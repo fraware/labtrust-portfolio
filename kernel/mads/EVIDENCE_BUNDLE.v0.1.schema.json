@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/mads/EVIDENCE_BUNDLE.v0.1",
+  "title": "EVIDENCE_BUNDLE.v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "run_id",
+    "kernel_version",
+    "artifacts",
+    "verification"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "kernel_version": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "schema_id"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "schema_id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_validation_ok",
+        "replay_ok",
+        "replay_diagnostics"
+      ],
+      "properties": {
+        "schema_validation_ok": {
+          "type": "boolean"
+        },
+        "replay_ok": {
+          "type": "boolean"
+        },
+        "replay_diagnostics": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/contracts/COORD_CONTRACT.v0.1",
+  "title": "COORD_CONTRACT.v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "name",
+    "time_model",
+    "ownership_model",
+    "valid_transitions",
+    "conflict_semantics"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "name": {
+      "type": "string"
+    },
+    "time_model": {
+      "type": "string",
+      "description": "Placeholder: event/processing/actuation time semantics"
+    },
+    "ownership_model": {
+      "type": "string",
+      "description": "Placeholder: leases/OCC/roles/authority rules"
+    },
+    "valid_transitions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Placeholder: named transition rules"
+    },
+    "conflict_semantics": {
+      "type": "string",
+      "description": "Placeholder: CRDT/last-write-wins/merge policy"
+    }
+  }
+}

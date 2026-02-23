@@ -1,0 +1,10 @@
+id: toy_lab_v0
+description: Minimal lab micro-world for thin-slice pipeline (sample→spin→analyze→report).
+tasks:
+  - name: receive_sample
+  - name: centrifuge
+  - name: analyze
+  - name: report_results
+faults:
+  - name: drop_completion
+    param: drop_completion_prob

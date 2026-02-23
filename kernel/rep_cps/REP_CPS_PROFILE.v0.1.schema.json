@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/rep_cps/REP_CPS_PROFILE.v0.1",
+  "title": "REP_CPS_PROFILE.v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "variables",
+    "rate_limits",
+    "auth",
+    "aggregation",
+    "safety_gate"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Typed coordination variables (placeholder)"
+    },
+    "rate_limits": {
+      "type": "object",
+      "description": "Update/windowing constraints (placeholder)"
+    },
+    "auth": {
+      "type": "object",
+      "description": "Authenticated channel + provenance rules (placeholder)"
+    },
+    "aggregation": {
+      "type": "object",
+      "description": "Robust aggregation under compromise (placeholder)"
+    },
+    "safety_gate": {
+      "type": "object",
+      "description": "Conditions before actuation (placeholder)"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/assurance_pack/ASSURANCE_PACK.v0.1",
+  "title": "ASSURANCE_PACK.v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "system",
+    "hazards",
+    "controls",
+    "evidence_map"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "system": {
+      "type": "object",
+      "description": "System boundary + assumptions (placeholder)"
+    },
+    "hazards": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Hazard log (placeholder)"
+    },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Invariants/controls (placeholder)"
+    },
+    "evidence_map": {
+      "type": "object",
+      "description": "Mapping hazards\u2192controls\u2192evidence types (placeholder)"
+    }
+  }
+}

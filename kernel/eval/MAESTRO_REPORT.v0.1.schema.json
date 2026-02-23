@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.1",
+  "title": "MAESTRO_REPORT.v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "run_id",
+    "scenario_id",
+    "metrics",
+    "faults",
+    "notes"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.1"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "scenario_id": {
+      "type": "string"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tasks_completed",
+        "task_latency_ms_p50",
+        "task_latency_ms_p95",
+        "task_latency_ms_p99",
+        "coordination_messages"
+      ],
+      "properties": {
+        "tasks_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "task_latency_ms_p50": {
+          "type": "number",
+          "minimum": 0
+        },
+        "task_latency_ms_p95": {
+          "type": "number",
+          "minimum": 0
+        },
+        "task_latency_ms_p99": {
+          "type": "number",
+          "minimum": 0
+        },
+        "coordination_messages": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "faults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fault_injected",
+        "fault_events",
+        "recovery_ok"
+      ],
+      "properties": {
+        "fault_injected": {
+          "type": "boolean"
+        },
+        "fault_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recovery_ok": {
+          "type": "boolean"
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}
