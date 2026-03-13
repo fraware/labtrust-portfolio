@@ -1,0 +1,20 @@
+%% P2 REP-CPS profile architecture (auto-generated)
+%% Agents -> aggregation -> safety gate -> actuation
+flowchart LR
+  subgraph agents[Agents]
+    A1[Agent 1]
+    A2[Agent 2]
+  end
+  subgraph agg[Aggregation]
+    R[Robust aggregate]
+  end
+  subgraph gate[Safety gate]
+    G[MADS Tier / gate]
+  end
+  subgraph out[Output]
+    O[Actuation]
+  end
+  A1 --> R
+  A2 --> R
+  R --> G
+  G -->|pass| O

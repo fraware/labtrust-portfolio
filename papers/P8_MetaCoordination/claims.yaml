@@ -1,0 +1,41 @@
+# P8 Meta-Coordination claim table (Draft conversion checklist 2.1)
+# Conditional paper; trigger_met = no_safety_regression and meta_reduces_collapse. See docs/CONDITIONAL_TRIGGERS.md.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P8_MetaCoordination"
+title: "Meta-Coordination for CPS: Switching Regimes Under Stress"
+release_id: "meta_eval"
+
+claims:
+  - id: "C1"
+    statement: "A meta-controller can switch regimes based on measurable stress signals (tail latency, contention, fault rate) while preserving safety constraints."
+    evidence:
+      release_id: "meta_eval"
+      artifact_paths:
+        - "datasets/runs/meta_eval/comparison.json"
+        - "kernel/meta/META_CONTROLLER_SPEC.v0.1.md"
+        - "impl/src/labtrust_portfolio/meta_controller.py"
+      table_ids: ["Table 1"]
+      figure_ids: ["Figure 0", "Figure 1"]
+
+  - id: "C2"
+    statement: "Switching is auditable and replayable: every regime change is justified by logged criteria and does not silently violate higher-level intent."
+    evidence:
+      release_id: "meta_eval"
+      artifact_paths:
+        - "impl/src/labtrust_portfolio/adapters/meta_adapter.py"
+        - "kernel/trace/TRACE.v0.1.schema.json"
+      table_ids: ["Table 1"]
+      figure_ids: []
+
+  - id: "C3"
+    statement: "Under compound faults, meta-coordination reduces collapse versus best fixed-regime baselines."
+    evidence:
+      release_id: "meta_eval"
+      artifact_paths:
+        - "datasets/runs/meta_eval/comparison.json"
+        - "datasets/runs/meta_eval/collapse_sweep.json"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 1"]
+
+# Table 1/2: export_meta_tables. Figure 1: plot_meta_collapse. Collapse sweep for non-vacuous trigger.

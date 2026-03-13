@@ -1,0 +1,14 @@
+# Scenario that stresses regime switching: high fault rate to trigger meta-controller
+id: regime_stress_v0
+family: lab
+description: High fault load to trigger meta-controller regime switch (P8).
+tasks:
+  - name: receive_sample
+  - name: centrifuge
+  - name: analyze
+  - name: report_results
+faults:
+  - name: drop_completion
+    param: drop_completion_prob
+  - name: delay
+    param: delay_p95_ms

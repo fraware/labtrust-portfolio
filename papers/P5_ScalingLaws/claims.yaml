@@ -1,0 +1,40 @@
+# P5 Scaling Laws claim table (Draft conversion checklist 2.1)
+# Conditional paper; beat_per_scenario_baseline, trigger_met in output. See docs/CONDITIONAL_TRIGGERS.md.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P5_ScalingLaws"
+title: "When More Agents Hurt: Empirical Predictors of Coordination Tax"
+release_id: "scaling_eval"
+
+claims:
+  - id: "C1"
+    statement: "Coordination tax and error amplification are predictable from a compact CPS task feature set."
+    evidence:
+      release_id: "scaling_eval"
+      artifact_paths:
+        - "datasets/runs/scaling_eval/heldout_results.json"
+        - "docs/P5_SCALING_SPEC.md"
+        - "impl/src/labtrust_portfolio/scaling.py"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 0"]
+
+  - id: "C2"
+    statement: "The predictors generalize out-of-sample across scenario families and beat trivial baselines."
+    evidence:
+      release_id: "scaling_eval"
+      artifact_paths:
+        - "datasets/runs/scaling_eval/heldout_results.json"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 1"]
+
+  - id: "C3"
+    statement: "The model supports architecture selection decisions with calibrated uncertainty."
+    evidence:
+      release_id: "scaling_eval"
+      artifact_paths:
+        - "datasets/runs/scaling_eval/heldout_results.json"
+        - "scripts/scaling_recommend.py"
+      table_ids: ["Table 2"]
+      figure_ids: []
+
+# Table 1/2: export_scaling_tables.py. Figure 1: plot_scaling_mae.py. Baseline hierarchy: global mean, per-scenario mean, feature, regression.

@@ -1,3 +1,3 @@
-# Safe LLM Planning for CPS: Typed Plans, Deterministic Toolcalling, and Runtime Safety Gates
+# P6 — Safe LLM Planning
 
-See `AUTHORING_PACKET.md`.
+P6 defines a typed-plan firewall and validator stack for CPS: plan schema, red-team suite, and MAESTRO adapter with latency reporting. Draft and claims: [DRAFT.md](DRAFT.md), [claims.yaml](claims.yaml). Tables and figures: [VISUALS_PER_PAPER.md](../docs/VISUALS_PER_PAPER.md), [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Outline: [AUTHORING_PACKET.md](AUTHORING_PACKET.md). Firewall is planner-agnostic; real LLM optional via .env and --real-llm. Conditional trigger: success_criteria_met.trigger_met; see [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md).

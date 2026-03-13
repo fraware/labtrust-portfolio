@@ -15,7 +15,7 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          python -m pip install jsonschema
+          python -m pip install jsonschema pyyaml
       - name: Validate kernel schemas
         run: |
           python scripts/validate_kernel.py
@@ -24,3 +24,99 @@ jobs:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
         run: |
           PYTHONPATH=impl/src python -m unittest discover -s tests -q
+      - name: Run thin-slice and validate outputs
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python -m labtrust_portfolio run-thinslice --out-dir datasets/runs/ci_thinslice
+          PYTHONPATH=impl/src python -m labtrust_portfolio load-profile
+          PYTHONPATH=impl/src python -m labtrust_portfolio check-conformance datasets/runs/ci_thinslice
+      - name: Release dataset from thin-slice run
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python -m labtrust_portfolio release-dataset datasets/runs/ci_thinslice ci_release_${{ github.run_id }}
+
+  conditional-evals:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install jsonschema pyyaml
+      - name: P0 E3 variance (replay-link, 2 scenarios)
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/produce_p0_e3_release.py --runs 5 --scenarios toy_lab_v0,lab_profile_v0 --no-release
+      - name: P0 E2 redaction demo
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo
+      - name: P3 Replay eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/replay_eval.py --overhead-curve --overhead-runs 5
+      - name: P4 MAESTRO fault sweep (multi-scenario)
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/maestro_fault_sweep.py --seeds 5
+      - name: P4 MAESTRO baselines
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/maestro_baselines.py --scenario toy_lab_v0 --seeds 2
+      - name: P4 MAESTRO anti-gaming eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/maestro_antigaming_eval.py --out datasets/runs/maestro_antigaming
+      - name: P1 Contracts eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/contracts_eval.py
+      - name: P7 Assurance eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/run_assurance_eval.py
+          PYTHONPATH=impl/src python scripts/export_assurance_tables.py
+      - name: P2 REP-CPS eval (10 seeds, delay sweep)
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/rep_cps_eval.py --delay-sweep 0,0.05,0.1
+      - name: P5 Generate multi-scenario runs
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/generate_multiscenario_runs.py --seeds 2
+      - name: P5 Scaling held-out eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/scaling_heldout_eval.py
+      - name: P6 LLM red-team eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/llm_redteam_eval.py
+      - name: P8 Meta-coordination eval
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/meta_eval.py --seeds 1,2,3 --run-naive --fault-threshold 0
+      - name: P8 Meta collapse sweep (2 drop_probs, 3 seeds)
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/meta_collapse_sweep.py --drop-probs 0.15,0.2 --seeds 3 --out datasets/runs/meta_eval

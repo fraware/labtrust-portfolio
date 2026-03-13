@@ -1,0 +1,13 @@
+# Lab Profile v0.1 — Points of No Return
+
+ponrs:
+  - id: PONR-A
+    name: Decision Commit
+    tier: T2
+    description: Authoritative internal workflow decision that downstream systems treat as binding.
+
+  - id: PONR-B
+    name: Sample Disposition Change
+    tier: T3
+    description: Irreversible sample consumption/disposal/processing eliminating retest/recovery.
+

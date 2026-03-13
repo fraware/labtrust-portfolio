@@ -1,0 +1,51 @@
+# P6 LLM Planning claim table (Draft conversion checklist 2.1)
+# Conditional paper; trigger_met in red_team success_criteria_met. See docs/CONDITIONAL_TRIGGERS.md.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P6_LLMPlanning"
+title: "Safe LLM Planning for CPS: Typed Plans and Runtime Safety Gates"
+release_id: "llm_eval"
+
+claims:
+  - id: "C1"
+    statement: "Typed plan outputs and validators produce a testable interface that blocks unsafe tool use and unsafe PONR proposals."
+    evidence:
+      release_id: "llm_eval"
+      artifact_paths:
+        - "datasets/runs/llm_eval/red_team_results.json"
+        - "kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json"
+        - "impl/src/labtrust_portfolio/llm_planning.py"
+      table_ids: ["Table 1"]
+      figure_ids: ["Figure 0", "Figure 1"]
+
+  - id: "C2"
+    statement: "Deterministic toolcalling capture and bounded retries make behavior replayable and auditable."
+    evidence:
+      release_id: "llm_eval"
+      artifact_paths:
+        - "impl/src/labtrust_portfolio/llm_planning.py"
+        - "datasets/runs/llm_eval/adapter_latency.json"
+      table_ids: ["Table 2"]
+      figure_ids: []
+
+  - id: "C3"
+    statement: "A CPS-specific red-team suite (prompt injection, malformed toolcalls, excessive agency) is required and sufficient to exercise key failure modes."
+    evidence:
+      release_id: "llm_eval"
+      artifact_paths:
+        - "datasets/runs/llm_eval/red_team_results.json"
+        - "datasets/runs/llm_eval/confusable_deputy_results.json"
+      table_ids: ["Table 1"]
+      figure_ids: []
+
+  - id: "C4"
+    statement: "Under MAESTRO faults, the pattern reduces safety violations without unacceptable tail latency."
+    evidence:
+      release_id: "llm_eval"
+      artifact_paths:
+        - "datasets/runs/llm_eval/adapter_latency.json"
+        - "datasets/runs/llm_eval/e2e_denial_trace.json"
+      table_ids: ["Table 2"]
+      figure_ids: ["Figure 1"]
+
+# Table 1: red_team. Table 2: adapter latency. Figure 1: plot_llm_adapter_latency.py.

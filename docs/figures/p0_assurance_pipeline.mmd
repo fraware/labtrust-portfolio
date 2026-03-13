@@ -1,0 +1,22 @@
+%% P0 MADS-CPS assurance pipeline (auto-generated)
+%% Trace -> MAESTRO report -> Evidence bundle -> Conformance -> Release
+flowchart LR
+  subgraph capture[Capture]
+    T[TRACE]
+  end
+  subgraph eval[Evaluation]
+    M[MAESTRO_REPORT]
+  end
+  subgraph evidence[Evidence]
+    E[Evidence bundle]
+  end
+  subgraph check[Conformance]
+    C[Tier 1/2/3]
+  end
+  subgraph release[Release]
+    R[Release manifest]
+  end
+  T --> M
+  M --> E
+  E --> C
+  C -->|pass| R

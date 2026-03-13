@@ -1,0 +1,16 @@
+%% P4 MAESTRO scenario-adapter-report flow (auto-generated)
+%% Scenario -> Adapter -> Trace -> MAESTRO report
+flowchart LR
+  subgraph spec[Spec]
+    SC[Scenario YAML]
+  end
+  subgraph run[Run]
+    A[Adapter]
+  end
+  subgraph artifacts[Artifacts]
+    T[TRACE]
+    M[MAESTRO_REPORT]
+  end
+  SC --> A
+  A --> T
+  A --> M

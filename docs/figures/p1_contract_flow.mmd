@@ -1,0 +1,18 @@
+%% P1 Contract validation flow (auto-generated)
+%% event -> validate(state, event) -> allow | deny + reason_codes
+flowchart LR
+  subgraph input[Input]
+    E[Trace event]
+    S[State]
+  end
+  subgraph validator[Validator]
+    V[validate(state, event)]
+  end
+  subgraph outcome[Outcome]
+    A[allow]
+    D[deny + reason_codes]
+  end
+  E --> V
+  S --> V
+  V --> A
+  V --> D

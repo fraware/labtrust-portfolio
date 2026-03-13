@@ -1,0 +1,12 @@
+id: traffic_v0
+family: traffic
+description: Minimal traffic scenario (sense, plan, actuate).
+tasks:
+  - name: sense
+  - name: plan
+  - name: actuate
+faults:
+  - name: drop_completion
+    param: drop_completion_prob
+  - name: delay
+    param: delay_p95_ms

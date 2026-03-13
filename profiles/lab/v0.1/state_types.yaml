@@ -1,0 +1,42 @@
+# Lab Profile v0.1 — State Types (Sketch)
+# This file is intentionally small and will evolve; it exists to force early discipline.
+
+entities:
+  specimen_episode:
+    key: specimen_id
+    fields:
+      custody_chain_digest: string
+      stability_window_ok: boolean
+      anomalies_open: integer
+      qc_available: boolean
+      confirmations:
+        - type: string  # qc | secondary_analyzer | rerun
+          source_id: string
+          ts: string
+
+  device:
+    key: device_id
+    fields:
+      model: string
+      firmware: string
+      functional_units:
+        - fu_id: string
+          fu_state: string  # LADS-aligned state machine label
+          last_transition_ts: string
+
+  resource_graph:
+    key: graph_id
+    fields:
+      nodes: integer
+      edges: integer
+      contention_hotspots: integer
+
+authority:
+  writers:
+    - domain: specimen_episode
+      role: gatekeeper
+      can_write: ["decision_commit", "disposition"]
+    - domain: device
+      role: device_controller
+      can_write: ["fu_state"]
+

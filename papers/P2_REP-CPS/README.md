@@ -1,3 +1,3 @@
-# REP-CPS: A Real-Time, Authenticated Sensitivity-Sharing Profile for Cyber-Physical Coordination
+# P2 — REP-CPS
 
-See `AUTHORING_PACKET.md`.
+P2 defines a CPS profile for sensitivity-sharing (typed variables, rate limits, robust aggregation) integrated with MADS safety gates. Draft and claims: [DRAFT.md](DRAFT.md), [claims.yaml](claims.yaml). Tables and figures: [VISUALS_PER_PAPER.md](../docs/VISUALS_PER_PAPER.md), [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Outline: [AUTHORING_PACKET.md](AUTHORING_PACKET.md). Conditional paper: trigger requires REP-CPS to improve robustness on at least one non-toy scenario; run `python scripts/rep_cps_eval.py --scenarios lab_profile_v0`; summary reports `success_criteria_met.trigger_met`. See [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md).

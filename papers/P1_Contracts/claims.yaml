@@ -1,0 +1,52 @@
+# P1 Coordination Contracts claim table (Draft conversion checklist 2.1)
+# Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P1_Contracts"
+title: "Coordination Contracts: Typed State, Ownership, and Valid Transitions Above Messaging"
+release_id: "contracts_eval"
+
+claims:
+  - id: "C1"
+    statement: "A minimal contract layer (typed state + ownership + valid transitions + temporal semantics) prevents common coordination pathologies (split-brain, stale writes, orphan authority, unsafe last-write-wins)."
+    evidence:
+      release_id: "contracts_eval"
+      artifact_paths:
+        - "datasets/runs/contracts_eval/eval.json"
+        - "bench/contracts/corpus/"
+        - "impl/src/labtrust_portfolio/contracts.py"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 0"]
+
+  - id: "C2"
+    statement: "Contract validation can be executed from traces (no privileged hidden state), enabling auditability and replay-based debugging."
+    evidence:
+      release_id: "contracts_eval"
+      artifact_paths:
+        - "datasets/runs/contracts_eval/eval.json"
+        - "docs/P1_TRACE_DERIVABILITY.md"
+        - "impl/src/labtrust_portfolio/contracts.py"
+      table_ids: ["Table 1"]
+      figure_ids: []
+
+  - id: "C3"
+    statement: "The contract surface is portable across ROS2/DDS and event-log architectures (DDS/Kafka-style), because it is defined above transport."
+    evidence:
+      release_id: "contracts_eval"
+      artifact_paths:
+        - "kernel/contracts/CONTRACT_MODEL.v0.1.md"
+        - "kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md"
+      table_ids: []
+      figure_ids: ["Figure 0"]
+
+  - id: "C4"
+    statement: "A small reference implementation demonstrates enforceability with bounded overhead."
+    evidence:
+      release_id: "contracts_eval"
+      artifact_paths:
+        - "datasets/runs/contracts_eval/eval.json"
+        - "datasets/runs/contracts_eval/scale_test.json"
+      table_ids: ["Table 1"]
+      figure_ids: ["Figure 1"]
+
+# Table 1: export_contracts_corpus_table.py. Table 2: policy comparison (in DRAFT from eval.json). Figure 1: plot_contracts_scale.py.

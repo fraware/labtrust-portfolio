@@ -1,0 +1,9 @@
+# Invariant registry template (v0.1). One entry per control/invariant.
+# Each control must have: id, description, evidence_artifact_types.
+controls:
+  - id: C-001
+    description: ""  # e.g. "PONR gate requires admissible evidence"
+    evidence_artifact_types: ["trace", "evidence_bundle"]
+  - id: C-002
+    description: ""
+    evidence_artifact_types: []

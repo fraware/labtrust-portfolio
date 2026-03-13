@@ -1,0 +1,54 @@
+{
+  "recovery_proxy": [
+    {
+      "scenario": "toy_lab_v0",
+      "setting": "no_drop",
+      "tasks_completed_mean": 4
+    },
+    {
+      "scenario": "toy_lab_v0",
+      "setting": "drop_005",
+      "tasks_completed_mean": 3.7
+    },
+    {
+      "scenario": "toy_lab_v0",
+      "setting": "delay_01",
+      "tasks_completed_mean": 4
+    },
+    {
+      "scenario": "toy_lab_v0",
+      "setting": "drop_005_delay_01",
+      "tasks_completed_mean": 3.5
+    },
+    {
+      "scenario": "toy_lab_v0",
+      "setting": "calibration_invalid_01",
+      "tasks_completed_mean": 4
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "setting": "no_drop",
+      "tasks_completed_mean": 5
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "setting": "drop_005",
+      "tasks_completed_mean": 4.7
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "setting": "delay_01",
+      "tasks_completed_mean": 5
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "setting": "drop_005_delay_01",
+      "tasks_completed_mean": 4.5
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "setting": "calibration_invalid_01",
+      "tasks_completed_mean": 5
+    }
+  ]
+}

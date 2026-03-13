@@ -1,0 +1,11 @@
+{"log":
+ [{"message":
+   ".> LEAN_PATH=.\\.\\.lake\\build\\lib PATH c:\\Users\\mateo\\.elan\\toolchains\\leanprover--lean4---v4.14.0\\bin\\lean.exe .\\.\\.\\.\\Labtrust\\W3EvidenceBundle.lean -R .\\.\\.\\. -o .\\.\\.lake\\build\\lib\\Labtrust\\W3EvidenceBundle.olean -i .\\.\\.lake\\build\\lib\\Labtrust\\W3EvidenceBundle.ilean -c .\\.\\.lake\\build\\ir\\Labtrust\\W3EvidenceBundle.c --json",
+   "level": "trace"},
+  {"message":
+   ".\\.\\.\\.\\Labtrust\\W3EvidenceBundle.lean:82:8: declaration uses 'sorry'",
+   "level": "warning"},
+  {"message":
+   ".\\.\\.\\.\\Labtrust\\W3EvidenceBundle.lean:86:8: declaration uses 'sorry'",
+   "level": "warning"}],
+ "depHash": "11706611840000257207"}

@@ -2,7 +2,25 @@
 
 - `datasets/runs/` are **mutable** working directories (local runs, scratch outputs).
 - `datasets/releases/` are **immutable** release snapshots (content-addressed or stamped with release IDs).
+- `datasets/releases/portfolio_v0.1/` is the **portfolio-level release** directory: it may contain aggregated artifacts such as `p0_conformance_summary.json` (conformance over all P0 runs included in the portfolio). Build with `scripts/build_p0_conformance_summary.py` (see EVALS_RUNBOOK).
 
 Both directories are ignored by default in `.gitignore`, except `.gitkeep` placeholders.
 
 If you publish a dataset, publish **a release manifest** + **evidence bundle** referencing the exact artifacts and hashes.
+
+## Run layout
+
+Each run directory under `datasets/runs/<run_id>/` should contain:
+
+- `trace.json` — TRACE (kernel/trace/TRACE.v0.1)
+- `maestro_report.json` — MAESTRO_REPORT (kernel/eval/MAESTRO_REPORT.v0.1)
+- `evidence_bundle.json` — EVIDENCE_BUNDLE (kernel/mads/EVIDENCE_BUNDLE.v0.1)
+- `release_manifest.json` — RELEASE_MANIFEST (kernel/policy/RELEASE_MANIFEST.v0.1)
+
+The thin-slice pipeline (`labtrust_portfolio run-thinslice --out-dir datasets/runs/<run_id>`) produces this layout. Use `scripts/release_dataset.py` (or `labtrust_portfolio release-dataset`) to copy a run into `datasets/releases/<release_id>/` with a release manifest.
+
+**Paper experiment runner:** To populate `datasets/runs/` with a full set of paper-tailored runs in one go, run `python scripts/run_paper_experiments.py` (or `--quick` for fewer seeds, `--paper P0` … `P8` for a single paper). Requires `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [docs/EVALS_RUNBOOK.md](../docs/EVALS_RUNBOOK.md). Eval summary JSONs may include optional **excellence_metrics**; run `python scripts/export_excellence_summary.py` to print a one-line summary per paper (see [docs/STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md)). **Repro time (P4):** `python scripts/repro_time_p4.py` writes `datasets/runs/repro_manifest.json` with `repro_wall_min` for minimal P4 repro.
+
+**Standard release IDs (P0/P3):** To produce the E3 release: `python scripts/produce_p0_e3_release.py` (with PYTHONPATH and LABTRUST_KERNEL_DIR set). Use `--runs 10` and optionally `--scenarios`; run dirs under `e3/<scenario_id>/seed_<n>/`; writes `e3_summary.json`, `p0_e3_variance.json`; releases first scenario seed_1 to `datasets/releases/p0_e3_release`. E2 (redaction): `e2_redaction_demo.py` writes `trace_redacted.json` and `evidence_bundle_redacted.json`; the redacted trace is for audit only (not replayed; payloads are refs). Each run dir may contain `conformance.json` (E1). P3: `replay_eval/summary.json` (use `--out datasets/runs/replay_eval/summary.json` — file path, not directory; includes `witness_slice` per trace, top-level `witness_slices`, optionally `overhead_curve`, and `excellence_metrics`). P4: `maestro_fault_sweep/` (multi_sweep.json, incl. calibration_invalid_01), `maestro_antigaming/antigaming_results.json` (includes `scoring_proof`). P1: `contracts_eval/eval.json`, `scale_test.json` (with --scale-test). P7: `assurance_eval/results.json`; use `scripts/audit_bundle.py` for auditor walk-through (or `audit_bundle.py --release datasets/releases/portfolio_v0.1` for one-command audit over the portfolio release). P0: after E3/E2 runs, `scripts/build_p0_conformance_summary.py` writes `releases/portfolio_v0.1/p0_conformance_summary.json`.
+
+**Conditional paper evals (P2, P5, P6, P8):** P2: `rep_cps_eval/summary.json`, `safety_gate_denial.json`. P5: `multiscenario_runs/`, `scaling_eval/heldout_results.json` (per_scenario_baseline_mae, regression, 95% CI, scaling_fit); use `generate_multiscenario_runs.py --seeds 10 --fault-mix` for stability. P6: `llm_eval/red_team_results.json`, `confusable_deputy_results.json`, `e2e_denial_trace.json`, `adapter_latency.json` (with --run-adapter). P8: `meta_eval/comparison.json` (run_manifest, success_criteria_met.trigger_met, excellence_metrics; run `meta_eval.py --run-naive --fault-threshold 0`), `meta_eval/collapse_sweep.json` (from `meta_collapse_sweep.py`; run_manifest; required for Figure 1). See [docs/EVALS_RUNBOOK.md](../docs/EVALS_RUNBOOK.md) and [docs/EVAL_RESULTS_INTERPRETATION.md](../docs/EVAL_RESULTS_INTERPRETATION.md).

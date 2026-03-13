@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/conformance/CONFORMANCE.v0.1",
+  "title": "CONFORMANCE.v0.1",
+  "description": "E1 conformance check result per run (tier, pass, reasons)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tier", "pass", "reasons"],
+  "properties": {
+    "tier": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "description": "Conformance tier reached (1=artifacts present and valid, 2=+replay and schema ok, 3=+PONR coverage)"
+    },
+    "pass": {
+      "type": "boolean",
+      "description": "True if run meets the bar for the reported tier"
+    },
+    "reasons": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Failure reasons when pass is false; empty when pass is true"
+    }
+  }
+}

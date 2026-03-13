@@ -1,0 +1,10 @@
+{
+  "description": "Edge-case timestamps: same-ts events; ordering by seq determines which is stale",
+  "initial_state": {"ownership": {}, "_last_ts": {}},
+  "events": [
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "name": "a", "writer": "agent_1"}},
+    {"type": "task_end", "ts": 1.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "name": "a", "writer": "agent_1"}},
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t2", "name": "b", "writer": "agent_1"}}
+  ],
+  "expected_verdicts": ["allow", "allow", "allow"]
+}

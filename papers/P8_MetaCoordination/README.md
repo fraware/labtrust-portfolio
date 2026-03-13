@@ -1,3 +1,3 @@
-# Meta-Coordination for Thousand-Agent CPS: Switching Coordination Regimes Under Stress
+# P8 — Meta-Coordination
 
-See `AUTHORING_PACKET.md`.
+P8 studies meta-controller regime switching under stress: threshold-based switch criterion, regime_switch events, and comparison to fixed and naive baselines. Draft and claims: [DRAFT.md](DRAFT.md), [claims.yaml](claims.yaml). Tables and figures: [VISUALS_PER_PAPER.md](../docs/VISUALS_PER_PAPER.md), [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Outline: [AUTHORING_PACKET.md](AUTHORING_PACKET.md). Conditional paper: for non-vacuous trigger run meta_collapse_sweep, then meta_eval with a drop_prob where collapse_count > 0; see [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md).

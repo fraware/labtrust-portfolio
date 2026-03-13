@@ -1,0 +1,20 @@
+{
+  "throughput_sweep": [
+    {
+      "events": 2000,
+      "events_per_sec": 59295.1
+    },
+    {
+      "events": 20000,
+      "events_per_sec": 78584.84
+    },
+    {
+      "events": 100000,
+      "events_per_sec": 64374.99
+    },
+    {
+      "events": 200000,
+      "events_per_sec": 57619.53
+    }
+  ]
+}

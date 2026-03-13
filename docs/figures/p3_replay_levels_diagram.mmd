@@ -1,0 +1,14 @@
+%% P3 Replay levels and pipeline (auto-generated)
+%% L0 control-plane; L1 with recorded observations; L2 aspirational
+flowchart TB
+  subgraph levels[Replay levels]
+    L0[L0: Control-plane replay]
+    L1[L1: + recorded observations]
+    L2[L2: Hardware-assisted aspirational]
+  end
+  subgraph pipeline[Pipeline]
+    T[Trace] --> R[Replay engine]
+    R --> H[state_hash check]
+    H --> D[Diagnostics]
+  end
+  L0 --> pipeline

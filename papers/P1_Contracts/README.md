@@ -1,3 +1,3 @@
-# Coordination Contracts: Typed State, Ownership, and Valid Transitions Above Messaging for Large-Scale CPS
+# P1 — Coordination Contracts
 
-See `AUTHORING_PACKET.md`.
+P1 defines a minimal contract layer (typed state, ownership, valid transitions, temporal semantics) to prevent coordination pathologies; validation is trace-driven with bounded overhead. Draft and claims: [DRAFT.md](DRAFT.md), [claims.yaml](claims.yaml). Tables and figures: [VISUALS_PER_PAPER.md](../docs/VISUALS_PER_PAPER.md), [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Outline: [AUTHORING_PACKET.md](AUTHORING_PACKET.md). P1 does not include a live OPC UA or LADS adapter in v0.1; the LADS mapping is normative for alignment, not an implemented integration.

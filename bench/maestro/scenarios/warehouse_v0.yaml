@@ -1,0 +1,12 @@
+id: warehouse_v0
+family: warehouse
+description: Minimal warehouse scenario (pick, move, place).
+tasks:
+  - name: pick
+  - name: move
+  - name: place
+faults:
+  - name: drop_completion
+    param: drop_completion_prob
+  - name: delay
+    param: delay_p95_ms

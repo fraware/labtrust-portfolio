@@ -1,0 +1,21 @@
+# Lab Profile v0.1 — Fault Model (Minimal)
+
+fault_classes:
+  - id: F_TIMING_SKEW
+    description: Clock skew / delayed timestamps affecting admissibility windows.
+
+  - id: F_TOOL_TIMEOUT
+    description: Tool/instrument returns timeout or partial result.
+
+  - id: F_DRIFT_CALIBRATION
+    description: Calibration invalidation / drift triggers degraded mode and re-validation.
+
+  - id: F_QUEUE_CONTENTION
+    description: Resource contention causes queue buildup and deadline misses.
+
+  - id: F_INSERTION_FAILURE
+    description: Physical insertion/handling failure requiring recovery sequence.
+
+  - id: F_COMPROMISED_AGENT
+    description: Agent emits malicious or corrupted proposals / sensitivities.
+

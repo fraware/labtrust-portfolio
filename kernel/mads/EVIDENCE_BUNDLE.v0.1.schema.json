@@ -9,7 +9,8 @@
     "run_id",
     "kernel_version",
     "artifacts",
-    "verification"
+    "verification",
+    "verification_mode"
   ],
   "properties": {
     "version": {
@@ -20,6 +21,21 @@
     },
     "kernel_version": {
       "type": "string"
+    },
+    "verification_mode": {
+      "type": "string",
+      "enum": ["public", "evaluator", "regulator"],
+      "description": "Audit context: public (full disclosure), evaluator (restricted, redaction allowed), regulator (compliance-aligned)"
+    },
+    "redaction_manifest": {
+      "type": "object",
+      "description": "What was redacted, under which policy; used when verification_mode is evaluator or regulator",
+      "additionalProperties": true,
+      "properties": {
+        "policy_ref": { "type": "string" },
+        "redacted_artifacts": { "type": "array", "items": { "type": "string" } },
+        "reason": { "type": "string" }
+      }
     },
     "artifacts": {
       "type": "array",

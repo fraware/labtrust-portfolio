@@ -1,0 +1,19 @@
+{
+  "description": "Adapter implementation cost (coarse) for adoption reporting",
+  "adapters": [
+    {
+      "adapter_id": "centralized",
+      "scenario_id": null,
+      "loc_estimate": 120,
+      "hours_estimate": 8,
+      "notes": "Thin-slice reference; single coordinator"
+    },
+    {
+      "adapter_id": "blackboard",
+      "scenario_id": null,
+      "loc_estimate": 180,
+      "hours_estimate": 14,
+      "notes": "Event-sourced / blackboard variant"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+# P4 CPS-MAESTRO claim table (Draft conversion checklist 2.1)
+# Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P4_CPS-MAESTRO"
+title: "CPS-MAESTRO: Benchmark + Fault Injection Suite for CPS-Grade Agent Coordination"
+release_id: "maestro_fault_sweep"
+
+claims:
+  - id: "C1"
+    statement: "Standard scenarios + fault models + scoring produce stable, comparable measurements across coordination architectures."
+    evidence:
+      release_id: "maestro_fault_sweep"
+      artifact_paths:
+        - "datasets/runs/maestro_fault_sweep/multi_sweep.json"
+        - "bench/maestro/SCENARIO_SPEC.md"
+        - "kernel/eval/MAESTRO_REPORT.v0.1.schema.json"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 0", "Figure 1"]
+
+  - id: "C2"
+    statement: "Variance is first-class: repeated runs and tail reporting are mandatory."
+    evidence:
+      release_id: "maestro_fault_sweep"
+      artifact_paths:
+        - "datasets/runs/maestro_fault_sweep/multi_sweep.json"
+        - "impl/src/labtrust_portfolio/maestro_report_from_trace.py"
+      table_ids: ["Table 1"]
+      figure_ids: ["Figure 1"]
+
+  - id: "C3"
+    statement: "Adapter interface makes adoption tractable across centralized/blackboard/hybrid stacks."
+    evidence:
+      release_id: "maestro_fault_sweep"
+      artifact_paths:
+        - "bench/maestro/baseline_summary.json"
+        - "impl/src/labtrust_portfolio/adapters/"
+        - "bench/maestro/adapter_costs.json"
+      table_ids: ["Table 2"]
+      figure_ids: []
+
+  - id: "C4"
+    statement: "The suite is usable by third parties: docs + CI + reference baselines."
+    evidence:
+      release_id: "maestro_fault_sweep"
+      artifact_paths:
+        - "bench/maestro/REPRODUCIBILITY.md"
+        - "bench/maestro/BENCHMARK_RELEASE.v0.1.md"
+        - "bench/maestro/baseline_results.md"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: []
+
+# Table 1: export_maestro_tables (fault sweep). Table 2: baselines. Figure 1: plot_maestro_recovery.py.

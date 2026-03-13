@@ -1,0 +1,12 @@
+%% P8 Meta-controller state and switch (auto-generated)
+%% Regimes and switch criterion: fault_count / latency_p95
+flowchart LR
+  subgraph regimes[Regimes]
+    C[Centralized]
+    F[Fallback]
+  end
+  subgraph criterion[Switch criterion]
+    S[fault_count > thr OR latency_p95 > thr]
+  end
+  C -->|S| F
+  F -->|below 0.5*thr| C

@@ -1,0 +1,18 @@
+%% P7 Mapping flow (auto-generated)
+%% Hazards -> Controls -> Evidence -> Audit
+flowchart LR
+  subgraph hazards[Hazards]
+    H[Hazard log]
+  end
+  subgraph controls[Controls]
+    C[Controls / invariants]
+  end
+  subgraph evidence[Evidence]
+    E[Evidence artifacts]
+  end
+  subgraph audit[Audit]
+    A[audit_bundle / review]
+  end
+  H --> C
+  C --> E
+  E --> A

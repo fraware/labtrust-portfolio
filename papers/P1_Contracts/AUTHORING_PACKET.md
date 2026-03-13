@@ -1,44 +1,70 @@
-# Coordination Contracts: Typed State, Ownership, and Valid Transitions Above Messaging for Large-Scale CPS
+# Coordination Contracts: Typed State, Ownership, and Valid Transitions Above Messaging
 
 **Paper ID:** P1_Contracts  
-**Stage target (board):** Spec → MVP → Eval → Draft  
-**Kernel dependency:** must reference kernel schemas by version; breaking changes require version bump.
+**Tag:** core-kernel  
+**Board path:** Spec → MVP → Eval → Draft  
+**Kernel ownership:** coordination semantics kernel (authority, valid writes, time model)
 
-## 1) Thesis (one paragraph)
-Make ‘communication isn’t coordination’ executable: specify a portable contract layer for shared state authority (ownership, admissible writes, temporal semantics, conflict resolution) that is auditable across ROS2/DDS, event logs, and hybrids.
+## 1) One-line question
+What does “coordination” mean in CPS when messaging is not authority—i.e., what are the **contracts** for shared state ownership, valid transitions, time semantics, and conflict resolution?
 
-## 2) Claims (citable, falsifiable)
-- A contract layer reduces whole classes of failure (split brain, stale writes, orphan leases, unsafe last-write-wins) without prescribing a single messaging substrate.
-- Authority + temporal semantics are necessary preconditions for auditability and replayability in agentic CPS.
-- Minimal contract surfaces can be standardized as schemas + validation rules and adopted incrementally.
+## 2) Scope anchors (lab reality)
+- Primary anchor is **resource graphs + device heterogeneity + recovery**, not only “large N.”
+- Must map cleanly to lab instrument substrates; explicitly include an interoperability hook to **OPC UA LADS** state machines. citeturn0search13turn0search16
 
-## 3) Outline (high-level)
-1. Problem framing and scope boundary (what this paper is / is not)
-2. Core object (spec / protocol / trace / benchmark / model) and formal definitions
-3. Implementation surface (schemas, validators, harness)
-4. Evaluation plan (what evidence would convince a skeptic)
-5. Limitations and explicit non-goals
-6. Relationship to the portfolio (how it plugs into MADS-CPS / MAESTRO / Replay)
+## 3) Claims
+- **C1:** A minimal contract layer (typed state + ownership + valid transitions + temporal semantics) prevents common coordination pathologies (split-brain, stale writes, orphan authority, unsafe last-write-wins).
+- **C2:** Contract validation can be executed from traces (no privileged hidden state), enabling auditability and replay-based debugging.
+- **C3:** The contract surface is portable across ROS2/DDS and event-log architectures (DDS/Kafka-style), because it is defined above transport.
+- **C4:** A small reference implementation demonstrates enforceability with bounded overhead.
 
-## 4) Experiment plan (minimum credible)
-- Construct 3–5 minimal failure scenarios; show contract flags violations early; quantify false positives/negatives.
-- Integrate into MAESTRO: contract violations become scored failures (not just logs).
+## 4) Outline
+1. Motivation: “communication ≠ coordination” with concrete failure classes
+2. Contract model: types, ownership/leases, authority scope
+3. Valid transitions: invariants, preconditions, conflict rules
+4. Time model above messaging: event vs processing vs actuation time
+5. Concurrency semantics: lease/OCC/CRDT options + when each is admissible
+6. Security invariants: provenance, writer authentication hooks
+7. Interop mapping: OPC UA LADS → contract semantics
+8. Reference implementation + evaluation
 
-## 5) Artifact checklist (must ship)
-- kernel/contracts/COORD_CONTRACT.v0.1.schema.json (placeholder now; expand to enumerated invariants)
-- Reference validator: checks write admissibility, ownership/lease rules, and time ordering assumptions against TRACE.
-- Two example ‘contract profiles’: blackboard/event-sourced and ROS2-style.
-- Negative examples: traces that violate contract invariants (for tests).
+## 5) Experiment plan (tight and decisive)
+- Micro-scenarios that isolate failures:
+  - split-brain ownership,
+  - stale write acceptance,
+  - orphan lease/liveness hazard,
+  - unsafe last-write-wins under delay/reorder.
+- Metrics:
+  - detection/denial rate,
+  - false positives,
+  - overhead (latency added per write validation),
+  - convergence success.
+- Baselines:
+  - naive last-write-wins,
+  - lock-only,
+  - “eventual consistency without authority.”
+- Stressors:
+  - clock skew, delay, reorder, partial partitions.
 
-## 6) Kill criteria (stop early if true)
-- If the contract cannot remain substrate-agnostic (i.e., collapses into “ROS2 best practices”), thesis fails.
-- If invariants become too many / too vague to validate, the contract cannot be enforced.
-- If benefits cannot be demonstrated with small, concrete failure classes, paper won’t be citable.
+## 6) Artifact checklist
+- `kernel/contracts/COORD_CONTRACT.v0.1.schema.json` (schema + stable IDs)
+- validator library (pure function): `validate(state, event) -> verdict + reason_codes`
+- reference implementation of a contract-enforcing store
+- trace corpus of good/bad sequences + expected verdicts
+- LADS mapping note: `kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md`
 
-## 7) Target venues (initial)
-arXiv (cs.DC, cs.RO, cs.SE); distributed systems or robotics systems workshops; later systems venue if implementation matures.
+## 7) Kill criteria
+- **K1:** If a contract predicate requires **privileged hidden state** not derivable from trace + declared config, the design loses portability/auditability; document and either remove or make optional. See docs/P1_TRACE_DERIVABILITY.md.
+- **K2:** semantics cannot be made transport-agnostic.
+- **K3:** overhead makes even L0 control-plane enforcement infeasible.
 
-## 8) Integration contract (portfolio coherence)
-- Output artifacts must validate against kernel schemas (or propose a versioned extension).
-- All evaluations must be reproducible from `datasets/` with a release manifest and evidence bundle.
-- Do not duplicate scope owned by other papers; cite and depend on them.
+## 8) Target venues
+- NSDI / OSDI (coordination substrate framing)
+- DSN / ICSE (dependability/spec+tooling)
+- arXiv first (cs.DC, cs.RO, cs.SE)
+
+## 9) Integration contract
+- Contracts defines **what is a valid write** and **who may write**.
+- MADS defines **what must be gated** and **what evidence is admissible**.
+- Replay defines **how traces are replayed** and how nondeterminism is surfaced.
+

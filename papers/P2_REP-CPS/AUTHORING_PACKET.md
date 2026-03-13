@@ -1,44 +1,50 @@
 # REP-CPS: A Real-Time, Authenticated Sensitivity-Sharing Profile for Cyber-Physical Coordination
 
 **Paper ID:** P2_REP-CPS  
-**Stage target (board):** Spec → MVP → Eval → Draft  
-**Kernel dependency:** must reference kernel schemas by version; breaking changes require version bump.
+**Tag:** conditional  
+**Board path:** Spec → MVP → Eval → Draft  
+**Kernel ownership:** protocol profile kernel (schemas, rate limits, provenance, robust aggregation constraints)
 
-## 1) Thesis (one paragraph)
-Define a CPS-grade protocol profile for real-time sensitivity/coordination-variable sharing: typed variables, bounded rates, authenticated provenance, robust aggregation under compromise, and explicit safety gates before actuation.
+## 1) Trigger condition (why this paper exists)
+Proceed only if **sensitivity sharing materially influences scheduling/actuation decisions** in the target architecture (lab/warehouse/traffic) and therefore becomes safety/security relevant.
 
-## 2) Claims (citable, falsifiable)
-- Naive sensitivity sharing is unsafe in CPS under compromise; a tight profile is required for authenticated, rate-bounded, influence-bounded aggregation.
-- Robust aggregation + safety gating can make sensitivity signals usable without giving any agent unilateral control of actuation.
-- A profile can be evaluated via fault injection (compromised agents, spoofing, delay) and measured via MAESTRO.
+## 2) Claims
+- **C1:** A CPS profile makes sensitivity-sharing deployable: typed variables, bounded update rates, authenticated channels, robust aggregation under compromise.
+- **C2:** Under compromised agents, aggregation maintains bounded influence and stable convergence behavior.
+- **C3:** Protocol state does not directly actuate; it influences decisions only through explicit safety gates (MADS-compatible).
+- **C4:** The profile is testable via fault injection and compromised-agent suites in MAESTRO.
 
-## 3) Outline (high-level)
-1. Problem framing and scope boundary (what this paper is / is not)
-2. Core object (spec / protocol / trace / benchmark / model) and formal definitions
-3. Implementation surface (schemas, validators, harness)
-4. Evaluation plan (what evidence would convince a skeptic)
-5. Limitations and explicit non-goals
-6. Relationship to the portfolio (how it plugs into MADS-CPS / MAESTRO / Replay)
+## 3) Outline
+1. Motivation: why REP-like protocols are attractive; why CPS constraints break naive forms
+2. Profile spec: message schemas, windowing, rate limits, provenance
+3. Threat model: Byzantine agents, sybils, spoofing, replay
+4. Robust aggregation + influence bounds: spec-level commitments + acceptance tests
+5. Safety-gate integration contract (Gatekeeper/Monitor mediation)
+6. Reference implementation + conformance tests
+7. Evaluation in MAESTRO scenarios
 
-## 4) Experiment plan (minimum credible)
-- Convergence under sparsity + bounded update rates; robustness under compromised agents; safety-gate prevents unsafe actuation.
-- Tail latency + throughput evaluation under rate limits; measure effect on coordination tax.
+## 4) Experiment plan
+- Scenarios: one bottleneck coordination task where sensitivity-sharing provides a measurable benefit.
+- Metrics: convergence time, stability under delay, robustness under compromise, safety-gate compliance.
+- Baselines: unsecured channels; naive averaging; no rate limiting; non-robust aggregators.
+- Stressors: compromised fraction sweep; sparse connectivity; bursty updates; jitter.
 
-## 5) Artifact checklist (must ship)
-- kernel/rep_cps/REP_CPS_PROFILE.v0.1.schema.json expanded into a concrete profile
-- Threat model spec + test harness: compromised-agent injection, spoofed provenance, rate-limit violation
-- Reference aggregator implementations (median/trimmed mean + influence bounds as baseline)
-- Safety-gate interface linking profile outputs to Gatekeeper/Monitor logic (MADS).
+## 5) Artifact checklist
+- `kernel/rep_cps/REP_CPS_PROFILE.v0.1.schema.json`
+- reference aggregator + authentication hooks
+- attack harness: compromised-agent behaviors
+- MAESTRO adapter module to run the protocol
 
-## 6) Kill criteria (stop early if true)
-- If the profile cannot be specified without re-deriving the entire REP framework, scope is wrong.
-- If robustness cannot be demonstrated with clear threat-model tests, the profile is cosmetic.
-- If runtime costs make it infeasible under CPS constraints, adoption fails.
+## 6) Kill criteria
+- **K1:** cannot define measurable influence bounds / robustness acceptance tests.
+- **K2:** protocol does not outperform baselines in the one scenario where it should help.
+- **K3:** becomes unnecessary in the lab architecture (no meaningful decentralized primitive).
 
-## 7) Target venues (initial)
-arXiv (cs.CR, cs.RO, cs.DC); security/robotics workshops; depending on maturity, security-focused venue.
+## 7) Target venues
+- arXiv first (cs.RO, cs.CR, cs.DC)
+- security venues if the threat model + guarantees are strong
 
-## 8) Integration contract (portfolio coherence)
-- Output artifacts must validate against kernel schemas (or propose a versioned extension).
-- All evaluations must be reproducible from `datasets/` with a release manifest and evidence bundle.
-- Do not duplicate scope owned by other papers; cite and depend on them.
+## 8) Integration contract
+- REP-CPS is a **profile** inside MADS envelope, not the envelope.
+- Must reuse Contracts typed state and Replay/MAESTRO harnesses.
+

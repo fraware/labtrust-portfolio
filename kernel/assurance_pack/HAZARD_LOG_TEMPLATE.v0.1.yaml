@@ -1,0 +1,9 @@
+# Hazard log template (v0.1). One entry per hazard.
+# Each hazard must have: id, description, and mapped control_ids.
+hazards:
+  - id: H-001
+    description: ""  # e.g. "Incorrect sample disposition"
+    control_ids: []   # references to controls/invariants
+  - id: H-002
+    description: ""
+    control_ids: []

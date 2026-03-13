@@ -1,0 +1,18 @@
+%% P6 Typed-plan firewall flow (auto-generated)
+%% Plan -> validate_plan / policy_check_step -> allow | deny
+flowchart LR
+  subgraph input[Input]
+    P[Typed plan]
+  end
+  subgraph firewall[Firewall]
+    V[validate_plan]
+    C[policy_check_step]
+  end
+  subgraph outcome[Outcome]
+    A[allow]
+    D[deny]
+  end
+  P --> V
+  V --> C
+  C --> A
+  C --> D

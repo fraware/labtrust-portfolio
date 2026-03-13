@@ -4,27 +4,86 @@ This repository is a **portfolio workspace** for a coherent paper + artifact pro
 **assurance, reproducibility, and evaluation of large-scale agentic cyber-physical systems (CPS)**.
 
 ## What exists today (v0.1)
-- `kernel/` — versioned, strict JSON Schemas (placeholders but stable IDs)
-- `impl/` — minimal runnable thin-slice pipeline producing: TRACE → MAESTRO report → Replay result → Evidence bundle
-- `bench/` — benchmark scaffolding (MAESTRO + Replay)
-- `papers/` — paper-by-paper authoring packets (outline, claims, experiments, artifacts, kill-criteria, venues)
-- `datasets/` — run and release outputs (policy documented)
+- `kernel/` — versioned JSON Schemas and supporting docs (TRACE, MAESTRO_REPORT, EVIDENCE_BUNDLE, RELEASE_MANIFEST, COORD_CONTRACT, REP_CPS_PROFILE, TYPED_PLAN, ASSURANCE_PACK)
+- `impl/` — thin-slice pipeline (TRACE → MAESTRO report → Replay → Evidence bundle → Release manifest); adapters (Centralized, Blackboard, REP-CPS, LLM Planning, Meta); contract validator; REP-CPS aggregator; scaling (regression, collapse, scaling exponent) and assurance tooling
+- `bench/` — MAESTRO scenarios (toy_lab, lab_profile, warehouse, traffic, regime_stress) with scenario taxonomy; fault sweep; baselines (Centralized vs Blackboard); Replay corpus (four traps: nondeterminism, reorder, timestamp_reorder, hash_mismatch; discovery from `*_trace.json`); contract corpus (seven sequences; see bench/contracts/README.md)
+- `papers/` — paper folders (P0–P8) with AUTHORING_PACKET, DRAFT, claims.yaml, and PHASE3_PASSED per paper. **All nine papers are at Draft stage**; Phase 3 (submission-readiness) checklist passed 2025-03-11. Next: submission prep per [docs/PRE_SUBMISSION_CHECKLIST.md](docs/PRE_SUBMISSION_CHECKLIST.md).
+- `datasets/` — run and release layout; eval outputs under `datasets/runs/` (e3_summary, e2_redaction_demo, replay_eval, rep_cps_eval, scaling_eval, llm_eval, meta_eval, contracts_eval, assurance_eval, maestro_fault_sweep, multiscenario_runs, etc.). Summary JSONs include optional `excellence_metrics`; run `python scripts/export_excellence_summary.py` to print a one-line summary per paper.
+- **Tests:** Unit and integration tests; P1–P8 each have a real-eval integration test that runs the eval script and asserts on the produced artifact; P8 has unit tests for the meta-controller (`decide_switch` revert/latency/hysteresis); W3 evidence-bundle conditions are tested in `tests/test_w3_evidence_bundle.py` (alignment with formal/lean). See [docs/STATE_OF_THE_ART_CRITERIA.md](docs/STATE_OF_THE_ART_CRITERIA.md).
 
 ## Quickstart
-Validate kernel schemas:
+
+Validate kernel schemas (no env vars needed):
 ```bash
 python scripts/validate_kernel.py
 ```
 
-Run the thin slice end-to-end:
+Run the thin slice end-to-end and run tests. Use one of the following depending on your shell.
+
+**Bash / Git Bash / WSL:**
 ```bash
-PYTHONPATH=impl/src python -m labtrust_portfolio run-thinslice --out-dir datasets/runs/demo
+export PYTHONPATH=impl/src
+python -m labtrust_portfolio run-thinslice --out-dir datasets/runs/demo
+
+export LABTRUST_KERNEL_DIR=kernel
+python -m unittest discover -s tests
 ```
 
-Run tests:
-```bash
-PYTHONPATH=impl/src python -m unittest discover -s tests
+**PowerShell (Windows):**
+```powershell
+$env:PYTHONPATH = "impl/src"
+python -m labtrust_portfolio run-thinslice --out-dir datasets/runs/demo
+
+$env:LABTRUST_KERNEL_DIR = "kernel"
+$env:PYTHONPATH = "impl/src"
+python -m unittest discover -s tests
 ```
+
+## Cross-cutting workflow
+
+1. **Validate kernel** — `python scripts/validate_kernel.py`
+2. **Run thin-slice** — Set `PYTHONPATH=impl/src` then `python -m labtrust_portfolio run-thinslice --out-dir datasets/runs/<run_id>`
+3. **Check conformance** — Set `LABTRUST_KERNEL_DIR=kernel` and `PYTHONPATH=impl/src` then `python -m labtrust_portfolio check-conformance datasets/runs/<run_id>`
+4. **Release dataset (optional)** — With `PYTHONPATH=impl/src`: `python -m labtrust_portfolio release-dataset datasets/runs/<run_id> <release_id>`
+
+**PowerShell (Windows)** — Set env vars first, then run commands; or use the helper scripts from repo root:
+```powershell
+.\scripts\run_tests.ps1
+.\scripts\run_workflow.ps1
+```
+Or manually:
+```powershell
+$env:LABTRUST_KERNEL_DIR = "kernel"
+$env:PYTHONPATH = "impl/src"
+python -m labtrust_portfolio run-thinslice --out-dir datasets/runs/demo
+python -m labtrust_portfolio check-conformance datasets/runs/demo
+python -m labtrust_portfolio release-dataset datasets/runs/demo my_release
+```
+
+For **P6 real-LLM mode** (optional): set API keys in a `.env` file at repo root (`OPENAI_API_KEY` or `ANTHROPIC_API_KEY`); run `llm_redteam_eval.py --real-llm`. `.env` is in `.gitignore` and must not be committed. See [docs/EXPERIMENTS_AND_LIMITATIONS.md](docs/EXPERIMENTS_AND_LIMITATIONS.md).
+
+The portfolio anchor scenario is **lab_profile_v0** (`bench/maestro/scenarios/lab_profile_v0.yaml`); every paper touches it at least once. See [docs/VALIDATING_A_RUN.md](docs/VALIDATING_A_RUN.md) for conformance tiers and details. For paper ownership and dependencies see [docs/INTEGRATION_CONTRACTS.md](docs/INTEGRATION_CONTRACTS.md) and [docs/CONDITIONAL_TRIGGERS.md](docs/CONDITIONAL_TRIGGERS.md). Before submission, run the Phase 3 checklist in [docs/STATE_OF_THE_ART_CRITERIA.md](docs/STATE_OF_THE_ART_CRITERIA.md) section 3. Kernel versioning: [kernel/README.md](kernel/README.md).
+
+## Evaluation pipelines
+
+Per-paper evaluation scripts write results under `datasets/runs/`:
+
+| Paper | Script(s) | Output under `datasets/runs/` |
+|-------|-----------|-------------------------------|
+| P0 | `produce_p0_e3_release.py`, `replay_link_e3.py`, `e2_redaction_demo.py`, `build_p0_conformance_summary.py` | E3: `e3_summary.json`, `p0_e3_variance.json`, `e3/<scenario>/seed_<n>/`; release to `releases/p0_e3_release`. E2: `e2_redaction_demo/`. E1: `conformance.json` per run. Portfolio: `releases/portfolio_v0.1/p0_conformance_summary.json`. Tables/figures: `export_e3_table.py` (--compact), `export_e2_admissibility_matrix.py`, `plot_e3_latency.py`. Evidence bundle: `verification_mode` required. |
+| P1 | `contracts_eval.py` | `contracts_eval/eval.json`; `scale_test.json` (--scale-test). Gatekeeper: `allow_release(..., check_contracts=True)`. Trace-derivability: docs/P1_TRACE_DERIVABILITY.md. Tables/figures: `export_contracts_corpus_table.py`, `plot_contracts_scale.py`. |
+| P2 | `rep_cps_eval.py` | `rep_cps_eval/summary.json` (delay sweep, aggregation_variants, sybil_sweep, trigger_met), `safety_gate_denial.json`. Figure: `plot_rep_cps_summary.py`. |
+| P3 | `replay_eval.py` | `replay_eval/summary.json` (root_cause_category, witness_slice, overhead_curve with --overhead-curve). **Use `--out datasets/runs/replay_eval/summary.json`** (file path, not directory). Figure: `plot_replay_overhead.py`. L1 = control-plane replay with recorded observations. |
+| P4 | `maestro_fault_sweep.py`, `maestro_antigaming_eval.py`, `maestro_baselines.py` | `maestro_fault_sweep/` (multi_sweep.json), `maestro_antigaming/antigaming_results.json` (scoring_proof), `bench/maestro/adapter_costs.json`, baseline_summary.json. Tables: `export_maestro_tables.py`. Figure: `plot_maestro_recovery.py`. |
+| P5 | `generate_multiscenario_runs.py`, `scaling_heldout_eval.py` | `multiscenario_runs/`, `scaling_eval/heldout_results.json` (per_scenario_baseline_mae, trigger_met, regression, 95% CI). Use --seeds 10, --fault-mix. Tables: `export_scaling_tables.py`. Figure: `plot_scaling_mae.py`. |
+| P6 | `llm_redteam_eval.py` | `llm_eval/red_team_results.json`, `confusable_deputy_results.json`, `e2e_denial_trace.json`, `adapter_latency.json` (with --run-adapter). Figure: `plot_llm_adapter_latency.py`. success_criteria_met.trigger_met. |
+| P7 | `run_assurance_eval.py`, `audit_bundle.py` | `assurance_eval/results.json`. Auditor: `audit_bundle.py` (mapping + PONR; `--release` for one-command audit). Part 11: docs/PART11_AUDIT_TRAIL_ALIGNMENT.md (artifact + field per requirement). Figure: `export_assurance_gsn.py`. |
+| P8 | `meta_eval.py`, `meta_collapse_sweep.py` | `meta_eval/comparison.json` (fixed vs meta vs naive; trigger_met; run_manifest; use `--run-naive --fault-threshold 0`), `meta_eval/collapse_sweep.json` (from meta_collapse_sweep.py; run_manifest). Tables: `export_meta_tables.py`. Figure: `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json`. |
+
+Commands and options: [docs/EVALS_RUNBOOK.md](docs/EVALS_RUNBOOK.md). To run a focused set of experiments per paper in one go: `python scripts/run_paper_experiments.py` (or `--quick` for fewer seeds, `--paper P2` for a single paper). Interpretation of results and experiment plan: [docs/EVAL_RESULTS_INTERPRETATION.md](docs/EVAL_RESULTS_INTERPRETATION.md). CI runs the evaluation scripts in the `conditional-evals` job. The test job runs all tests, including integration tests that launch P1–P8 eval scripts and assert on their outputs.
+
+**Key documentation:** [PORTFOLIO_BOARD.md](PORTFOLIO_BOARD.md) (paper stages, next actions) | [docs/VALIDATING_A_RUN.md](docs/VALIDATING_A_RUN.md) (conformance) | [docs/INTEGRATION_CONTRACTS.md](docs/INTEGRATION_CONTRACTS.md) (ownership) | [docs/CONDITIONAL_TRIGGERS.md](docs/CONDITIONAL_TRIGGERS.md) (P2/P5/P6/P8) | [docs/STATE_OF_THE_ART_CRITERIA.md](docs/STATE_OF_THE_ART_CRITERIA.md) (rigor, peer-review bar) | [docs/PRE_SUBMISSION_CHECKLIST.md](docs/PRE_SUBMISSION_CHECKLIST.md) (before submit: tag, final pass, venue format) | [docs/STANDARDS_OF_EXCELLENCE.md](docs/STANDARDS_OF_EXCELLENCE.md) (optional excellence metrics per paper) | [docs/VISUALS_PER_PAPER.md](docs/VISUALS_PER_PAPER.md) (tables + figures) | [docs/REPORTING_STANDARD.md](docs/REPORTING_STANDARD.md) (publishable tables/figures) | [docs/EXPERIMENTS_AND_LIMITATIONS.md](docs/EXPERIMENTS_AND_LIMITATIONS.md) (strengthened experiments, known limitations) | [docs/DRAFT_CONVERSION_CHECKLIST.md](docs/DRAFT_CONVERSION_CHECKLIST.md) (Eval to Draft) | [docs/PAPER_GENERATION_WORKFLOW.md](docs/PAPER_GENERATION_WORKFLOW.md) (repro workflow) | [docs/PAPER_BY_PAPER_NEXT_STEPS_PLAN.md](docs/PAPER_BY_PAPER_NEXT_STEPS_PLAN.md) (implementation roadmap) | [kernel/README.md](kernel/README.md) (schemas, versioning).
 
 ## Design constraint
-The **kernel** is the shared spine. Papers may add optional fields, but **breaking changes require a version bump**.
+
+The **kernel** is the shared spine. Papers may add optional fields, but **breaking changes require a version bump**. MAESTRO + Replay are the default release train; every other paper either produces artifacts compatible with them or consumes their datasets.

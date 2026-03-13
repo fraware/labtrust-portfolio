@@ -1,0 +1,7 @@
+{
+  "description": "Reorder trap: two events at same ts; trace has wrong state_hash_after for seq 1 (as if recorded in different order). Replay in seq order diverges at seq 1.",
+  "trace_file": "reorder_trap_trace.json",
+  "expected_replay_ok": false,
+  "expected_divergence_at_seq": 1,
+  "expected_diagnostic": "state hash mismatch"
+}

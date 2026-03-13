@@ -1,0 +1,20 @@
+{
+  "version": "0.1",
+  "variables": ["load", "availability", "priority"],
+  "rate_limits": {
+    "max_updates_per_sec": 10,
+    "max_age_sec": 5.0
+  },
+  "auth": {
+    "require_provenance": true,
+    "reject_replay": true
+  },
+  "aggregation": {
+    "method": "trimmed_mean",
+    "trim_fraction": 0.25
+  },
+  "safety_gate": {
+    "mads_tier_required": 2,
+    "gate_before_actuation": true
+  }
+}

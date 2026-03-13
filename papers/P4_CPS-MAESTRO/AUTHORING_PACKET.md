@@ -1,44 +1,72 @@
-# CPS-MAESTRO: Standardized Evaluation of Thousand-Agent CPS Coordination Under Faults, Tail Latency, and Cost
+# CPS-MAESTRO: Benchmark + Fault Injection Suite for CPS-Grade Agent Coordination
 
 **Paper ID:** P4_CPS-MAESTRO  
-**Stage target (board):** Spec → MVP → Eval → Draft  
-**Kernel dependency:** must reference kernel schemas by version; breaking changes require version bump.
+**Tag:** core-kernel  
+**Board path:** MVP → Eval → Draft  
+**Kernel ownership:** evaluation kernel (scenario specs, fault models, scoring, report format)
 
-## 1) Thesis (one paragraph)
-Make coordination measurable and comparable via a benchmark suite with fault injection, scenario adapters, scoring, and variance-aware reporting, optimized for CPS constraints and auditable outputs.
+## 1) One-line question
+How do we make CPS coordination **measurable and comparable** under tail latency, faults, recovery behavior, and operational cost—especially for autonomous labs?
 
-## 2) Claims (citable, falsifiable)
-- Without a shared evaluation substrate, coordination claims remain incomparable; MAESTRO supplies a practical yardstick.
-- Tail latency, recovery curves, and coordination tax are first-class metrics for CPS, not afterthoughts.
-- Variance and repeated trials are required; single-run demos are scientifically weak for agentic CPS.
+## 2) Scope anchors (ADePT-aligned realism)
+- Autonomous labs are not primarily “thousand-agent” problems; they are **heterogeneous device + robot + station** systems with recovery and drift.
+- MAESTRO must model: drift/calibration invalidation, insertion failures, queue contention, partial observability, and recovery sequences.
 
-## 3) Outline (high-level)
-1. Problem framing and scope boundary (what this paper is / is not)
-2. Core object (spec / protocol / trace / benchmark / model) and formal definitions
-3. Implementation surface (schemas, validators, harness)
-4. Evaluation plan (what evidence would convince a skeptic)
-5. Limitations and explicit non-goals
-6. Relationship to the portfolio (how it plugs into MADS-CPS / MAESTRO / Replay)
+## 3) Claims
+- **C1:** Standard scenarios + fault models + scoring produce stable, comparable measurements across coordination architectures.
+- **C2:** Variance is first-class: repeated runs and tail reporting are mandatory.
+- **C3:** Adapter interface makes adoption tractable across centralized/blackboard/hybrid stacks.
+- **C4:** The suite is usable by third parties: docs + CI + reference baselines.
 
-## 4) Experiment plan (minimum credible)
-- Repeated trials (N≥30) for each architecture in 1–2 scenarios; report p50/p95/p99 + variance + MTTR.
-- Ablations: fault injection on/off; safety gate on/off; measure coordination tax deltas.
+## 4) Outline
+1. Motivation: why coordination benchmarking fails (variance, hidden assumptions, missing faults)
+2. Scenario spec (lab/warehouse/traffic micro-world)
+3. Fault injection model (network/tool/agent/world)
+4. Scoring and reporting (p95/p99, MTTR, coordination tax, safety violations)
+5. Adapter interface + reference implementations
+6. Reproducibility protocol and dataset format
+7. Baseline results + ablations
 
-## 5) Artifact checklist (must ship)
-- Scenario spec format (bench/maestro/scenarios/*.yaml) + adapters interface
-- Scoring/report schema (kernel/eval/MAESTRO_REPORT.v0.1.schema.json → expand)
-- Fault injection harness (drop/delay/Byzantine tool output baselines)
-- Reference baselines: centralized scheduler vs blackboard vs hybrid (incremental).
+## 5) Experiment plan
+- Scenarios (minimum):
+  - lab profile micro-world (resource graph + PONRs + recovery),
+  - warehouse micro-world,
+  - traffic micro-intersection.
+- Fault sweeps:
+  - drift/calibration invalidation,
+  - tool timeouts/partial results,
+  - queue contention,
+  - delay/drop/reorder,
+  - compromised agent behavior.
+- Metrics:
+  - p95/p99 latency, throughput, success, safety violations, MTTR,
+  - coordination messages per completed task,
+  - operational overhead proxies.
+- Baselines:
+  - centralized scheduler,
+  - blackboard/event-sourced,
+  - market allocation,
+  - swarm fallback.
 
-## 6) Kill criteria (stop early if true)
-- If scenarios are too bespoke and cannot be adapted to other systems, benchmark won’t be adopted.
-- If metrics are unstable or easy to game, MAESTRO becomes noise.
-- If harness is too heavy to run, adoption collapses—must stay ‘thin’ and modular.
+## 6) Artifact checklist
+- scenario definitions + fault injection harness
+- `kernel/eval/MAESTRO_REPORT.v0.1.schema.json`
+- scoring library + standardized JSON reports
+- adapter interface + 2–4 reference adapters
+- dataset release scripts + reproducibility README
 
-## 7) Target venues (initial)
-arXiv (cs.RO, cs.AI, cs.SE); benchmarking/evaluation workshops; later robotics systems venue.
+## 7) Kill criteria
+- **K1:** results are unstable run-to-run due to underspecification.
+- **K2:** adapters become bespoke and expensive for each method.
+- **K3:** If scoring is gameable without improving real robustness/safety, revise scoring.
+- **K4:** If MAESTRO can be "won" by pathological strategies (always_deny, always_wait, or unsafe success), revise **scoring** until it cannot; document in SCENARIO_SPEC and anti-gaming section. Scoring is safety-weighted so unsafe success does not yield high scores.
 
-## 8) Integration contract (portfolio coherence)
-- Output artifacts must validate against kernel schemas (or propose a versioned extension).
-- All evaluations must be reproducible from `datasets/` with a release manifest and evidence bundle.
-- Do not duplicate scope owned by other papers; cite and depend on them.
+## 8) Target venues
+- ICRA/IROS/RSS (benchmark + CPS relevance)
+- DSN (dependability benchmarking)
+- arXiv first (cs.RO, cs.SE)
+
+## 9) Integration contract
+- MAESTRO is the **release train** producing datasets used by scaling laws and validating LLM/REP/meta modules.
+- Must emit traces compatible with Replay and evidence bundles compatible with MADS.
+

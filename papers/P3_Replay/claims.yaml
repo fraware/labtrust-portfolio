@@ -1,0 +1,53 @@
+# P3 Replay claim table (Draft conversion checklist 2.1)
+# Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P3_Replay"
+title: "Replay Levels and Nondeterminism Detection for Agentic CPS"
+release_id: "replay_eval"
+
+claims:
+  - id: "C1"
+    statement: "A CPS-aware trace format plus a determinism contract enables replay sufficient for third-party verification at L0."
+    evidence:
+      release_id: "replay_eval"
+      artifact_paths:
+        - "datasets/runs/replay_eval/summary.json"
+        - "kernel/trace/TRACE.v0.1.schema.json"
+        - "kernel/trace/REPLAY_LEVELS.v0.1.md"
+        - "impl/src/labtrust_portfolio/replay.py"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 0", "Figure 1"]
+
+  - id: "C2"
+    statement: "Hidden nondeterminism is detectable: same trace not equal to same control-plane behavior triggers structured diagnostics."
+    evidence:
+      release_id: "replay_eval"
+      artifact_paths:
+        - "datasets/runs/replay_eval/summary.json"
+        - "bench/replay/corpus/"
+        - "impl/src/labtrust_portfolio/replay.py"
+      table_ids: ["Table 1"]
+      figure_ids: []
+
+  - id: "C3"
+    statement: "Replay supports time-travel debugging: control-plane decisions and enforcement events can be reconstructed and audited."
+    evidence:
+      release_id: "replay_eval"
+      artifact_paths:
+        - "datasets/runs/replay_eval/summary.json"
+        - "impl/src/labtrust_portfolio/replay.py"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: []
+
+  - id: "C4"
+    statement: "The toolchain integrates with evidence bundles so replay outcomes are admissible evidence (MADS)."
+    evidence:
+      release_id: "replay_eval"
+      artifact_paths:
+        - "kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json"
+        - "impl/src/labtrust_portfolio/evidence.py"
+      table_ids: ["Table 1"]
+      figure_ids: []
+
+# Table 1: corpus/fidelity from replay_eval. Table 2: overhead from summary. Figure 1: plot_replay_overhead.py.

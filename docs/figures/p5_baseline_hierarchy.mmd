@@ -1,0 +1,10 @@
+%% P5 Scaling baseline hierarchy (auto-generated)
+%% Weak -> strong trivial baselines; model must beat these out-of-sample
+flowchart LR
+  B1[Global mean]
+  B2[Per-scenario mean]
+  B3[Feature baseline]
+  B4[Regression]
+  B1 --> B2
+  B2 --> B3
+  B3 --> B4

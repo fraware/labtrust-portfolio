@@ -1,0 +1,6 @@
+{
+  "description": "Timestamp reorder trap: two events with distinct timestamps; second event has wrong state_hash_after, replay in seq order diverges at seq 1",
+  "trace_file": "timestamp_reorder_trap_trace.json",
+  "expected_replay_ok": false,
+  "expected_divergence_at_seq": 1
+}

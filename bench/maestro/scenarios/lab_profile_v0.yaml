@@ -1,0 +1,51 @@
+# Canonical lab profile: ADePT-style labs with resource graph and PONR-aligned workflow.
+# Failures are dominated by contention, branching, and recovery (not scale N).
+id: lab_profile_v0
+family: lab
+description: >
+  Lab profile with resource graph (instruments, stations, calibration/warmup/cleaning).
+  Tasks: receive_sample, centrifuge, analyze, report_results, disposition_commit.
+  Station/instrument concurrency and queue contention are first-class; retries modeled.
+tasks:
+  - name: receive_sample
+  - name: centrifuge
+  - name: analyze
+  - name: report_results
+  - name: disposition_commit
+faults:
+  - name: drop_completion
+    param: drop_completion_prob
+  - name: delay
+    param: delay_p95_ms
+  - name: calibration_invalid
+    param: calibration_invalid_prob
+# Resource graph: capacity-constrained instruments, stations as bottlenecks, auxiliary states.
+# Enables MAESTRO results believable for ADePT-style labs (contention + recovery, not N).
+resource_graph:
+  instruments:
+    - id: centrifuge_1
+      capacity: 1
+      states: [idle, running, calibration, cleaning]
+      warmup_required: true
+    - id: analyzer_1
+      capacity: 1
+      states: [idle, running, warmup, cleaning]
+      warmup_required: true
+  stations:
+    - id: receiving
+      capacity: 2
+      bottleneck: false
+    - id: prep
+      capacity: 1
+      bottleneck: true
+    - id: analysis
+      capacity: 1
+      bottleneck: true
+  queue_contention: true
+  retry_policy:
+    max_retries: 3
+    backoff: exponential
+  failure_dominance: contention  # failures dominated by contention + branching + recovery, not N
+concurrency:
+  max_concurrent_per_instrument: 1
+  max_concurrent_per_station: 2

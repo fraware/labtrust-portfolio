@@ -22,14 +22,27 @@
     "hazards": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "required": ["id", "control_ids"],
+        "properties": {
+          "id": {"type": "string"},
+          "description": {"type": "string"},
+          "control_ids": {"type": "array", "items": {"type": "string"}},
+          "ponr_ids": {"type": "array", "items": {"type": "string"}, "description": "Optional PONR ids from lab profile covered by this hazard"}
+        }
       },
       "description": "Hazard log (placeholder)"
     },
     "controls": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": {"type": "string"},
+          "description": {"type": "string"},
+          "evidence_artifact_types": {"type": "array", "items": {"type": "string"}}
+        }
       },
       "description": "Invariants/controls (placeholder)"
     },

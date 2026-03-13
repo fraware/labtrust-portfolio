@@ -1,0 +1,26 @@
+# Lab Profile v0.1 — Minimum Telemetry Fields
+# This references TRACE semantics; sensitive payloads may be replaced by hashes.
+
+required_events:
+  - ProposalEvent
+  - ToolCallEvent
+  - ToolResultEvent
+  - GateDecisionEvent
+  - AdmissibilityCheckEvent
+  - ActionExecutionEvent
+
+ponr_requirements:
+  PONR-A:
+    must_include:
+      - custody_chain_digest
+      - stability_window_ok
+      - anomalies_open
+      - confirmations
+      - gate_reason_codes
+
+  PONR-B:
+    must_include:
+      - telemetry_completeness
+      - disposition_action
+      - gate_reason_codes
+

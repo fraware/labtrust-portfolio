@@ -1,0 +1,32 @@
+{
+  "version": "0.1",
+  "system": {
+    "boundary": "lab_profile_v0.1",
+    "assumptions": "Robot-centric autonomous lab; PONRs from ponrs.yaml"
+  },
+  "hazards": [
+    {
+      "id": "H-001",
+      "description": "Incorrect or unauthorized sample disposition (PONR-B)",
+      "control_ids": ["C-001", "C-002"],
+      "ponr_ids": ["PONR-A", "PONR-B"]
+    }
+  ],
+  "controls": [
+    {
+      "id": "C-001",
+      "description": "PONR gate requires admissible evidence (Tier 2 conformance)",
+      "evidence_artifact_types": ["trace", "evidence_bundle"]
+    },
+    {
+      "id": "C-002",
+      "description": "Disposition action recorded in trace and evidence bundle",
+      "evidence_artifact_types": ["trace", "evidence_bundle"]
+    }
+  ],
+  "evidence_map": {
+    "H-001": ["C-001", "C-002"],
+    "trace": ["C-001", "C-002"],
+    "evidence_bundle": ["C-001", "C-002"]
+  }
+}

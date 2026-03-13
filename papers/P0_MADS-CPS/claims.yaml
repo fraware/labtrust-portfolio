@@ -1,0 +1,58 @@
+# P0 MADS-CPS claim table (Draft conversion checklist 2.1)
+# Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P0_MADS-CPS"
+title: "MADS-CPS: A Normative Minimum Assurance Bar for Agentic Cyber-Physical Workflows"
+release_id: "p0_e3_release"
+
+claims:
+  - id: "C1"
+    statement: "A normative minimum assurance bar is separable from any particular coordination algorithm; it constrains interfaces and evidence, not internal optimization."
+    evidence:
+      release_id: "p0_e3_release"
+      confidence: "high"  # optional: high = direct measure + 10 seeds + script; see STANDARDS_OF_EXCELLENCE.md
+      artifact_paths:
+        - "kernel/mads/NORMATIVE.v0.1.md"
+        - "kernel/mads/VERIFICATION_MODES.v0.1.md"
+        - "datasets/releases/p0_e3_release/release_manifest.json"
+      table_ids: []
+      figure_ids: ["Figure 0"]
+
+  - id: "C2"
+    statement: "Conformance tiers can be tested by artifact presence, runtime checks, and replayable evidence, enabling objective pass/fail under a declared envelope."
+    evidence:
+      release_id: "p0_e3_release"
+      artifact_paths:
+        - "datasets/releases/p0_e3_release/evidence_bundle.json"
+        - "datasets/releases/p0_e3_release/conformance.json"
+        - "impl/src/labtrust_portfolio/conformance.py"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 1"]
+
+  - id: "C3"
+    statement: "Evidence admissibility requires integrity, traceability, and replay at declared fidelity levels; raw logs or transcripts alone are insufficient."
+    evidence:
+      release_id: "p0_e3_release"
+      artifact_paths:
+        - "kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json"
+        - "datasets/releases/p0_e3_release/evidence_bundle.json"
+        - "datasets/runs/e2_redaction_demo/evidence_bundle_redacted.json"
+        - "datasets/releases/p0_e3_release/trace.json"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: ["Figure 1"]
+
+  - id: "C4"
+    statement: "PONR enforcement operationalizes high impact by requiring mechanically checkable admissibility before irreversible or authoritative transitions."
+    evidence:
+      release_id: "p0_e3_release"
+      artifact_paths:
+        - "kernel/mads/PONR_ENFORCEMENT.v0.1.md"
+        - "impl/src/labtrust_portfolio/release.py"
+        - "impl/src/labtrust_portfolio/gatekeeper.py"
+        - "datasets/releases/p0_e3_release/release_manifest.json"
+      table_ids: ["Table 1", "Table 2"]
+      figure_ids: []
+
+# Draft conversion: Table 1 (export_e3_table.py), Table 2 (export_e2_admissibility_matrix.py), Figure 1 (plot_e3_latency.py).
+# Repro block at top of DRAFT.md.

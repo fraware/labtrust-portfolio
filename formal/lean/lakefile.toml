@@ -1,0 +1,7 @@
+name = "labtrust-formal"
+version = "0.1.0"
+defaultTargets = ["Labtrust"]
+
+[[lean_lib]]
+name = "Labtrust"
+globs = ["Labtrust.*"]

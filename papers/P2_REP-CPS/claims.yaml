@@ -1,0 +1,51 @@
+# P2 REP-CPS claim table (Draft conversion checklist 2.1)
+# Conditional paper; trigger_met in summary. See docs/CONDITIONAL_TRIGGERS.md.
+# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+
+paper_id: "P2_REP-CPS"
+title: "REP-CPS: A Real-Time, Authenticated Sensitivity-Sharing Profile for Cyber-Physical Coordination"
+release_id: "rep_cps_eval"
+
+claims:
+  - id: "C1"
+    statement: "A CPS profile makes sensitivity-sharing deployable: typed variables, bounded update rates, authenticated channels, robust aggregation under compromise."
+    evidence:
+      release_id: "rep_cps_eval"
+      artifact_paths:
+        - "kernel/rep_cps/PROFILE_SPEC.v0.1.md"
+        - "kernel/rep_cps/example_profile.v0.1.json"
+        - "datasets/runs/rep_cps_eval/summary.json"
+      table_ids: ["Table 1"]
+      figure_ids: ["Figure 0"]
+
+  - id: "C2"
+    statement: "Under compromised agents, aggregation maintains bounded influence and stable convergence behavior."
+    evidence:
+      release_id: "rep_cps_eval"
+      artifact_paths:
+        - "datasets/runs/rep_cps_eval/summary.json"
+        - "impl/src/labtrust_portfolio/rep_cps.py"
+      table_ids: ["Table 2", "Table 3"]
+      figure_ids: []
+
+  - id: "C3"
+    statement: "Protocol state does not directly actuate; it influences decisions only through explicit safety gates (MADS-compatible)."
+    evidence:
+      release_id: "rep_cps_eval"
+      artifact_paths:
+        - "datasets/runs/rep_cps_eval/safety_gate_denial.json"
+        - "impl/src/labtrust_portfolio/adapters/rep_cps_adapter.py"
+      table_ids: ["Table 1"]
+      figure_ids: []
+
+  - id: "C4"
+    statement: "The profile is testable via fault injection and compromised-agent suites in MAESTRO."
+    evidence:
+      release_id: "rep_cps_eval"
+      artifact_paths:
+        - "datasets/runs/rep_cps_eval/summary.json"
+        - "scripts/rep_cps_eval.py"
+      table_ids: ["Table 1", "Table 2", "Table 3"]
+      figure_ids: ["Figure 1"]
+
+# Tables from summary.json. Figure 1: plot_rep_cps_summary.py (tasks_completed by policy).

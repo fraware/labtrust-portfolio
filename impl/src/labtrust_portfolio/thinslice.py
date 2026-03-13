@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 from datetime import datetime, timezone
 import json, random, uuid, math
 
@@ -11,6 +11,8 @@ from .replay import replay_trace
 from .evidence import build_evidence_bundle
 from .release import build_release_manifest
 from .schema import validate
+from .scenario import load_scenario, get_scenario_task_names
+from .conformance import write_conformance_artifact
 
 KERNEL_VERSION = "0.1"
 
@@ -29,13 +31,36 @@ SCHEMA_IDS = {
 def _task_id(name: str, idx: int) -> str:
     return f"{name}:{idx}"
 
-def run_thin_slice(out_dir: Path, seed: int = 7, delay_p95_ms: float = 50.0, drop_completion_prob: float = 0.02) -> Dict[str, Path]:
+DEFAULT_TASK_NAMES = ["receive_sample", "centrifuge", "analyze", "report_results"]
+
+
+def _task_list_for_scenario(scenario_id: Optional[str]) -> List[str]:
+    """Resolve task list from scenario YAML or default."""
+    if not scenario_id:
+        return list(DEFAULT_TASK_NAMES)
+    try:
+        scenario = load_scenario(scenario_id)
+        names = get_scenario_task_names(scenario)
+        return names if names else list(DEFAULT_TASK_NAMES)
+    except (FileNotFoundError, ValueError):
+        return list(DEFAULT_TASK_NAMES)
+
+
+def run_thin_slice(
+    out_dir: Path,
+    seed: int = 7,
+    delay_p95_ms: float = 50.0,
+    drop_completion_prob: float = 0.02,
+    scenario_id: Optional[str] = "toy_lab_v0",
+    delay_fault_prob: float = 0.0,
+    calibration_invalid_prob: float = 0.0,
+) -> Dict[str, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rng = random.Random(seed)
     run_id = f"run_{uuid.uuid4().hex[:10]}"
-    scenario_id = "toy_lab_v0"
-    start_time = datetime.now(timezone.utc).isoformat().replace("+00:00","Z")
+    sid = scenario_id or "toy_lab_v0"
+    start_time = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     lam = -math.log(0.05) / max(1.0, delay_p95_ms)
 
@@ -70,23 +95,32 @@ def run_thin_slice(out_dir: Path, seed: int = 7, delay_p95_ms: float = 50.0, dro
         events.append(TraceEvent(seq=seq, ts=ts, type=ev_type, actor_kind=actor_kind, actor_id=actor_id, payload=payload, state_hash_after=state_hash(state)))
         seq += 1
 
-    task_names = ["receive_sample", "centrifuge", "analyze", "report_results"]
+    task_names = _task_list_for_scenario(sid)
 
     for i, name in enumerate(task_names):
         tid = _task_id(name, i)
         emit("coordination_message", "system", "scheduler", {"detail": "assign_task", "task_id": tid})
         emit("task_start", "agent", "agent_1", {"task_id": tid, "name": name})
 
+        if delay_fault_prob > 0 and rng.random() < delay_fault_prob:
+            emit("fault_injected", "system", "fault_injector", {"fault": "delay", "task_id": tid})
+            ts += sample_delay_ms() * 2.0 / 1000.0
+
         if rng.random() < drop_completion_prob:
             emit("fault_injected", "system", "fault_injector", {"fault": "drop_completion", "task_id": tid})
             continue
 
+        if calibration_invalid_prob > 0 and rng.random() < calibration_invalid_prob:
+            emit("fault_injected", "system", "fault_injector", {"fault": "calibration_invalid", "task_id": tid})
+
         emit("task_end", "tool", "lab_device_1", {"task_id": tid, "name": name})
 
     final_hash = state_hash(state)
-    trace = build_trace(run_id, scenario_id, seed, start_time, events, final_hash, metadata={
+    trace = build_trace(run_id, sid, seed, start_time, events, final_hash, metadata={
         "delay_p95_ms": delay_p95_ms,
         "drop_completion_prob": drop_completion_prob,
+        "delay_fault_prob": delay_fault_prob,
+        "calibration_invalid_prob": calibration_invalid_prob,
     })
 
     trace_path = out_dir / "trace.json"
@@ -116,6 +150,7 @@ def run_thin_slice(out_dir: Path, seed: int = 7, delay_p95_ms: float = 50.0, dro
         schema_validation_ok=schema_ok,
         replay_ok=replay_ok,
         replay_diag=replay_diag,
+        verification_mode="evaluator",
     )
 
     try:
@@ -138,9 +173,12 @@ def run_thin_slice(out_dir: Path, seed: int = 7, delay_p95_ms: float = 50.0, dro
 
     release_path.write_text(json.dumps(release, indent=2) + "\n", encoding="utf-8")
 
+    conformance_path = write_conformance_artifact(out_dir)
+
     return {
         "trace": trace_path,
         "maestro_report": maestro_path,
         "evidence_bundle": evidence_path,
         "release_manifest": release_path,
+        "conformance": conformance_path,
     }

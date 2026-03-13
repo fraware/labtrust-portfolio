@@ -1,0 +1,19 @@
+%% GSN-lite: hazards -> controls -> evidence (auto-generated from assurance_pack_instantiation.json)
+graph LR
+  subgraph Hazards
+    H_001[H-001]
+  end
+  subgraph Controls
+    C_001[C-001]
+    C_002[C-002]
+  end
+  subgraph Evidence
+    trace[trace]
+    bundle[evidence_bundle]
+  end
+  H_001 --> C_001
+  H_001 --> C_002
+  C_001 --> trace
+  C_001 --> evidence_bundle
+  C_002 --> trace
+  C_002 --> evidence_bundle
