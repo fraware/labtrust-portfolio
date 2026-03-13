@@ -1,0 +1,32 @@
+{
+  "version": "0.1",
+  "system": {
+    "boundary": "medical_device_v0.1",
+    "assumptions": "Software as medical device; traceability to IEC 62304 / regulatory checklist"
+  },
+  "hazards": [
+    {
+      "id": "H-M01",
+      "description": "Incorrect or unsafe clinical output (software failure)",
+      "control_ids": ["C-M01", "C-M02"],
+      "ponr_ids": []
+    }
+  ],
+  "controls": [
+    {
+      "id": "C-M01",
+      "description": "Evidence of verification (trace, test result)",
+      "evidence_artifact_types": ["trace", "evidence_bundle"]
+    },
+    {
+      "id": "C-M02",
+      "description": "Critical action recorded in trace",
+      "evidence_artifact_types": ["trace", "evidence_bundle"]
+    }
+  ],
+  "evidence_map": {
+    "H-M01": ["C-M01", "C-M02"],
+    "trace": ["C-M01", "C-M02"],
+    "evidence_bundle": ["C-M01", "C-M02"]
+  }
+}

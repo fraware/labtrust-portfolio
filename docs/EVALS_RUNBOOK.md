@@ -27,7 +27,7 @@ PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experime
 
 PowerShell: `$env:PYTHONPATH="impl\src"; $env:LABTRUST_KERNEL_DIR="$PWD\kernel"; python scripts/run_paper_experiments.py [--quick] [--paper P0|...|P8]`
 
-Per-paper runs: P0 (E3 multi-scenario + E2 redaction + export E3 table + build_p0_conformance_summary); P1 (corpus + scale-test); P2 (delay sweep toy_lab_v0); P3 (replay + overhead curve); P4 (fault sweep two scenarios + antigaming + baselines); P5 (multiscenario runs + held-out eval + export scaling tables); P6 (red-team + confusable + adapter latency); P7 (assurance + audit_bundle + export tables); P8 (meta eval + collapse sweep + export meta tables). **P0 conformance summary:** `python scripts/build_p0_conformance_summary.py` writes `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. **P7 one-command audit:** `python scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR and review if release dir contains evidence_bundle.json.
+Per-paper runs: P0 (E3 multi-scenario + E2 redaction + export E3 table + build_p0_conformance_summary); P1 (corpus + scale-test); P2 (delay sweep, two scenarios default toy_lab_v0+lab_profile_v0, optional --aggregation-steps, convergence table via export_rep_cps_convergence_table); P3 (replay + overhead curve, optional --l1-twin); P4 (fault sweep two scenarios + antigaming + baselines: Centralized, Blackboard, RetryHeavy); P5 (multiscenario runs + held-out eval + export scaling tables); P6 (red-team + confusable + jailbreak-style + adapter latency; validator v0.2; optional --real-llm); P7 (assurance + three profiles lab/warehouse/medical + audit_bundle + export tables); P8 (collapse sweep then meta_eval --non-vacuous, optional --fallback-adapter blackboard|centralized|retry_heavy, export meta tables). After a full run, see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. **P0 conformance summary:** `python scripts/build_p0_conformance_summary.py` writes `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. **P7 one-command audit:** `python scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR and review if release dir contains evidence_bundle.json.
 
 ## Environment
 
@@ -58,13 +58,15 @@ PYTHONPATH=impl/src python scripts/contracts_eval.py --scale-test [--scale-event
 - **Bottleneck scenario:** `toy_lab_v0` (configurable via `--scenario`).
 - **Script:** `scripts/rep_cps_eval.py`
 - **Output:** `datasets/runs/rep_cps_eval/summary.json` (and per-run dirs under `rep_cps/`, `centralized/`). Also: `aggregation_variants` (method, bias, max_influence_per_compromised_agent), `sybil_sweep[]`, `safety_gate_denial.json`.
-- **Metrics:** adapter comparison (tasks_completed), aggregation under compromise (bias robust vs naive); clipping and median_of_means variants; sybil stress test; safety-gate denial record.
+- **Metrics:** adapter comparison (tasks_completed), aggregation under compromise (bias robust vs naive); clipping and median_of_means variants; sybil stress test; safety-gate denial record. When `--aggregation-steps > 1`: convergence (steps_to_convergence, convergence_achieved_rate) in summary; Table 4 via `python scripts/export_rep_cps_convergence_table.py`.
 - **Figure 1:** `python scripts/plot_rep_cps_summary.py` (output `docs/figures/p2_rep_cps_tasks.png`; tasks_completed by policy from summary.json). Required for peer-review; no optional figures.
 
 ```bash
-PYTHONPATH=impl/src python scripts/rep_cps_eval.py [--scenario toy_lab_v0] [--seeds 1,2,...,10] [--out datasets/runs/rep_cps_eval]
-# Delay sweep + second scenario:
-PYTHONPATH=impl/src python scripts/rep_cps_eval.py --delay-sweep 0,0.05,0.1 --scenarios toy_lab_v0,lab_profile_v0 --seeds 1,2,...,10
+# Publishable: default 20 seeds. Quick/CI: --seeds 2 or --seeds 5.
+PYTHONPATH=impl/src python scripts/rep_cps_eval.py [--scenario toy_lab_v0] [--out datasets/runs/rep_cps_eval]
+# Delay sweep + second scenario (publishable default 20 seeds):
+PYTHONPATH=impl/src python scripts/rep_cps_eval.py --delay-sweep 0,0.05,0.1 --scenarios toy_lab_v0,lab_profile_v0
+python scripts/export_rep_cps_convergence_table.py [--summary datasets/runs/rep_cps_eval/summary.json]
 PYTHONPATH=impl/src python scripts/plot_rep_cps_summary.py
 ```
 
@@ -72,7 +74,7 @@ PYTHONPATH=impl/src python scripts/plot_rep_cps_summary.py
 
 - **Script:** `scripts/replay_eval.py`
 - **Output:** `datasets/runs/replay_eval/summary.json` (or `--out` path). **Use a file path for `--out`** (e.g. `datasets/runs/replay_eval/summary.json`), not a directory; the script writes the summary JSON to that file. Includes `per_trace[]` with `root_cause_category` and **witness_slice** per divergence; top-level **witness_slices** (aggregate of all divergence witness slices); `overhead_stats`; with `--overhead-curve`: `overhead_curve[]` (event_count, p95_replay_ms).
-- **L1:** L1 = control-plane replay with recorded observations (trace-only; no live simulator; not physics replay). See `bench/replay/README.md` and `kernel/trace/REPLAY_LEVELS.v0.1.md`.
+- **L1:** L1 stub (L0 + twin config validation) and L1 twin (--l1-twin: deterministic re-run of control-plane state machine; l1_twin_ok, l1_twin_final_hash_match in summary). L2 aspirational with design subsection in REPLAY_LEVELS. Full corpus table: `python scripts/export_replay_corpus_table.py`. See `bench/replay/README.md` and `kernel/trace/REPLAY_LEVELS.v0.1.md`.
 - **Figure:** `python scripts/plot_replay_overhead.py` (p95 replay ms vs event count from overhead_curve).
 
 ```bash
@@ -83,10 +85,10 @@ PYTHONPATH=impl/src python scripts/replay_eval.py --out datasets/runs/replay_eva
 
 - **Prerequisite:** Multi-scenario runs. Generate with `scripts/generate_multiscenario_runs.py`, then run held-out eval.
 - **Output:** `datasets/runs/scaling_eval/heldout_results.json` (held_out_results, overall_baseline_mae, overall_per_scenario_baseline_mae, overall_feat_baseline_mae, overall_regression_mae, overall_collapse_rate, 95% CI for MAE, scaling_fit).
-- **Metrics:** held-out MAE per scenario (global mean, per-scenario mean, num_tasks/features, regression); collapse rate; exploratory scaling exponent. Use `scripts/export_scaling_tables.py` to print markdown tables for the draft. **Figure 1:** `python scripts/plot_scaling_mae.py` (output `docs/figures/p5_scaling_mae.png`; MAE by held-out scenario). Dataset stability: `--seeds 10` (or higher); optional `--fault-mix` for calibration_invalid.
+- **Metrics:** held-out MAE per scenario (global mean, per-scenario mean, num_tasks/features, regression, optional stump); collapse rate; exploratory scaling exponent. Use `scripts/export_scaling_tables.py` to print markdown tables for the draft. **Figure 1:** `python scripts/plot_scaling_mae.py` (output `docs/figures/p5_scaling_mae.png`; MAE by held-out scenario). Publishable: 20 seeds (default); for sensitivity re-run generate_multiscenario_runs and scaling_heldout_eval with 30 seeds and compare CI width or stability of MAE (see sensitivity_seed_sweep.py or REPORTING_STANDARD). Optional stump baseline in heldout_results (overall_stump_mae).
 
 ```bash
-PYTHONPATH=impl/src python scripts/generate_multiscenario_runs.py [--out datasets/runs/multiscenario_runs] [--seeds 10] [--fault-mix]
+PYTHONPATH=impl/src python scripts/generate_multiscenario_runs.py [--out datasets/runs/multiscenario_runs] [--fault-mix]
 PYTHONPATH=impl/src python scripts/scaling_heldout_eval.py [--runs-dir datasets/runs/multiscenario_runs] [--out datasets/runs/scaling_eval]
 python scripts/export_scaling_tables.py [--results datasets/runs/scaling_eval/heldout_results.json]
 python scripts/plot_scaling_mae.py [--results datasets/runs/scaling_eval/heldout_results.json]
@@ -96,7 +98,7 @@ python scripts/plot_scaling_mae.py [--results datasets/runs/scaling_eval/heldout
 
 - **Script:** `scripts/llm_redteam_eval.py`
 - **Output:** `datasets/runs/llm_eval/red_team_results.json`; `confusable_deputy_results.json` (adversarial args inducing privilege); `e2e_denial_trace.json` (blocked + safe recovery); with `--run-adapter`: `adapter_latency.json` (runs, tail_latency_p95_mean_ms, scenarios, seeds; optional latency_acceptable if `--latency-threshold-ms` set).
-- **Metrics:** red-team pass/fail (8 cases); confusable deputy (4 cases; validate_plan_step blocks privilege-request args); E2E denial trace; optional tail latency from adapter runs (obtained with `--run-adapter`). Optional real-LLM: `--real-llm` when `.env` has OPENAI_API_KEY or ANTHROPIC_API_KEY; results merged into red_team_results.json.
+- **Metrics:** red-team pass/fail (8 cases); confusable deputy (4 cases); jailbreak-style cases (prompt-injection style args; results in red_team_results.json under `jailbreak_style`); E2E denial trace; optional tail latency from adapter runs (obtained with `--run-adapter`). Optional real-LLM: `--real-llm` when `.env` has OPENAI_API_KEY or ANTHROPIC_API_KEY; results merged into red_team_results.json. OWASP LLM Top 10 coverage: `docs/P6_OWASP_MAPPING.md`.
 - **Options:** `--out DIR`; `--run-adapter`; `--adapter-scenarios toy_lab_v0,lab_profile_v0`; `--adapter-seeds 7,42`; `--latency-threshold-ms N`; `--real-llm` (optional; requires .env API keys).
 - **Figure 1:** `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`; requires adapter_latency.json from `--run-adapter`).
 - **Integration test:** `tests/test_llm_p6.py` runs eval with `--run-adapter --adapter-scenarios toy_lab_v0 --adapter-seeds 7` and asserts both artifacts.
@@ -116,8 +118,8 @@ Exit code 1 if any red-team case fails (expected_block not satisfied).
 - **Output:** mapping_check (ok, ponr_coverage_ok), review (primary = toy_lab_v0), reviews (per scenario: evidence_bundle_ok, trace_ok, ponr_events, controls_covered, ponr_coverage, control_coverage_ratio, exit_ok).
 - **Check:** `scripts/check_assurance_mapping.py` (--inst, --profile-dir); schema + mapping completeness + PONR coverage.
 - **Auditor walk-through:** `scripts/audit_bundle.py [--run-dir DIR] [--inst path] [--profile-dir path] [--scenario-id toy_lab_v0]` prints pass/fail for mapping completeness and PONR coverage (and optional run review); outputs JSON + human-readable. **One-command audit over release:** `scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR; if the release dir contains evidence_bundle.json, review runs there too.
-- **Part 11:** See `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` for evidence-bundle/trace mapping to Part 11-style audit trail (each requirement mapped to artifact path and field; machine-checkable). Non-goals: no certification claim; translation layer only (P7 DRAFT, kernel/assurance_pack/README.md, profiles/lab/v0.1/README.md). Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
-- **Review:** `scripts/review_assurance_run.py <run_dir> [--scenario-id toy_lab_v0]`; kernel PONR task names when --scenario-id set.
+- **Part 11:** See `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` for evidence-bundle/trace mapping to Part 11-style audit trail (each requirement mapped to artifact path and field; machine-checkable). Non-goals: no certification claim; translation layer only. **Three profiles:** lab v0.1, warehouse v0.1, medical v0.1; results include per_profile (P7 DRAFT, kernel/assurance_pack/README.md, profiles/). Standards mapping table: `docs/P7_STANDARDS_MAPPING.md`. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
+- **Review:** `scripts/review_assurance_run.py <run_dir> [--scenario-id toy_lab_v0]`; PONR coverage requires --scenario-id from the known list (SCENARIO_PONR_TASK_NAMES); no heuristic when scenario unknown. Scripted review is partial.
 - **Export:** `scripts/export_assurance_tables.py [--results path]` prints Table 1 and Table 2 (per-scenario) for draft. GSN-lite graph: `python scripts/export_assurance_gsn.py` (Mermaid from assurance_pack_instantiation.json).
 - **Integration test:** tests/test_assurance_p7.py runs run_assurance_eval --out <temp>, asserts results and export script; TestAuditBundle runs audit_bundle (mapping + PONR; optional run-dir review).
 
@@ -134,15 +136,16 @@ python scripts/export_assurance_gsn.py
 - **Script:** `scripts/meta_eval.py`
 - **Output:** `--out DIR` (default `datasets/runs/meta_eval`); writes `comparison.json` (fixed, meta_controller, optional naive_switch_baseline when `--run-naive`, meta_reduces_collapse, no_safety_regression, collapse_definition, per_seed, run_manifest, success_criteria_met.trigger_met, excellence_metrics).
 - **Run manifests:** comparison.json includes run_manifest (seeds, scenario_id, fault_threshold, script); collapse_sweep.json (from meta_collapse_sweep.py) includes run_manifest (seeds, drop_probs, scenario_id, script).
-- **Args:** `--out`, `--seeds`, `--collapse-threshold` (default 2), `--drop-prob` (default 0.15), `--fault-threshold` (default 1; 0 = naive: switch on any fault), `--run-naive` (also run meta with fault_threshold=0 as naive baseline), `--hysteresis N` (thrash control; require N consecutive fault observations before switch; default 1).
+- **Args:** `--out`, `--seeds`, `--collapse-threshold` (default 2), `--drop-prob` (default 0.15), `--fault-threshold` (default 1; 0 = naive: switch on any fault), `--run-naive` (also run meta with fault_threshold=0 as naive baseline), `--hysteresis N` (thrash control; require N consecutive fault observations before switch; default 1), `--non-vacuous` (run or read collapse_sweep, use smallest drop_prob where collapse_count > 0; exit with message if none found), `--collapse-sweep-path` (path to collapse_sweep.json when using --non-vacuous), `--fallback-adapter blackboard|centralized|retry_heavy` (when set, meta run uses fallback adapter when switch is decided; two coordination paths). `--stress-preset very_high` (higher drop_prob) or scenario `regime_stress_v1.yaml` for second stress scenario.
 - **Collapse:** `tasks_completed < threshold` or `recovery_ok` false (from report.faults); per-seed results include `recovery_ok` when present. Integration test: `tests/test_meta_p8.py` runs meta_eval with `--out <temp>`, `--run-naive`, `--fault-threshold 0` and asserts comparison.json (no_safety_regression, meta_reduces_collapse, regime_switch_count_total >= 1), then runs `export_meta_tables.py`. Unit tests: `TestMetaController` cover `decide_switch` and `regime_switch_event`. A stress test runs with `--collapse-threshold 4` to exercise collapse metrics when tasks_completed < 4.
 - **Export:** `scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json [--table2]` prints markdown Table 1 (fixed vs meta vs naive) and Table 2 (per-seed). **Figure 1:** Run `meta_collapse_sweep.py` first to produce collapse_sweep.json, then `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (output `docs/figures/p8_meta_collapse.png`). Optional stress: run with `--drop-prob 0.25` or `0.3` or `--collapse-threshold 4` to observe collapse; run `meta_collapse_sweep.py` with `--drop-probs 0.15,0.2,0.25,0.3` (and `--seeds 1,...,10`) to get collapse_sweep.json. Thrash control: `--hysteresis N`; naive-switch baseline uses fault_threshold=0.
 
-**Publishable order:** (1) `meta_eval.py --run-naive --fault-threshold 0`, (2) `meta_collapse_sweep.py`, (3) `export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json`, (4) `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json`.
+**Publishable (state-of-the-art / non-vacuous):** Run collapse sweep first, then meta_eval with `--non-vacuous` so Table 1 uses a drop_prob where collapse_count > 0. If no drop_prob in the sweep has collapse, meta_eval --non-vacuous exits with a message; present Table 1 as methodology and auditability only. **Order:** (1) `meta_collapse_sweep.py` (default 20 seeds, --drop-probs 0.15,0.2,0.25,0.3), (2) `meta_eval.py --run-naive --fault-threshold 0 --non-vacuous`, (3) `export_meta_tables.py`, (4) `plot_meta_collapse.py`. CI can omit --non-vacuous for speed.
 
 ```bash
-PYTHONPATH=impl/src python scripts/meta_eval.py --run-naive --fault-threshold 0 [--out datasets/runs/meta_eval] [--seeds 1,2,...,10]
-PYTHONPATH=impl/src python scripts/meta_collapse_sweep.py [--drop-probs 0.15,0.2,0.25,0.3] [--seeds 1,2,...,10] [--out datasets/runs/meta_eval]
+# Publishable (non-vacuous): collapse sweep then meta_eval --non-vacuous
+PYTHONPATH=impl/src python scripts/meta_collapse_sweep.py [--out datasets/runs/meta_eval] [--drop-probs 0.15,0.2,0.25,0.3] [--seeds 1,2,...,20]
+PYTHONPATH=impl/src python scripts/meta_eval.py --run-naive --fault-threshold 0 --non-vacuous [--out datasets/runs/meta_eval] [--seeds 1,2,...,20]
 python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json [--table2]
 python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json
 ```
@@ -174,7 +177,7 @@ python scripts/build_p0_conformance_summary.py
 - **Fault sweep:** `scripts/maestro_fault_sweep.py` writes `datasets/runs/maestro_fault_sweep/multi_sweep.json`. Sweep includes lab-real fault setting `calibration_invalid_01` (calibration_invalid_prob 0.1).
 - **Anti-gaming:** `scripts/maestro_antigaming_eval.py` writes `datasets/runs/maestro_antigaming/antigaming_results.json` (always_deny, always_wait score poorly; `scoring_proof` documents legitimate_safe_min > always_wait > always_deny). See `bench/maestro/SCENARIO_SPEC.md` (Anti-gaming).
 - **Adapter cost:** `bench/maestro/adapter_costs.json` (loc_estimate, hours_estimate per adapter); referenced in bench/maestro/README.md.
-- **Baselines:** `scripts/maestro_baselines.py` writes `bench/maestro/baseline_results.md` and `baseline_summary.json`.
+- **Baselines:** `scripts/maestro_baselines.py` runs Centralized, Blackboard, and RetryHeavy adapters; writes `bench/maestro/baseline_results.md` and `baseline_summary.json`. Fault-sweep reports include recovery metrics: `steps_to_completion_after_first_fault`, `tasks_completed_after_fault` (when faults occur).
 - **Draft tables/figure:** `python scripts/export_maestro_tables.py` reads multi_sweep.json and baseline_summary.json and prints Table 1 (fault sweep) and Table 2 (baselines). Recovery proxy figure: `python scripts/plot_maestro_recovery.py` (tasks_completed vs fault setting).
 
 ```bash

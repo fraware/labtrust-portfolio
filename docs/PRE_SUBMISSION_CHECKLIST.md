@@ -29,7 +29,7 @@ Run through these for the paper you are submitting:
 
 For any table or figure that will appear in the submitted PDF:
 
-- Evals were run with 10 seeds (or the script's publishable default).
+- Evals were run with 20 seeds (or the script's publishable default).
 - Export/plot scripts were re-run and DRAFT.md numbers match the generated output.
 - Run manifest is stated in the draft or in the summary JSON referenced by the draft.
 

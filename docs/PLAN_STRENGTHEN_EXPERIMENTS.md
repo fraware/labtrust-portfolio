@@ -25,7 +25,7 @@ This document is the single merged plan. It includes **Phases 1–6** (statistic
 
 The portfolio already documents many limitations in DRAFTs (synthetic traces, thin-slice only, toy scenarios, no real hardware). The main actionable weaknesses are:
 
-- **Statistical rigor:** 10 seeds is the bar; no formal tests (t-test, bootstrap), no effect-size reporting, no power/sensitivity analysis. [STANDARDS_OF_EXCELLENCE.md](STANDARDS_OF_EXCELLENCE.md) lists "Statistical test (optional)" but no script implements it.
+- **Statistical rigor (addressed):** Previously 10 seeds was the bar; now publishable default is 20. Formal tests (t-test, bootstrap), effect-size, and power/sensitivity are implemented (see Tier 2 above).
 - **Scenario and fault coverage:** Single-scenario defaults (P0 E3: toy_lab_v0; P2: one scenario in many runs); P5 multiscenario uses only 2–3 fault settings; P8 collapse often vacuous (collapse_count = 0).
 - **Corpus and case diversity (addressed):** P1: 7 contract sequences (good_sequence, split_brain, stale_write, reorder, unsafe_lww, multi_writer_contention, edge_case_timestamps); P3: 4 replay traps (nondeterminism, reorder, timestamp_reorder, hash_mismatch) with corpus discovery; P6: 8 red-team + 4 confusable deputy cases.
 - **Test depth:** Integration tests use minimal seeds (1,2 or 2) and single scenario; no variance/CI assertions; no property-based or targeted stress tests beyond one P8 stress test.
@@ -77,7 +77,7 @@ The portfolio already documents many limitations in DRAFTs (synthetic traces, th
    - [scripts/generate_multiscenario_runs.py](../scripts/generate_multiscenario_runs.py): include `regime_stress_v0` in the scenario list when present; ensure `--fault-mix` is the recommended default for publishable. Add a third fault setting (e.g. delay or combined) so train/test diversity is higher.
 
 8. **P8 non-vacuous collapse**
-   - Define a "stress preset" (e.g. `--drop-prob 0.25` or a drop_prob chosen from collapse_sweep where collapse_count > 0). In [scripts/meta_eval.py](../scripts/meta_eval.py) and runbook: document "For non-vacuous trigger, run meta_collapse_sweep first, then meta_eval with --drop-prob &lt;value&gt; where collapse appears." Optionally add `--stress-preset high` that sets drop_prob to a value that typically yields at least one collapse in 10 seeds.
+   - Define a "stress preset" (e.g. `--drop-prob 0.25` or a drop_prob chosen from collapse_sweep where collapse_count > 0). In [scripts/meta_eval.py](../scripts/meta_eval.py) and runbook: document "For non-vacuous trigger, run meta_collapse_sweep first, then meta_eval with --drop-prob &lt;value&gt; where collapse appears." Optionally add `--stress-preset high` that sets drop_prob to a value that typically yields at least one collapse in some seeds.
 
 ---
 
@@ -135,7 +135,7 @@ The portfolio already documents many limitations in DRAFTs (synthetic traces, th
 
 18. **Experiments and limitations summary doc**
     - Add [docs/EXPERIMENTS_AND_LIMITATIONS.md](EXPERIMENTS_AND_LIMITATIONS.md) (or extend [EVAL_RESULTS_INTERPRETATION.md](EVAL_RESULTS_INTERPRETATION.md)) with:
-      - **What we do:** 10 seeds, run manifest, variance/CI, multi-scenario where applicable, statistical tests for comparisons, expanded corpora, optional real LLM (Phase 7), formal verification (Phase 8).
+      - **What we do:** 20 seeds (publishable default), run manifest, variance/CI, multi-scenario where applicable, statistical tests for comparisons, expanded corpora, optional real LLM (Phase 7), formal verification (Phase 8).
       - **What we do not do (and why):** No real hardware; thin-slice only for physical execution; no formal verification of full system or LLM planner; threat model and fault set are bounded. Reference each paper's Limitations section.
     - Link from README and PORTFOLIO_BOARD so "strengthened experiments" and "known limitations" are easy to find.
 

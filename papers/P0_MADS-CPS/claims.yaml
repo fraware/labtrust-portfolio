@@ -11,12 +11,12 @@ claims:
     statement: "A normative minimum assurance bar is separable from any particular coordination algorithm; it constrains interfaces and evidence, not internal optimization."
     evidence:
       release_id: "p0_e3_release"
-      confidence: "high"  # optional: high = direct measure + 10 seeds + script; see STANDARDS_OF_EXCELLENCE.md
+      confidence: "high"  # kernel docs + Figure 0; Table 1 (E3) shows recomputation from TRACE independent of adapter
       artifact_paths:
         - "kernel/mads/NORMATIVE.v0.1.md"
         - "kernel/mads/VERIFICATION_MODES.v0.1.md"
         - "datasets/releases/p0_e3_release/release_manifest.json"
-      table_ids: []
+      table_ids: ["Table 1"]
       figure_ids: ["Figure 0"]
 
   - id: "C2"

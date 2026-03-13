@@ -31,15 +31,19 @@ Contract model: types, ownership/leases, authority scope.
 
 Validator library (pure function): `validate(state, event) -> (verdict, reason_codes)`. Implemented in `impl/src/labtrust_portfolio/contracts.py`. No privileged hidden state; executable from traces. Contract-enforcing store: `ContractEnforcingStore` applies writes only when validator returns allow; one validation per write (bounded overhead).
 
+**Formal and theoretical backing.** Determinism of the validator is machine-checked (W2 wedge: same state and event yield the same verdict); see `formal/lean/`. Under single-writer and monotonic timestamps, our rules prevent split-brain; detection of conflict classes (split_brain, stale_write, reorder_violation) is complete under the stated assumptions. See `kernel/contracts/PROPERTIES.v0.1.md`.
+
 ## 5. Trace corpus
 
 Seven sequences in `bench/contracts/corpus/`: **good_sequence** (single writer, allow/allow), **split_brain_sequence** (second writer denied, reason split_brain), **stale_write_sequence** (event ts before last_ts for key, deny), **reorder_sequence** (second event has lower ts than first, allow then deny), **unsafe_lww_sequence** (unsafe last-write-wins under delay/reorder; validator denies with reorder_violation), **multi_writer_contention** (two writers same task_id; second denied after first owns), **edge_case_timestamps** (same-ts events; ordering by seq). Each file has initial_state, events, expected_verdicts. Eval iterates over all corpus JSON files. Reorder and unsafe_lww denials carry both stale_write and reorder_violation (timestamp monotonicity). Corpus driver test (`tests/test_contracts_p1.py`) loads each corpus file, runs validate(state, event) and apply_event_to_state when allow; asserts verdict matches expected_verdicts[i]. Ensures corpus and validator stay in sync.
+
+**Benchmark.** The corpus is released as Coordination Contract Benchmark v0.1 (see `bench/contracts/BENCHMARK_SPEC.v0.1.md`). Table 1 and this section cite the benchmark; the reference runner is `scripts/contracts_eval.py` and the reference table is `scripts/export_contracts_corpus_table.py`.
 
 **Spec-corpus mapping:** Failure class 1 (split-brain) -> split_brain_sequence; 2 (stale write) -> stale_write_sequence; 3 (unsafe LWW/reorder) -> reorder_sequence, unsafe_lww_sequence.
 
 ## 6. LADS mapping
 
-OPC UA LADS state machine edges map to contract valid transitions; FunctionalUnit key ownership and timestamps map to contract state. See `kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md`: concrete mapping subsection covers FU key ownership (key from device/FU id, owner from controller), LADS edges to contract event types (task_start/task_end), and timestamps (_last_ts monotonicity, stale_write detection).
+OPC UA LADS state machine edges map to contract valid transitions; FunctionalUnit key ownership and timestamps map to contract state. See `kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md`: concrete mapping subsection covers FU key ownership (key from device/FU id, owner from controller), LADS edges to contract event types (task_start/task_end), and timestamps (_last_ts monotonicity, stale_write detection). We ran the same validator on a **LADS-derived event stream** (mock): `scripts/contracts_mock_lads_run.py` reads a JSON event stream (LADS-equivalent shape) and runs validate/apply_event_to_state; results in `datasets/runs/contracts_lads_demo/lads_demo_result.json`. A live OPC-UA or ROS2 adapter would emit the same event shape; the mock demonstrates transport-agnostic and LADS-mappable validation.
 
 ## 7. Evaluation (micro-scenarios)
 
@@ -89,7 +93,7 @@ Security invariants: provenance, writer authentication hooks. Contract surface i
 Scope and determinism are summarized in [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper limitations:
 
 - **K1 (trace-derivability; no hidden state):** The validator uses **no privileged hidden state**: all contract predicates are computed from the trace alone (event sequence, timestamps, task_id, actor, payload) and declared config. This trace-derivability is a design invariant; if any predicate required state not derivable from the trace, the design would lose portability (kill criterion K1). See `docs/P1_TRACE_DERIVABILITY.md` for the predicate-to-trace-field mapping. Gatekeeper: `allow_release(run_dir, check_contracts=True)` runs the contract validator on the trace and denies release when any event is denied; test `test_gatekeeper_denies_when_contract_invalid` demonstrates denial on contract-invalid trace.
-- **Trace-driven only:** The validator and store are exercised on the corpus and via contracts_eval; there is no integration with a real coordination backend (e.g. OPC UA, LADS) in v0.1. The LADS mapping is documented in `kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md`; an adapter (e.g. lads_adapter) is future work.
+- **Trace-driven only:** The validator and store are exercised on the corpus and via contracts_eval; there is no integration with a real coordination backend (e.g. OPC UA, LADS) in v0.1. The LADS mapping is documented only in `kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md`; no live OPC-UA or ROS2 adapter is implemented (future work).
 - **Corpus size:** Seven sequences in bench/contracts/corpus; coverage is by failure class, not large-scale event count.
 - **Events are synthetic:** Corpus events are hand-crafted for the validator; no real distributed system or live messaging.
 - **No real distributed system:** Evaluation is single-process, trace-driven only; no multi-process or network.
@@ -103,5 +107,5 @@ Scope and determinism are summarized in [EXPERIMENTS_AND_LIMITATIONS.md](../docs
 |-------|----------|
 | C1 (Prevents failure classes) | Table 1 (corpus sequences and deny verdicts); Table 2 (vs timestamp-only and accept-all); Section 5 corpus and spec-corpus mapping. |
 | C2 (Validation from traces) | Section 5 corpus driver; test `tests/test_contracts_p1.py` (per-sequence verdict match). |
-| C3 (Transport-agnostic) | Section 4 validator interface (state, event only); no transport in API. |
+| C3 (Transport-agnostic) | Specification and mapping documents (CONTRACT_MODEL, OPC_UA_LADS_MAPPING); no empirical cross-transport test in this version. |
 | C4 (Bounded overhead) | Table 1 column time_per_write_us; eval.json. |

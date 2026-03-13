@@ -20,7 +20,7 @@ Generate **core papers (P0, P1, P3, P4, P7)** first, then **conditional papers (
 
 For each paper Px:
 
-1. **Ensure eval data exists** — Run the eval script(s) that produce inputs for this paper's tables and figures (typically 10 seeds for publishable; see [REPORTING_STANDARD.md](REPORTING_STANDARD.md)).
+1. **Ensure eval data exists** — Run the eval script(s) that produce inputs for this paper's tables and figures (typically 20 seeds for publishable; see [REPORTING_STANDARD.md](REPORTING_STANDARD.md)).
 2. **Run export scripts (tables)** — Run each export script; capture stdout (markdown) and paste into DRAFT.md or use `scripts/generate_paper_artifacts.py --paper Px` to write to `papers/Px_*/generated_tables.md`.
 3. **Run Figure 0 and Figure 1 scripts** — Run the `export_pX_*` diagram script (output `.mmd` in `docs/figures/`) and the `plot_*.py` script (output `.png`). For camera-ready, render Mermaid to PNG (e.g. `npx -p @mermaid-js/mermaid-cli mmdc -i file.mmd -o file.png`).
 4. **Update DRAFT.md** — Replace placeholder table rows with actual output; ensure Figure 0/1 paths are correct; confirm Reproducibility block lists every script; for conditional papers, confirm Limitations state trigger and scope ([CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md)).
@@ -50,10 +50,10 @@ All commands from repo root with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=
 |-------|------------------|---------------|----------|----------|
 | P0 | `python scripts/produce_p0_e3_release.py --runs 10`; `python scripts/e2_redaction_demo.py` | `python scripts/export_e3_table.py`; `python scripts/export_e2_admissibility_matrix.py` | `python scripts/export_p0_assurance_pipeline.py` | `python scripts/plot_e3_latency.py` |
 | P1 | `python scripts/contracts_eval.py` [optional: `--scale-test`] | `python scripts/export_contracts_corpus_table.py` | `python scripts/export_p1_contract_flow.py` | `python scripts/plot_contracts_scale.py` |
-| P2 | `python scripts/rep_cps_eval.py` [--seeds 10] | From rep_cps_eval/summary.json | `python scripts/export_p2_rep_profile_diagram.py` | `python scripts/plot_rep_cps_summary.py` |
+| P2 | `python scripts/rep_cps_eval.py` (default 20 seeds) | From rep_cps_eval/summary.json | `python scripts/export_p2_rep_profile_diagram.py` | `python scripts/plot_rep_cps_summary.py` |
 | P3 | `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20` | From replay_eval/summary.json | `python scripts/export_p3_replay_levels_diagram.py` | `python scripts/plot_replay_overhead.py` |
-| P4 | `python scripts/maestro_fault_sweep.py --seeds 10`; `python scripts/maestro_baselines.py`; `python scripts/maestro_antigaming_eval.py` | `python scripts/export_maestro_tables.py` | `python scripts/export_p4_maestro_flow.py` | `python scripts/plot_maestro_recovery.py` |
-| P5 | `python scripts/generate_multiscenario_runs.py --seeds 10`; `python scripts/scaling_heldout_eval.py` | `python scripts/export_scaling_tables.py` | `python scripts/export_p5_baseline_hierarchy.py` | `python scripts/plot_scaling_mae.py` |
+| P4 | `python scripts/maestro_fault_sweep.py` (default 20 seeds); `python scripts/maestro_baselines.py`; `python scripts/maestro_antigaming_eval.py` | `python scripts/export_maestro_tables.py` | `python scripts/export_p4_maestro_flow.py` | `python scripts/plot_maestro_recovery.py` |
+| P5 | `python scripts/generate_multiscenario_runs.py` (default 20 seeds); `python scripts/scaling_heldout_eval.py` | `python scripts/export_scaling_tables.py` | `python scripts/export_p5_baseline_hierarchy.py` | `python scripts/plot_scaling_mae.py` |
 | P6 | `python scripts/llm_redteam_eval.py` [optional: `--run-adapter`] | `python scripts/export_llm_tables.py` or from red_team_results/adapter_latency | `python scripts/export_p6_firewall_flow.py` | `python scripts/plot_llm_adapter_latency.py` |
 | P7 | `python scripts/run_assurance_eval.py` | `python scripts/export_assurance_tables.py` | `python scripts/export_p7_mapping_flow.py` | `python scripts/export_assurance_gsn.py` |
 | P8 | `python scripts/meta_eval.py --run-naive --fault-threshold 0`; for Figure 1 also run `python scripts/meta_collapse_sweep.py` (produces collapse_sweep.json) | `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json` | `python scripts/export_p8_meta_diagram.py` | `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` |
@@ -68,7 +68,7 @@ Before submission, for each paper run through the six items in [STATE_OF_THE_ART
 
 1. Claim-evidence matrix complete (every claim in claims.yaml has artifact_paths and at least one table_id or figure_id).
 2. Repro steps under 20 minutes (minimal run documented at top of DRAFT.md, executable with stated env).
-3. Variance rules followed (run manifest and seed count stated; 10 seeds for publishable tables unless justified).
+3. Variance rules followed (run manifest and seed count stated; 20 seeds for publishable tables unless justified).
 4. No redefinition of another paper's kernel (draft cites owning paper and kernel).
 5. Overclaim check (no certification P7; no full hardware determinism P3; conditional papers state trigger/scope).
 6. Repro block lists every script for every table and figure.
@@ -87,4 +87,4 @@ See **[PRE_SUBMISSION_CHECKLIST.md](PRE_SUBMISSION_CHECKLIST.md)** for the full 
 
 1. **Tag a release (optional but recommended).** To provide a citable artifact: tag a release that includes kernel schemas, runnable scripts, and a frozen dataset slice (e.g. `datasets/releases/` or a specific run manifest). Example: `git tag -a v0.1-p0-draft -m "P0 draft-complete; kernel + p0_e3_release"`. Document the tag in the paper's Reproducibility section or supplement so reviewers can clone and check out that tag.
 2. **Final pass.** Run through: (a) repro block—every table and figure has the exact command; (b) claim–evidence—every claim in claims.yaml has artifact_paths and table_id or figure_id; (c) venue-specific shortening and format (page limit, reference style, author guidelines).
-3. **Publishable seeds.** For any table or figure in the submitted draft, ensure evals were run with 10 seeds (or the script's publishable default), export/plot scripts were re-run, and DRAFT.md numbers match. Run manifest (seeds, scenario, fault settings) should be stated in the draft or summary JSON.
+3. **Publishable seeds.** For any table or figure in the submitted draft, ensure evals were run with 20 seeds (or the script's publishable default), export/plot scripts were re-run, and DRAFT.md numbers match. Run manifest (seeds, scenario, fault settings) should be stated in the draft or summary JSON.

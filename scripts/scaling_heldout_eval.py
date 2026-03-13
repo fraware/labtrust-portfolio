@@ -45,8 +45,10 @@ def main() -> int:
         build_dataset_from_runs,
         predict_baseline_mean,
         predict_by_scenario,
+        predict_prior_model,
         extract_features_from_scenario,
         fit_linear_predictor,
+        fit_tree_stump_predictor,
         fit_scaling_exponent,
     )
 
@@ -94,6 +96,11 @@ def main() -> int:
         mae_feat = (
             sum(abs(a - feat_pred) for a in actuals) / len(actuals) if actuals else 0.0
         )
+        prior_preds = [predict_prior_model(r, target) for r in test_rows]
+        mae_prior = (
+            sum(abs(a - p) for a, p in zip(actuals, prior_preds)) / len(actuals)
+            if actuals and prior_preds else None
+        )
         reg_predict = fit_linear_predictor(
             train_rows, target,
             feature_cols=["num_tasks", "num_faults", "tool_density"],
@@ -108,6 +115,15 @@ def main() -> int:
             )
         else:
             mae_reg = None
+        stump_predict = fit_tree_stump_predictor(train_rows, target, "num_tasks")
+        if stump_predict is not None:
+            preds_stump = [stump_predict(r) for r in test_rows]
+            mae_stump = (
+                sum(abs(a - p) for a, p in zip(actuals, preds_stump)) / len(actuals)
+                if actuals and preds_stump else None
+            )
+        else:
+            mae_stump = None
         test_collapse = [
             r.get("collapse", False) for r in test_rows
             if "collapse" in r
@@ -135,7 +151,9 @@ def main() -> int:
             "num_tasks_held_out": num_tasks_held,
             "feat_baseline_pred": feat_pred,
             "feat_baseline_mae": mae_feat,
+            "prior_model_mae": mae_prior,
             "regression_mae": mae_reg,
+            "stump_mae": mae_stump,
             "actuals_mean": sum(actuals) / len(actuals) if actuals else 0.0,
             "test_collapse_rate": test_collapse_rate,
             "train_collapse_rate": train_collapse_rate,
@@ -154,6 +172,14 @@ def main() -> int:
     reg_maes = [r["regression_mae"] for r in results if r.get("regression_mae") is not None]
     overall_reg_mae = (
         sum(reg_maes) / len(reg_maes) if reg_maes else None
+    )
+    prior_maes = [r["prior_model_mae"] for r in results if r.get("prior_model_mae") is not None]
+    overall_prior_mae = (
+        sum(prior_maes) / len(prior_maes) if prior_maes else None
+    )
+    stump_maes = [r["stump_mae"] for r in results if r.get("stump_mae") is not None]
+    overall_stump_mae = (
+        sum(stump_maes) / len(stump_maes) if stump_maes else None
     )
     collapse_rates = [
         r["test_collapse_rate"] for r in results
@@ -174,6 +200,26 @@ def main() -> int:
     ci_half = 1.96 * stdev_baseline / math.sqrt(n_hold) if n_hold else 0.0
     ci_half_feat = 1.96 * stdev_feat / math.sqrt(n_hold) if n_hold else 0.0
     scaling_fit = fit_scaling_exponent(rows, target, "num_tasks")
+    # Feature ablation: MAE with only num_tasks, only num_faults, full features
+    feature_ablation = []
+    for feat_set in [["num_tasks"], ["num_faults"], ["num_tasks", "num_faults", "tool_density"]]:
+        maes_ablation = []
+        for held_out_id in scenario_ids:
+            train_rows_ab = [r for r in rows if r.get("scenario_id") != held_out_id]
+            test_rows_ab = [r for r in rows if r.get("scenario_id") == held_out_id]
+            if not test_rows_ab:
+                continue
+            pred_fn = fit_linear_predictor(train_rows_ab, target, feat_set)
+            if pred_fn is None:
+                continue
+            actuals_ab = [r.get("response", {}).get(target, 0) for r in test_rows_ab]
+            preds_ab = [pred_fn(r) for r in test_rows_ab]
+            mae_ab = sum(abs(a - p) for a, p in zip(actuals_ab, preds_ab)) / len(actuals_ab)
+            maes_ablation.append(mae_ab)
+        feature_ablation.append({
+            "features": feat_set,
+            "mae": round(sum(maes_ablation) / len(maes_ablation), 4) if maes_ablation else None,
+        })
     held_out_scenarios = [r["held_out_scenario"] for r in results]
     train_n_total = sum(r["train_n"] for r in results)
     test_n_total = sum(r["test_n"] for r in results)
@@ -195,12 +241,19 @@ def main() -> int:
         "overall_per_scenario_baseline_mae": overall_per_scenario_mae,
         "overall_feat_baseline_mae": overall_feat_mae,
         "overall_regression_mae": overall_reg_mae,
+        "overall_prior_model_mae": overall_prior_mae,
+        "overall_stump_mae": overall_stump_mae,
+        "regression_skipped_reason": (
+            "train_n < k or singular; see run_manifest.train_n_total"
+            if overall_reg_mae is None else None
+        ),
         "overall_collapse_rate": overall_collapse_rate,
         "overall_baseline_mae_ci95_lower": overall_mae - ci_half,
         "overall_baseline_mae_ci95_upper": overall_mae + ci_half,
         "overall_feat_baseline_mae_ci95_lower": overall_feat_mae - ci_half_feat,
         "overall_feat_baseline_mae_ci95_upper": overall_feat_mae + ci_half_feat,
         "scaling_fit": scaling_fit if scaling_fit else None,
+        "feature_ablation": feature_ablation,
         "success_criteria_met": {
             "beat_baseline_out_of_sample": (
                 overall_reg_mae is not None and overall_reg_mae <= overall_mae

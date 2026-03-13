@@ -38,14 +38,14 @@ def table1(multi_sweep_path: Path) -> list[str]:
     data = json.loads(multi_sweep_path.read_text(encoding="utf-8"))
     h1 = (
         "| Scenario | Setting | tasks_completed_mean | tasks_completed_stdev | "
-        "p95_latency_ms_mean | p95_latency_ms_stdev |"
+        "p95_latency_ms_mean | p95_latency_ms_stdev | steps_after_fault_mean |"
     )
     h2 = (
         "|----------|---------|---------------------|----------------------|"
-        "------------------------|-------------------------|"
+        "------------------------|-------------------------|------------------------|"
     )
     lines = [
-        "# Table 1 — Fault sweep. tasks_completed mean/stdev and p95_latency_ms (ms) by scenario and setting; N seeds per cell (run_manifest in multi_sweep.json).",
+        "# Table 1 — Fault sweep. tasks_completed mean/stdev, p95_latency_ms (ms), and steps_to_completion_after_first_fault (recovery) by scenario and setting; N seeds per cell (run_manifest in multi_sweep.json).",
         "",
         h1,
         h2,
@@ -58,9 +58,10 @@ def table1(multi_sweep_path: Path) -> list[str]:
             tc_s = summary.get("tasks_completed_stdev", "")
             p95_m = summary.get("p95_latency_ms_mean", "")
             p95_s = summary.get("p95_latency_ms_stdev", "")
+            steps_af = summary.get("steps_to_completion_after_first_fault_mean", "—")
             row = (
                 f"| {scenario} | {setting} | {_fmt(tc_m)} | {_fmt(tc_s)} | "
-                f"{_fmt(p95_m)} | {_fmt(p95_s)} |"
+                f"{_fmt(p95_m)} | {_fmt(p95_s)} | {_fmt(steps_af)} |"
             )
             lines.append(row)
     return lines + [""]

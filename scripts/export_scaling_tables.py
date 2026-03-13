@@ -75,9 +75,11 @@ def table2(data: dict) -> list[str]:
             f"| Regression (num_tasks, num_faults) | {_fmt(mae_r)} | — | — |"
         )
     else:
+        reason = data.get("regression_skipped_reason", "train_n < k or singular")
         lines.append(
-            "| Regression (num_tasks, num_faults) | N/A (e.g. insufficient train rows) | — | — |"
+            f"| Regression (num_tasks, num_faults) | N/A ({reason}) | — | — |"
         )
+        lines.append(f"*Regression: N/A when {reason}; see run_manifest.train_n_total.*")
     lines.append("")
     return lines
 

@@ -1,0 +1,14 @@
+# Second stress scenario: very high fault rate (for P8 generalization)
+id: regime_stress_v1
+family: lab
+description: Very high fault load for meta-controller; use with --stress-preset very_high or drop_completion_prob >= 0.35.
+tasks:
+  - name: receive_sample
+  - name: centrifuge
+  - name: analyze
+  - name: report_results
+faults:
+  - name: drop_completion
+    param: drop_completion_prob
+  - name: delay
+    param: delay_p95_ms

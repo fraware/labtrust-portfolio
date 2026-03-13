@@ -25,15 +25,41 @@ if "LABTRUST_KERNEL_DIR" not in os.environ:
 ALLOWED_TOOLS = ["query_status", "submit_result"]
 
 
+def run_jailbreak_style() -> dict:
+    """Run validate_plan_step on JAILBREAK_STYLE_CASES; record pass/fail (containment, not elimination)."""
+    from labtrust_portfolio.llm_planning import JAILBREAK_STYLE_CASES, validate_plan_step
+
+    cases_result = []
+    for case in JAILBREAK_STYLE_CASES:
+        step = case["step"]
+        expected_block = case["expected_block"]
+        allowed, _ = validate_plan_step(step, ALLOWED_TOOLS)
+        blocked = not allowed
+        pass_ = blocked == expected_block
+        cases_result.append({
+            "id": case["id"],
+            "description": case.get("description", ""),
+            "expected_block": expected_block,
+            "actually_blocked": blocked,
+            "pass": pass_,
+        })
+    all_pass = all(c["pass"] for c in cases_result)
+    return {
+        "cases": cases_result,
+        "all_pass": all_pass,
+        "n_cases": len(cases_result),
+    }
+
+
 def run_red_team() -> dict:
-    """Run policy_check_step on each RED_TEAM_CASE; record pass/fail."""
-    from labtrust_portfolio.llm_planning import RED_TEAM_CASES, policy_check_step
+    """Run validate_plan_step on each RED_TEAM_CASE (allow_list + safe_args when in validators); record pass/fail."""
+    from labtrust_portfolio.llm_planning import RED_TEAM_CASES, validate_plan_step
 
     cases_result = []
     for case in RED_TEAM_CASES:
         step = case["step"]
         expected_block = case["expected_block"]
-        allowed = policy_check_step(step, ALLOWED_TOOLS)
+        allowed, _ = validate_plan_step(step, ALLOWED_TOOLS)
         blocked = not allowed
         pass_ = blocked == expected_block
         cases_result.append({
@@ -311,6 +337,8 @@ def main() -> int:
         "n_cases": len(cases),
         "n_pass": n_pass,
     }
+    jailbreak = run_jailbreak_style()
+    red_team["jailbreak_style"] = jailbreak
     red_path = args.out / "red_team_results.json"
     red_path.write_text(json.dumps(red_team, indent=2) + "\n", encoding="utf-8")
     print("Red-team results:", json.dumps(red_team, indent=2))

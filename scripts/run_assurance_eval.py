@@ -26,15 +26,23 @@ REVIEW_SCENARIOS = [
     ("toy_lab_v0", 7),
     ("lab_profile_v0", 7),
 ]
+# Three assurance-pack instantiations (lab, warehouse, medical) for state-of-the-art
+PROFILE_PACKS = [
+    ("lab_v0.1", REPO / "profiles" / "lab" / "v0.1" / "assurance_pack_instantiation.json"),
+    ("warehouse_v0.1", REPO / "profiles" / "warehouse" / "v0.1" / "assurance_pack_instantiation.json"),
+    ("medical_v0.1", REPO / "profiles" / "medical_v0.1" / "assurance_pack_instantiation.json"),
+]
 
 
-def _run_review(run_dir: Path, scenario_id: str, env: dict) -> dict:
+def _run_review(run_dir: Path, scenario_id: str, pack_path: Path, env: dict) -> dict:
     review_cmd = [
         sys.executable,
         str(REPO / "scripts" / "review_assurance_run.py"),
         str(run_dir),
         "--scenario-id",
         scenario_id,
+        "--pack",
+        str(pack_path),
     ]
     r = subprocess.run(
         review_cmd, cwd=str(REPO), env=env, capture_output=True, text=True
@@ -87,7 +95,7 @@ def main() -> int:
         "stderr": r.stderr.strip() if r.stderr else "",
     }
 
-    # 2) Produce runs and review per scenario
+    # 2) Produce runs and review per scenario; run review with each profile pack (two instantiations)
     with tempfile.TemporaryDirectory() as td:
         for scenario_id, seed in REVIEW_SCENARIOS:
             run_dir = Path(td) / f"run_{scenario_id}"
@@ -100,15 +108,23 @@ def main() -> int:
                 drop_completion_prob=0.0,
             )
             results["reviews"][scenario_id] = _run_review(
-                run_dir, scenario_id, env
+                run_dir, scenario_id, PROFILE_PACKS[0][1], env
             )
+        # Per-profile review (lab and warehouse) on first run dir
+        first_run_dir = Path(td) / f"run_{REVIEW_SCENARIOS[0][0]}"
+        results["per_profile"] = {}
+        for profile_name, pack_path in PROFILE_PACKS:
+            if pack_path.exists():
+                results["per_profile"][profile_name] = _run_review(
+                    first_run_dir, REVIEW_SCENARIOS[0][0], pack_path, env
+                )
 
     # Backward compatibility: primary review = toy_lab_v0
     results["review"] = results["reviews"].get("toy_lab_v0", {})
 
     results["run_manifest"] = {
         "scenarios": [s for s, _ in REVIEW_SCENARIOS],
-        "profile_dir": str(REPO / "profiles" / "lab" / "v0.1"),
+        "profile_dirs": [name for name, _ in PROFILE_PACKS],
         "script": "run_assurance_eval.py",
     }
     results["success_criteria_met"] = {

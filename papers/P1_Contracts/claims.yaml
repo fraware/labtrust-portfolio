@@ -29,6 +29,7 @@ claims:
       table_ids: ["Table 1"]
       figure_ids: []
 
+  # C3: design/portability claim; no cross-transport empirical test in v0.1
   - id: "C3"
     statement: "The contract surface is portable across ROS2/DDS and event-log architectures (DDS/Kafka-style), because it is defined above transport."
     evidence:

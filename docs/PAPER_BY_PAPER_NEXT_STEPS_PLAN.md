@@ -140,7 +140,7 @@ The following are in place: **verification_mode** in EVIDENCE_BUNDLE and VERIFIC
 
 | # | Task | Artifact / change |
 |---|------|-------------------|
-| 3.1 | **Table 1:** Fault sweep across 2–3 scenarios (10 seeds): scenario, fault setting, mean tasks_completed, stdev, CI. | From maestro_fault_sweep multi_sweep; export script; P4 DRAFT |
+| 3.1 | **Table 1:** Fault sweep across 2–3 scenarios (20 seeds): scenario, fault setting, mean tasks_completed, stdev, CI. | From maestro_fault_sweep multi_sweep; export script; P4 DRAFT |
 | 3.2 | **Table 2:** Centralized vs blackboard baselines (same scenario, seeds). | From maestro_baselines; already partially there; ensure in DRAFT |
 | 3.3 | **Figure: recovery curves** — MTTR or time-to-safe-state proxy under calibration faults (e.g. time from fault to next successful task or to recovery_ok). | New script from fault_sweep or report data; plot; P4 DRAFT |
 
@@ -213,7 +213,7 @@ The following are in place: **verification_mode** in EVIDENCE_BUNDLE and VERIFIC
 
 ## P5 — Scaling / empirical predictors (conditional)
 
-**Already in place:** per_scenario_baseline_mae, 10 seeds, fault-mix.
+**Already in place:** per_scenario_baseline_mae, 20 seeds default, fault-mix.
 
 ### 1. Baseline hierarchy explicit
 

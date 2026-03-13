@@ -107,15 +107,16 @@ def p1(quick: bool) -> bool:
 
 
 def p2(quick: bool) -> bool:
-    seeds = "1,2,3" if quick else "1,2,3,4,5"
+    seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    scenarios = "toy_lab_v0" if quick else "toy_lab_v0,lab_profile_v0"
     return run(
         [
             sys.executable,
             str(REPO / "scripts" / "rep_cps_eval.py"),
             "--out", str(RUNS / "rep_cps_eval"),
-            "--scenario", "toy_lab_v0",
+            "--scenarios", scenarios,
             "--seeds", seeds,
-            "--delay-sweep", "0,0.05,0.1",
+            "--delay-sweep", "0,0.05,0.1" if quick else "0,0.05,0.1,0.2",
         ],
         "P2 REP-CPS delay sweep (toy_lab_v0)",
         timeout=300,
@@ -267,33 +268,49 @@ def p7(quick: bool) -> bool:
 
 
 def p8(quick: bool) -> bool:
-    seeds = "1,2,3" if quick else "1,2,3,4,5"
-    ok = run(
-        [
-            sys.executable,
-            str(REPO / "scripts" / "meta_eval.py"),
-            "--out", str(RUNS / "meta_eval"),
-            "--seeds", seeds,
-            "--run-naive",
-            "--fault-threshold", "0",
-        ],
-        "P8 Meta-coordination (fixed vs meta vs naive)",
-        timeout=300,
-    )
-    if not ok:
-        return False
-    sweep_seeds = "1,2,3" if quick else "1,2,3,4,5"
-    ok = run(
-        [
-            sys.executable,
-            str(REPO / "scripts" / "meta_collapse_sweep.py"),
-            "--out", str(RUNS / "meta_eval"),
-            "--drop-probs", "0.15,0.2,0.25",
-            "--seeds", sweep_seeds,
-        ],
-        "P8 Meta collapse sweep",
-        timeout=300,
-    )
+    seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    meta_out = str(RUNS / "meta_eval")
+    # Publishable (not quick): run collapse sweep first, then meta_eval --non-vacuous so Table 1 uses drop_prob where collapse occurs
+    if not quick:
+        ok = run(
+            [
+                sys.executable,
+                str(REPO / "scripts" / "meta_collapse_sweep.py"),
+                "--out", meta_out,
+                "--drop-probs", "0.15,0.2,0.25,0.3",
+                "--seeds", seeds,
+            ],
+            "P8 Meta collapse sweep (for non-vacuous drop_prob)",
+            timeout=400,
+        )
+        if not ok:
+            return False
+        ok = run(
+            [
+                sys.executable,
+                str(REPO / "scripts" / "meta_eval.py"),
+                "--out", meta_out,
+                "--seeds", seeds,
+                "--run-naive",
+                "--fault-threshold", "0",
+                "--non-vacuous",
+            ],
+            "P8 Meta-coordination (non-vacuous: fixed vs meta vs naive)",
+            timeout=400,
+        )
+    else:
+        ok = run(
+            [
+                sys.executable,
+                str(REPO / "scripts" / "meta_eval.py"),
+                "--out", meta_out,
+                "--seeds", seeds,
+                "--run-naive",
+                "--fault-threshold", "0",
+            ],
+            "P8 Meta-coordination (fixed vs meta vs naive)",
+            timeout=300,
+        )
     if not ok:
         return False
     run(

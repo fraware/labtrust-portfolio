@@ -32,4 +32,4 @@ Resource graph structure and deadline tightness can be added in v0.2 from scenar
 - Baseline predictor: `predict_baseline_mean`, `predict_by_scenario` (per-scenario mean baseline), `fit_linear_predictor` (regression on num_tasks, num_faults, tool_density).
 - Recommendation CLI: `scripts/scaling_recommend.py` (--scenario, --table, --runs-dir).
 
-**Small N:** For reporting and stable MAE/CI, run `generate_multiscenario_runs.py --seeds 10` (or higher) and optionally `--fault-mix` for calibration_invalid; see script docstring. Held-out eval reports `per_scenario_baseline_mae`; kill criterion: beat per-scenario mean out-of-sample (or state explicitly if scenario identity is forbidden).
+**Small N:** For reporting and stable MAE/CI, run `generate_multiscenario_runs.py` with default 20 seeds (or higher) and optionally `--fault-mix` for calibration_invalid; see script docstring. Held-out eval reports `per_scenario_baseline_mae`; kill criterion: beat per-scenario mean out-of-sample (or state explicitly if scenario identity is forbidden).

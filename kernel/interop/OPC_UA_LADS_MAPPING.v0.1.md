@@ -49,6 +49,9 @@ We recommend building an explicit `lads_adapter/` (v0.2+) that:
 - **LADS state machine edges:** A LADS transition (e.g. Idle→Running, Running→Complete) becomes a contract event type (e.g. `task_start`, `task_end`). The event payload carries `task_id` (or fu key), `writer` (actor id), and optional timestamp. Valid transitions are those allowed by the LADS state machine; the contract validator enforces that only the current owner can request the transition and that event time is not before the last accepted write for that key (monotonicity).
 - **Timestamps:** Event timestamp (`ts`) is the time of the transition request or device-reported transition. Contract state `_last_ts` per key records the last accepted write time; a write with `ts <= _last_ts[key]` is rejected (stale_write). Reordered delivery (later-ts event applied before earlier-ts) is detected as stale_write when the later event has already been applied.
 
+## Mock LADS demo (v0.1)
+A **mock LADS** path runs the same contract validator on a LADS-equivalent event stream (JSON): `scripts/contracts_mock_lads_run.py` reads events (task_start/task_end with ts, actor, payload) and runs `validate()` and `apply_event_to_state`; output is written to `datasets/runs/contracts_lads_demo/lads_demo_result.json`. This demonstrates that the validator is transport-agnostic and LADS-mappable; a live OPC UA LADS shim would produce the same event shape and call the same validator.
+
 ## Practical guardrail
 Do not put LADS-specific code into the kernel.
 - Kernel should define abstract types and invariants.

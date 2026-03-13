@@ -13,7 +13,7 @@ These apply to every paper; add to run manifests, summary JSONs, or docs as feas
 | **Statistical test (optional)** | Where two conditions are compared, report a simple test (e.g. paired t-test, bootstrap CI for difference) and whether the difference is significant at a stated alpha. | Summary JSON: `excellence_metrics.difference_mean`, `difference_ci95`, `paired_t_p_value`, `alpha` (meta_eval, rep_cps_eval, scaling_heldout_eval via labtrust_portfolio.stats). See REPORTING_STANDARD.md section 5. |
 | **Threats to validity** | One short subsection or bullet list: internal (e.g. single platform), external (e.g. scenario coverage), construct (e.g. proxy metrics). | Limitations in DRAFT.md. |
 | **Artifact badge readiness** | Artifact available (repo/tag); artifact functional (scripts run); results reproducible (same commands, same env). Document for AE. | README or supplement; tag + PRE_SUBMISSION_CHECKLIST. |
-| **Claim confidence** | Per claim: "high" (direct measure + 10 seeds + script), "medium" (fewer seeds or proxy), "low" (qualitative). | claims.yaml optional `evidence.confidence` or DRAFT backing sentence. |
+| **Claim confidence** | Per claim: "high" (direct measure + 20 seeds + script), "medium" (fewer seeds or proxy), "low" (qualitative). | claims.yaml optional `evidence.confidence` or DRAFT backing sentence. |
 
 ## Per-paper excellence metrics
 
@@ -53,6 +53,7 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 | Divergence localization accuracy | Fraction of corpus traps where observed divergence_at_seq == expected. | summary.json; corpus_divergences_detected, per_trace. |
 | Overhead p99 (ms) | p99 replay time over N replays (in addition to mean, stdev, p95). | overhead_stats or derived. |
 | L1 stub pass | l1_stub_ok true when twin config valid. | summary.json. |
+| L1 twin pass | l1_twin_ok true when --l1-twin and deterministic re-run matches state hash. | summary.json (with --l1-twin). |
 | Witness slices present | Top-level witness_slices length > 0 when divergence detected. | summary.json. |
 
 ### P4 — CPS-MAESTRO

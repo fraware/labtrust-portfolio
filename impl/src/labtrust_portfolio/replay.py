@@ -140,3 +140,33 @@ def replay_l1_stub(
         if key not in cfg:
             return (False, f"twin config missing required key: {key}")
     return (True, "L1 stub ok (L0 + twin config valid)")
+
+
+def replay_l1_twin(
+    trace: Dict[str, Any],
+    twin_config_path: Path,
+) -> Tuple[bool, str]:
+    """
+    L1 twin: L0 replay + twin config validation + one deterministic re-run of the
+    same control-plane state machine from the trace. For v0.2 the twin uses the
+    same apply_event/state_hash logic as L0 so the re-run reproduces state_hash;
+    full simulator/physics twin is future work. Returns (ok, message).
+    """
+    ok, diag = replay_trace_with_diagnostics(trace)
+    if not ok:
+        return (False, diag[0].message() if diag else "L0 replay failed")
+    if not twin_config_path.exists():
+        return (False, f"twin config not found: {twin_config_path}")
+    try:
+        import json as _json
+        cfg = _json.loads(twin_config_path.read_text(encoding="utf-8"))
+    except Exception as e:
+        return (False, f"twin config invalid: {e}")
+    for key in ("build_hash", "env_seed"):
+        if key not in cfg:
+            return (False, f"twin config missing required key: {key}")
+    # Deterministic twin re-run: same event sequence, same state machine (L0 logic)
+    ok2, diag2 = replay_trace_with_diagnostics(trace)
+    if not ok2:
+        return (False, f"L1 twin re-run failed: {diag2[0].message() if diag2 else 'unknown'}")
+    return (True, "L1 twin ok (L0 + config + deterministic re-run)")

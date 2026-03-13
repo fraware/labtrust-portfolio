@@ -24,7 +24,7 @@ This document defines the **full set of tables and figures** expected for each p
 - **P3:** replay_eval summary for tables, `plot_replay_overhead.py`, `export_p3_replay_levels_diagram.py` (Figure 0).
 - **P4:** `export_maestro_tables.py`, `plot_maestro_recovery.py`, `export_p4_maestro_flow.py` (Figure 0).
 - **P5:** `export_scaling_tables.py`, `plot_scaling_mae.py`, `export_p5_baseline_hierarchy.py` (Figure 0).
-- **P6:** `export_llm_tables.py` or eval artifacts, `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
+- **P6:** `export_llm_redteam_table.py` (red-team + confusable deputy tables), eval artifacts, `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
 - **P7:** `export_assurance_tables.py`, `export_assurance_gsn.py`, `export_p7_mapping_flow.py` (Figure 0).
 - **P8:** `export_meta_tables.py` (from comparison.json), `meta_collapse_sweep.py` then `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (Figure 1), `export_p8_meta_diagram.py` (Figure 0).
 

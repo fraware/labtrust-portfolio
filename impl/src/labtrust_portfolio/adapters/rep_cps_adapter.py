@@ -31,6 +31,8 @@ class REPCPSAdapter:
         aggregation_method = fault_params.get("aggregation_method", "trimmed_mean")
         use_compromised = fault_params.get("use_compromised", False)
         allowed_agents = fault_params.get("allowed_agents", None)
+        aggregation_steps = int(fault_params.get("aggregation_steps", 1))
+        aggregation_epsilon = float(fault_params.get("aggregation_epsilon", 1e-6))
         outs = run_thin_slice(
             out_dir,
             seed=seed,
@@ -60,16 +62,47 @@ class REPCPSAdapter:
             u for u in updates
             if auth_hook(u, allowed_agents=allowed_agents)
         ]
-        agg_value = aggregate(
-            "load", filtered,
-            method=aggregation_method,
-            trim_fraction=0.25,
-        )
+        agg_value = None
+        converged = False
+        steps_to_convergence: int | None = None
+        step_values: list[float] = []
+        for step in range(max(1, aggregation_steps)):
+            # Synthetic multi-step: add small ts offset per step so updates differ slightly
+            step_updates = [
+                {**u, "ts": u.get("ts", 0.0) + step * 0.01} for u in filtered
+            ]
+            prev = agg_value
+            agg_value = aggregate(
+                "load", step_updates,
+                method=aggregation_method,
+                trim_fraction=0.25,
+            )
+            if agg_value is not None:
+                step_values.append(float(agg_value))
+            if prev is not None and agg_value is not None and abs(agg_value - prev) < aggregation_epsilon:
+                converged = True
+                steps_to_convergence = step
+                break
+        if steps_to_convergence is None:
+            steps_to_convergence = len(step_values) if step_values else 0
+        if agg_value is None and step_values:
+            agg_value = step_values[-1]
+        if agg_value is None:
+            agg_value = aggregate(
+                "load", filtered,
+                method=aggregation_method,
+                trim_fraction=0.25,
+            )
         if "metadata" not in trace:
             trace["metadata"] = {}
         trace["metadata"]["rep_cps"] = True
         trace["metadata"]["rep_cps_aggregate_load"] = agg_value
         trace["metadata"]["rep_cps_safety_gate_ok"] = True
+        trace["metadata"]["rep_cps_aggregation_steps"] = len(step_values) or 1
+        trace["metadata"]["rep_cps_converged"] = converged or (aggregation_steps <= 1)
+        if aggregation_steps > 1:
+            trace["metadata"]["rep_cps_steps_to_convergence"] = steps_to_convergence
+            trace["metadata"]["rep_cps_step_values"] = step_values
         trace_path.write_text(json.dumps(trace, indent=2) + "\n", encoding="utf-8")
 
         report["metadata_rep_cps"] = True

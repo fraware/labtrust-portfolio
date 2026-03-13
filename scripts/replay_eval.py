@@ -49,11 +49,17 @@ def main() -> int:
         action="store_true",
         help="Record p95 replay time vs trace size (event count) for overhead curve",
     )
+    ap.add_argument(
+        "--l1-twin",
+        action="store_true",
+        help="Run full L1 twin (L0 + config + deterministic re-run); default is L1 stub only",
+    )
     args = ap.parse_args()
 
     from labtrust_portfolio.replay import (
         replay_trace_with_diagnostics,
         replay_l1_stub,
+        replay_l1_twin,
     )
     from labtrust_portfolio.thinslice import run_thin_slice
 
@@ -88,8 +94,12 @@ def main() -> int:
     twin_config_path = args.corpus_dir / "twin_config.json"
     l1_stub_ok = False
     l1_stub_message = ""
+    l1_twin_ok = False
+    l1_twin_message = ""
     if thin_slice_trace is not None:
         l1_stub_ok, l1_stub_message = replay_l1_stub(thin_slice_trace, twin_config_path)
+        if args.l1_twin:
+            l1_twin_ok, l1_twin_message = replay_l1_twin(thin_slice_trace, twin_config_path)
 
     # Overhead stats: replay thin-slice trace N times
     overhead_times_ms: list[float] = []
@@ -157,7 +167,9 @@ def main() -> int:
     # Guarantee is detection and localization of nondeterminism, not bit-identical hardware replay.
     replay_level = "L0"
     if l1_stub_ok:
-        replay_level = "L1"  # L1 stub validated; full L1 twin replay not implemented
+        replay_level = "L1"
+    if args.l1_twin and l1_twin_ok:
+        replay_level = "L1_twin"  # L1 includes deterministic twin re-run
 
     # Nondeterminism budget (kernel/trace/REPLAY_LEVELS.v0.1.md).
     nondeterminism_budget = {
@@ -219,6 +231,9 @@ def main() -> int:
         "fidelity_pass": fidelity_pass,
         "l1_stub_ok": l1_stub_ok,
         "l1_stub_message": l1_stub_message,
+        "l1_twin_ok": l1_twin_ok if args.l1_twin else None,
+        "l1_twin_message": l1_twin_message if args.l1_twin else None,
+        "l1_twin_final_hash_match": l1_twin_ok if args.l1_twin else None,
         "overhead_stats": overhead_stats,
         "overhead_curve": overhead_curve if overhead_curve else None,
         "witness_slices": witness_slices,
@@ -259,6 +274,7 @@ def main() -> int:
         "divergence_localization_accuracy_pct": div_accuracy,
         "overhead_p99_ms": overhead_p99_ms,
         "l1_stub_ok": l1_stub_ok,
+        "l1_twin_ok": l1_twin_ok if args.l1_twin else None,
         "witness_slices_present": len(witness_slices) > 0,
     }
     print(json.dumps(summary, indent=2))

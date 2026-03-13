@@ -123,6 +123,21 @@ def predict_by_scenario(
     return predict_baseline_mean(subset, target)
 
 
+def predict_prior_model(row: Dict[str, Any], target: str = "tasks_completed") -> float:
+    """
+    Prior coordination model: predict tasks_completed from num_tasks only
+    (simple upper-bound heuristic: completion cannot exceed num_tasks).
+    Used as a baseline from coordination literature (task-count scaling).
+    """
+    if target != "tasks_completed":
+        return 0.0
+    num_tasks = row.get("num_tasks", 0) or 0
+    num_faults = row.get("num_faults", 0) or 0
+    # Heuristic: completed ≈ num_tasks * (1 - small penalty per fault)
+    penalty = min(0.2, 0.05 * num_faults)
+    return max(0.0, float(num_tasks) * (1.0 - penalty))
+
+
 def _ols_fit(
     rows: List[Dict[str, Any]],
     target: str,
@@ -199,20 +214,54 @@ def fit_linear_predictor(
 ) -> Any:
     """
     Fit linear model on rows; feature_cols default ["num_tasks", "num_faults"].
-    Returns a callable predict(feature_dict) -> float, or None if fit failed.
+    Tries full feature set first; falls back to num_tasks-only if singular or n < k
+    so that fewer rows are required (n >= 2). Returns a callable predict(feature_dict)
+    -> float, or None if fit failed.
     """
     if feature_cols is None:
         feature_cols = ["num_tasks", "num_faults"]
     result = _ols_fit(rows, target, feature_cols)
+    used_cols = feature_cols
+    if result is None and feature_cols != ["num_tasks"]:
+        result = _ols_fit(rows, target, ["num_tasks"])
+        used_cols = ["num_tasks"]
     if result is None:
         return None
     coefs, intercept = result
 
     def predict(feat: Dict[str, Any]) -> float:
         val = intercept
-        for i, col in enumerate(feature_cols):
+        for i, col in enumerate(used_cols):
             val += coefs[i] * float(feat.get(col, 0))
         return val
+
+    return predict
+
+
+def fit_tree_stump_predictor(
+    rows: List[Dict[str, Any]],
+    target: str = "tasks_completed",
+    feature_col: str = "num_tasks",
+) -> Any:
+    """
+    Stump baseline: split on feature_col at median; return callable predict(feat) -> float
+    that returns mean of target for the branch (left = feat <= median, right = feat > median).
+    Returns None if insufficient rows (< 2).
+    """
+    vals = [r.get(feature_col, 0) for r in rows]
+    targets = [r.get("response", {}).get(target, 0) for r in rows]
+    if len(rows) < 2:
+        return None
+    import statistics
+    med = statistics.median(vals)
+    left_y = [t for v, t in zip(vals, targets) if v <= med]
+    right_y = [t for v, t in zip(vals, targets) if v > med]
+    mean_left = sum(left_y) / len(left_y) if left_y else 0.0
+    mean_right = sum(right_y) / len(right_y) if right_y else 0.0
+
+    def predict(feat: Dict[str, Any]) -> float:
+        x = float(feat.get(feature_col, 0))
+        return mean_left if x <= med else mean_right
 
     return predict
 

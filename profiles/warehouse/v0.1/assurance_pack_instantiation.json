@@ -1,0 +1,32 @@
+{
+  "version": "0.1",
+  "system": {
+    "boundary": "warehouse_profile_v0.1",
+    "assumptions": "Warehouse automation; PONRs from scenario"
+  },
+  "hazards": [
+    {
+      "id": "H-W01",
+      "description": "Unauthorized inventory commit (PONR-W)",
+      "control_ids": ["C-W01", "C-W02"],
+      "ponr_ids": ["PONR-W"]
+    }
+  ],
+  "controls": [
+    {
+      "id": "C-W01",
+      "description": "PONR gate requires admissible evidence",
+      "evidence_artifact_types": ["trace", "evidence_bundle"]
+    },
+    {
+      "id": "C-W02",
+      "description": "Commit action recorded in trace",
+      "evidence_artifact_types": ["trace", "evidence_bundle"]
+    }
+  ],
+  "evidence_map": {
+    "H-W01": ["C-W01", "C-W02"],
+    "trace": ["C-W01", "C-W02"],
+    "evidence_bundle": ["C-W01", "C-W02"]
+  }
+}

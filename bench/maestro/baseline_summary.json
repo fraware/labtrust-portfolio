@@ -1,6 +1,6 @@
 {
   "scenario": "toy_lab_v0",
-  "seeds": 2,
+  "seeds": 3,
   "rows": [
     {
       "adapter": "Centralized",
@@ -17,6 +17,13 @@
       "p95_latency_ms": 75.59
     },
     {
+      "adapter": "Centralized",
+      "seed": 3,
+      "tasks_completed": 4,
+      "coordination_messages": 4,
+      "p95_latency_ms": 28.09
+    },
+    {
       "adapter": "Blackboard",
       "seed": 1,
       "tasks_completed": 4,
@@ -29,6 +36,34 @@
       "tasks_completed": 4,
       "coordination_messages": 4,
       "p95_latency_ms": 75.59
+    },
+    {
+      "adapter": "Blackboard",
+      "seed": 3,
+      "tasks_completed": 4,
+      "coordination_messages": 4,
+      "p95_latency_ms": 28.09
+    },
+    {
+      "adapter": "RetryHeavy",
+      "seed": 1,
+      "tasks_completed": 4,
+      "coordination_messages": 4,
+      "p95_latency_ms": 25.26
+    },
+    {
+      "adapter": "RetryHeavy",
+      "seed": 2,
+      "tasks_completed": 4,
+      "coordination_messages": 4,
+      "p95_latency_ms": 75.59
+    },
+    {
+      "adapter": "RetryHeavy",
+      "seed": 3,
+      "tasks_completed": 4,
+      "coordination_messages": 4,
+      "p95_latency_ms": 28.09
     }
   ]
 }

@@ -61,7 +61,7 @@ Summary JSON may include a `success_criteria_met` or `kill_criteria` block so th
 
 - **P0 E3:** `replay_link_e3.py` writes `e3_summary.json` and `p0_e3_variance.json`; both include run_manifest (seeds, scenario_id). Statistics: mean, stdev, p95, p99, 95% CI. Default `--runs 20` for publishable tables.
 - **P4 MAESTRO fault sweep:** `maestro_fault_sweep.py` writes `multi_sweep.json` with run_manifest (seeds, scenarios, fault settings). Statistics: mean, stdev, p95, p99 per metric. Default `--seeds 20` for publishable tables; CI may use fewer for speed.
-- **P3 Replay:** `replay_eval.py` writes `replay_eval/summary.json` with replay_level, nondeterminism_budget, divergence_localization_confidence; overhead_stats; root_cause_category and witness_slice per divergence; top-level witness_slices; with `--overhead-curve`, overhead_curve[] (event_count, p95_replay_ms).
+- **P3 Replay:** `replay_eval.py` writes `replay_eval/summary.json` with replay_level, nondeterminism_budget, divergence_localization_confidence; overhead_stats; root_cause_category and witness_slice per divergence; top-level witness_slices; with `--overhead-curve`, overhead_curve[] (event_count, p95_replay_ms); with `--l1-twin`, l1_twin_ok and l1_twin_final_hash_match. Full corpus table: `scripts/export_replay_corpus_table.py`.
 - **Other evals:** P1, P2, P5, P6, P7, P8 summary outputs include run_manifest (seeds, scenario, fault settings, script) and, where stochastic, mean/stdev and 95% CI when n >= 2. See runbook "CI vs publishable" and per-script help.
 
 ## References

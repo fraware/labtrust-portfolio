@@ -16,6 +16,8 @@ The reference implementation (`impl/src/labtrust_portfolio/meta_controller.py`, 
 
 So revert and latency-based switch work even when `fault_count` is zero; hysteresis applies only to fault-count–driven switching. Regret-based or safety-bound-based switching (e.g. formal safety certificates) are out of scope for v0.1 and documented as future work.
 
+**Lemma (informal, thrashing bound).** With `hysteresis_consecutive = K` (K ≥ 1), the fault-based switch to fallback requires at least K consecutive fault observations. In a single run, the number of fault-driven regime switches is bounded by the structure of the run (at most one switch per “epoch” where fault_count reaches K and exceeds fault_threshold). So increasing K reduces thrashing (rapid toggling) when fault_count hovers near the threshold; empirical validation: run meta_eval with `--hysteresis 1`, `2`, `3` and compare `regime_switch_count_total` and collapse_count (see P8 DRAFT “Thrashing vs hysteresis” table).
+
 ## Collapse (v0.1)
 
 **Current proxy:** Collapse is defined as `tasks_completed < collapse_threshold` (configurable; default 2 in meta_eval). A run is counted as collapsed when the MAESTRO report has tasks_completed below that threshold. This is a proxy for "run did not meet minimum progress"; it is not tied to a specific failure event or recovery timeout in the trace schema. **Future work:** Tie collapse to a concrete failure event type or recovery-timeout field in the trace (e.g. when the trace schema supports it); document in kernel.

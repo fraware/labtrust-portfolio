@@ -2,7 +2,7 @@
 
 This file is the canonical, repo-native portfolio board. Mirror to GitHub Projects if desired, but treat **this** as truth.
 
-**Current state:** All nine papers (P0–P8) are at **Draft** stage. Phase 3 (submission-readiness) checklist passed 2025-03-11 for each; see `papers/Px_*/PHASE3_PASSED.md`. Next step for each: submission prep (tag release, final pass, venue format) per [docs/PRE_SUBMISSION_CHECKLIST.md](docs/PRE_SUBMISSION_CHECKLIST.md). Eval summary JSONs include optional `excellence_metrics`; run `python scripts/export_excellence_summary.py` to print a summary. Strengthened experiments and known limitations: [docs/EXPERIMENTS_AND_LIMITATIONS.md](docs/EXPERIMENTS_AND_LIMITATIONS.md); plan: [docs/PLAN_STRENGTHEN_EXPERIMENTS.md](docs/PLAN_STRENGTHEN_EXPERIMENTS.md).
+**Current state:** All nine papers (P0–P8) are at **Draft** stage. Phase 3 (submission-readiness) checklist passed 2025-03-11 for each; see `papers/Px_*/PHASE3_PASSED.md`. Next step for each: submission prep (tag release, final pass, venue format) per [docs/PRE_SUBMISSION_CHECKLIST.md](docs/PRE_SUBMISSION_CHECKLIST.md). Eval summary JSONs include optional `excellence_metrics`; run `python scripts/export_excellence_summary.py` to print a summary. After running all paper evals: [datasets/runs/RUN_RESULTS_SUMMARY.md](datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. Strengthened experiments and known limitations: [docs/EXPERIMENTS_AND_LIMITATIONS.md](docs/EXPERIMENTS_AND_LIMITATIONS.md); plan: [docs/PLAN_STRENGTHEN_EXPERIMENTS.md](docs/PLAN_STRENGTHEN_EXPERIMENTS.md).
 
 ## Stages (exactly five)
 - **Spec** — scoped, non-overlapping thesis + artifacts named in kernel; explicit kill criteria

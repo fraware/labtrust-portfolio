@@ -11,6 +11,7 @@ claims:
     statement: "A CPS profile makes sensitivity-sharing deployable: typed variables, bounded update rates, authenticated channels, robust aggregation under compromise."
     evidence:
       release_id: "rep_cps_eval"
+      confidence: "high"  # PROFILE_SPEC, example_profile, adapter; 20 seeds, script-generated tables
       artifact_paths:
         - "kernel/rep_cps/PROFILE_SPEC.v0.1.md"
         - "kernel/rep_cps/example_profile.v0.1.json"
@@ -19,9 +20,10 @@ claims:
       figure_ids: ["Figure 0"]
 
   - id: "C2"
-    statement: "Under compromised agents, aggregation maintains bounded influence and stable convergence behavior."
+    statement: "Under compromised agents, robust aggregation maintains bounded influence (e.g. bias_robust < bias_naive) in offline and in-loop comparison."
     evidence:
       release_id: "rep_cps_eval"
+      confidence: "high"  # Table 2/3, harness; direct measure
       artifact_paths:
         - "datasets/runs/rep_cps_eval/summary.json"
         - "impl/src/labtrust_portfolio/rep_cps.py"
@@ -32,6 +34,7 @@ claims:
     statement: "Protocol state does not directly actuate; it influences decisions only through explicit safety gates (MADS-compatible)."
     evidence:
       release_id: "rep_cps_eval"
+      confidence: "high"  # safety_gate_ok in trace; adapter integration
       artifact_paths:
         - "datasets/runs/rep_cps_eval/safety_gate_denial.json"
         - "impl/src/labtrust_portfolio/adapters/rep_cps_adapter.py"
@@ -42,6 +45,7 @@ claims:
     statement: "The profile is testable via fault injection and compromised-agent suites in MAESTRO."
     evidence:
       release_id: "rep_cps_eval"
+      confidence: "high"  # rep_cps_eval.py, summary.json, integration test
       artifact_paths:
         - "datasets/runs/rep_cps_eval/summary.json"
         - "scripts/rep_cps_eval.py"

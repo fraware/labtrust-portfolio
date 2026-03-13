@@ -78,36 +78,36 @@ def main() -> int:
             outcome["trace_ok"] = True
             events = trace.get("events", [])
             from labtrust_portfolio.conformance import SCENARIO_PONR_TASK_NAMES
+            # PONR coverage uses kernel task names only; no heuristic when scenario not in map
             required_ponr_tasks = set(
-                SCENARIO_PONR_TASK_NAMES.get(
-                    args.scenario_id,
-                    SCENARIO_PONR_TASK_NAMES.get("toy_lab_v0", []),
-                )
+                SCENARIO_PONR_TASK_NAMES.get(args.scenario_id, [])
             )
-            found_ponr_tasks = set()
-            for ev in events:
-                t = ev.get("type", "")
-                payload = ev.get("payload", {})
-                name = payload.get("name", "")
-                if required_ponr_tasks:
+            if not required_ponr_tasks and args.scenario_id not in SCENARIO_PONR_TASK_NAMES:
+                outcome["ponr_coverage"] = {
+                    "note": "PONR coverage requires --scenario-id; known: " + ",".join(sorted(SCENARIO_PONR_TASK_NAMES.keys())),
+                    "required_task_names": [],
+                    "found_in_trace": [],
+                    "ratio": None,
+                }
+            else:
+                found_ponr_tasks = set()
+                for ev in events:
+                    t = ev.get("type", "")
+                    payload = ev.get("payload", {})
+                    name = payload.get("name", "")
                     if t == "task_end" and name in required_ponr_tasks:
                         outcome["ponr_events"].append(
                             {"seq": ev.get("seq"), "type": t, "name": name}
                         )
                         found_ponr_tasks.add(name)
-                else:
-                    if t == "task_end" or "disposition" in (name or "").lower():
-                        outcome["ponr_events"].append(
-                            {"seq": ev.get("seq"), "type": t, "name": name}
-                        )
-            req_list = sorted(required_ponr_tasks)
-            found_list = sorted(found_ponr_tasks)
-            ratio = len(found_list) / len(req_list) if req_list else 1.0
-            outcome["ponr_coverage"] = {
-                "required_task_names": req_list,
-                "found_in_trace": found_list,
-                "ratio": round(ratio, 4),
-            }
+                req_list = sorted(required_ponr_tasks)
+                found_list = sorted(found_ponr_tasks)
+                ratio = len(found_list) / len(req_list) if req_list else 1.0
+                outcome["ponr_coverage"] = {
+                    "required_task_names": req_list,
+                    "found_in_trace": found_list,
+                    "ratio": round(ratio, 4),
+                }
         except Exception as e:
             outcome["trace_error"] = str(e)
 

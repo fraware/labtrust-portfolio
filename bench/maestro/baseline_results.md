@@ -1,13 +1,18 @@
 # MAESTRO baseline comparison (P4)
 
-Scenario: `toy_lab_v0`. Seeds 1..2. Fault params: drop_completion_prob=0, delay_p95_ms=50.
+Scenario: `toy_lab_v0`. Seeds 1..3. Fault params: drop_completion_prob=0, delay_p95_ms=50.
 
 | Adapter | Seed | tasks_completed | coordination_messages | p95_latency_ms |
 |---------|------|-----------------|------------------------|----------------|
 | Centralized | 1 | 4 | 4 | 25.26 |
 | Centralized | 2 | 4 | 4 | 75.59 |
+| Centralized | 3 | 4 | 4 | 28.09 |
 | Blackboard | 1 | 4 | 4 | 25.26 |
 | Blackboard | 2 | 4 | 4 | 75.59 |
+| Blackboard | 3 | 4 | 4 | 28.09 |
+| RetryHeavy | 1 | 4 | 4 | 25.26 |
+| RetryHeavy | 2 | 4 | 4 | 75.59 |
+| RetryHeavy | 3 | 4 | 4 | 28.09 |
 
 Reference adapter comparison (same pipeline, different defaults).
 

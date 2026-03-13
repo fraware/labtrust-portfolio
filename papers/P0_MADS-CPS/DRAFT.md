@@ -26,7 +26,7 @@ The object of the standard is to constrain **interfaces and evidence**, not inte
 
 ## 3. Conformance tiers and global hard-fails
 
-**Table 1 — E1 conformance and E3 replay-link.** E1: missing artifact yields Tier 1 FAIL; present and validated yields Tier 2 PASS. E3: independent verifier recomputes MAESTRO from TRACE over 10 seeds; variance and 95% CIs are in `e3_summary.json` / `p0_e3_variance.json`. Table below is from a specific run (script: `produce_p0_e3_release.py --runs 10`; release: `p0_e3_release`). Regenerate with `python scripts/export_e3_table.py`.
+**Table 1 — E1 conformance and E3 replay-link.** E1: missing artifact yields Tier 1 FAIL; present and validated yields Tier 2 PASS. E3: independent verifier recomputes MAESTRO from TRACE over 20 seeds (publishable bar); variance and 95% CIs are in `e3_summary.json` / `p0_e3_variance.json`. Table below is from a specific run (script: `produce_p0_e3_release.py --runs 20`; release: `p0_e3_release`). Example table may show n=10; publishable uses 20 runs. Regenerate with `python scripts/export_e3_table.py`.
 
 | Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
 |------|----------------|----------------------|----------------|-------|
@@ -53,7 +53,7 @@ The conformance checker (`labtrust_portfolio check-conformance`) computes pass/f
 
 ## 4. Gatekeeper and PONR semantics
 
-PONR (point of no return) enforcement requires mechanically checkable admissibility before irreversible or authoritative transitions. The gate is executed at release time: `release_dataset` calls `check_conformance` and raises if the run does not meet Tier 2. When admissibility is checked, fail-closed behavior applies: if evidence is missing or invalid, the transition is denied. Overrides are possible but must be logged. See `kernel/mads/PONR_ENFORCEMENT.v0.1.md`.
+PONR (point of no return) enforcement requires mechanically checkable admissibility before irreversible or authoritative transitions. The gate is executed at release time: `release_dataset` calls `check_conformance` and raises if the run does not meet Tier 2. When admissibility is checked, fail-closed behavior applies: if evidence is missing or invalid, the transition is denied. Overrides are possible but must be logged. See `kernel/mads/PONR_ENFORCEMENT.v0.1.md`. **Formal verification:** Gatekeeper policy (fail-closed, no Tier 2/T3 actuation without recorded authorization) is machine-checked in the W1 wedge; see `formal/lean/`. Table 1 (E3) shows runs where conformance and replay hold.
 
 ## 5. Telemetry and trace obligations
 
@@ -78,7 +78,7 @@ Redacted trace preserves event order, timestamps, and state_hash_after; payloads
 
 What counts as evidence for evaluation is defined by the release train: TRACE and MAESTRO_REPORT. An independent verifier can recompute MAESTRO metrics from TRACE (E3 experiment); repeated trials and variance reporting are required where stochasticity exists. All runs must produce admissible evidence bundles (see `scripts/produce_p0_e3_release.py` and datasets).
 
-**Figure 1 — E3 p95 latency distribution (per scenario).** Distribution of p95_latency_ms across seeds per scenario from E3 runs. Regenerate with `python scripts/plot_e3_latency.py` (output `docs/figures/p0_e3_latency.png`). With multi-scenario E3 (`produce_p0_e3_release.py --runs 10 --scenarios toy_lab_v0,lab_profile_v0`), the figure shows variance across scenarios and seeds.
+**Figure 1 — E3 p95 latency distribution (per scenario).** Distribution of p95_latency_ms across seeds per scenario from E3 runs. Regenerate with `python scripts/plot_e3_latency.py` (output `docs/figures/p0_e3_latency.png`). With multi-scenario E3 (`produce_p0_e3_release.py --runs 20 --scenarios toy_lab_v0,lab_profile_v0`), the figure shows variance across scenarios and seeds.
 
 ## 8. Reference organism and thin-slice demo
 
@@ -90,7 +90,7 @@ The lab profile (`profiles/lab/v0.1/`) instantiates the reference organism. The 
 
 **Baseline comparison:** With the MADS gate, release is denied when conformance fails Tier 2 (e.g. missing artifact, replay_ok false). Without the gate, the same run could be released but would be inadmissible. Comparison: runs with intentional Tier 2 failure (e.g. evidence_bundle.verification.replay_ok=false); with gate 0/N released (release_dataset raises); without gate the run would be copyable. Test: `tests/test_thinslice_e2e.TestThinSliceE2E.test_release_denied_when_tier2_fails`.
 
-**Reproducibility:** Produce E3 runs and release: `python scripts/produce_p0_e3_release.py` (with PYTHONPATH=impl/src, LABTRUST_KERNEL_DIR=kernel). Check conformance: `labtrust_portfolio check-conformance <run_dir>`. Artifacts: trace.json, maestro_report.json, evidence_bundle.json, release_manifest.json; release ID p0_e3_release. See `papers/P0_MADS-CPS/README.md` and `docs/VALIDATING_A_RUN.md`.
+**Reproducibility:** Produce E3 runs and release: `python scripts/produce_p0_e3_release.py` (with PYTHONPATH=impl/src, LABTRUST_KERNEL_DIR=kernel). Release paths (e.g. `datasets/releases/p0_e3_release/`) are produced when running without `--no-release`; for CI or runs without release, tables can be regenerated from `e3_summary.json` in `datasets/runs/` (export_e3_table.py reads from the run summary). Check conformance: `labtrust_portfolio check-conformance <run_dir>`. Artifacts: trace.json, maestro_report.json, evidence_bundle.json, release_manifest.json; release ID p0_e3_release. See `papers/P0_MADS-CPS/README.md` and `docs/VALIDATING_A_RUN.md`.
 
 ## 10. Limitations and non-goals
 

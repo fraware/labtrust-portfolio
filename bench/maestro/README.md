@@ -10,3 +10,11 @@ MAESTRO is the evaluation substrate: scenarios, adapters, scoring, variance-awar
 - **Baselines:** `scripts/maestro_baselines.py` writes `baseline_results.md` and `baseline_summary.json` (Centralized vs Blackboard). Draft tables: `scripts/export_maestro_tables.py`.
 - **Reproducibility:** [REPRODUCIBILITY.md](REPRODUCIBILITY.md). Thin-slice report generator: `kernel/eval/MAESTRO_REPORT.v0.1`.
 - **Adapter cost:** Coarse implementation cost (LOC estimate, hours estimate) per reference adapter in [adapter_costs.json](adapter_costs.json). Used to back adoption claims; see REPRODUCIBILITY for run instructions.
+
+## MAESTRO adoption (external use)
+
+We invite external groups to run MAESTRO with their own adapter or a fork of the reference adapters and report results.
+
+1. **Add an external adapter:** Implement the same interface `run(scenario_id, out_dir, seed, **fault_params) -> AdapterResult` (trace + maestro_report). Place it in your fork or in `impl/src/labtrust_portfolio/adapters/` and register it in `maestro_baselines.py` or your own script.
+2. **Run one scenario and one fault setting:** e.g. `maestro_fault_sweep.py --scenario toy_lab_v0 --seeds 5` or run your adapter on `toy_lab_v0` with `drop_completion_prob=0.05` and record TRACE + MAESTRO_REPORT.
+3. **Submit a results snippet:** Provide `run_manifest` (scenario_id, seeds, script or adapter name) and key metrics (e.g. `tasks_completed_mean`, `tasks_completed_stdev`). When an external result exists, P4 DRAFT can add a short "External use" sentence and optional table row or footnote. Contact: see repo README or PORTFOLIO_BOARD.

@@ -39,10 +39,12 @@ def main() -> int:
 
     from labtrust_portfolio.adapters.centralized import CentralizedAdapter
     from labtrust_portfolio.adapters.blackboard import BlackboardAdapter
+    from labtrust_portfolio.adapters.retry_heavy import RetryHeavyAdapter
 
     adapters = [
         ("Centralized", CentralizedAdapter()),
         ("Blackboard", BlackboardAdapter()),
+        ("RetryHeavy", RetryHeavyAdapter()),
     ]
     fault_params = {"drop_completion_prob": 0.0, "delay_p95_ms": 50.0}
     rows = []

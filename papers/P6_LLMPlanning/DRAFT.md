@@ -23,9 +23,11 @@ Schema: `kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json` (plan_id, steps with se
 
 ## 3. Red-team suite
 
-`RED_TEAM_CASES`: eight cases and `CONFUSABLE_DEPUTY_CASES`: four cases with expected_block (unsafe blocked, safe allowed). Policy hook allow_list; validators must block unsafe in red-team tests. OWASP LLM Top 10 aligned; containment posture only.
+`RED_TEAM_CASES`: eight cases and `CONFUSABLE_DEPUTY_CASES`: four cases with expected_block (unsafe blocked, safe allowed). Validator v0.2: allow_list + safe_args (path traversal, dangerous patterns); validators must block unsafe in red-team tests. PONR checks future. OWASP LLM Top 10 aligned; containment posture only.
 
-**Table 1 — Red-team results.** Source: `datasets/runs/llm_eval/red_team_results.json`. Contains `success_criteria_met.red_team_all_pass` and `success_criteria_met.trigger_met` (conditional paper evidence). Run `scripts/llm_redteam_eval.py` to regenerate.
+**OWASP LLM Top 10 coverage.** A mapping of red-team, confusable deputy, and jailbreak-style cases to OWASP LLM categories is in [docs/P6_OWASP_MAPPING.md](../docs/P6_OWASP_MAPPING.md). We partially cover Prompt Injection (jailbreak-style args), Insecure Output Handling (disallowed tools), Insecure Plugin Design (safe_args), and Excessive Agency (containment); we do not cover Training Data Poisoning, Supply Chain, Model Theft, or full jailbreak suites.
+
+**Table 1 — Red-team results.** Validator v0.2: allow_list + safe_args (path traversal, dangerous patterns); PONR checks future. Full 8 red-team + 4 confusable deputy; regenerate with `python scripts/export_llm_redteam_table.py` (reads red_team_results.json and confusable_deputy_results.json). Source: `datasets/runs/llm_eval/`. Contains `success_criteria_met.red_team_all_pass` and `success_criteria_met.trigger_met` (conditional paper evidence). Run `scripts/llm_redteam_eval.py` to regenerate results. **Table 1b — Real-LLM (optional):** With `--real-llm` and .env API keys set, the script runs the same red-team flow via a real model (e.g. gpt-4o-mini); red_team_results.json gets a `real_llm` key and run_manifest.real_llm_model_id. Export script prints Table 1b (model_id, all_block_unsafe_pass, latency_ms) when present.
 
 | Case id | expected_block | actually_blocked | pass |
 |---------|----------------|-----------------|------|
@@ -56,13 +58,15 @@ LLMPlanningAdapter (`adapters/llm_planning_adapter.py`) runs scenario, injects s
 
 We do not run jailbreak or adversarial prompt suites; scope is tool-policy containment and deterministic capture for CPS integration.
 
+**Jailbreak-style cases.** A small set of steps whose args contain prompt-injection style phrases (e.g. "ignore previous instructions", "disregard instruction") are run through the same validator; red_team_results.json includes a `jailbreak_style` section with pass/fail per case. Export script prints this table when present. Claim remains **containment, not elimination**: we report whether the pipeline blocks these cases; we do not claim coverage of all jailbreak or adversarial prompts.
+
 ## 6. Limitations
 
 Scope and conditional triggers: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper:
 
 - **Conditional paper (trigger and scope):** Trigger requires the firewall to reduce unsafe attempts without collapsing task completion on at least one scenario. Evidence: `red_team_results.json` (success_criteria_met.trigger_met, red_team_all_pass), `e2e_denial_trace.json`, and adapter runs (tasks_completed). **Scope:** Typed-plan containment and tool-policy firewall only; no claim to elimination of prompt injection. If success_criteria_met.trigger_met is false, frame the paper as "conditional / optional"; see docs/CONDITIONAL_TRIGGERS.md (P6).
 - **Containment not elimination:** We claim containment (firewall blocks unsafe actions); we do not claim elimination of prompt injection or adversarial inputs.
-- **Real LLM:** Optional; when `.env` at repo root contains API keys (OPENAI_API_KEY or ANTHROPIC_API_KEY), run with `--real-llm` to call a real model for red-team-style prompts; results merged into red_team_results.json. Synthetic plans remain the default for CI and keyless environments.
+- **Real LLM:** Evidence in the draft is from synthetic plans by default; real-LLM mode (`--real-llm`) is optional and requires .env keys. When keys are set, run with `--real-llm` to call a real model; results merged into red_team_results.json. Synthetic remains the default for CI and keyless environments.
 - **No adversarial prompts or jailbreaks:** Red-team is tool-centric and static; no multi-step attack plans or prompt-injection suite.
 - **Validator stack:** Allow-list only in v0.1; no argument checks or PONR checks (documented as future).
 - **Static red-team:** Cases are fixed (not generated or adaptive).

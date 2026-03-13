@@ -44,14 +44,22 @@ This document defines replay fidelity levels used by the **Replay** paper (P3) a
 **Guarantee:**
 - Minimal L1: same as L0 (replay from trace only). Full L1/twin: under declared twin fidelity assumptions, a third party can re-run the episode and reproduce aggregate outcome distributions within declared tolerance.
 
-### L2 — Hardware-assisted replay (aspirational)
-**Goal:** replay with physical hardware in the loop.
+### L2 — Hardware-assisted replay (aspirational; design)
 
-**Required capture:**
+**Goal:** replay with physical hardware in the loop. L2 is not implemented; the following is a design subsection for future work.
+
+**Assumptions:**
+- Hardware configuration identity: firmware versions, calibration state, and device models are recorded so that runs under the same config are comparable.
+- Time-sync model: jitter bounds and synchronization assumptions (e.g. NTP stratum, PTP domain) are declared so that timestamp ordering is interpretable.
+
+**Capture requirements:**
 - All L0 capture,
-- Hardware configuration identity (device models, firmware versions, calibration state),
-- Time synchronization model and jitter bounds,
+- Hardware config identity (firmware, calibration),
+- Jitter bounds and time-sync model,
 - Snapshot/restore semantics (or a principled lack thereof).
+
+**One possible metric (under consideration):**
+- Distributional agreement: over N runs with the same config, the outcome distribution (e.g. tasks_completed, final_state_hash family) agrees within a declared tolerance; or bounded divergence rate (fraction of runs that diverge below a threshold).
 
 **Guarantee:**
 - Typically distributional (not bitwise). The primary objective becomes auditability and nondeterminism localization.

@@ -18,9 +18,9 @@ A twin config file (e.g. `twin_config.json` or `twin_config.yaml`) must capture:
 - Sensor events or observations that are logged in the trace (or referenced by content hash) map to the twin’s observation interface: each observation type has a corresponding twin API or input channel.
 - The minimal L1 path: given L0 trace + twin_config, run L0 replay first; if it passes, the same event sequence is then replayed in the twin with the given config and seeds. Divergence in the twin (e.g. different state after N steps) is reported with the same diagnostic structure as L0 (seq, expected vs got).
 
-## Minimal implementation (stub)
+## Minimal implementation (stub and twin re-run)
 
-A minimal L1 path in the repo: (1) accept L0 trace + twin config path; (2) run L0 replay; (3) if L0 passes, validate that twin config exists and has required keys (build_hash, env_seed); (4) optionally run a no-op “twin replay” step that does not yet execute a real simulator but returns success when config is valid. This proves the contract: L1 is L0 + twin config + future simulator hook.
+A minimal L1 path in the repo: (1) accept L0 trace + twin config path; (2) run L0 replay; (3) if L0 passes, validate that twin config exists and has required keys (build_hash, env_seed); (4) optionally run a no-op “twin replay” step that does not yet execute a real simulator but returns success when config is valid. L1 twin (v0.2): the minimal L1 path now includes one deterministic re-run of the control-plane state machine from the trace; use replay_eval.py --l1-twin; summary.json records l1_twin_ok and l1_twin_final_hash_match. Full simulator/physics twin is future work.
 
 ## Nondeterminism budget for L1
 

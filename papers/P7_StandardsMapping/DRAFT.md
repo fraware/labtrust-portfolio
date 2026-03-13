@@ -21,7 +21,7 @@ Assurance pack: hazards (array), controls (array), evidence_map (object).
 
 **Figure 0 — Mapping flow.** Hazards to controls to evidence artifacts to audit (audit_bundle / review). Regenerate with `python scripts/export_p7_mapping_flow.py` (output `docs/figures/p7_mapping_flow.mmd`). Schema: `kernel/assurance_pack/ASSURANCE_PACK.v0.1.schema.json`. Hazard items may include optional `ponr_ids` (array of PONR ids from the lab profile). Hazard log template: `HAZARD_LOG_TEMPLATE.v0.1.yaml`. Invariant registry template: `INVARIANT_REGISTRY_TEMPLATE.v0.1.yaml`. Mapping rules: each hazard has control_ids; each control has evidence_artifact_types; evidence_map links hazards and artifacts to controls.
 
-**Relationship to standards.** The pack structure (hazards, controls, evidence_map) is compatible with the hazard–control–evidence traceability pattern found in standards such as ISO 26262 (functional safety) or similar frameworks, for mapping and audit only. No certification or compliance claim is made.
+**Relationship to standards.** The pack structure (hazards, controls, evidence_map) is compatible with the hazard–control–evidence traceability pattern found in standards such as ISO 26262 (functional safety) or ISO 62304 (medical device software) for mapping and audit only. No certification or compliance claim is made. An **explicit standards mapping table** maps each assurance-pack element (hazard, control, evidence type) to specific clauses or tables of one standard: see [docs/P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md) (ISO 62304 and ISO 26262-6). That makes the translation layer checkable by standards experts.
 
 **Non-goals.** This mapping is a translation layer only. We make no certification claim and no claim of compliance with 21 CFR Part 11, OECD GLP, or any other regulation. The assurance pack and review scripts supply auditable artifacts that can support an auditor; they do not constitute regulatory certification. Explicit non-goals: (1) certification or attestation of compliance; (2) replacement for a formal quality or regulatory process; (3) legal or liability coverage.
 
@@ -29,9 +29,9 @@ Assurance pack: hazards (array), controls (array), evidence_map (object).
 
 Gatekeeper (P0), trace (P3), evidence bundle (P0) are the portfolio artifacts. Controls reference trace and evidence_bundle. PONR causal chains are reconstructible from trace; denials/allows map to hazards and controls via the assurance pack.
 
-## 4. Worked instantiation (lab profile)
+## 4. Worked instantiation (lab, warehouse, medical)
 
-One full instantiation: `profiles/lab/v0.1/assurance_pack_instantiation.json`. Hazard H-001 (incorrect sample disposition) has control_ids C-001, C-002 and optional ponr_ids (e.g. PONR-A, PONR-B) linking to the lab profile. Controls C-001, C-002 with evidence_artifact_types trace, evidence_bundle. Instantiation is validated by check_assurance_mapping.py (schema + mapping + PONR coverage).
+Three instantiations: **lab** (`profiles/lab/v0.1/assurance_pack_instantiation.json`), **warehouse** (`profiles/warehouse/v0.1/`), **medical** (`profiles/medical_v0.1/assurance_pack_instantiation.json`). The medical profile is a minimal regulator-style instantiation (one hazard, two controls, evidence_map) for software-as-medical-device traceability; no PONR ids. run_assurance_eval runs review with each pack; results.json includes per_profile (lab_v0.1, warehouse_v0.1, medical_v0.1). Mapping is reusable across domains. Hazard H-001 (incorrect sample disposition) has control_ids C-001, C-002 and optional ponr_ids (e.g. PONR-A, PONR-B) linking to the lab profile. Controls C-001, C-002 with evidence_artifact_types trace, evidence_bundle. Instantiation is validated by check_assurance_mapping.py (schema + mapping + PONR coverage).
 
 ## 5. Mapping completeness and schema validation
 
@@ -47,7 +47,7 @@ Script `scripts/check_assurance_mapping.py`: (1) Validates the lab instantiation
 
 Controls: C-001 (PONR gate requires Tier 2 conformance), C-002 (disposition in trace and bundle). Diagram: hazard H-001 → controls C-001, C-002 → evidence types trace, evidence_bundle.
 
-**Review checklist:** `docs/P7_REVIEW_CHECKLIST.md` gives an independent reviewer steps. Script `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>]` produces a machine-readable outcome. When `--scenario-id` is set, PONR events use kernel PONR task names (same as conformance Tier 3); otherwise a heuristic is used. Output includes evidence_bundle_ok, trace_ok, ponr_events, controls_covered, ponr_coverage (required_task_names, found_in_trace, ratio), control_coverage_ratio.
+**Review checklist:** `docs/P7_REVIEW_CHECKLIST.md` gives an independent reviewer steps. Script `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>]` produces a machine-readable outcome. When `--scenario-id` is set, PONR events use kernel PONR task names (same as conformance Tier 3); when `--scenario-id` is omitted, PONR events use a heuristic (not kernel PONR task names). Scripted review is partial and does not constitute a full safety-case proof. Output includes evidence_bundle_ok, trace_ok, ponr_events, controls_covered, ponr_coverage (required_task_names, found_in_trace, ratio), control_coverage_ratio.
 
 **Table 1 — Mapping and review results.** Source: `results.json`. Run `scripts/run_assurance_eval.py`; regenerate tables with `scripts/export_assurance_tables.py`.
 
@@ -79,8 +79,8 @@ We emphasize mechanically checkable mapping and scripted review over narrative-o
 
 Scope: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper (no certification):
 
-- **Single lab profile and one run (or few runs):** Instantiation is minimal; no real certification process or external auditor.
-- **Review is scripted:** When `--scenario-id` is used, PONR events are tied to kernel PONR task names; otherwise a heuristic applies. Not a full safety-case proof.
+- **Two instantiations:** Lab v0.1 and warehouse v0.1; run_assurance_eval runs mapping and review for both (per_profile in results.json). No cross-domain evidence beyond these two. Instantiation is minimal; no real certification process or external auditor. This limits the scope of claims to the translation layer only (no certification).
+- **Review is scripted and partial:** Scripted review checks schema, mapping completeness, PONR task presence in trace, and control coverage; it does not replace human judgment or full safety-case proof. PONR coverage requires `--scenario-id` from the known list (toy_lab_v0, lab_profile_v0); when scenario is unknown, no heuristic is used and the script reports which scenario-ids are supported.
 - **Completeness:** No guarantee beyond the defined checks (mapping + optional PONR-coverage). "All PONRs have a control" holds only when hazard `ponr_ids` are populated and the checker is run.
 - **Coverage metrics:** PONR coverage ratio and control coverage ratio are defined for the run and scenario; they are not system-wide safety-case completeness metrics.
 - **Standards link:** Relationship to ISO 26262 (or similar) is structural only (hazard–control–evidence traceability pattern); no certification or compliance claim.

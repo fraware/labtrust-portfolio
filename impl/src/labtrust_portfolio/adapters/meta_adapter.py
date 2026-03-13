@@ -1,21 +1,26 @@
-"""P8 Meta-Coordination adapter: runs scenario and injects regime_switch trace events."""
+"""P8 Meta-Coordination adapter: runs scenario and injects regime_switch trace events. v0.2: optional fallback adapter run when switch is decided."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional, TYPE_CHECKING
 
 from ..thinslice import run_thin_slice
 from ..meta_controller import decide_switch, regime_switch_event
-from .base import AdapterResult
+from .base import AdapterResult, run_adapter
+
+if TYPE_CHECKING:
+    from .base import MAESTROAdapter
 
 
 class MetaAdapter:
     """
     Adapter that runs thin-slice and injects regime_switch events into the trace
-    when switching criteria are met (e.g. fault count). Demonstrates
-    meta-controller and auditable regime changes.
+    when switching criteria are met (e.g. fault count). v0.2: when fallback_adapter
+    is set and decide_switch returns a regime, runs the fallback adapter with the
+    same scenario/seed/fault_params and records fallback result in trace metadata
+    (fallback_tasks_completed) so evaluation can compare two coordination paths.
     """
 
     def run(
@@ -23,6 +28,7 @@ class MetaAdapter:
         scenario_id: str,
         out_dir: Path,
         seed: int = 7,
+        fallback_adapter: Optional["MAESTROAdapter"] = None,
         **fault_params: Any,
     ) -> AdapterResult:
         delay_p95_ms = fault_params.get("delay_p95_ms", 50.0)
@@ -69,6 +75,15 @@ class MetaAdapter:
             trace["metadata"] = {}
         trace["metadata"]["meta_controller"] = True
         trace["metadata"]["regime_switch_count"] = 1 if to_regime else 0
+        if to_regime and fallback_adapter is not None:
+            fallback_dir = out_dir / "fallback_run"
+            fallback_dir.mkdir(parents=True, exist_ok=True)
+            fallback_result = run_adapter(
+                fallback_adapter, scenario_id, fallback_dir, seed=seed, **fault_params
+            )
+            fb_metrics = fallback_result.maestro_report.get("metrics", {})
+            trace["metadata"]["fallback_tasks_completed"] = fb_metrics.get("tasks_completed")
+            trace["metadata"]["fallback_run_recorded"] = True
         trace_path.write_text(json.dumps(trace, indent=2) + "\n", encoding="utf-8")
 
         report["metadata_meta_controller"] = True

@@ -54,6 +54,7 @@ def run_thin_slice(
     scenario_id: Optional[str] = "toy_lab_v0",
     delay_fault_prob: float = 0.0,
     calibration_invalid_prob: float = 0.0,
+    max_retries_per_task: int = 0,
 ) -> Dict[str, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -96,24 +97,33 @@ def run_thin_slice(
         seq += 1
 
     task_names = _task_list_for_scenario(sid)
+    max_retries = max(0, int(max_retries_per_task))
 
     for i, name in enumerate(task_names):
         tid = _task_id(name, i)
         emit("coordination_message", "system", "scheduler", {"detail": "assign_task", "task_id": tid})
-        emit("task_start", "agent", "agent_1", {"task_id": tid, "name": name})
+        task_done = False
+        for attempt in range(max_retries + 1):
+            emit("task_start", "agent", "agent_1", {"task_id": tid, "name": name})
 
-        if delay_fault_prob > 0 and rng.random() < delay_fault_prob:
-            emit("fault_injected", "system", "fault_injector", {"fault": "delay", "task_id": tid})
-            ts += sample_delay_ms() * 2.0 / 1000.0
+            if delay_fault_prob > 0 and rng.random() < delay_fault_prob:
+                emit("fault_injected", "system", "fault_injector", {"fault": "delay", "task_id": tid})
+                ts += sample_delay_ms() * 2.0 / 1000.0
 
-        if rng.random() < drop_completion_prob:
-            emit("fault_injected", "system", "fault_injector", {"fault": "drop_completion", "task_id": tid})
-            continue
+            if rng.random() < drop_completion_prob:
+                emit("fault_injected", "system", "fault_injector", {"fault": "drop_completion", "task_id": tid})
+                if attempt < max_retries:
+                    continue
+                break
 
-        if calibration_invalid_prob > 0 and rng.random() < calibration_invalid_prob:
-            emit("fault_injected", "system", "fault_injector", {"fault": "calibration_invalid", "task_id": tid})
+            if calibration_invalid_prob > 0 and rng.random() < calibration_invalid_prob:
+                emit("fault_injected", "system", "fault_injector", {"fault": "calibration_invalid", "task_id": tid})
 
-        emit("task_end", "tool", "lab_device_1", {"task_id": tid, "name": name})
+            emit("task_end", "tool", "lab_device_1", {"task_id": tid, "name": name})
+            task_done = True
+            break
+        if not task_done:
+            pass  # task dropped after all retries; no task_end
 
     final_hash = state_hash(state)
     trace = build_trace(run_id, sid, seed, start_time, events, final_hash, metadata={
@@ -121,6 +131,7 @@ def run_thin_slice(
         "drop_completion_prob": drop_completion_prob,
         "delay_fault_prob": delay_fault_prob,
         "calibration_invalid_prob": calibration_invalid_prob,
+        "max_retries_per_task": max_retries,
     })
 
     trace_path = out_dir / "trace.json"

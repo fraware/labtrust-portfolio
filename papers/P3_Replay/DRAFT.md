@@ -9,7 +9,7 @@
 **Publishable run:** `--overhead-runs 20`; run_manifest in summary.json.
 
 - **Figure 0:** `python scripts/export_p3_replay_levels_diagram.py` (output `docs/figures/p3_replay_levels_diagram.mmd`). Render Mermaid to PNG for camera-ready.
-- **Table 1, Table 2:** `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20`; table content from summary.
+- **Table 1, Table 2:** `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20`; table content from summary. Single source: [generated_tables.md](generated_tables.md).
 - **Figure 1:** `python scripts/plot_replay_overhead.py` (output `docs/figures/p3_replay_overhead.png`). Run replay_eval with `--overhead-curve` first.
 
 ## 1. Motivation
@@ -20,7 +20,7 @@ Replayability is the missing glue between robotics, distributed systems, and saf
 
 Replay is defined in levels (L0 control-plane default, L1 twin, L2 hardware-assisted).
 
-**Figure 0 — Replay levels and pipeline.** L0 (control-plane replay), L1 (+ recorded observations), L2 (aspirational); pipeline from trace to replay engine to state_hash check to diagnostics. Regenerate with `python scripts/export_p3_replay_levels_diagram.py` (output `docs/figures/p3_replay_levels_diagram.mmd`). The primary guarantee is **nondeterminism detection and localization** relative to a declared replay contract. See `kernel/trace/REPLAY_LEVELS.v0.1.md` and determinism contract there. For L0, the budget is tight: control-plane outputs must match exactly. **L2 (hardware-assisted replay)** is defined in REPLAY_LEVELS as aspirational; no L2 implementation or evaluation is included in this version.
+**Figure 0 — Replay levels and pipeline.** L0 (control-plane replay), L1 (+ recorded observations), L2 (aspirational); pipeline from trace to replay engine to state_hash check to diagnostics. Regenerate with `python scripts/export_p3_replay_levels_diagram.py` (output `docs/figures/p3_replay_levels_diagram.mmd`). The primary guarantee is **nondeterminism detection and localization** relative to a declared replay contract. See `kernel/trace/REPLAY_LEVELS.v0.1.md` and determinism contract there. For L0, the budget is tight: control-plane outputs must match exactly. **L2 (hardware-assisted replay)** is aspirational; no L2 implementation or evaluation is included in this version (see REPLAY_LEVELS).
 
 ## 3. Trace format
 
@@ -29,22 +29,25 @@ Trace format: event ontology, causal links, time model. Schema: `kernel/trace/TR
 ## 4. Replay engine and divergence detection
 
 - **L0:** Deterministic scheduling: apply events in order, recompute state, compare state_hash_after and final_state_hash. On mismatch, emit structured diagnostics (seq, expected_hash, got_hash, event_type). CLI: `labtrust_portfolio replay --run-dir <dir>` or `replay <trace.json> --diagnostics`.
-- **L1:** L1 = **control-plane replay with recorded observations**, not physics replay. All observations come from the trace; no live simulator is required for the minimal L1 contract. Design in `kernel/trace/L1_TWIN_DESIGN.v0.1.md`: twin configuration identity (build_hash, model_params, env_seed), mapping from trace to twin interface. Minimal stub: L0 replay + twin config validation. The eval runs the L1 stub on the thin-slice trace with `bench/replay/corpus/twin_config.json` and reports `l1_stub_ok` in the summary; full twin replay (simulator execution) remains future work.
+- **L1:** L1 = L0 + twin config + deterministic twin replay (same state machine from trace); full simulator/physics twin is future work. The eval runs the L1 stub by default; use `--l1-twin` for full L1 (one re-execution of the control-plane state machine so the twin consumes the same trace and reproduces state_hash). L1 = **control-plane replay with recorded observations**, not physics replay. All observations come from the trace; no live simulator is required for the minimal L1 contract. Design in `kernel/trace/L1_TWIN_DESIGN.v0.1.md`: twin configuration identity (build_hash, model_params, env_seed), mapping from trace to twin interface. The eval runs the L1 stub on the thin-slice trace with `bench/replay/corpus/twin_config.json` and reports `l1_stub_ok` in the summary.
 - **Divergence detector:** Implemented in `replay_trace_with_diagnostics`; diagnostics integrated with evidence bundle (replay_diagnostics string).
 
-**Comparison to other replay systems.** Full execution record-replay (e.g. RR, Scribe) targets full process determinism; we do not claim that. L0 focuses on **control-plane state** and **nondeterminism localization**: state-hash check per event and structured diagnostics (seq, expected/got hash). Log-only or best-effort replay has no divergence detection; we provide exact L0 contract and diagnostics.
+**Comparison to record-replay systems.** We clarify the niche relative to full execution record-replay and log-only tools.
 
-| Approach | Scope | Divergence detection |
-|----------|--------|----------------------|
-| Full execution (RR, Scribe) | Whole process | Execution replay |
-| Log-only / best-effort | Events only | None |
-| **Our L0** | Control-plane, state_hash_after | Yes: seq, expected_hash, got_hash |
+| System | Guarantee | Scope | Divergence detection | When our approach is preferable |
+|--------|-----------|--------|----------------------|----------------------------------|
+| RR (record-replay) | Full process determinism | Whole process, syscalls | Re-execution match | Control-plane audit without full-process determinism; no kernel/syscall capture. |
+| Scribe / similar | Deterministic replay from log | Process + I/O | Replay from log | We need state_hash and localization (which event diverged), not only replay. |
+| Log-only / best-effort | Events only | Events | None | Audit and forensics require *detection* of divergence and seq-level diagnostics. |
+| **Our L0** | Control-plane state + state_hash | Events, state_hash_after | Yes: seq, expected_hash, got_hash | Control-plane audit, evidence for safety cases, no full-process determinism. |
+
+RR and Scribe aim at full-process or I/O determinism for debugging; we do not. L0 targets **control-plane state** and **nondeterminism localization** with structured diagnostics (seq, expected_hash, got_hash) for audit and evidence bundles. Our approach is preferable when: (1) only control-plane behaviour must be verified (e.g. MADS evidence); (2) full-process determinism is infeasible or unnecessary; (3) divergence must be localized to a specific event for forensics.
 
 ## 5. Evaluation
 
 - **Trace corpus:** (1) MAESTRO scenario (thin-slice) with expected pass; (2) nondeterminism trap: divergence at seq 0; (3) reorder trap: divergence at seq 1; (4) timestamp_reorder_trap: wrong state_hash_after at seq 1; (5) hash_mismatch_trap: wrong state_hash_after at seq 1 (three events). Corpus is discovered from all `*_trace.json` / `*_expected.json` pairs in `bench/replay/corpus/`; `divergence_localization_confidence` is computed over the full set. See `bench/replay/README.md` and `kernel/trace/REPLAY_LEVELS.v0.1.md`.
 - **Metrics:** Replay fidelity (pass/fail per trace), divergence detection (yes/no, divergence_at_seq), overhead (replay_time_ms per trace; distribution over N replays: mean, stdev, p95 in `overhead_stats`). The evaluation script `scripts/replay_eval.py` runs L0 replay on thin-slice and corpus traces, runs the L1 stub on the thin-slice trace, and outputs a JSON summary. Summary includes **replay_level** (L0|L1|L2), **nondeterminism_budget** (declared per level), **divergence_localization_confidence** (fraction of corpus traps localized at expected seq), plus fidelity_pass, l1_stub_ok, l1_stub_message, overhead_stats, corpus_divergence_detected, per_trace. Default `--overhead-runs 20` for overhead distribution.
-- **Table 1 — Corpus and fidelity (source: replay_eval/summary.json).**
+- **Table 1 — Corpus and fidelity.** Source: replay_eval summary.json. All corpus traces (one row per trace); regenerate with `python scripts/export_replay_corpus_table.py`. Corpus includes all `*_trace.json`/`*_expected.json` pairs in bench/replay/corpus (e.g. hash_mismatch_trap); full list in summary.json per_trace and corpus_divergence_detected.
 
 | Trace | expected_replay_ok | expected_divergence_at_seq | observed replay_ok | observed divergence_at_seq |
 |-------|--------------------|----------------------------|--------------------|----------------------------|
@@ -65,7 +68,7 @@ Trace format: event ontology, causal links, time model. Schema: `kernel/trace/TR
 
 ## 6. Evidence integration
 
-Replay outcomes are admissible evidence (MADS): evidence bundle includes replay_ok and replay_diagnostics. Conformance Tier 2 requires replay ok.
+Replay outcomes are admissible evidence (MADS): evidence bundle includes replay_ok and replay_diagnostics. Conformance Tier 2 requires replay ok. **Formal + empirical:** The evidence-bundle verifier (required artifact presence, schema validity) is specified in the W3 wedge (`formal/lean/`); replay_ok and verification flags in the bundle align with that spec. L0 replay (state_hash check and diagnostics) provides the empirical replay outcome that the evidence bundle records.
 
 ## 7. Methodology and reproducibility
 
@@ -80,7 +83,7 @@ Scope and determinism levels: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMEN
 - **K3 (fidelity bound):** If replay fidelity cannot be bounded clearly (e.g. no clear pass/fail, or dependency on simulator internals), claims are narrowed to **detection and localization only** (no strong fidelity guarantee). The current design provides a clear L0 pass/fail and structured diagnostics (seq, expected_hash, got_hash, witness_slice).
 - **Synthetic traces:** Corpus and thin-slice traces are synthetic (MAESTRO thin-slice and hand-crafted trap traces); no real nondeterministic platform or hardware.
 - **L1:** Twin design is documented in `kernel/trace/L1_TWIN_DESIGN.v0.1.md`; only the stub (L0 + twin config validation) is implemented. Full twin replay (simulator execution) is not implemented; future work.
-- **L2:** Not implemented; hardware-assisted replay is aspirational (see REPLAY_LEVELS). L2 is out of scope for this version.
+- **L2 (design):** Hardware-assisted replay would require hardware config identity (firmware, calibration), time-sync model, and jitter bounds; we do not implement L2. Metric under consideration: distributional agreement (same outcome distribution over N runs with same config) or bounded divergence rate. See `kernel/trace/REPLAY_LEVELS.v0.1.md` (L2 subsection).
 - **Overhead:** Measured on small traces and a single process; not representative of large-scale or distributed deployment.
 - **L1 stub only:** Full L1 twin replay (simulator execution) is not implemented; only L0 + twin config validation. L1 = control-plane replay with recorded observations, not physics replay.
 - **Small corpus:** A few trap traces; no long real-world traces.

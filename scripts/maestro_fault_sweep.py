@@ -118,16 +118,21 @@ def main() -> int:
                 report_path = run_dir / "maestro_report.json"
                 data = json.loads(report_path.read_text(encoding="utf-8"))
                 m = data["metrics"]
-                runs.append(
-                    {
-                        "seed": seed,
-                        "tasks_completed": m["tasks_completed"],
-                        "coordination_messages": m["coordination_messages"],
-                        "p95_latency_ms": m["task_latency_ms_p95"],
-                    }
-                )
+                run_row = {
+                    "seed": seed,
+                    "tasks_completed": m["tasks_completed"],
+                    "coordination_messages": m["coordination_messages"],
+                    "p95_latency_ms": m["task_latency_ms_p95"],
+                }
+                if m.get("steps_to_completion_after_first_fault") is not None:
+                    run_row["steps_to_completion_after_first_fault"] = m["steps_to_completion_after_first_fault"]
+                if m.get("tasks_completed_after_fault") is not None:
+                    run_row["tasks_completed_after_fault"] = m["tasks_completed_after_fault"]
+                runs.append(run_row)
             tasks = [r["tasks_completed"] for r in runs]
             p95s = [r["p95_latency_ms"] for r in runs]
+            steps_after = [r["steps_to_completion_after_first_fault"] for r in runs if r.get("steps_to_completion_after_first_fault") is not None]
+            tasks_after = [r["tasks_completed_after_fault"] for r in runs if r.get("tasks_completed_after_fault") is not None]
             n = len(p95s)
             p99_idx = min(int(0.99 * n), n - 1) if n > 0 else -1
             p99_latency = sorted(p95s)[p99_idx] if p99_idx >= 0 else 0.0
@@ -147,6 +152,12 @@ def main() -> int:
                 "p95_latency_ms_p99": p99_latency,
                 "per_run": runs,
             }
+            if steps_after:
+                summary["steps_to_completion_after_first_fault_mean"] = round(statistics.mean(steps_after), 2)
+                summary["steps_to_completion_after_first_fault_stdev"] = round(statistics.stdev(steps_after), 2) if len(steps_after) > 1 else 0.0
+            if tasks_after:
+                summary["tasks_completed_after_fault_mean"] = round(statistics.mean(tasks_after), 2)
+                summary["tasks_completed_after_fault_stdev"] = round(statistics.stdev(tasks_after), 2) if len(tasks_after) > 1 else 0.0
             all_results.append(summary)
             (args.out / scenario_id / f"{s['label']}_summary.json").write_text(
                 json.dumps(summary, indent=2) + "\n", encoding="utf-8"

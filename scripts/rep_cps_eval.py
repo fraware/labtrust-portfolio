@@ -43,6 +43,7 @@ def run_adapter_comparison(
     seeds: list[int],
     out_dir: Path,
     delay_fault_prob: float = 0.05,
+    aggregation_steps: int = 1,
 ) -> list[dict]:
     """Run REPCPS (robust), REPCPS naive, REPCPS unsecured, and Centralized; return metrics."""
     from labtrust_portfolio.adapters.rep_cps_adapter import REPCPSAdapter
@@ -67,6 +68,7 @@ def run_adapter_comparison(
         fault_params = {
             "drop_completion_prob": 0.02,
             "delay_fault_prob": delay_fault_prob,
+            "aggregation_steps": aggregation_steps,
         }
 
         rep_result = run_adapter(
@@ -93,7 +95,7 @@ def run_adapter_comparison(
         meta_naive = rep_naive_result.trace.get("metadata", {})
         meta_unsec = rep_unsec_result.trace.get("metadata", {})
 
-        results.append({
+        row = {
             "seed": seed,
             "rep_cps_tasks_completed": m_rep.get("tasks_completed", 0),
             "rep_cps_naive_tasks_completed": m_naive.get("tasks_completed", 0),
@@ -104,7 +106,11 @@ def run_adapter_comparison(
             "rep_cps_unsecured_aggregate_load": meta_unsec.get("rep_cps_aggregate_load"),
             "rep_cps_safety_gate_ok": meta_rep.get("rep_cps_safety_gate_ok"),
             "delay_fault_prob": delay_fault_prob,
-        })
+            "rep_cps_aggregation_steps": meta_rep.get("rep_cps_aggregation_steps"),
+            "rep_cps_converged": meta_rep.get("rep_cps_converged"),
+            "rep_cps_steps_to_convergence": meta_rep.get("rep_cps_steps_to_convergence"),
+        }
+        results.append(row)
     return results
 
 
@@ -206,6 +212,12 @@ def main() -> int:
         default="toy_lab_v0,lab_profile_v0",
         help="Comma-separated scenario ids (publishable: toy_lab_v0,lab_profile_v0; use --scenario for single)",
     )
+    ap.add_argument(
+        "--aggregation-steps",
+        type=int,
+        default=1,
+        help="Multi-step aggregation (default 1; use 3 or 5 for convergence metric)",
+    )
     args = ap.parse_args()
 
     seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
@@ -217,17 +229,19 @@ def main() -> int:
     if not delay_values:
         delay_values = [0.05]
 
+    aggregation_steps = getattr(args, "aggregation_steps", 1)
     summary = {
         "scenario_ids": scenarios,
         "bottleneck_scenario": REP_CPS_BOTTLENECK_SCENARIO,
         "seeds": seeds,
         "delay_fault_prob_sweep": delay_values,
-        "aggregation_steps": 1,
+        "aggregation_steps": aggregation_steps,
         "run_manifest": {
             "seeds": seeds,
             "seed_count": len(seeds),
             "scenario_ids": scenarios,
             "delay_fault_prob_sweep": delay_values,
+            "aggregation_steps_used": aggregation_steps,
             "script": "rep_cps_eval.py",
         },
     }
@@ -235,6 +249,7 @@ def main() -> int:
     summary["rate_limit_windowing"] = run_rate_limit_windowing_check()
 
     all_adapter = []
+    convergence_achieved = None
     if not args.skip_adapter:
         delay_sweep_results = []
         for scenario_id in scenarios:
@@ -245,8 +260,11 @@ def main() -> int:
                     run_dir = args.out / scenario_id / f"delay_{d}"
                 run_dir.mkdir(parents=True, exist_ok=True)
                 adapter_results = run_adapter_comparison(
-                    scenario_id, seeds, run_dir, delay_fault_prob=d
+                    scenario_id, seeds, run_dir, delay_fault_prob=d,
+                    aggregation_steps=aggregation_steps,
                 )
+                if convergence_achieved is None and aggregation_steps > 1 and adapter_results:
+                    convergence_achieved = adapter_results[0].get("rep_cps_converged")
                 tasks_rep = [r["rep_cps_tasks_completed"] for r in adapter_results]
                 tasks_cen = [r["centralized_tasks_completed"] for r in adapter_results]
                 stdev_rep = statistics.stdev(tasks_rep) if len(tasks_rep) > 1 else 0.0
@@ -308,6 +326,25 @@ def main() -> int:
         summary["rep_cps_unsecured_aggregate_load_mean"] = (
             statistics.mean(aggs_unsec) if len(aggs_unsec) > 0 else None
         )
+        # Convergence under multi-step aggregation (aggregation_steps > 1)
+        if aggregation_steps > 1:
+            steps_list = [
+                r["rep_cps_steps_to_convergence"]
+                for r in all_adapter
+                if r.get("rep_cps_steps_to_convergence") is not None
+            ]
+            converged_list = [r.get("rep_cps_converged") for r in all_adapter]
+            summary["convergence_steps_to_convergence_mean"] = (
+                round(statistics.mean(steps_list), 4) if steps_list else None
+            )
+            summary["convergence_steps_to_convergence_stdev"] = (
+                round(statistics.stdev(steps_list), 4) if len(steps_list) > 1 else None
+            )
+            summary["convergence_achieved_rate"] = (
+                sum(1 for c in converged_list if c) / len(converged_list)
+                if converged_list else None
+            )
+            summary["convergence_achieved"] = convergence_achieved
 
     agg_compromise = run_aggregation_under_compromise()
     summary["aggregation_under_compromise"] = agg_compromise

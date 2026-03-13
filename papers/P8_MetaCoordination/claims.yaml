@@ -11,6 +11,7 @@ claims:
     statement: "A meta-controller can switch regimes based on measurable stress signals (tail latency, contention, fault rate) while preserving safety constraints."
     evidence:
       release_id: "meta_eval"
+      confidence: "medium"  # spec + impl; single scenario; conditional on non-vacuous trigger
       artifact_paths:
         - "datasets/runs/meta_eval/comparison.json"
         - "kernel/meta/META_CONTROLLER_SPEC.v0.1.md"
@@ -22,6 +23,7 @@ claims:
     statement: "Switching is auditable and replayable: every regime change is justified by logged criteria and does not silently violate higher-level intent."
     evidence:
       release_id: "meta_eval"
+      confidence: "high"  # trace events + payload; script-generated tables
       artifact_paths:
         - "impl/src/labtrust_portfolio/adapters/meta_adapter.py"
         - "kernel/trace/TRACE.v0.1.schema.json"
@@ -32,6 +34,7 @@ claims:
     statement: "Under compound faults, meta-coordination reduces collapse versus best fixed-regime baselines."
     evidence:
       release_id: "meta_eval"
+      confidence: "medium"  # comparison.json; strength depends on non-vacuous run
       artifact_paths:
         - "datasets/runs/meta_eval/comparison.json"
         - "datasets/runs/meta_eval/collapse_sweep.json"
