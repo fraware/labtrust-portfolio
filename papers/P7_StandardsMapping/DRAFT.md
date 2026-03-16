@@ -79,7 +79,7 @@ We emphasize mechanically checkable mapping and scripted review over narrative-o
 
 Scope: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper (no certification):
 
-- **Two instantiations:** Lab v0.1 and warehouse v0.1; run_assurance_eval runs mapping and review for both (per_profile in results.json). No cross-domain evidence beyond these two. Instantiation is minimal; no real certification process or external auditor. This limits the scope of claims to the translation layer only (no certification).
+- **Three instantiations:** Lab v0.1, warehouse v0.1, and medical v0.1; run_assurance_eval runs mapping and review for each (per_profile in results.json). Instantiation is minimal; no real certification process or external auditor. This limits the scope of claims to the translation layer only (no certification).
 - **Review is scripted and partial:** Scripted review checks schema, mapping completeness, PONR task presence in trace, and control coverage; it does not replace human judgment or full safety-case proof. PONR coverage requires `--scenario-id` from the known list (toy_lab_v0, lab_profile_v0); when scenario is unknown, no heuristic is used and the script reports which scenario-ids are supported.
 - **Completeness:** No guarantee beyond the defined checks (mapping + optional PONR-coverage). "All PONRs have a control" holds only when hazard `ponr_ids` are populated and the checker is run.
 - **Coverage metrics:** PONR coverage ratio and control coverage ratio are defined for the run and scenario; they are not system-wide safety-case completeness metrics.

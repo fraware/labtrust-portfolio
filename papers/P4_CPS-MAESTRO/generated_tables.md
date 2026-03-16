@@ -1,5 +1,7 @@
 # Generated tables for P4 (P4_CPS-MAESTRO)
 
+**How to read:** Table 1 (fault sweep) includes steps_after_fault_mean when available (recovery metric). Table 2 compares Centralized, Blackboard, and RetryHeavy adapters. Source: multi_sweep.json and baseline_summary.json. Regenerate: `python scripts/export_maestro_tables.py` (with multi_sweep.json and baseline_summary.json from maestro_fault_sweep and maestro_baselines).
+
 ## From export_maestro_tables.py
 
 # Table 1 — Fault sweep
@@ -17,7 +19,7 @@
 | lab_profile_v0 | drop_005_delay_01 | 4.50 | 0.53 | 32.71 | 20.95 |
 | lab_profile_v0 | calibration_invalid_01 | 5 | 0.00 | 40.19 | 18.49 |
 
-# Table 2 — Baseline (Centralized vs Blackboard)
+# Table 2 — Baseline (Centralized vs Blackboard vs RetryHeavy)
 
 | Adapter | Seed | tasks_completed | coordination_messages | p95_latency_ms |
 |---------|------|----------------|------------------------|----------------|
