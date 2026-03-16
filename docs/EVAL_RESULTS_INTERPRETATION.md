@@ -2,7 +2,7 @@
 
 This document interprets the current evaluation outputs across the portfolio and proposes follow-up tests and experiments. Use it to decide what to run next and how to read the results.
 
-**Portfolio status:** All nine papers (P0–P8) are at Draft stage; Phase 3 (submission-readiness) passed 2025-03-11. Next: submission prep per [PRE_SUBMISSION_CHECKLIST.md](PRE_SUBMISSION_CHECKLIST.md). Summary JSONs may include optional **excellence_metrics**; run `python scripts/export_excellence_summary.py` to print a one-line summary per paper (see [STANDARDS_OF_EXCELLENCE.md](STANDARDS_OF_EXCELLENCE.md)).
+**Portfolio status:** All nine papers (P0–P8) are at Draft stage; Phase 3 (submission-readiness) passed 2025-03-11. Next: submission prep per [PRE_SUBMISSION_CHECKLIST.md](PRE_SUBMISSION_CHECKLIST.md). Summary JSONs may include optional **excellence_metrics**; run `python scripts/export_excellence_summary.py` to print a one-line summary per paper (see [STANDARDS_OF_EXCELLENCE.md](STANDARDS_OF_EXCELLENCE.md)). For a compact snapshot of key numbers per paper, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md). For P5/P6/P8 key results as markdown, run `python scripts/export_key_results_p5_p6_p8.py` after the publishable pipeline.
 
 ## Executive summary
 

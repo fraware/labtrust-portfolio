@@ -64,6 +64,8 @@ Controls: C-001 (PONR gate requires Tier 2 conformance), C-002 (disposition in t
 
 **Figure 1 — Assurance case graph skeleton (GSN-lite).** Hazards to controls to evidence artifacts, auto-generated from the lab instantiation. Regenerate with `python scripts/export_assurance_gsn.py` (reads assurance_pack_instantiation.json; outputs Mermaid diagram).
 
+**Key results.** (1) Mapping: mapping_check_ok (results.mapping_check.ok), ponr_coverage_ok from results.json; use a run where both are true for submission tables. (2) Per-profile: lab_v0.1, warehouse_v0.1, medical_v0.1 in results.per_profile (reusable across domains); each profile has review outcome and optional PONR coverage. (3) Review: run review with --scenario-id toy_lab_v0 and --scenario-id lab_profile_v0 so PONR coverage uses kernel task names; review_exit_ok, ponr_coverage_ratio, control_coverage_ratio per scenario in results.reviews and Table 2. (4) No certification claim (translation layer only). Numbers from results.json. Regenerate with run_assurance_eval.py and export_assurance_tables.py. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).
+
 ## 7. Comparison to other assurance and safety-case frameworks
 
 | Aspect | P7 (this work) | GSN/CAE safety case | ISO 26262 hazard analysis |
@@ -91,6 +93,8 @@ Scope: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md).
 **Methodology:** Hypothesis—structured assurance pack enables traceable, mechanically checkable mapping from hazards to controls to evidence. Metrics: schema validation, mapping completeness, PONR coverage (optional), review outcome (evidence_bundle_ok, trace_ok, ponr_coverage_ratio, control_coverage_ratio). Kill criterion: if mapping cannot be checked by script or reviewer cannot reconstruct PONR chain, the approach fails. No certification claim. Portfolio criteria: `docs/STATE_OF_THE_ART_CRITERIA.md`.
 
 **Reproducibility:** Run full eval: `python scripts/run_assurance_eval.py` (writes results.json). Validate instantiation: `python scripts/check_assurance_mapping.py`. Review a run: `python scripts/review_assurance_run.py <run_dir> --scenario-id toy_lab_v0`. Integration test: `tests/test_assurance_p7.py`. Checklist: `docs/P7_REVIEW_CHECKLIST.md`. Artifacts: assurance_pack_instantiation.json, results.json, review outcome JSON.
+
+**Submission note.** No certification or compliance claim is made. Review is scripted and partial; PONR coverage uses `--scenario-id` when available (toy_lab_v0, lab_profile_v0). For submission, ensure the reported tables come from a run where results.json has mapping_check.ok and ponr_coverage_ok true and per_profile populated (lab_v0.1, warehouse_v0.1, medical_v0.1); verify and state in the draft that no certification claim is made and that review is scripted and partial.
 
 ## 10. Non-claims
 

@@ -110,50 +110,78 @@ def main() -> int:
         default=100_000,
         help="When --scale-test: number of events (default 100000)",
     )
+    ap.add_argument(
+        "--scale-test-runs",
+        type=int,
+        default=1,
+        help="When --scale-test: number of runs for mean/stdev of throughput (default 1); use 5+ for variance",
+    )
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
 
     if args.scale_test:
-        state = {"ownership": {}, "_last_ts": {}}
         n = args.scale_events
-        t0 = time.perf_counter()
-        denials = 0
-        for i in range(n):
-            task_id = f"t{i % 1000}"
-            ts = 1.0 + i * 0.01
-            ev_start = {
-                "type": "task_start",
-                "ts": ts,
-                "actor": {"id": f"agent_{i % 3}"},
-                "payload": {"task_id": task_id, "name": "a", "writer": f"agent_{i % 3}"},
-            }
-            verdict = validate(state, ev_start)
-            if verdict.verdict == ALLOW:
-                state = apply_event_to_state(state, ev_start)
-            else:
-                denials += 1
-            ev_end = {
-                "type": "task_end",
-                "ts": ts + 0.005,
-                "actor": {"id": "agent_1"},
-                "payload": {"task_id": task_id, "name": "a", "writer": "agent_1"},
-            }
-            verdict = validate(state, ev_end)
-            if verdict.verdict == ALLOW:
-                state = apply_event_to_state(state, ev_end)
-            else:
-                denials += 1
-        elapsed = time.perf_counter() - t0
-        total_events = n * 2
+        total_events_per_run = n * 2
+        runs_data = []
+        for _ in range(args.scale_test_runs):
+            state = {"ownership": {}, "_last_ts": {}}
+            t0 = time.perf_counter()
+            denials = 0
+            for i in range(n):
+                task_id = f"t{i % 1000}"
+                ts = 1.0 + i * 0.01
+                ev_start = {
+                    "type": "task_start",
+                    "ts": ts,
+                    "actor": {"id": f"agent_{i % 3}"},
+                    "payload": {"task_id": task_id, "name": "a", "writer": f"agent_{i % 3}"},
+                }
+                verdict = validate(state, ev_start)
+                if verdict.verdict == ALLOW:
+                    state = apply_event_to_state(state, ev_start)
+                else:
+                    denials += 1
+                ev_end = {
+                    "type": "task_end",
+                    "ts": ts + 0.005,
+                    "actor": {"id": "agent_1"},
+                    "payload": {"task_id": task_id, "name": "a", "writer": "agent_1"},
+                }
+                verdict = validate(state, ev_end)
+                if verdict.verdict == ALLOW:
+                    state = apply_event_to_state(state, ev_end)
+                else:
+                    denials += 1
+            elapsed = time.perf_counter() - t0
+            events_per_sec = total_events_per_run / elapsed if elapsed > 0 else 0
+            time_per_write_us = elapsed * 1e6 / total_events_per_run if total_events_per_run else 0
+            runs_data.append({
+                "total_time_sec": round(elapsed, 4),
+                "time_per_write_us": round(time_per_write_us, 4),
+                "events_per_sec": round(events_per_sec, 2),
+                "denials": denials,
+            })
+        events_per_sec_list = [r["events_per_sec"] for r in runs_data]
+        time_per_write_list = [r["time_per_write_us"] for r in runs_data]
+        mean_eps = statistics.mean(events_per_sec_list)
+        stdev_eps = statistics.stdev(events_per_sec_list) if len(events_per_sec_list) > 1 else 0.0
+        mean_tpu = statistics.mean(time_per_write_list)
+        stdev_tpu = statistics.stdev(time_per_write_list) if len(time_per_write_list) > 1 else 0.0
         scale_result = {
             "scale_test": True,
-            "total_events": total_events,
-            "denials": denials,
-            "total_time_sec": round(elapsed, 4),
-            "time_per_write_us": round(elapsed * 1e6 / total_events, 4) if total_events else 0,
-            "events_per_sec": round(total_events / elapsed, 2) if elapsed > 0 else 0,
+            "total_events": total_events_per_run,
+            "denials": runs_data[0]["denials"] if runs_data else 0,
+            "total_time_sec": round(runs_data[0]["total_time_sec"], 4) if runs_data else 0,
+            "time_per_write_us": round(mean_tpu, 4),
+            "events_per_sec": round(mean_eps, 2),
+            "events_per_sec_mean": round(mean_eps, 2),
+            "events_per_sec_stdev": round(stdev_eps, 2),
+            "time_per_write_us_mean": round(mean_tpu, 4),
+            "time_per_write_us_stdev": round(stdev_tpu, 4),
+            "scale_test_runs": args.scale_test_runs,
             "run_manifest": {
                 "scale_test_events": args.scale_events,
+                "scale_test_runs": args.scale_test_runs,
                 "script": "contracts_eval.py",
             },
         }

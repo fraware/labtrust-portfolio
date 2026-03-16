@@ -32,6 +32,32 @@ For any table or figure that will appear in the submitted PDF:
 - Evals were run with 20 seeds (or the script's publishable default).
 - Export/plot scripts were re-run and DRAFT.md numbers match the generated output.
 - Run manifest is stated in the draft or in the summary JSON referenced by the draft.
+- **Key results (P5, P6, P8):** DRAFTs include a Key results subsection; verify numbers match [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) or re-run `python scripts/export_key_results_p5_p6_p8.py` after the publishable pipeline.
+
+**Core papers (P1, P2, P3, P4, P7):**
+
+- **P1:** Verify eval.json has all_detection_ok true (or success_criteria_met equivalent) and run_manifest for the run used for Table 1 and Table 2; state in draft if needed.
+- **P2 trigger:** Verify rep_cps_eval summary.json has trigger_met true for the run used for tables; state in the draft that the trigger is met (or that the paper is conditional/optional). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
+- **P3:** Verify replay_eval summary.json has fidelity_pass and run_manifest for the run used for tables; state in draft if needed.
+- **P4:** Verify multi_sweep.json run_manifest (seeds, scenarios) for the run used for Table 1; use 20 seeds and two scenarios for publishable tables.
+- **P7:** Verify results.json mapping_check_ok and ponr_coverage_ok for the run used for tables; draft must state no certification claim and that review is scripted and partial.
+- **P5 regression:** If Table 2 regression row is N/A, draft must state so and avoid claiming regression beats baseline.
+- **P5 trigger:** Verify heldout_results.json has beat_per_scenario_baseline and trigger_met true for the run used for tables; state in the draft that the conditional trigger is met (or that the paper is negative/dataset analysis). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
+- **P6 evidence:** If submitting without real-LLM, abstract or limitations must state "results from synthetic plans only"; if submitting with real-LLM, Table 1b must appear in the draft and run_manifest must record model_id.
+- **P6 trigger:** Verify red_team_results.json has trigger_met true for the run used for tables; state in the draft that the trigger is met (or that the paper is conditional/optional). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
+- **P8 non-vacuous:** Tables must be from a run with `meta_eval --non-vacuous` (so collapse_count > 0), or the draft must state that results are methodology and auditability only and not claim collapse reduction.
+- **P8 trigger:** Verify comparison.json has trigger_met and no_safety_regression true; state in the draft that the trigger is met (or that the paper is methodology/auditability only). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
+
+### Conditional papers (P2, P5, P6, P8)
+
+Before submission, for each conditional paper ensure the following and state in the draft accordingly. Canonical trigger wording: [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
+
+| Paper | Checks |
+|-------|--------|
+| **P2** | Trigger: REP-CPS improves robustness without throughput regression on at least one non-toy scenario; evidence in summary; state in draft. See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md). |
+| **P5** | Trigger: `heldout_results.json` has `beat_per_scenario_baseline` and `trigger_met` true for the run used for tables. Regression row: if N/A, state in draft and do not claim regression beats baseline. |
+| **P6** | Trigger: `red_team_results.json` has `trigger_met` true. Evidence: if synthetic-only, state in abstract/limitations; if real-LLM, Table 1b in draft and run_manifest records model_id. |
+| **P8** | Non-vacuous: Table 1 from run with `meta_eval --non-vacuous` (collapse_count > 0), or label results as methodology and auditability only. Trigger: `comparison.json` has `trigger_met` and `no_safety_regression` true. |
 
 Commands per paper: [PAPER_GENERATION_WORKFLOW.md — Quick reference](PAPER_GENERATION_WORKFLOW.md#quick-reference-commands-per-paper). Regenerate all artifacts for that paper with `python scripts/generate_paper_artifacts.py --paper Px`, then paste from `papers/Px_*/generated_tables.md` into DRAFT.md if needed.
 

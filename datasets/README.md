@@ -1,6 +1,6 @@
 # Datasets policy
 
-- `datasets/runs/` are **mutable** working directories (local runs, scratch outputs). After running all paper experiments (`run_paper_experiments.py`), see [RUN_RESULTS_SUMMARY.md](runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary.
+- `datasets/runs/` are **mutable** working directories (local runs, scratch outputs). After running all paper experiments (`run_paper_experiments.py`), see [RUN_RESULTS_SUMMARY.md](runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. For a Key results markdown block (P5, P6, P8), run `python scripts/export_key_results_p5_p6_p8.py` from repo root.
 - `datasets/releases/` are **immutable** release snapshots (content-addressed or stamped with release IDs).
 - `datasets/releases/portfolio_v0.1/` is the **portfolio-level release** directory: it may contain aggregated artifacts such as `p0_conformance_summary.json` (conformance over all P0 runs included in the portfolio). Build with `scripts/build_p0_conformance_summary.py` (see EVALS_RUNBOOK).
 

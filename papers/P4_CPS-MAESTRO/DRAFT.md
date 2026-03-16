@@ -32,7 +32,7 @@ Scoring is standardized: tasks_completed, task_latency_ms_p50/p95/p99, coordinat
 
 Adapter interface: run(scenario_id, out_dir, seed, **fault_params) -> AdapterResult (trace + report). Reference adapters: **CentralizedAdapter** (thin-slice, single coordinator), **BlackboardAdapter** (same pipeline, different default fault params), and **RetryHeavyAdapter** (architecturally distinct: retry on drop—each task is retried up to max_retries_per_task times on drop_completion, so under the same fault settings tasks_completed and latency curves differ from Centralized). All produce valid TRACE and MAESTRO_REPORT. See `impl/src/labtrust_portfolio/adapters/`. Centralized and Blackboard differ only by default fault parameters; RetryHeavy adds a different failure-handling strategy (retry-on-drop). Table 2 (baselines) from `maestro_baselines.py` includes all three; under fault sweep, RetryHeavy yields higher tasks_completed when drops occur.
 
-**Comparison to other benchmarks.** Multi-agent RL benchmarks (e.g. SMAC, MAPF) focus on learning and full simulation; MAESTRO focuses on scenario-driven coordination under fault injection and standardized reporting (tasks_completed, p95 latency, variance) rather than full RL or physical hardware. CPS and robotics testbeds often lack a shared fault model and report format; MAESTRO provides a minimal benchmark set with drop/delay faults and MAESTRO_REPORT schema.
+**Comparison to other benchmarks.** Multi-agent RL benchmarks (e.g. SMAC, MAPF) [1] focus on learning and full simulation; CPS and robotics testbeds [2] often lack a shared fault model and report format. MAESTRO focuses on scenario-driven coordination under fault injection and standardized reporting (tasks_completed, p95 latency, variance) rather than full RL or physical hardware; MAESTRO provides a minimal benchmark set with drop/delay faults and MAESTRO_REPORT schema.
 
 | Benchmark type | Domain | Fault model | Metrics |
 |----------------|--------|-------------|---------|
@@ -57,6 +57,8 @@ One run per scenario is supported by loading the scenario YAML and running the p
 Dataset layout and release process in `bench/maestro/REPRODUCIBILITY.md`. All runs produce admissible evidence bundles; release script copies to datasets/releases with manifest. **Benchmark release v0.1:** Canonical scenario set defined in `bench/maestro/BENCHMARK_RELEASE.v0.1.md` and `benchmark_scenarios.v0.1.json` (toy_lab_v0, lab_profile_v0, warehouse_v0, traffic_v0, regime_stress_v0). For held-out and train/val/test usage, see P5 (scaling_heldout_eval).
 
 ## 7. Baseline results and fault sweep
+
+**Key results.** (1) Fault sweep: tasks_completed_mean/stdev by scenario and setting (no_drop, drop_005, delay_01, etc.); publishable run uses --seeds 20 and --scenarios toy_lab_v0,lab_profile_v0; run_manifest in multi_sweep.json. (2) Recovery metrics when faults occur (non-vacuous for drop_005, drop_005_delay_01): steps_to_completion_after_first_fault_mean, tasks_completed_after_fault_mean in multi_sweep per-scenario summaries. (3) Anti-gaming: run maestro_antigaming_eval.py; scoring_proof and success_criteria_met.antigaming_penalized in antigaming_results.json; excellence_metrics: anti_gaming_margin_tasks, legitimate_safe_min, pathological_max_tasks_completed. (4) Baselines: Centralized, Blackboard, RetryHeavy from baseline_summary (maestro_baselines.py). (5) Excellence metrics (multi_sweep.json): fault_coverage, scenario_diversity, variance_reported, n_seeds_per_setting. *Numbers from multi_sweep.json, antigaming_results.json, baseline_summary.json. Regenerate with maestro_fault_sweep.py, maestro_baselines.py, maestro_antigaming_eval.py, export_maestro_tables.py. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).*
 
 Tables are generated from machine-readable artifacts. The **run manifest** for the fault sweep is in `datasets/runs/maestro_fault_sweep/multi_sweep.json`: top-level key `run_manifest` contains `seeds`, `scenarios`, `fault_settings`, and `fault_params`. Baseline run info is in `bench/maestro/baseline_summary.json`. For publishable tables use `--seeds 20` and both scenarios (`toy_lab_v0`, `lab_profile_v0`). Run `scripts/maestro_fault_sweep.py --scenarios toy_lab_v0,lab_profile_v0 --seeds 20`, then `scripts/maestro_baselines.py`, then `scripts/export_maestro_tables.py` to regenerate the tables below. Figure 1: `scripts/plot_maestro_recovery.py` (reads multi_sweep.json). Sources: `datasets/runs/maestro_fault_sweep/multi_sweep.json`, `bench/maestro/baseline_summary.json`. Benchmark release: `bench/maestro/BENCHMARK_RELEASE.v0.1.md`, `benchmark_scenarios.v0.1.json`.
 
@@ -104,6 +106,13 @@ Tables are generated from machine-readable artifacts. The **run manifest** for t
 
 **Figure 1 — Recovery proxy (tasks_completed vs fault setting).** Recovery proxy only (tasks_completed vs fault setting); not MTTR or time-to-safe-state. Mean tasks_completed across seeds per fault setting from multi_sweep. Regenerate with `python scripts/plot_maestro_recovery.py` (output `docs/figures/p4_recovery_curve.png`). See Limitations.
 
+## References (placeholders)
+
+Replace with actual references before submission. See [PAPER_ARTIFACT_STYLE.md](../docs/PAPER_ARTIFACT_STYLE.md).
+
+- [1] Author. Title. Venue, Year. (e.g. multi-agent or coordination benchmark: SMAC, MAPF.)
+- [2] Author. Title. Venue, Year. (e.g. CPS or robotics testbed.)
+
 ## 8. Limitations
 
 Scope and fault model: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper:
@@ -122,6 +131,8 @@ Scope and fault model: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_
 **Methodology:** Hypothesis—standard scenarios, fault model, and scoring yield stable, comparable metrics across adapters and seeds. Metrics: tasks_completed, coordination_messages, task_latency_ms_p95; variance (stdev) over seeds per setting. Baselines: Centralized vs Blackboard (same scenario, seed band); fault sweep no_drop vs drop_005. Kill criterion: if metrics are not comparable across runs or variance is unreported, the suite fails. Portfolio criteria: `docs/STATE_OF_THE_ART_CRITERIA.md`.
 
 **Reproducibility:** Scenario-driven run: `labtrust_portfolio run-thinslice --out-dir <dir>` or adapter.run(scenario_id, out_dir, seed). Fault sweep (publishable): `python scripts/maestro_fault_sweep.py --scenarios toy_lab_v0,lab_profile_v0 --seeds 20`; run manifest in `datasets/runs/maestro_fault_sweep/multi_sweep.json` (run_manifest). Baselines: `python scripts/maestro_baselines.py`. Tables: `python scripts/export_maestro_tables.py` (reads multi_sweep.json and baseline_summary.json). Figure 1: `python scripts/plot_maestro_recovery.py`. Anti-gaming: `python scripts/maestro_antigaming_eval.py` writes `datasets/runs/maestro_antigaming/antigaming_results.json` (scoring_proof, success_criteria_met.antigaming_penalized). Benchmark set: `bench/maestro/benchmark_scenarios.v0.1.json`. Dataset layout: `bench/maestro/REPRODUCIBILITY.md`, `datasets/README.md`. Integration tests: `tests/test_maestro_p4.py`.
+
+**Submission note.** For submission, publishable tables use 20 seeds and two scenarios (toy_lab_v0, lab_profile_v0); run_manifest in multi_sweep.json must be stated in the draft. Use run_paper_experiments.py --paper P4 (or maestro_fault_sweep.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0, then maestro_antigaming_eval.py, then maestro_baselines.py) so fault sweep includes drop_005 (recovery metrics non-vacuous) and antigaming_results.json has scoring_proof and excellence_metrics.
 
 ---
 

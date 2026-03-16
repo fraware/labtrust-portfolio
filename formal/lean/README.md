@@ -19,7 +19,7 @@ Requires [elan](https://github.com/leanprover/elan) and Lean 4 (toolchain in `le
 
 - **W1 — Gatekeeper/PONR:** Implemented. Minimal model (RunState: conformance_ok, contracts_ok); `allow_release check_contracts s` = conformance_ok ∧ (¬check_contracts ∨ contracts_ok). Fail-closed theorems: conformance false ⇒ deny; contracts checked and false ⇒ deny. See `Labtrust/W1Gatekeeper.lean`. Aligns with `impl/.../gatekeeper.allow_release` and kernel/mads/PONR_ENFORCEMENT.v0.1.md.
 - **W2 — Contract validator:** Implemented. Minimal model (State: owner, lastTs; Event: taskId, ts, writer); `validate s e` returns allow/deny. Determinism: same state and event yield the same verdict (validate_congr). See `Labtrust/W2Contract.lean`. Aligns with impl/.../contracts.validate and kernel/contracts/CONTRACT_MODEL.v0.1.md.
-- **W3 — Evidence bundle verifier:** Implemented. Encodes required artifact presence, schema validity, and SHA256 format checks; soundness lemmas state that if `verify b = .ok` then required artifacts are present and verification flags hold. See `Labtrust/W3EvidenceBundle.lean`. The two soundness theorem proofs currently use `sorry` (full proofs require Std/Mathlib list tactics).
+- **W3 — Evidence bundle verifier:** Implemented. Encodes required artifact presence, schema validity, and SHA256 format checks; soundness lemmas state that if `verify b = .ok` then required artifacts are present and verification flags hold. See `Labtrust/W3EvidenceBundle.lean`. The two soundness theorem proofs currently use `sorry` (full proofs require Std/Mathlib list tactics). **Portfolio bar:** W1 and W2 are fully machine-checked; W3 satisfies spec + soundness statements; full W3 proofs are optional excellence.
 
 ## Alignment with impl
 

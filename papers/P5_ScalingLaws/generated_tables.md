@@ -1,6 +1,6 @@
 # Generated tables for P5 (P5_ScalingLaws)
 
-**How to read:** Table 1 shows per held-out scenario train_n, test_n, baseline MAE, per-scenario MAE, feature baseline MAE, regression MAE (when fit), and actuals_mean. Table 2 gives overall MAE and 95% CI for each baseline. Units: MAE in tasks_completed; CI in same units.
+**How to read:** P5 contributes scenario-based coordination tax prediction with held-out validation and comparison to prior model; sensitivity at N=10, 20, 30 in scaling_sensitivity.json. Table 1 shows per held-out scenario train_n, test_n, baseline MAE, per-scenario MAE, feature baseline MAE, regression MAE (when fit), and actuals_mean. Table 2 gives overall MAE and 95% CI for each baseline (regression row from overall_regression_mae or N/A when regression_skipped_reason set). Units: MAE in tasks_completed; CI in same units.
 
 ## From export_scaling_tables.py
 

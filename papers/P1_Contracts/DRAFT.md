@@ -62,6 +62,8 @@ Run `scripts/contracts_eval.py` to evaluate the validator on the corpus: for eac
 
 Overhead is sub-microsecond to tens of microseconds per write (validator + state update). Detection rate: 100% for corpus (all expected verdicts match).
 
+**Key results.** (1) Corpus: 7/7 sequences detection_ok; violations_denied_with_validator and baseline_timestamp_only margin from eval.json. (2) Overhead: time_per_write_us (mean or p99) per sequence in eval.json; excellence_metrics: corpus_detection_rate_pct, overhead_p99_us, baseline_margin_denials. (3) Scale test (publishable): total_events, events_per_sec (mean and stdev when --scale-test-runs > 1), time_per_write_us from scale_test.json; publishable run includes `contracts_eval.py --scale-test --scale-events 100000 --scale-test-runs 5` (via run_paper_experiments.py). (4) Gatekeeper: release blocked when contract invalid (allow_release with check_contracts=True). *Numbers from eval.json and scale_test.json. Regenerate with contracts_eval.py and export_contracts_corpus_table.py. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+
 **Throughput (with variance):** Run `contracts_eval.py --throughput --scale 1000 --throughput-runs 5`. Output: `throughput_events_per_sec_mean`, `throughput_events_per_sec_stdev` in eval.json. Typical: hundreds of thousands of events/sec (single-threaded); variance reported over multiple runs for reproducibility.
 
 **Table 2 — Policy comparison (state-of-the-art baseline).** Comparison to another consistency approach: timestamp-only policy (monotonicity only, no ownership) vs full contract vs accept-all. Source: `eval.json` (`violations_denied_with_validator`, `baseline_timestamp_only_denials`, `baseline_timestamp_only_missed`). Run manifest in same file.
@@ -80,13 +82,22 @@ The timestamp-only baseline catches stale write and reorder but misses split-bra
 
 **Methodology:** Hypothesis—contract validator detects and denies split-brain, stale write, and reorder violations from trace events. Metrics: verdict (allow/deny), reason_codes, detection_ok (denials match expected). Kill criteria: cannot define failure classes (K1); validator misses a corpus denial (K2); overhead unbounded (K3). Baselines: corpus expected_verdicts; timestamp-only policy (comparison to another consistency approach); accept-all. Portfolio criteria: `docs/STATE_OF_THE_ART_CRITERIA.md`.
 
-**Baseline comparison:** With the contract validator, all violation events in the corpus are denied (Table 1 denials; eval.json `violations_denied_with_validator`). Timestamp-only (monotonicity only) denies 3 and misses 1 (split_brain). Accept-all would apply all 4 (inadmissible). Table 2 summarizes. So we compare against two baselines: another contract-like approach (timestamp-only) and no validation (accept-all).
+**Baseline comparison:** With the contract validator, all violation events in the corpus are denied (Table 1 denials; eval.json `violations_denied_with_validator`). Timestamp-only (monotonicity only) denies 3 and misses 1 (split_brain). Accept-all would apply all 4 (inadmissible). Table 2 summarizes. So we compare against two baselines: another contract-like approach (timestamp-only) and no validation (accept-all). Prior work on consistency and coordination contracts often focuses on distributed consensus or state-machine validation [1,2]; we contribute trace-derived validation (no hidden state) and a corpus benchmark with explicit failure classes.
 
-**Reproducibility:** Corpus: `bench/contracts/corpus/*.json`. Run corpus test: `pytest tests/test_contracts_p1.py`. Run eval: `python scripts/contracts_eval.py --out datasets/runs/contracts_eval`; every run reports `violations_denied_with_validator`, `baseline_timestamp_only_denials`, `baseline_timestamp_only_missed` (policy comparison). Optional: `--throughput --scale 1000 --throughput-runs 5` for throughput mean and stdev; `--baseline` for accept-all count. Artifacts: eval.json with per-sequence results, overhead, policy comparison, and optional throughput (mean, stdev). A real-launch integration test (`TestContractsEvalIntegration.test_contracts_eval_produces_valid_eval`) runs the eval script and asserts on eval.json (corpus_eval, detection_ok per sequence, baseline keys).
+**Reproducibility:** Corpus: `bench/contracts/corpus/*.json`. Run corpus test: `pytest tests/test_contracts_p1.py`. Run eval: `python scripts/contracts_eval.py --out datasets/runs/contracts_eval`; every run reports `violations_denied_with_validator`, `baseline_timestamp_only_denials`, `baseline_timestamp_only_missed` (policy comparison) and excellence_metrics (corpus_detection_rate_pct, overhead_p99_us, baseline_margin_denials). **Publishable run:** include scale test: `python scripts/contracts_eval.py --out datasets/runs/contracts_eval --scale-test --scale-events 100000 --scale-test-runs 5` (or use `run_paper_experiments.py --paper P1` which runs corpus eval then scale test). scale_test.json then contains total_events, events_per_sec_mean, events_per_sec_stdev, time_per_write_us_mean, time_per_write_us_stdev. Optional: `--throughput --scale 1000 --throughput-runs 5` for corpus-repeat throughput mean and stdev; `--baseline` for accept-all count. Artifacts: eval.json with per-sequence results, overhead, excellence_metrics, policy comparison; scale_test.json with scale-test throughput and variance.
+
+**Submission note.** For submission, tables must be produced from a run where eval.json has run_manifest and success_criteria_met.all_detection_ok true (or equivalent); state so in the draft when submitting.
 
 ## 9. Security and transport
 
 Security invariants: provenance, writer authentication hooks. Contract surface is transport-agnostic (above ROS2/DDS or event-log).
+
+## References (placeholders)
+
+Replace with actual references before submission. See [PAPER_ARTIFACT_STYLE.md](../docs/PAPER_ARTIFACT_STYLE.md).
+
+- [1] Author. Title. Venue, Year. (e.g. consistency or coordination contracts.)
+- [2] Author. Title. Venue, Year. (e.g. state-machine or trace-based validation.)
 
 ## 10. Limitations
 

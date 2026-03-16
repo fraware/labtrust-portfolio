@@ -90,8 +90,9 @@ def p1(quick: bool) -> bool:
     )
     if not ok:
         return False
-    # Scale test (surgical: 10k events if quick, else 100k)
+    # Scale test (surgical: 10k events if quick, else 100k); multiple runs for variance when publishable
     n = 10_000 if quick else 100_000
+    scale_test_runs = 1 if quick else 5
     ok = run(
         [
             sys.executable,
@@ -99,9 +100,10 @@ def p1(quick: bool) -> bool:
             "--out", str(out),
             "--scale-test",
             "--scale-events", str(n),
+            "--scale-test-runs", str(scale_test_runs),
         ],
         "P1 Contracts scale test",
-        timeout=120,
+        timeout=180 if scale_test_runs > 1 else 120,
     )
     return ok
 
@@ -125,7 +127,7 @@ def p2(quick: bool) -> bool:
 
 def p3(quick: bool) -> bool:
     out = RUNS / "replay_eval" / "summary.json"
-    overhead_runs = 5 if quick else 15
+    overhead_runs = 5 if quick else 20
     return run(
         [
             sys.executable,
@@ -140,7 +142,7 @@ def p3(quick: bool) -> bool:
 
 
 def p4(quick: bool) -> bool:
-    seeds = 3 if quick else 5
+    seeds = 3 if quick else 20
     ok = run(
         [
             sys.executable,
@@ -150,7 +152,7 @@ def p4(quick: bool) -> bool:
             "--seeds", str(seeds),
         ],
         "P4 MAESTRO fault sweep (two scenarios)",
-        timeout=400,
+        timeout=600 if seeds > 5 else 400,
     )
     if not ok:
         return False
@@ -170,26 +172,29 @@ def p4(quick: bool) -> bool:
             sys.executable,
             str(REPO / "scripts" / "maestro_baselines.py"),
             "--scenario", "toy_lab_v0",
-            "--seeds", str(min(seeds, 5)),
+            "--seeds", str(seeds),
         ],
         "P4 MAESTRO baselines (toy_lab_v0)",
-        timeout=120,
+        timeout=180 if seeds > 5 else 120,
     )
     return True
 
 
 def p5(quick: bool) -> bool:
-    seeds = 3 if quick else 5
+    seeds = 3 if quick else 20
     multiscenario = RUNS / "multiscenario_runs"
+    cmd = [
+        sys.executable,
+        str(REPO / "scripts" / "generate_multiscenario_runs.py"),
+        "--out", str(multiscenario),
+        "--seeds", str(seeds),
+    ]
+    if not quick:
+        cmd.append("--fault-mix")
     ok = run(
-        [
-            sys.executable,
-            str(REPO / "scripts" / "generate_multiscenario_runs.py"),
-            "--out", str(multiscenario),
-            "--seeds", str(seeds),
-        ],
+        cmd,
         "P5 Generate multi-scenario runs",
-        timeout=600,
+        timeout=900 if seeds >= 20 else 600,
     )
     if not ok:
         return False
@@ -218,20 +223,22 @@ def p5(quick: bool) -> bool:
 
 
 def p6(quick: bool) -> bool:
-    # Red-team + confusable + adapter latency (surgical: one scenario, two seeds if quick)
+    # Red-team + confusable + adapter latency; publishable: two scenarios, 5 adapter seeds for variance
     scenarios = "toy_lab_v0" if quick else "toy_lab_v0,lab_profile_v0"
-    adapter_seeds = "7" if quick else "7,42"
+    adapter_seeds = "7" if quick else "7,14,21,28,35"
+    cmd = [
+        sys.executable,
+        str(REPO / "scripts" / "llm_redteam_eval.py"),
+        "--out", str(RUNS / "llm_eval"),
+        "--run-adapter",
+        "--adapter-scenarios", scenarios,
+        "--adapter-seeds", adapter_seeds,
+    ]
+    # For real-LLM evidence (Table 1b), run manually: llm_redteam_eval.py --real-llm (requires .env API keys)
     return run(
-        [
-            sys.executable,
-            str(REPO / "scripts" / "llm_redteam_eval.py"),
-            "--out", str(RUNS / "llm_eval"),
-            "--run-adapter",
-            "--adapter-scenarios", scenarios,
-            "--adapter-seeds", adapter_seeds,
-        ],
+        cmd,
         "P6 LLM red-team + confusable + adapter latency",
-        timeout=180,
+        timeout=300 if not quick else 180,
     )
 
 
@@ -294,9 +301,10 @@ def p8(quick: bool) -> bool:
                 "--run-naive",
                 "--fault-threshold", "0",
                 "--non-vacuous",
+                "--fallback-adapter", "retry_heavy",
             ],
-            "P8 Meta-coordination (non-vacuous: fixed vs meta vs naive)",
-            timeout=400,
+            "P8 Meta-coordination (non-vacuous: fixed vs meta vs naive, two regimes)",
+            timeout=500,
         )
     else:
         ok = run(

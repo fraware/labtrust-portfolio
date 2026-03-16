@@ -18,6 +18,7 @@ claims:
         - "impl/src/labtrust_portfolio/replay.py"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 0", "Figure 1"]
+      confidence: high
 
   - id: "C2"
     statement: "Hidden nondeterminism is detectable: same trace not equal to same control-plane behavior triggers structured diagnostics."
@@ -29,6 +30,7 @@ claims:
         - "impl/src/labtrust_portfolio/replay.py"
       table_ids: ["Table 1"]
       figure_ids: []
+      confidence: high
 
   - id: "C3"
     statement: "Replay supports time-travel debugging: control-plane decisions and enforcement events can be reconstructed and audited."
@@ -39,6 +41,7 @@ claims:
         - "impl/src/labtrust_portfolio/replay.py"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: []
+      confidence: medium
 
   - id: "C4"
     statement: "The toolchain integrates with evidence bundles so replay outcomes are admissible evidence (MADS)."
@@ -49,5 +52,6 @@ claims:
         - "impl/src/labtrust_portfolio/evidence.py"
       table_ids: ["Table 1"]
       figure_ids: []
+      confidence: high
 
 # Table 1: corpus/fidelity from replay_eval. Table 2: overhead from summary. Figure 1: plot_replay_overhead.py.

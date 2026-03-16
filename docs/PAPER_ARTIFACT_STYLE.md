@@ -41,6 +41,8 @@ Format: **Figure N — Short title.** One sentence interpreting the figure (e.g.
 
 ## References
 
+- **P1 (Contracts), P2 (REP-CPS), P4 (MAESTRO):** Replace [1], [2] in the DRAFT References section with actual citations before submission (e.g. consistency/coordination or state-machine literature for P1; Byzantine aggregation / CPS coordination for P2; multi-agent or coordination benchmark and CPS/robotics testbed for P4).
+- **P5 (Scaling):** Replace [1], [2] in the DRAFT References section with actual citations (e.g. multi-agent/coordination overhead, RL reward scaling) before submission.
 - Draft conversion: [DRAFT_CONVERSION_CHECKLIST.md](DRAFT_CONVERSION_CHECKLIST.md).
 - Visual inventory: [VISUALS_PER_PAPER.md](VISUALS_PER_PAPER.md).
 - Result locations and how to read: [RESULTS_PER_PAPER.md](RESULTS_PER_PAPER.md).

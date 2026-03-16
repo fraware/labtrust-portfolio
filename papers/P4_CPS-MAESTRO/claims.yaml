@@ -17,6 +17,7 @@ claims:
         - "kernel/eval/MAESTRO_REPORT.v0.1.schema.json"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 0", "Figure 1"]
+      confidence: high
 
   - id: "C2"
     statement: "Variance is first-class: repeated runs and tail reporting are mandatory."
@@ -27,6 +28,7 @@ claims:
         - "impl/src/labtrust_portfolio/maestro_report_from_trace.py"
       table_ids: ["Table 1"]
       figure_ids: ["Figure 1"]
+      confidence: high
 
   - id: "C3"
     statement: "Adapter interface makes adoption tractable across centralized/blackboard/hybrid stacks."
@@ -38,6 +40,7 @@ claims:
         - "bench/maestro/adapter_costs.json"
       table_ids: ["Table 2"]
       figure_ids: []
+      confidence: high
 
   - id: "C4"
     statement: "The suite is usable by third parties: docs + CI + reference baselines."
@@ -49,5 +52,6 @@ claims:
         - "bench/maestro/baseline_results.md"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: []
+      confidence: medium
 
 # Table 1: export_maestro_tables (fault sweep). Table 2: baselines. Figure 1: plot_maestro_recovery.py.

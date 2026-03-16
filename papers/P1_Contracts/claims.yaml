@@ -17,6 +17,7 @@ claims:
         - "impl/src/labtrust_portfolio/contracts.py"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 0"]
+      confidence: high
 
   - id: "C2"
     statement: "Contract validation can be executed from traces (no privileged hidden state), enabling auditability and replay-based debugging."
@@ -28,6 +29,7 @@ claims:
         - "impl/src/labtrust_portfolio/contracts.py"
       table_ids: ["Table 1"]
       figure_ids: []
+      confidence: high
 
   # C3: design/portability claim; no cross-transport empirical test in v0.1
   - id: "C3"
@@ -39,6 +41,7 @@ claims:
         - "kernel/interop/OPC_UA_LADS_MAPPING.v0.1.md"
       table_ids: []
       figure_ids: ["Figure 0"]
+      confidence: medium
 
   - id: "C4"
     statement: "A small reference implementation demonstrates enforceability with bounded overhead."
@@ -49,5 +52,6 @@ claims:
         - "datasets/runs/contracts_eval/scale_test.json"
       table_ids: ["Table 1"]
       figure_ids: ["Figure 1"]
+      confidence: high
 
 # Table 1: export_contracts_corpus_table.py. Table 2: policy comparison (in DRAFT from eval.json). Figure 1: plot_contracts_scale.py.

@@ -17,6 +17,7 @@ claims:
         - "datasets/runs/assurance_eval/results.json"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 0", "Figure 1"]
+      confidence: high
 
   - id: "C2"
     statement: "The mapping is mechanically checkable (artifact presence + trace reconstruction), not narrative."
@@ -29,6 +30,7 @@ claims:
         - "docs/PART11_AUDIT_TRAIL_ALIGNMENT.md"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: []
+      confidence: high
 
   - id: "C3"
     statement: "One worked example (lab profile) demonstrates audit completeness and replayability."
@@ -41,5 +43,6 @@ claims:
         - "docs/P7_REVIEW_CHECKLIST.md"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 1"]
+      confidence: medium
 
 # Table 1/2: export_assurance_tables.py. Figure 1: export_assurance_gsn.py (GSN-lite). One-command audit: audit_bundle.py --release. K7: no template theater.

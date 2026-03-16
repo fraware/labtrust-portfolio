@@ -1,6 +1,6 @@
 # Generated tables for P6 (P6_LLMPlanning)
 
-**How to read:** Table 1 lists all 8 red-team cases; export may also emit Table 1b (real-LLM when run with `--real-llm`) and a jailbreak-style section. Table 2: adapter latency. Source: `datasets/runs/llm_eval/red_team_results.json`. Regenerate: `python scripts/export_llm_redteam_table.py [--out-dir datasets/runs/llm_eval]`.
+**How to read:** P6 contributes a CPS-oriented typed-plan firewall with red-team + confusable deputy + jailbreak-style suite and OWASP alignment; optional real-LLM table (Table 1b when keys set). Table 1 lists all 8 red-team cases; export may also emit Table 1b (real-LLM when run with `--real-llm`) and a jailbreak-style section. Table 2: adapter latency. Source: `datasets/runs/llm_eval/red_team_results.json`. Regenerate: `python scripts/export_llm_redteam_table.py [--out-dir datasets/runs/llm_eval]`.
 
 ## From export_llm_redteam_table.py
 
