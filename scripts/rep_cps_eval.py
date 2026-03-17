@@ -175,6 +175,115 @@ def run_rate_limit_windowing_check() -> dict:
     }
 
 
+def run_profile_ablation() -> list[dict]:
+    """
+    Ablate profile components: no auth, no freshness, no rate limit, no robust aggregation, full profile.
+    Uses same honest+compromised updates; reports bias vs honest-only aggregate and aggregate value.
+    """
+    from labtrust_portfolio.rep_cps import aggregate, compromised_updates
+
+    honest = [
+        {"variable": "load", "value": 0.3, "ts": 0.0, "agent_id": "a1"},
+        {"variable": "load", "value": 0.35, "ts": 0.0, "agent_id": "a2"},
+        {"variable": "load", "value": 0.32, "ts": 0.0, "agent_id": "a3"},
+    ]
+    compromised = compromised_updates("load", num_compromised=2, extreme_value=10.0, ts=0.0)
+    combined = honest + compromised
+    honest_only_agg = aggregate("load", honest, method="trimmed_mean", trim_fraction=0.25)
+    # Allowed agents for "auth on": only honest
+    allowed = {"a1", "a2", "a3"}
+    filtered = [u for u in combined if u.get("agent_id") in allowed]
+
+    rows = []
+    # No auth: accept all (including compromised), robust agg
+    agg_no_auth = aggregate("load", combined, method="trimmed_mean", trim_fraction=0.25)
+    bias_no_auth = abs(agg_no_auth - honest_only_agg)
+    rows.append({
+        "variant": "no_auth",
+        "description": "All agents accepted (no auth filter), trimmed_mean",
+        "bias": round(bias_no_auth, 4),
+        "aggregate": round(agg_no_auth, 4),
+        "failure": bias_no_auth > 1.0,
+    })
+
+    # No freshness: compromised send with stale ts; without max_age we accept them
+    honest_current = [{"variable": "load", "value": 0.3, "ts": 0.0, "agent_id": "a1"},
+                     {"variable": "load", "value": 0.35, "ts": 0.0, "agent_id": "a2"},
+                     {"variable": "load", "value": 0.32, "ts": 0.0, "agent_id": "a3"}]
+    compromised_stale = [
+        {"variable": "load", "value": 10.0, "ts": -100.0, "agent_id": "compromised_0"},
+        {"variable": "load", "value": 10.0, "ts": -100.0, "agent_id": "compromised_1"},
+    ]
+    combined_stale = honest_current + compromised_stale
+    current_ts = 0.0
+    agg_no_freshness = aggregate(
+        "load", combined_stale,
+        method="trimmed_mean", trim_fraction=0.25,
+        max_age_sec=None, current_ts=current_ts,
+    )
+    bias_no_freshness = abs(agg_no_freshness - honest_only_agg)
+    rows.append({
+        "variant": "no_freshness",
+        "description": "No freshness window (stale compromised accepted), trimmed_mean",
+        "bias": round(bias_no_freshness, 4),
+        "aggregate": round(agg_no_freshness, 4),
+        "failure": bias_no_freshness > 1.0,
+    })
+
+    # No rate limit: burst from one agent
+    burst = honest + [{"variable": "load", "value": 10.0, "ts": 0.0, "agent_id": "a1"}] * 5
+    agg_no_rate = aggregate(
+        "load", [u for u in burst if u.get("agent_id") in allowed],
+        method="trimmed_mean", trim_fraction=0.25,
+        rate_limit=None,
+    )
+    bias_no_rate = abs(agg_no_rate - honest_only_agg)
+    rows.append({
+        "variant": "no_rate_limit",
+        "description": "No rate limit (burst from one agent), auth, trimmed_mean",
+        "bias": round(bias_no_rate, 4),
+        "aggregate": round(agg_no_rate, 4),
+        "failure": bias_no_rate > 1.0,
+    })
+
+    # No robust aggregation: mean instead of trimmed_mean (with compromised in)
+    agg_no_robust = aggregate("load", combined, method="mean")
+    bias_no_robust = abs(agg_no_robust - honest_only_agg)
+    rows.append({
+        "variant": "no_robust_aggregation",
+        "description": "Mean (no robust agg), all agents",
+        "bias": round(bias_no_robust, 4),
+        "aggregate": round(agg_no_robust, 4),
+        "failure": bias_no_robust > 1.0,
+    })
+
+    # No safety gate: not simulated in this eval (protocol output could actuate directly)
+    rows.append({
+        "variant": "no_safety_gate",
+        "description": "Safety gate bypass (N/A in current eval)",
+        "bias": None,
+        "aggregate": None,
+        "failure": None,
+    })
+
+    # Full profile: auth + trimmed_mean + rate_limit + max_age (same as filtered, trimmed)
+    agg_full = aggregate(
+        "load", filtered,
+        method="trimmed_mean", trim_fraction=0.25,
+        rate_limit=10, max_age_sec=60.0, current_ts=1.0,
+    )
+    bias_full = abs(agg_full - honest_only_agg)
+    rows.append({
+        "variant": "full_profile",
+        "description": "Auth, trimmed_mean, rate_limit, freshness",
+        "bias": round(bias_full, 4),
+        "aggregate": round(agg_full, 4),
+        "failure": bias_full > 1.0,
+    })
+
+    return rows
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="P2 REP-CPS evaluation")
     ap.add_argument(
@@ -348,6 +457,8 @@ def main() -> int:
 
     agg_compromise = run_aggregation_under_compromise()
     summary["aggregation_under_compromise"] = agg_compromise
+
+    summary["profile_ablation"] = run_profile_ablation()
 
     from labtrust_portfolio.rep_cps import aggregate, compromised_updates
     honest = [

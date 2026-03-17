@@ -1,8 +1,8 @@
 # MADS-CPS Normative Scope (v0.1)
 
-## Object of the standard
+## Scope of the framework
 
-MADS-CPS defines a **normative minimum assurance bar** for agentic cyber-physical workflows. The object of the standard is to specify what must exist—controls, telemetry, evidence admissibility, and conformance tiers—so that a third party can verify system-level safety and security **under realistic lab constraints**, without prescribing coordination algorithms or internal optimization.
+MADS-CPS defines a **normative minimum assurance bar** for agentic cyber-physical workflows. We specify what must exist—controls, telemetry, evidence admissibility, and conformance tiers—so that a third party can verify conformance to the proposed assurance bar **under realistic lab constraints**, without prescribing coordination algorithms or internal optimization.
 
 ## Boundary
 

@@ -75,7 +75,7 @@ PAPER_CONFIG = {
     "P6": (
         "P6_LLMPlanning",
         [RUNS / "llm_eval" / "red_team_results.json"],
-        [("export_llm_tables.py", [])],
+        [("export_llm_redteam_table.py", [])],
         "export_p6_firewall_flow.py",
         "plot_llm_adapter_latency.py",
     ),

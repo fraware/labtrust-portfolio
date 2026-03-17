@@ -51,11 +51,11 @@ Recommended bundle elements (v0.2 candidate):
 - `redaction_manifest`: what was removed, why, under which policy.
 - `access_policy`: who can access which blobs, under what process.
 
-## What MADS-CPS guarantees under restricted modes
+## What MADS-CPS supports under restricted modes
 - Integrity verification of the evidence bundle.
 - Reconstruction of causal chains for Tier T2/T3 actions.
 - Replay at declared fidelity levels (see Replay Levels).
-- Objective conformance checks (tiers) without requiring public disclosure.
+- Machine-checkable conformance checks (tiers) under a declared envelope without requiring public disclosure.
 
 ## Non-goals
 - MADS-CPS does not claim “open science by default.”

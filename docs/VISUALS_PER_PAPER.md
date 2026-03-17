@@ -6,25 +6,25 @@ This document defines the **full set of tables and figures** expected for each p
 
 | Paper | Overview / conceptual figure | Result tables | Result figures | Comparison / taxonomy |
 |-------|-----------------------------|---------------|----------------|------------------------|
-| P0 MADS-CPS | Figure 0: Assurance pipeline (Trace → Report → Bundle → Conformance → Release) | Table 1 E1/E3, Table 2 E2 admissibility | Figure 1 E3 p95 latency | — |
+| P0 MADS-CPS | Figure 1: Assurance pipeline (Trace → Report → Bundle → Conformance → Release) | Table 1 E1 corpus, Table 2 E2 4-col admissibility, Table 3 E3+E4 | Figure 2 tier lattice, Figure 3 redaction; plot_e3_latency | — |
 | P1 Contracts | Figure 0: Contract validation flow (event → validate → allow/deny) | Table 1 corpus, Table 2 policy comparison | Figure 1 scale throughput | — |
-| P2 REP-CPS | Figure 0: REP-CPS profile architecture (agents → aggregation → gate) | Table 1 adapter, Table 2 aggregation, Table 3 baselines | Figure 1 tasks by policy | — |
+| P2 REP-CPS | Figure 0: REP-CPS profile architecture (agents → aggregation → gate) | Table 1 adapter, Table 2 aggregation, Table 3 baselines, Table 5 profile ablation | Figure 1 tasks by policy | — |
 | P3 Replay | Figure 0: Replay levels (L0 / L1 / L2) and pipeline | Table 1 corpus/fidelity, Table 2 overhead | Figure 1 overhead vs trace size | Table: approach comparison |
 | P4 MAESTRO | Figure 0: Scenario → Adapter → Trace → Report flow | Table 1 fault sweep, Table 2 baselines | Figure 1 recovery curve | Table: benchmark comparison |
 | P5 Scaling | Figure 0: Baseline hierarchy (global → per-scenario → feature → regression) | Table 1 held-out, Table 2 MAE/CI | Figure 1 MAE by scenario | — |
-| P6 LLM Planning | Figure 0: Typed-plan firewall flow (plan → validate → allow/deny) | Table 1 red-team, Table 2 adapter latency | Figure 1 adapter latency by scenario | Table: comparison to OWASP/benchmarks |
+| P6 LLM Planning | Figure 0: Typed-plan firewall flow (plan → validate → allow/deny) | Table 1 red-team, Table 1b real-LLM (5 runs/case, pass_rate, Wilson CI), Table 2 adapter latency, Baseline (gated/weak/ungated) | Figure 1 adapter latency by scenario | Table: comparison to OWASP/benchmarks |
 | P7 Standards | Figure 0: Mapping flow (hazards → controls → evidence → audit) | Table 1 mapping/review, Table 2 per-scenario | Figure 1 GSN-lite graph | Table: framework comparison |
 | P8 Meta | Figure 0: Meta-controller state and switch criterion | Table 1 fixed vs meta vs naive, Table 2 per-seed | Figure 1 collapse sweep | Table: comparison to related work |
 
 ## Scripts that produce each visual
 
-- **P0:** `export_e3_table.py`, `export_e2_admissibility_matrix.py`, `plot_e3_latency.py`, `export_p0_assurance_pipeline.py` (Figure 0).
+- **P0:** Table 1: `build_p0_conformance_corpus.py`, `export_e1_corpus_table.py`. Table 2: `e2_redaction_demo.py`, `export_e2_admissibility_matrix.py`. Table 3: `run_p0_e4_multi_adapter.py`, `export_p0_table3.py`. Figure 1: `export_p0_assurance_pipeline.py`. Figure 2: `export_p0_tier_lattice.py`. Figure 3: `export_p0_redaction_figure.py`. `plot_e3_latency.py`.
 - **P1:** `export_contracts_corpus_table.py`, eval.json for Table 2, `plot_contracts_scale.py`, `export_p1_contract_flow.py` (Figure 0).
-- **P2:** summary.json for tables, `plot_rep_cps_summary.py`, `export_p2_rep_profile_diagram.py` (Figure 0).
+- **P2:** summary.json for Table 1/2/3 and profile_ablation (Table 5), `plot_rep_cps_summary.py`, `export_p2_rep_profile_diagram.py` (Figure 0).
 - **P3:** replay_eval summary for tables, `plot_replay_overhead.py`, `export_p3_replay_levels_diagram.py` (Figure 0).
 - **P4:** `export_maestro_tables.py`, `plot_maestro_recovery.py`, `export_p4_maestro_flow.py` (Figure 0).
 - **P5:** `export_scaling_tables.py`, `plot_scaling_mae.py`, `export_p5_baseline_hierarchy.py` (Figure 0).
-- **P6:** `export_llm_redteam_table.py` (red-team + confusable deputy tables), eval artifacts, `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
+- **P6:** `export_llm_redteam_table.py` (Table 1 red-team + Table 1b real-LLM + confusable deputy), `llm_redteam_eval.py --real-llm --real-llm-runs 5`, `export_p6_baseline_table.py` (3-way baseline), `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
 - **P7:** `export_assurance_tables.py`, `export_assurance_gsn.py`, `export_p7_mapping_flow.py` (Figure 0).
 - **P8:** `export_meta_tables.py` (from comparison.json), `meta_collapse_sweep.py` then `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (Figure 1), `export_p8_meta_diagram.py` (Figure 0).
 
@@ -36,10 +36,12 @@ Overview diagrams (Figure 0) are written to `docs/figures/` as `.mmd` (Mermaid) 
 
 Each paper's repro block at the top of DRAFT.md must list the exact command for **every** table and figure, including Figure 0. Example:
 
-- Figure 0: `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`).
-- Table 1: `python scripts/export_e3_table.py`.
-- Table 2: `python scripts/export_e2_admissibility_matrix.py`.
-- Figure 1: `python scripts/plot_e3_latency.py`.
+- Figure 1: `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`).
+- Table 1: `python scripts/build_p0_conformance_corpus.py`, then `python scripts/export_e1_corpus_table.py`.
+- Table 2: `python scripts/e2_redaction_demo.py`, then `python scripts/export_e2_admissibility_matrix.py`.
+- Table 3: `python scripts/run_p0_e4_multi_adapter.py`, then `python scripts/export_p0_table3.py`.
+- Figure 2: `python scripts/export_p0_tier_lattice.py`. Figure 3: `python scripts/export_p0_redaction_figure.py`.
+- Figure (E3 latency): `python scripts/plot_e3_latency.py`.
 
 ## References
 

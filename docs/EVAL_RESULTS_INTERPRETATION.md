@@ -6,11 +6,11 @@ This document interprets the current evaluation outputs across the portfolio and
 
 ## Executive summary
 
-- **P2 REP-CPS:** Robust aggregation (trimmed_mean, clipping, median_of_means) reduces bias under compromise; aggregation_variants and sybil_sweep in summary; safety_gate_denial.json documents REP output gated by policy. Eval writes to `rep_cps_eval/`.
+- **P2 REP-CPS:** Safety-gated profile for sensitivity sharing; robust aggregation reduces observed compromise-induced bias (trimmed_mean, clipping, median_of_means); aggregation_variants, sybil_sweep, profile_ablation in summary; safety_gate_denial.json documents REP output gated by policy. Trigger not met in evaluated scenario (tasks_completed identical across policies); contribution is profile and harness. Eval writes to `rep_cps_eval/`.
 - **P5 Scaling:** Global-mean and per-scenario-mean baselines; num_tasks/feature regression; 95% CI for MAE; scaling_fit (exploratory). Scripts: `scaling_heldout_eval.py`, `export_scaling_tables.py`; output: `scaling_eval/heldout_results.json`. Use `generate_multiscenario_runs.py --fault-mix` (default 20 seeds) for publishable.
 - **P6 LLM:** Red-team (8 cases) and confusable deputy (4 cases); confusable_deputy_results.json (adversarial args blocked); e2e_denial_trace.json; adapter latency with --run-adapter. Evidence from synthetic plans by default; optional --real-llm. Eval writes to `llm_eval/`.
 - **P8 Meta:** Regime switches with `--run-naive --fault-threshold 0`; naive baseline; `--hysteresis N` for thrash control; meta_collapse_sweep.py writes collapse_sweep.json (drop_prob sweep). Run manifests in comparison.json and collapse_sweep.json. Eval writes to `meta_eval/comparison.json`; Figure 1 from plot_meta_collapse.py (input collapse_sweep.json).
-- **Core (P0, P3, P4, P1, P5, P7):** Eval scripts run in CI; results under `datasets/runs/` (P0 E3: e3_summary.json, p0_e3_variance.json; P0 E2: e2_redaction_demo/trace_redacted.json; P0 conformance summary: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json; replay_eval with witness_slice and top-level witness_slices in summary; maestro_fault_sweep, maestro_antigaming/antigaming_results.json with scoring_proof; contracts_eval, P1_TRACE_DERIVABILITY.md; assurance_eval, audit_bundle --release; scaling_eval with trigger_met). **Conditional (P2, P5, P6, P8):** success_criteria_met includes trigger_met where applicable; see docs/CONDITIONAL_TRIGGERS.md for required evidence. **Real eval launches:** P1, P2, P3, P4, P5, P6, P7, and P8 each have an integration test; see tests/test_contracts_p1.py, test_rep_cps_p2.py, test_replay_p3.py, test_maestro_p4.py, test_scaling_p5.py, test_llm_p6.py, test_assurance_p7.py, test_meta_p8.py. P5: test_scaling_p5.py runs generate_multiscenario_runs then scaling_heldout_eval and asserts on heldout_results.json. CI runs generate_multiscenario_runs --seeds 2 and scaling_heldout_eval.
+- **Core (P0, P3, P4, P1, P5, P7):** Eval scripts run in CI; results under `datasets/runs/` (P0 E1: p0_conformance_corpus/, corpus_manifest.json; P0 E2: e2_redaction_demo/; P0 E3: e3_summary.json, p0_e3_variance.json; P0 E4: p0_e4_summary.json; P0 conformance summary: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json; replay_eval with witness_slice and top-level witness_slices in summary; maestro_fault_sweep, maestro_antigaming/antigaming_results.json with scoring_proof; contracts_eval, P1_TRACE_DERIVABILITY.md; assurance_eval, audit_bundle --release; scaling_eval with trigger_met). **Conditional (P2, P5, P6, P8):** success_criteria_met includes trigger_met where applicable; see docs/CONDITIONAL_TRIGGERS.md for required evidence. **Real eval launches:** P1, P2, P3, P4, P5, P6, P7, and P8 each have an integration test; see tests/test_contracts_p1.py, test_rep_cps_p2.py, test_replay_p3.py, test_maestro_p4.py, test_scaling_p5.py, test_llm_p6.py, test_assurance_p7.py, test_meta_p8.py. P5: test_scaling_p5.py runs generate_multiscenario_runs then scaling_heldout_eval and asserts on heldout_results.json. CI runs generate_multiscenario_runs --seeds 2 and scaling_heldout_eval.
 
 ---
 
@@ -32,19 +32,21 @@ This document interprets the current evaluation outputs across the portfolio and
 | with_compromise_naive_aggregate | ~4.19 | Plain mean with same inputs |
 | bias_robust | ~3.24 | |robust − honest| |
 | bias_naive | ~3.87 | |naive − honest| |
+| profile_ablation[] | from summary | No auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant (Table 5). |
 
 ### Interpretation
 
 - **Adapter parity:** REP-CPS and Centralized complete the same number of tasks on average; no throughput regression from the protocol in this setup.
 - **Robust vs naive aggregation:** Under 2 Byzantine agents (extreme value 10), robust (trimmed mean) stays closer to the honest aggregate (0.32) than naive mean (4.19). So **robust aggregation reduces bias under compromise**.
 - **Real tests and launches:** CI runs rep_cps_eval with reduced seeds for speed. Publishable default is 20 seeds. Integration tests in tests/test_rep_cps_p2.py run the eval script and real adapter runs, asserting summary structure and invariants (bias_robust < bias_naive, rate_limit exercised, adapter parity). Naive-in-loop and unsecured baselines are in the adapter and eval.
-- **Validity and robustness:** Summary includes run_manifest (seeds, scenario_ids, delay_sweep, script) and 95% CI for tasks_completed when n >= 2. success_criteria_met (adapter_parity, robust_beats_naive, trigger_met) is machine-checked in CI. Conditional paper: trigger_met indicates REP-CPS improves robustness without throughput regression; see docs/CONDITIONAL_TRIGGERS.md. Use default (20 seeds) for publishable tables.
+- **Validity and robustness:** Summary includes run_manifest (seeds, scenario_ids, delay_sweep, script), profile_ablation (Table 5), and 95% CI for tasks_completed when n >= 2. success_criteria_met (adapter_parity, robust_beats_naive) is machine-checked in CI. Conditional paper: in the evaluated scenario, sensitivity sharing does not materially change tasks_completed; the contribution is the profile and MAESTRO-compatible harness. See docs/CONDITIONAL_TRIGGERS.md (P2). Use default (20 seeds) for publishable tables.
 
 ### Follow-up experiments (P2)
 
 1. **Stability under delay:** Sweep delay_fault_prob (e.g. 0, 0.05, 0.1, 0.2); record tasks_completed and aggregate stability.
 2. **Second scenario:** Run with --scenarios toy_lab_v0,lab_profile_v0 to check generality.
-3. **Convergence:** If adapter gains multi-step aggregation, add convergence time and stability-over-time metrics.
+3. **Convergence (optional):** When --aggregation-steps > 1, summary reports convergence_achieved_rate, steps_to_convergence; Table 4 via export_rep_cps_convergence_table.py.
+4. **Scenario where sensitivity matters:** Add or document a scenario where aggregated sensitivity materially influences scheduling/actuation so trigger can be met.
 
 
 ---
@@ -163,11 +165,11 @@ With --run-naive and --fault-threshold 0, naive baseline and regime switches are
 
 ### P0 (MADS-CPS)
 
-- **Existing:** E1 thin-slice conformance, E2 redaction, E3 replay-link (multi-seed variance). No single “P0 eval result” file; Evidence bundle schema requires verification_mode (public | evaluator | regulator); Tier 2 replay conditional on verification_mode. Portfolio conformance: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json. Tables/figures: export_e3_table (--compact), export_e2_admissibility_matrix, plot_e3_latency. Conformance and E3 are in scripts and releases.
-- **E3 sample (20 seeds publishable):** tasks_completed mean, stdev; p95_latency_ms mean, stdev; all_match; 95% CI. Table: `python scripts/export_e3_table.py` (reads e3_summary / p0_e3_variance from produce_p0_e3_release run or from datasets/runs/ when --no-release). run_manifest (seeds, scenario_ids, fault_settings, script; optional version from GIT_SHA); success_criteria_met.e3_all_match.
-- **Validity and robustness:** E3 summary is self-describing via run_manifest; independent verifier recomputes from trace (no human in the loop). Use --runs 10 for publishable.
+- **Existing:** E1 conformance corpus (build_p0_conformance_corpus, export_e1_corpus_table; Table 1). E2 redaction and 4-col verification-mode admissibility matrix (Table 2). E3 replay-link with optional --standalone-verifier (verify_maestro_from_trace.py). E4 algorithm-independence (run_p0_e4_multi_adapter, export_p0_table3; Table 3). Evidence bundle “” file; Evidence bundle schema requires verification_mode (public | evaluator | regulator); Tier 2 replay conditional on verification_mode. Portfolio conformance: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json. Figures: export_p0_assurance_pipeline (Fig 1), export_p0_tier_lattice (Fig 2), export_p0_redaction_figure (Fig 3); plot_e3_latency. Repro: papers/P0_MADS-CPS/DRAFT.md Appendix.
+- **E3 (20 seeds publishable):** tasks_completed mean, stdev; p95_latency_ms mean, stdev; all_match; 95% CI. export_e3_table.py (per-seed table in appendix). run_manifest; success_criteria_met.e3_all_match. Use --standalone-verifier for independent verifier process.
+- **Validity and robustness:** E3 summary self-describing via run_manifest; independent verifier recomputes from trace. E1 corpus: expected vs observed tier and agreement per case.
 - **E2 redaction:** Redacted trace has payloads replaced by content-addressed refs; it is not replayed (L0 replay expects full payloads). evidence_bundle_redacted has replay_ok false and a note that the redacted trace is audit-only.
-- **Follow-up (CI):** E3 with 10 runs runs in conditional-evals (`produce_p0_e3_release.py --runs 10 --no-release`); E2 redaction demo (`scripts/e2_redaction_demo.py`) produces one redacted trace at `datasets/runs/e2_redaction_demo/trace_redacted.json`. To run all paper experiments locally: `python scripts/run_paper_experiments.py` (or `--quick`, `--paper P0` … `P8`).
+- **Follow-up (CI):** E1 build_p0_conformance_corpus; E3 produce_p0_e3_release.py --runs 10 --no-release; E2 e2_redaction_demo.py. Run all: `python scripts/run_paper_experiments.py` (or --quick, --paper P0 … P8).
 
 ### P3 (Replay)
 
@@ -249,7 +251,7 @@ With --run-naive and --fault-threshold 0, naive baseline and regime switches are
 | P5 | scaling_eval/heldout_results.json | Regression, collapse, 95% CI, scaling_fit; feat/regression beat global | Draft; more seeds optional |
 | P6 | llm_eval/red_team_results.json | 5/5 red-team pass; adapter latency recorded | Draft |
 | P8 | meta_eval/comparison.json | Regime switches with fault_threshold=0; naive baseline in comparison | Draft |
-| P0 | e3_summary.json, p0_e3_variance.json; p0_conformance_summary.json; e2_redaction_demo/ | E3 variance; E2 admissibility matrix; verification_mode; conformance summary; export/plot scripts | Claim table + repro block |
+| P0 | p0_conformance_corpus/, e3_summary.json, p0_e4_summary.json, e2_redaction_demo/, p0_conformance_summary.json | E1 corpus; E2 4-col matrix; E3 replay link (optional standalone verifier); E4 multi-adapter; Table 1/2/3, Figures 1-3; repro in DRAFT Appendix | Claim table + Appendix |
 | P3 | replay_eval/summary.json | Corpus + L0 replay; fidelity and divergence | Draft |
 | P4 | maestro_fault_sweep/ (multi_sweep.json) | Multi-scenario; drop + delay_fault_prob sweep | Draft |
 | P1 | contracts_eval/eval.json | Corpus verdicts; P1_TRACE_DERIVABILITY; export_contracts_corpus_table, plot_contracts_scale | Claim table + repro block |
@@ -265,8 +267,10 @@ The following were run and written under `datasets/runs/`:
 
 | Paper | Script / action | Output |
 |-------|-----------------|--------|
+| P0 | `build_p0_conformance_corpus.py` (CI) | `p0_conformance_corpus/`, `corpus_manifest.json` |
 | P0 | `produce_p0_e3_release.py --runs 10 --no-release` (CI) | `e3_summary.json`, `p0_e3_variance.json` |
 | P0 | `e2_redaction_demo.py` (CI) | `e2_redaction_demo/trace_redacted.json` |
+| P0 | `run_p0_e4_multi_adapter.py` | `p0_e4_summary.json` |
 | P3 | `replay_eval.py` (default out) | `replay_eval/summary.json` |
 | P4 | `maestro_fault_sweep.py --seeds 5` (multi-scenario) | `maestro_fault_sweep/{toy_lab_v0,lab_profile_v0}/sweep.json`, `multi_sweep.json` |
 | P1 | `contracts_eval.py` | `contracts_eval/eval.json` |
@@ -287,7 +291,10 @@ P5 feat baseline (predict by same `num_tasks` on train) improves over global mea
 | **P2** | Delay sweep + second scenario | `rep_cps_eval.py --delay-sweep 0,0.05,0.1 --scenarios toy_lab_v0,lab_profile_v0 --seeds 1,2,3`; output includes `delay_sweep` and per-scenario stability. |
 | **P4** | delay_fault_prob sweep | `maestro_fault_sweep.py` now has 4 settings: no_drop, drop_005, delay_01, drop_005_delay_01; each setting has `delay_fault_prob` in summary. |
 | **P8** | fault_threshold + naive baseline | `meta_eval.py --fault-threshold 0 --run-naive`; MetaAdapter accepts `fault_threshold` via fault_params; naive run uses threshold=0 (switch on any fault). Regime switches now trigger when faults occur; comparison includes `naive_switch_baseline`. |
-| **P0** | E3 variance table (20 seeds) | `produce_p0_e3_release.py` (default --runs 20) writes `e3_summary.json`, `p0_e3_variance.json`; use `--no-release` to skip release dir. Table: `export_e3_table.py`. |
-| **P0** | E2 redaction demo | `e2_redaction_demo.py` writes `datasets/runs/e2_redaction_demo/trace_redacted.json`; CI runs this step so E2 is exercised and one redacted trace lives under datasets. |
+| **P0** | Table 1 (E1 corpus) | `build_p0_conformance_corpus.py`, `export_e1_corpus_table.py`. |
+| **P0** | Table 2 (E2 admissibility) | `e2_redaction_demo.py`, `export_e2_admissibility_matrix.py` (4-col verification-mode matrix). |
+| **P0** | Table 3 (E3+E4) | `run_p0_e4_multi_adapter.py`, `export_p0_table3.py`; optionally merge E3 via produce_p0_e3_release + export_p0_table3 --e3. |
+| **P0** | E3 variance / per-seed table | `produce_p0_e3_release.py` (--runs 20); `export_e3_table.py` (per-seed table for appendix). |
+| **P0** | E2 redaction demo | `e2_redaction_demo.py` -> `datasets/runs/e2_redaction_demo/trace_redacted.json`. |
 
 **P5 (more N):** For larger scaling dataset, run `generate_multiscenario_runs.py --seeds 5` (or higher), then `scaling_heldout_eval.py`; no code change required. **P5 implemented:** regression baseline, collapse (report-derived), 95% CI for MAE, scaling_fit, export_scaling_tables.py, integration test (test_scaling_p5.py) plus unit tests for scaling module.

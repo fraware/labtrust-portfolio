@@ -1,106 +1,179 @@
-# MADS-CPS: A Normative Minimum Assurance Bar for Agentic Cyber-Physical Workflows
+# MADS-CPS: A Machine-Checkable Minimum Assurance Bar for Agentic Cyber-Physical Workflows
 
-**Draft (v0.1). Paper ID: P0_MADS-CPS.**
+**Draft (v0.2). Paper ID: P0_MADS-CPS.**
 
-**Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md) for run_manifest and result locations.
+**Central claim.** A minimum assurance bar for agentic CPS can be defined in terms of machine-checkable evidence obligations and conformance predicates, independently of the internal decision policy, and can be verified by third parties under both full and restricted audit modes.
 
-**Minimal run (under 20 min):** `python scripts/produce_p0_e3_release.py --runs 3` then `python scripts/export_p0_assurance_pipeline.py` then `python scripts/export_e3_table.py` then `python scripts/export_e2_admissibility_matrix.py` then `python scripts/plot_e3_latency.py`. E2: `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo`.
+---
 
-**Publishable run:** Use `--runs 20` (default) for publishable tables; run_manifest (seeds, scenario_id) is in e3_summary.json and release_manifest.json.
+## Abstract
 
-- **Figure 0:** `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`). Render Mermaid to PNG for camera-ready.
-- **Table 1:** `python scripts/produce_p0_e3_release.py` (writes e3_summary.json; default 20 runs), then `python scripts/export_e3_table.py`.
-- **Table 2:** `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo`, then `python scripts/export_e2_admissibility_matrix.py`.
-- **Figure 1:** `python scripts/plot_e3_latency.py` (output `docs/figures/p0_e3_latency.png`).
-- Conformance summary: `python scripts/build_p0_conformance_summary.py`. Check conformance: `labtrust_portfolio check-conformance <run_dir>`.
+Agentic cyber-physical systems (CPS) increasingly couple planning, tool use, sensing, and actuation in workflows where failures are systemic rather than model-local. Existing risk and assurance frameworks provide important guidance, but they do not by themselves specify a minimal set of machine-checkable evidence obligations by which a third party can determine whether a concrete agentic CPS run is admissible for audit, replay, and release under operational constraints. We introduce MADS-CPS, a normative minimum assurance bar for agentic CPS workflows. MADS-CPS defines (i) a declared assurance envelope, (ii) conformance tiers based on artifact presence, schema validity, replay status, and point-of-no-return (PONR) coverage, (iii) verification modes that support restricted auditability through structured redaction, and (iv) fail-closed release gating for irreversible or authoritative transitions. The framework is intentionally agnostic to the internal coordination or planning algorithm: conformance is defined over interfaces and evidence rather than internal optimization. We instantiate MADS-CPS in a robot-centric autonomous laboratory profile and evaluate it through a thin-slice implementation comprising a trace, an evaluation report, an evidence bundle, and a release manifest. Across a conformance challenge set, structured redaction experiments, and replay-link tests, we show that the proposed tiers are mechanically decidable under a declared envelope and that restricted auditability preserves a useful subset of admissibility checks while exposing the limits of replay under redaction. We do not claim certification or regulatory compliance; rather, we provide a concrete, reproducible assurance substrate that makes such assessments more disciplined, auditable, and toolable.
 
-## 1. Motivation
+---
 
-Agentic cyber-physical system (CPS) failures are systemic, not model-local. Coordination, sensing, and actuation interact in ways that cannot be verified by examining a single component. This paper defines a **normative minimum assurance bar** so that a third party can verify system-level safety and security for agentic CPS workflows under realistic lab constraints.
+## 1. Introduction
 
-## 2. Object of the standard
+Agentic cyber-physical system (CPS) failures are systemic, not model-local. Coordination, sensing, and actuation interact in ways that cannot be verified by examining a single component. When planning, tool use, and actuation are coupled in autonomous workflows, the assurance question shifts from component-level correctness to whether a run produced admissible evidence for audit, replay, and release.
 
-The object of the standard is to constrain **interfaces and evidence**, not internal optimization.
+Existing risk and assurance frameworks—including risk-management guidance, capability benchmarking, and safety standards—do not by themselves specify a minimal set of machine-checkable evidence obligations by which a third party can determine whether a concrete agentic CPS run is admissible. The missing object is not more risk guidance or capability metrics, but an operational, machine-checkable admissibility layer for agentic CPS evidence.
 
-**Figure 0 — Assurance pipeline.** Trace to MAESTRO report to evidence bundle to conformance check to release. Regenerate with `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`). Render the Mermaid diagram to PNG for inclusion in the camera-ready draft. Boundary, envelope, and definitions are given in the kernel: see `kernel/mads/NORMATIVE.v0.1.md`, `kernel/mads/VERIFICATION_MODES.v0.1.md`, and `profiles/lab/v0.1/`. The reference organism is a robot-centric autonomous lab workflow; the primary scaling anchor is resource graphs, campaign concurrency, heterogeneity, and fault recovery.
+**Contributions.** This paper makes four contributions. First, it defines a machine-checkable assurance object for agentic CPS workflows in terms of a declared envelope, evidence admissibility predicates, conformance tiers, and PONR-gated release. Second, it separates assurance from controller internals by defining conformance over externally verifiable artifacts rather than over planning or coordination logic. Third, it introduces restricted verification modes that preserve structural auditability under redaction while making explicit which admissibility checks are lost. Fourth, it provides a thin-slice reference instantiation in an autonomous laboratory profile together with a reproducible conformance checker and replay-link evaluation.
 
-## 3. Conformance tiers and global hard-fails
+**Scope and delimitation.** We scope the framework to agentic CPS workflows whose interfaces emit trace, evaluation report, evidence bundle, and release manifest under a declared envelope. ADePT is a capability framework for autonomous laboratory robotics; MADS-CPS specifies the assurance envelope and admissibility conditions for runs. We do not claim that MADS-CPS replaces risk frameworks, safety cases, or regulatory quality systems. MADS-CPS is a machine-checkable evidence substrate that can support them.
 
-**Table 1 — E1 conformance and E3 replay-link.** E1: missing artifact yields Tier 1 FAIL; present and validated yields Tier 2 PASS. E3: independent verifier recomputes MAESTRO from TRACE over 20 seeds (publishable bar); variance and 95% CIs are in `e3_summary.json` / `p0_e3_variance.json`. Table below is from a specific run (script: `produce_p0_e3_release.py --runs 20`; release: `p0_e3_release`). Example table may show n=10; publishable uses 20 runs. Regenerate with `python scripts/export_e3_table.py`.
+---
 
-| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
-|------|----------------|----------------------|----------------|-------|
-| 1 | 4 | 4 | 25.26 | yes |
-| 2 | 4 | 4 | 75.59 | yes |
-| 3 | 4 | 4 | 28.09 | yes |
-| 4 | 4 | 4 | 41.26 | yes |
-| 5 | 4 | 4 | 42.64 | yes |
-| 6 | 4 | 4 | 26.54 | yes |
-| 7 | 4 | 4 | 10.68 | yes |
-| 8 | 4 | 4 | 19.02 | yes |
-| 9 | 4 | 4 | 29.77 | yes |
-| 10 | 4 | 4 | 45.64 | yes |
-| **Summary (n=10)** | mean 4.00, stdev 0.00 | — | mean 34.45, stdev 18.08 | true |
+## 2. Problem setting and scope
 
-95% CI for mean: tasks_completed [4, 4]; p95_latency_ms [21.51, 47.38].
+We consider agentic CPS workflows in which a controller (or coordination layer) produces a trace of events, an evaluation report, an evidence bundle, and a release manifest. The assurance question is: under what conditions can a third party verify that a run is admissible for audit, replay, and release without access to the internal decision policy?
 
-- **Tier 1:** All required artifacts (trace, MAESTRO report, evidence bundle, release manifest) are present and validate against kernel schemas.
-- **Tier 2:** Tier 1 plus replay succeeds (state hashes match) and the evidence bundle reports schema_validation_ok and replay_ok. This is the default bar for admissible evidence.
-- **Tier 3:** Tier 2 plus PONR coverage: for each PONR-aligned task required by the scenario (e.g. disposition_commit for lab_profile_v0), the trace must contain at least one corresponding task_end event.
-- **Global hard-fail:** A run that fails Tier 2 must not be used as the basis for an authoritative release without an explicit, auditable override.
+The scope is limited to runs that (i) operate under a declared envelope (scenario/profile and required artifacts), (ii) produce the four artifact types above, and (iii) are evaluated by a conformance checker that depends only on those artifacts and the envelope. We do not address certification, regulatory compliance, or bit-identical hardware replay; we address the minimal evidence obligations and conformance predicates that make third-party verification and restricted auditability possible.
 
-The conformance checker (`labtrust_portfolio check-conformance`) computes pass/fail from artifacts; missing artifact or validation failure yields Tier 1 FAIL; replay or verification flag failure yields Tier 2 FAIL; Tier 3 adds PONR coverage (trace contains required PONR-relevant events). The release path (`release_dataset` in `impl/src/labtrust_portfolio/release.py`) enforces the gate: release is refused unless conformance is Tier 2 or higher.
+---
 
-## 4. Gatekeeper and PONR semantics
+## 3. Related work and positioning
 
-PONR (point of no return) enforcement requires mechanically checkable admissibility before irreversible or authoritative transitions. The gate is executed at release time: `release_dataset` calls `check_conformance` and raises if the run does not meet Tier 2. When admissibility is checked, fail-closed behavior applies: if evidence is missing or invalid, the transition is denied. Overrides are possible but must be logged. See `kernel/mads/PONR_ENFORCEMENT.v0.1.md`. **Formal verification:** Gatekeeper policy (fail-closed, no Tier 2/T3 actuation without recorded authorization) is machine-checked in the W1 wedge; see `formal/lean/`. Table 1 (E3) shows runs where conformance and replay hold.
+**Capability benchmarking for autonomous labs.** ADePT evaluates robotic capability dimensions such as adaptability, dexterity, perception, and task complexity. MADS-CPS instead specifies an assurance envelope and admissibility conditions for runs; the two are complementary (capability vs assurance).
 
-## 5. Telemetry and trace obligations
+**Risk-management frameworks.** NIST AI RMF and its Generative AI Profile provide governance-oriented risk framing but do not define the specific conformance tiers or replay-linked evidence object proposed here. MADS-CPS operates at the level of operational, machine-checkable evidence obligations.
 
-Telemetry follows flight-recorder semantics: trace format is defined by the kernel (`kernel/trace/TRACE.v0.1.schema.json`). Events carry type, timestamp, actor, payload, and state_hash_after so that replay and third-party verification can reconstruct control-plane behavior without requiring full hardware determinism.
+**Autonomous-product safety standards.** UL 4600 is goal-based and safety-case oriented for autonomous products. Our work is narrower and more operational at the artifact/checker level: machine-checkable admissibility and release gating for agentic CPS runs.
 
-## 6. Evidence admissibility
+**Assurance-case formalisms.** SACM/GSN represent structured arguments and evidence relationships. MADS-CPS contributes machine-checkable admissibility and release gating for agentic CPS runs, not a replacement for assurance-case structure.
 
-Evidence is admissible when it has integrity (content-addressed hashes), traceability (trace and evaluation report), and replay at declared fidelity. We guarantee **replay levels and nondeterminism detection** (detection and localization of divergence), not bit-identical deterministic replay on hardware (see Replay Levels). Raw logs or transcripts alone are insufficient. The evidence bundle schema (`kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json`) and verification modes (`kernel/mads/VERIFICATION_MODES.v0.1.md`) define restricted auditability (redacted payloads, hashed references) as the default.
+**Regulated data integrity.** OECD GLP and FDA 21 CFR Part 11 motivate trustworthy records, traceability, and audit trails. These support our restricted-auditability story without implying regulatory compliance; we supply auditable artifacts compatible with such expectations.
 
-**Table 2 — E2 redaction admissibility matrix.** For full vs redacted trace, which admissibility conditions remain checkable. Regenerate with `python scripts/export_e2_admissibility_matrix.py`.
+---
 
-| Admissibility condition | Full trace | Redacted trace |
-|-------------------------|------------|----------------|
-| schema_validation_ok    | yes        | yes            |
-| integrity_ok (hashes)   | yes        | yes            |
-| replay_ok (L0/L1)      | yes        | no (audit-only) |
-| PONR coverage           | yes        | N/A (structure only) |
+## 4. MADS-CPS model
 
-Redacted trace preserves event order, timestamps, and state_hash_after; payloads are replaced by content-addressed refs. Replay is not run on redacted trace (replay expects full payloads). See `kernel/mads/VERIFICATION_MODES.v0.1.md`.
+We propose a normative framework that constrains interfaces and evidence, not internal optimization. The following definitions are the source of the conformance checker and release gate.
 
-## 7. Evaluation admissibility and link to MAESTRO
+### 4.1 Declared envelope
 
-What counts as evidence for evaluation is defined by the release train: TRACE and MAESTRO_REPORT. An independent verifier can recompute MAESTRO metrics from TRACE (E3 experiment); repeated trials and variance reporting are required where stochasticity exists. All runs must produce admissible evidence bundles (see `scripts/produce_p0_e3_release.py` and datasets).
+**Definition 1 (Declared envelope).** The *declared envelope* is the scenario/profile and scope under which claims are evaluated. It includes the set of required artifacts, the PONR task set for the scenario, and the verification posture (e.g. public, evaluator, regulator). For a fixed envelope, conformance is defined over externally observable artifact predicates only.
 
-**Figure 1 — E3 p95 latency distribution (per scenario).** Distribution of p95_latency_ms across seeds per scenario from E3 runs. Regenerate with `python scripts/plot_e3_latency.py` (output `docs/figures/p0_e3_latency.png`). With multi-scenario E3 (`produce_p0_e3_release.py --runs 20 --scenarios toy_lab_v0,lab_profile_v0`), the figure shows variance across scenarios and seeds.
+### 4.2 Artifacts
 
-## 8. Reference organism and thin-slice demo
+Required artifacts for a run are: (i) trace, (ii) evaluation report (e.g. MAESTRO report), (iii) evidence bundle, (iv) release manifest. Each has a versioned schema; artifact presence and schema validity are the first-layer predicates.
 
-The lab profile (`profiles/lab/v0.1/`) instantiates the reference organism. The thin-slice pipeline produces TRACE, MAESTRO report, evidence bundle, and release manifest; the conformance checker confirms Tier 1/2/3 (E1). E2 demonstrates redacted payloads with structure preserved (kernel VERIFICATION_MODES.v0.1.md); one redacted trace is produced by `scripts/e2_redaction_demo.py` and written to `datasets/runs/e2_redaction_demo/trace_redacted.json` (CI runs this step). E3 demonstrates replay link with variance. This demo does not certify any specific deployment.
+### 4.3 Evidence bundle and admissibility
 
-## 9. Methodology and reproducibility
+**Definition 2 (Evidence bundle).** The *evidence bundle* is the tuple of artifacts (trace, evaluation report, evidence bundle file, release manifest) together with the validation predicates required for admissibility: schema validity, integrity (content-addressed hashes), and replay status at declared fidelity. Evidence is admissible when it has integrity, traceability (trace and report), and replay at declared fidelity; logs or transcripts that lack integrity binding, trace-to-report linkage, or declared replay semantics are insufficient for admissible third-party verification.
 
-**Methodology:** Hypothesis—a minimum bar constraining interfaces and evidence is third-party verifiable. Metrics: Tier 1/2/3 pass/fail (artifact presence, schema validity, replay ok, PONR coverage); E3 replay-link match and variance (tasks_completed_stdev, p95_latency_ms_stdev over seeds) with 95% confidence intervals for the means (tasks_completed_ci_95, p95_latency_ms_ci_95 in e3_summary.json). Kill criterion: if conformance cannot be computed objectively from artifacts, the bar fails. All claims are backed by kernel docs, conformance checker, E1/E2/E3 experiments (see Claims and backing below). Portfolio-wide criteria: `docs/STATE_OF_THE_ART_CRITERIA.md`.
+### 4.4 Conformance tiers
 
-**Baseline comparison:** With the MADS gate, release is denied when conformance fails Tier 2 (e.g. missing artifact, replay_ok false). Without the gate, the same run could be released but would be inadmissible. Comparison: runs with intentional Tier 2 failure (e.g. evidence_bundle.verification.replay_ok=false); with gate 0/N released (release_dataset raises); without gate the run would be copyable. Test: `tests/test_thinslice_e2e.TestThinSliceE2E.test_release_denied_when_tier2_fails`.
+**Definition 3 (Conformance tier).** *Conformance tiers* form a monotone hierarchy of machine-checkable predicates.
 
-**Reproducibility:** Produce E3 runs and release: `python scripts/produce_p0_e3_release.py` (with PYTHONPATH=impl/src, LABTRUST_KERNEL_DIR=kernel). Release paths (e.g. `datasets/releases/p0_e3_release/`) are produced when running without `--no-release`; for CI or runs without release, tables can be regenerated from `e3_summary.json` in `datasets/runs/` (export_e3_table.py reads from the run summary). Check conformance: `labtrust_portfolio check-conformance <run_dir>`. Artifacts: trace.json, maestro_report.json, evidence_bundle.json, release_manifest.json; release ID p0_e3_release. See `papers/P0_MADS-CPS/README.md` and `docs/VALIDATING_A_RUN.md`.
+- **Tier 1:** All required artifacts are present and validate against the kernel schemas.
+- **Tier 2:** Tier 1 plus replay succeeds (state hashes match) and the evidence bundle reports schema_validation_ok and replay_ok (where replay is required by verification mode). This is the default bar for admissible evidence.
+- **Tier 3:** Tier 2 plus PONR coverage: for each PONR-aligned task required by the scenario, the trace contains at least one corresponding task_end event.
 
-## 10. Limitations and non-goals
+A run that fails Tier 2 must not be used as the basis for an authoritative release without an explicit, auditable override.
 
-MADS-CPS does not claim certification or compliance with any specific regulation. It does not claim "open data by default"; default is restricted auditability. It supplies auditable artifacts compatible with regulated expectations (e.g. 21 CFR Part 11, OECD GLP) without implying certification. Scope and determinism levels are summarized in [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md).
+### 4.5 PONR
+
+**Definition 4 (PONR).** A *point of no return (PONR)* is a transition class that requires admissible evidence before authorization. The gate is fail-closed: if admissibility cannot be confirmed, the transition is denied. Overrides are possible but must be logged and auditable. PONR-gated release converts a qualitative notion of "high impact" into an enforceable control: irreversible or authoritative transitions are denied unless admissibility predicates hold or an auditable override is recorded.
+
+### 4.6 Verification modes
+
+**Definition 5 (Verification mode).** *Verification mode* is one of: public, evaluator, regulator (and optionally redacted). It determines required_artifacts and whether replay_ok is required. Under redaction, payloads may be replaced by content-addressed references; structure (event types, order, timestamps, state_hash_after) is preserved, but replay is not run on redacted trace, so replay_ok is false for redacted bundles.
+
+### 4.7 Replay fidelity (L0 / L1)
+
+**Definition 6 (Replay fidelity).** *L0* is control-plane replay: decision and enforcement outcomes are recomputable from the trace. *L1* is L0 plus recorded observations from the trace (no live simulator required for the minimal L1 contract). We do not guarantee bit-identical hardware replay; we guarantee replay levels and nondeterminism detection relative to the declared contract.
+
+---
+
+## 5. Properties
+
+**Proposition 1 (Tier monotonicity).** If a run satisfies Tier 3, then it satisfies Tier 2 and Tier 1.  
+*Proof sketch.* By definition, Tier 3 implies Tier 2 (PONR coverage is additive), and Tier 2 implies Tier 1 (replay and schema checks are additive to artifact presence and validity).
+
+**Proposition 2 (Controller-independence).** For a fixed declared envelope and artifact semantics, conformance is invariant to internal controller structure, conditional on identical externally observed artifact predicates.  
+*Proof sketch.* The conformance checker reads only artifacts and envelope (e.g. scenario_id, required PONR tasks); it does not branch on adapter or controller identity. Thus any two runs that produce the same artifact predicates receive the same conformance result.
+
+**Proposition 3 (Redaction preservation boundary).** Structure-preserving redaction can preserve schema and integrity predicates while invalidating replay predicates that depend on unreleased payload content.  
+*Proof sketch.* Redaction replaces payloads with content-addressed refs; schema and hashes remain checkable. Replay requires payload content to recompute state; hence replay_ok is false under redaction, while schema_validation_ok and integrity_ok can remain true.
+
+---
+
+## 6. Reference instantiation
+
+We instantiate MADS-CPS in a robot-centric autonomous laboratory profile. The thin-slice pipeline produces trace, MAESTRO report, evidence bundle, and release manifest. The conformance checker computes Tier 1/2/3 from these artifacts; the release path enforces the gate (release refused unless Tier 2 or higher). The lab profile defines PONR tasks (e.g. disposition_commit for lab_profile_v0); toy_lab_v0 has no PONR tasks in scope. This instantiation is a reference organism, not a deployed production system; it does not certify any specific deployment.
+
+---
+
+## 7. Experimental design
+
+**Hypothesis.** A minimum assurance bar defined over interfaces and evidence is third-party verifiable under full and restricted audit modes.
+
+**Experiments.**
+
+- **E1 (Conformance corpus):** A challenge set of positive and negative run directories (missing artifact, schema-invalid artifact, hash mismatch, replay mismatch, missing PONR event, etc.). The checker is run on each; we report expected vs observed tier and agreement.
+- **E2 (Restricted auditability):** Which predicates remain checkable under full vs redacted trace and under different verification modes (full, evaluator, regulator, public/redacted). We report a verification-mode admissibility matrix.
+- **E3 (Replay link):** An independent verifier recomputes the evaluation report from the trace. We run over multiple seeds and report match rate and variance (e.g. tasks_completed, p95 latency) with 95% CIs. The verifier is implemented as a distinct path (standalone script or subprocess) that does not depend on the producer pipeline.
+- **E4 (Algorithm-independence):** At least two internally different coordination/planning methods (e.g. centralized adapter and REP-CPS or retry-heavy adapter) emit the same interface-level artifacts. We run the same conformance checker on both and show that conformance depends on artifacts and envelope, not controller identity.
+
+**Metrics.** Tier 1/2/3 pass/fail; checker agreement on challenge set; admissibility matrix (predicate × mode); replay match rate and latency variance; conformance rate per adapter/scenario.
+
+---
+
+## 8. Results
+
+**E1 — Conformance challenge set.** Table 1 summarizes the conformance corpus: for each fault injected, the expected tier outcome, the observed outcome, and whether the checker agreed. The corpus includes valid runs (toy_lab, lab_profile), missing artifact, schema-invalid artifact, hash mismatch, replay mismatch, missing PONR event, and stale release manifest. Regenerate with `build_p0_conformance_corpus.py` and `export_e1_corpus_table.py` (see Appendix).
+
+**E2 — Verification-mode admissibility matrix.** Table 2 shows which predicates (schema_validation_ok, integrity_ok, replay_ok, PONR coverage) remain checkable in full mode, evaluator mode, regulator mode, and public/redacted mode. Under redaction, replay_ok is lost while schema and integrity remain checkable; this supports a subset of admissibility checks under redaction rather than full verification. Regenerate with `e2_redaction_demo.py` and `export_e2_admissibility_matrix.py`.
+
+**E3 — Replay link.** An independent verifier recomputes the evaluation report from the trace over multiple seeds. The verifier can be run as a separate process (`verify_maestro_from_trace.py`) so that the producer and verifier are distinct code paths. Table 3 (with E4) reports replay match rate, latency mean and 95% CI, and conformance rate per scenario and per controller. Use `replay_link_e3.py --standalone-verifier` to use the standalone verifier.
+
+**E4 — Algorithm-independence.** Two adapters (centralized, rep_cps) produce the same artifact interface for the same scenario. The same conformance checker is run on each; conformance outcome aligns with artifacts and declared envelope, not with which adapter produced the run. Results are combined in Table 3. Run `run_p0_e4_multi_adapter.py` and `export_p0_table3.py`.
+
+**Figures.** Figure 1 is the assurance pipeline (trace to report to evidence bundle to conformance check to release); `export_p0_assurance_pipeline.py`. Figure 2 is the tier lattice (what each tier adds); `export_p0_tier_lattice.py`. Figure 3 summarizes what is preserved vs lost under redaction; `export_p0_redaction_figure.py`.
+
+---
+
+## 9. Discussion
+
+The conformance challenge set (E1) demonstrates that the proposed tiers are mechanically decidable under a declared envelope: the checker correctly fails on missing or invalid artifacts, replay mismatch, and missing PONR events. The verification-mode matrix (E2) makes explicit which admissibility checks survive redaction and which do not, supporting restricted auditability without overclaiming full verification. The replay link (E3) shows that a third party can recompute metrics from the trace when the verifier is a distinct path. Algorithm-independence (E4) supports the claim that conformance is defined over external artifacts and envelope, not over the internal coordination or planning algorithm.
+
+---
+
+## 10. Limitations, non-goals, and certification boundary
+
+MADS-CPS does not claim certification or compliance with any specific regulation. It does not claim "open data by default"; the default is restricted auditability. It supplies auditable artifacts compatible with regulated expectations (e.g. 21 CFR Part 11, OECD GLP) without implying certification.
 
 - **Thin-slice is synthetic:** Simulated tasks and timing; no real hardware or physical actuation. The pipeline demonstrates the assurance bar on a synthetic workload.
-- **Lab profile is a reference organism:** It instantiates the standard for the portfolio; it is not a deployed production system.
+- **Lab profile is a reference organism:** It instantiates the framework for the portfolio; it is not a deployed production system.
 - **PONR gate at release time:** The gate is enforced in code at release (and in conformance Tier 3); it is not executed in a live hardware control loop in this portfolio.
 - **Admissibility from logged fields only (K0):** Every normative admissibility condition must be computable from logged fields (trace, evidence bundle, release manifest). Any condition that cannot be checked from these artifacts is non-normative (documentation only).
 
 ---
 
-**Claims and backing.** C1 (Minimum bar separable): Backed by kernel NORMATIVE and VERIFICATION_MODES; the bar constrains only interfaces and evidence, not coordination logic. C2 (Objective conformance): Backed by conformance checker and E1—missing artifact fails, present+validated passes; Table 1, Table 2 (admissibility matrix), Figure 1 (E3 latency). C3 (Admissibility): Backed by evidence bundle schema, redaction path (E2) and Table 2, replay link (E3) and Figure 1; raw logs alone do not satisfy bundle or replay. C4 (PONR discipline): Backed by PONR_ENFORCEMENT.v0.1.md and conformance Tier 2 as the admissibility gate before release; Table 2 documents what remains checkable under redaction.
+## 11. Conclusion
+
+We introduced MADS-CPS, a machine-checkable minimum assurance bar for agentic CPS workflows. We defined the declared envelope, evidence bundle, conformance tiers, PONR semantics, and verification modes, and we stated three properties: tier monotonicity, controller-independence, and the redaction preservation boundary. We instantiated the framework in an autonomous laboratory profile and evaluated it with a conformance corpus, a verification-mode admissibility matrix, an independent replay link, and an algorithm-independence experiment. The results support the claim that a minimum assurance bar can be defined in terms of machine-checkable evidence obligations and conformance predicates, independently of the internal decision policy, and verified by third parties under full and restricted audit modes. We do not claim certification or regulatory compliance; we provide a concrete, reproducible assurance substrate that can support such assessments.
+
+---
+
+## Appendix: Reproduction and artifact references
+
+**Artifact contents.** The artifact contains the schema set, reference implementation, conformance checker, and reproduction scripts. Exact commands and file paths are given below for replicability.
+
+**Reproducibility (minimal run, under 20 min).** From repo root, set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. Then: run the E1 corpus script to build the conformance challenge set and Table 1; run E2 redaction demo and export the admissibility matrix (Table 2); run E3 (and E4 if integrated) to produce replay-link and conformance-by-controller results (Table 3); run the pipeline export script for Figure 1, the tier-lattice script for Figure 2, and the redaction diagram for Figure 3. Conformance check: `labtrust_portfolio check-conformance <run_dir>`.
+
+**Scripts and outputs.** From repo root with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`:
+
+- **Figure 1 (assurance pipeline):** `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`). Render Mermaid to PNG for camera-ready.
+- **Table 1 (conformance challenge set):** `python scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus`, then `python scripts/export_e1_corpus_table.py --corpus datasets/runs/p0_conformance_corpus`.
+- **Table 2 (verification-mode admissibility matrix):** `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo`, then `python scripts/export_e2_admissibility_matrix.py`.
+- **Table 3 (replay-link and conformance by scenario/controller):** E4: `python scripts/run_p0_e4_multi_adapter.py --seeds 10`, then `python scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json`. E3: `python scripts/produce_p0_e3_release.py --runs 20`, then `python scripts/export_p0_table3.py --e3 datasets/runs/e3_summary.json` to merge.
+- **E3 independent verifier:** Standalone script `scripts/verify_maestro_from_trace.py TRACE.json [OUTPUT.json]`. Use `python scripts/replay_link_e3.py --standalone-verifier --runs N` to run E3 with verifier as separate process.
+- **Figure 2 (tier lattice):** `python scripts/export_p0_tier_lattice.py` (output `docs/figures/p0_tier_lattice.mmd`).
+- **Figure 3 (redaction preservation/loss):** `python scripts/export_p0_redaction_figure.py` (output `docs/figures/p0_redaction_figure.mmd`).
+- **Per-seed E3 table:** `python scripts/export_e3_table.py`; include in appendix or supplement. Run manifest (seeds, scenario_id) is in e3_summary.json and release_manifest.json.
+
+**Kernel and schema paths (for artifact reviewers).** Boundary, envelope, and definitions: `kernel/mads/NORMATIVE.v0.1.md`, `kernel/mads/VERIFICATION_MODES.v0.1.md`, `kernel/mads/PONR_ENFORCEMENT.v0.1.md`. Trace schema: `kernel/trace/TRACE.v0.1.schema.json`. Evidence bundle schema: `kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json`. Release manifest schema: `kernel/policy/RELEASE_MANIFEST.v0.1.schema.json`. Lab profile: `profiles/lab/v0.1/`.
+
+**Claims and backing.** C1 (controller-independence): Backed by kernel NORMATIVE and VERIFICATION_MODES; E4 (two adapters, same checker); Table 1, Table 3. C2 (machine-checkable tiers): Backed by conformance checker and E1 corpus; Table 1, Table 2, Figure 1, Figure 2. C3 (admissibility): Backed by evidence bundle schema, E2 redaction and Table 2, E3 replay link; Figure 3. C4 (PONR-gated release): Backed by PONR_ENFORCEMENT and release gate in code; Table 2 documents what remains checkable under redaction.

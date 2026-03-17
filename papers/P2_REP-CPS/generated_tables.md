@@ -13,7 +13,7 @@
 | Unsecured (mean, no auth, compromised) | 4.9 | 0.32 | 5.16 |
 | Centralized | 4.9 | 0.32 | — |
 
-**Table 2 — Aggregation under compromise (offline; source: summary.json aggregation_under_compromise).** Headline metric: max effect per compromised agent; robust aggregation bounds influence under Byzantine inputs.
+**Table 2 — Aggregation under compromise (offline; source: summary.json aggregation_under_compromise).** Robust aggregation reduces observed compromise-induced bias relative to naive averaging in the evaluated scenarios (bias_robust vs bias_naive).
 
 | Metric | Value |
 |--------|--------|
@@ -40,5 +40,16 @@
 | convergence_achieved_rate | from summary.json |
 | steps_to_convergence_mean | from summary.json |
 | steps_to_convergence_stdev | from summary.json |
+
+**Table 5 — Profile ablation (source: summary.json profile_ablation).** Each row disables one profile component; bias and aggregate are vs honest-only. Failures reappear when a component is missing (e.g. no auth or no robust aggregation yields high bias). No safety gate row: N/A in current eval (gate bypass not simulated).
+
+| Variant | Description | Bias | Aggregate | Failure |
+|---------|-------------|------|-----------+---------|
+| no_auth | All agents accepted, trimmed_mean | from summary | from summary | from summary |
+| no_freshness | No freshness window, trimmed_mean | from summary | from summary | from summary |
+| no_rate_limit | No rate limit, auth, trimmed_mean | from summary | from summary | from summary |
+| no_robust_aggregation | Mean, all agents | from summary | from summary | from summary |
+| no_safety_gate | N/A in current eval | — | — | — |
+| full_profile | Auth, trimmed_mean, rate_limit, freshness | from summary | from summary | from summary |
 
 Regenerate: `python scripts/rep_cps_eval.py --scenarios lab_profile_v0` (writes summary.json). For convergence table: `python scripts/rep_cps_eval.py --aggregation-steps 5` then `python scripts/export_rep_cps_convergence_table.py`. See DRAFT.md repro block and RESULTS_PER_PAPER.md.

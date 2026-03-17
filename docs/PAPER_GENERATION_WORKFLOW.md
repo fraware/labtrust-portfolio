@@ -36,7 +36,7 @@ For each paper Px:
 | P3 | replay_eval/summary.json | summary (corpus + overhead_stats) | export_p3_replay_levels_diagram | plot_replay_overhead |
 | P4 | maestro_fault_sweep, baseline_summary, antigaming | export_maestro_tables | export_p4_maestro_flow | plot_maestro_recovery |
 | P5 | scaling_eval/heldout_results.json | export_scaling_tables | export_p5_baseline_hierarchy | plot_scaling_mae |
-| P6 | llm_eval/red_team_results, adapter_latency | export_llm_tables / red_team + adapter | export_p6_firewall_flow | plot_llm_adapter_latency |
+| P6 | llm_eval/red_team_results (real_llm when --real-llm), adapter_latency, baseline_comparison | export_llm_redteam_table (Table 1, Table 1b real-LLM 5 runs/case, confusable deputy), export_p6_baseline_table (3-way) | export_p6_firewall_flow | plot_llm_adapter_latency |
 | P7 | assurance_eval/results.json | export_assurance_tables | export_p7_mapping_flow | export_assurance_gsn (Figure 1) |
 | P8 | meta_eval/comparison.json, collapse_sweep | export_meta_tables | export_p8_meta_diagram | plot_meta_collapse |
 
@@ -54,7 +54,7 @@ All commands from repo root with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=
 | P3 | `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20` | From replay_eval/summary.json | `python scripts/export_p3_replay_levels_diagram.py` | `python scripts/plot_replay_overhead.py` |
 | P4 | `python scripts/maestro_fault_sweep.py` (default 20 seeds); `python scripts/maestro_baselines.py`; `python scripts/maestro_antigaming_eval.py` | `python scripts/export_maestro_tables.py` | `python scripts/export_p4_maestro_flow.py` | `python scripts/plot_maestro_recovery.py` |
 | P5 | `python scripts/generate_multiscenario_runs.py` (default 20 seeds); `python scripts/scaling_heldout_eval.py` | `python scripts/export_scaling_tables.py` | `python scripts/export_p5_baseline_hierarchy.py` | `python scripts/plot_scaling_mae.py` |
-| P6 | `python scripts/llm_redteam_eval.py` [optional: `--run-adapter`] | `python scripts/export_llm_tables.py` or from red_team_results/adapter_latency | `python scripts/export_p6_firewall_flow.py` | `python scripts/plot_llm_adapter_latency.py` |
+| P6 | `python scripts/llm_redteam_eval.py` [optional: `--real-llm --real-llm-runs 5`, `--run-adapter`, `--run-baseline`] | `python scripts/export_llm_redteam_table.py` (Table 1, Table 1b; Table 2 from adapter_latency.json); `export_p6_baseline_table.py` (3-way) | `python scripts/export_p6_firewall_flow.py` | `python scripts/plot_llm_adapter_latency.py` |
 | P7 | `python scripts/run_assurance_eval.py` | `python scripts/export_assurance_tables.py` | `python scripts/export_p7_mapping_flow.py` | `python scripts/export_assurance_gsn.py` |
 | P8 | `python scripts/meta_eval.py --run-naive --fault-threshold 0`; for Figure 1 also run `python scripts/meta_collapse_sweep.py` (produces collapse_sweep.json) | `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json` | `python scripts/export_p8_meta_diagram.py` | `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` |
 

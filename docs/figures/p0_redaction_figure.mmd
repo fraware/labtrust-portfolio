@@ -1,0 +1,13 @@
+%% P0 redaction preservation boundary (Figure 3)
+%% Under structure-preserving redaction: schema and integrity preserved; replay lost
+flowchart LR
+  subgraph preserved [Preserved under redaction]
+    S[schema_validation_ok]
+    I[integrity_ok]
+  end
+  subgraph lost [Lost under redaction]
+    R[replay_ok]
+  end
+  subgraph partial [Structure only]
+    P[PONR coverage]
+  end

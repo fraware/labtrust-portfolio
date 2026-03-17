@@ -29,17 +29,20 @@ Prompt injection is structurally different from SQL injection; treat LLMs as pot
 7. Deployment guidance: least privilege, safe refusal, residual risk posture
 
 ## 5) Experiment plan
-- Scenarios: 1–2 MAESTRO scenarios with tool density + exceptions
-- Metrics: unsafe proposals blocked, residual violations, latency tails, variance
-- Baselines: untyped planner; typed without deterministic capture; rule-based
-- Stressors: prompt injection via tool-fed content; partial tool results; time pressure
+- Scenarios: 3 MAESTRO scenarios (toy_lab_v0, lab_profile_v0, warehouse_v0), 20 seeds per scenario (publishable).
+- Metrics: red-team pass (8 cases), confusable deputy (4), jailbreak-style (2); real-LLM: 5 runs per case, pass_rate_pct, 95% Wilson CI, latency mean ± stdev; adapter tail_latency_p95 mean/stdev/CI; denial-trace stats (runs_with_denial, tasks_completed_mean per scenario).
+- Baselines: 3-way (gated = full validator; weak = allow-list only; ungated = no validation); tool-level (execute_system) and argument-level (--baseline-plan args_unsafe: path traversal in allow-listed tool); same scenarios/seeds.
+- Real-LLM: `--real-llm --real-llm-model gpt-4o-mini --real-llm-runs 5`; prompt hardening for path-traversal case (rt_allowed_tool_disallowed_args).
+- Stressors: prompt injection via tool-fed content; partial tool results; path traversal in args; time pressure.
 
 ## 6) Artifact checklist
 - `kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json`
-- validator library + policy hooks
-- deterministic toolcalling wrapper
-- red-team suite (cases + expected outcomes)
-- MAESTRO adapter + baseline results
+- validator library + policy hooks (allow_list, safe_args)
+- deterministic toolcalling wrapper (capture_tool_call)
+- red-team suite (8 cases) + confusable deputy (4) + jailbreak-style (2); expected_block per case
+- MAESTRO adapter (LLMPlanningAdapter; validation_mode gated/weak/ungated) + 3-way baseline results (tool-level: baseline_comparison.json; argument-level: baseline_comparison_args.json)
+- Real-LLM: red_team_results.json real_llm (n_runs_per_case, pass_rate_pct, Wilson CI, latency stats); export_llm_redteam_table.py (Table 1b)
+- Appendix A: export_p6_artifact_hashes.py (SHA256 hashes)
 
 ## 7) Kill criteria
 - **K1:** validators fail to reliably block unsafe actions in red-team tests.

@@ -23,9 +23,11 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
+| E1 corpus agreement (%) | Fraction of challenge cases where checker outcome matches expected tier/pass. | corpus_manifest.json; build_p0_conformance_corpus, export_e1_corpus_table. |
 | Conformance coverage (%) | Fraction of required artifacts present and valid across runs. | conformance.json; build_p0_conformance_summary. |
-| PONR coverage ratio | For lab_profile_v0: ratio of PONR tasks with at least one task_end in trace. | review_assurance_run; Tier 3. |
+| PONR coverage ratio | For lab_profile_v0: ratio of PONR tasks with at least one task_end in trace. | Tier 3; lab profile. |
 | E3 variance (95% CI width) | Tighter CI = more precise estimate; report CI width for p95_latency_ms. | e3_summary / p0_e3_variance. |
+| E4 conformance rate per adapter | Conformance rate (passed/total) per controller in multi-adapter run. | p0_e4_summary.json; run_p0_e4_multi_adapter, export_p0_table3. |
 | Redaction completeness | E2: all payloads redacted; evidence_bundle_redacted has redaction_manifest. | e2_redaction_demo output. |
 
 ### P1 — Coordination Contracts
@@ -41,10 +43,11 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
-| Influence bound (max per compromised) | aggregation_variants[].max_influence_per_compromised_agent for trimmed_mean. | summary.json. |
-| Bias reduction (%) | (bias_naive - bias_robust) / bias_naive when bias_naive > 0. | summary.json aggregation_under_compromise. |
+| Bias reduction (%) | (bias_naive - bias_robust) / bias_naive when bias_naive > 0; robust aggregation reduces observed compromise-induced bias. | summary.json aggregation_under_compromise. |
+| Max influence per compromised (optional) | aggregation_variants[].max_influence_per_compromised_agent for trimmed_mean. | summary.json. |
 | Safety gate integration | Boolean: protocol output does not actuate without policy check. | summary.json safety_gate_denial. |
-| Trigger met | success_criteria_met.trigger_met; adapter_parity, robust_beats_naive. | summary.json. |
+| Adapter parity, robust_beats_naive | success_criteria_met; trigger not met in evaluated scenario (paper is profile-and-harness contribution). | summary.json. |
+| Profile ablation | profile_ablation[]: no auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant. | summary.json profile_ablation. |
 
 ### P3 — Replay
 
@@ -79,8 +82,10 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
 | Red-team pass rate (%) | Fraction of red-team cases with pass true (target 100% for expected_block alignment). | red_team_results.json. |
+| Real-LLM pass rate (%) | When --real-llm-runs N: overall pass_rate_pct and 95% Wilson CI (pass_rate_ci95_lower/upper). | red_team_results.json real_llm. |
 | Denial latency p95 (ms) | Adapter run: task_latency_ms_p95 or wall_sec; tail latency for firewall. | adapter_latency.json. |
 | Confusable deputy pass | success_criteria_met.confusable_deputy_all_pass. | confusable_deputy_results.json. |
+| Baseline 3-way | Gated vs weak vs ungated denial counts and tasks_completed_mean. | baseline_comparison.json. |
 | E2E denial trace | One run where unsafe proposal blocked and system still completes; documented. | e2e_denial_trace.json. |
 
 ### P7 — Standards Mapping

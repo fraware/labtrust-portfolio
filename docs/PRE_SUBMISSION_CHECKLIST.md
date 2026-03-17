@@ -37,13 +37,13 @@ For any table or figure that will appear in the submitted PDF:
 **Core papers (P1, P2, P3, P4, P7):**
 
 - **P1:** Verify eval.json has all_detection_ok true (or success_criteria_met equivalent) and run_manifest for the run used for Table 1 and Table 2; state in draft if needed.
-- **P2 trigger:** Verify rep_cps_eval summary.json has trigger_met true for the run used for tables; state in the draft that the trigger is met (or that the paper is conditional/optional). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
+- **P2 trigger:** In the evaluated scenario, sensitivity sharing does not materially change tasks_completed; the paper is framed as a profile-and-harness contribution. State in the draft that the trigger is not yet met and that the contribution is the safety-gated profile and MAESTRO-compatible harness. Verify summary.json has profile_ablation and excellence_metrics (bias_reduction_pct, adapter_parity). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
 - **P3:** Verify replay_eval summary.json has fidelity_pass and run_manifest for the run used for tables; state in draft if needed.
 - **P4:** Verify multi_sweep.json run_manifest (seeds, scenarios) for the run used for Table 1; use 20 seeds and two scenarios for publishable tables.
 - **P7:** Verify results.json mapping_check_ok and ponr_coverage_ok for the run used for tables; draft must state no certification claim and that review is scripted and partial.
 - **P5 regression:** If Table 2 regression row is N/A, draft must state so and avoid claiming regression beats baseline.
 - **P5 trigger:** Verify heldout_results.json has beat_per_scenario_baseline and trigger_met true for the run used for tables; state in the draft that the conditional trigger is met (or that the paper is negative/dataset analysis). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
-- **P6 evidence:** If submitting without real-LLM, abstract or limitations must state "results from synthetic plans only"; if submitting with real-LLM, Table 1b must appear in the draft and run_manifest must record model_id.
+- **P6 evidence:** If submitting without real-LLM, abstract or limitations must state "results from synthetic plans only"; if submitting with real-LLM, Table 1b must appear (pass_rate_pct, 95% Wilson CI, n_runs_per_case) and run_manifest must record model_id and n_runs_per_case. Baseline table: 3-way (gated/weak/ungated) from export_p6_baseline_table.py.
 - **P6 trigger:** Verify red_team_results.json has trigger_met true for the run used for tables; state in the draft that the trigger is met (or that the paper is conditional/optional). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
 - **P8 non-vacuous:** Tables must be from a run with `meta_eval --non-vacuous` (so collapse_count > 0), or the draft must state that results are methodology and auditability only and not claim collapse reduction.
 - **P8 trigger:** Verify comparison.json has trigger_met and no_safety_regression true; state in the draft that the trigger is met (or that the paper is methodology/auditability only). See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md).
@@ -54,9 +54,9 @@ Before submission, for each conditional paper ensure the following and state in 
 
 | Paper | Checks |
 |-------|--------|
-| **P2** | Trigger: REP-CPS improves robustness without throughput regression on at least one non-toy scenario; evidence in summary; state in draft. See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md). |
+| **P2** | Trigger not met in evaluated scenario. State in draft that the contribution is the safety-gated profile and harness; summary has profile_ablation, bias_reduction_pct, adapter_parity. See [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md). |
 | **P5** | Trigger: `heldout_results.json` has `beat_per_scenario_baseline` and `trigger_met` true for the run used for tables. Regression row: if N/A, state in draft and do not claim regression beats baseline. |
-| **P6** | Trigger: `red_team_results.json` has `trigger_met` true. Evidence: if synthetic-only, state in abstract/limitations; if real-LLM, Table 1b in draft and run_manifest records model_id. |
+| **P6** | Trigger: `red_team_results.json` has `trigger_met` true. Evidence: if synthetic-only, state in abstract/limitations; if real-LLM, Table 1b (pass_rate, Wilson CI) in draft, run_manifest model_id and n_runs_per_case; baseline 3-way table. |
 | **P8** | Non-vacuous: Table 1 from run with `meta_eval --non-vacuous` (collapse_count > 0), or label results as methodology and auditability only. Trigger: `comparison.json` has `trigger_met` and `no_safety_regression` true. |
 
 Commands per paper: [PAPER_GENERATION_WORKFLOW.md — Quick reference](PAPER_GENERATION_WORKFLOW.md#quick-reference-commands-per-paper). Regenerate all artifacts for that paper with `python scripts/generate_paper_artifacts.py --paper Px`, then paste from `papers/Px_*/generated_tables.md` into DRAFT.md if needed.

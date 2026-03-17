@@ -2,9 +2,9 @@
 
 Submission-readiness checklist (docs/STATE_OF_THE_ART_CRITERIA.md section 3) verified on 2025-03-11.
 
-- Claim-evidence: All claims in claims.yaml have artifact_paths and at least one table_id or figure_id.
-- Repro under 20 min: Minimal run documented (adapter-seeds 3); run manifest in red_team_results.json and adapter_latency.json.
-- Variance: Scenarios and seeds stated in adapter_latency.json; red-team table from eval.
+- Claim-evidence: All claims in claims.yaml have artifact_paths and at least one table_id or figure_id (Table 1, Table 1b, Table 2, Baseline table, Figure 0, Figure 1).
+- Repro under 20 min: Minimal run documented (adapter-seeds 3); run manifest in red_team_results.json and adapter_latency.json. Full publishable: --real-llm-runs 5, 3 scenarios, 20 seeds, --run-baseline (3-way).
+- Variance: Scenarios and seeds in adapter_latency.json; red-team from eval; real-LLM 5 runs per case with pass_rate and Wilson CI.
 - No kernel redefinition: Draft cites TYPED_PLAN schema and MAESTRO; does not redefine tiers or trace.
-- Overclaim: Conditional paper; trigger and scope stated in Limitations and docs/CONDITIONAL_TRIGGERS.md (P6). Containment only, not elimination.
-- Repro block: Figure 0, Table 1, Table 2, Figure 1 each have exact script commands.
+- Overclaim: Conditional paper; trigger and scope in Limitations and docs/CONDITIONAL_TRIGGERS.md (P6). Containment only, not elimination. Real-LLM: synthetic table remains primary validator evidence; Table 1b documents pass_rate and CI.
+- Repro block: Figure 0 (export_p6_firewall_flow.py), Table 1 and Table 1b (llm_redteam_eval.py then export_llm_redteam_table.py), Table 2 (adapter_latency.json), Baseline (llm_redteam_eval.py --run-baseline then export_p6_baseline_table.py), Figure 1 (plot_llm_adapter_latency.py), Appendix A (export_p6_artifact_hashes.py).

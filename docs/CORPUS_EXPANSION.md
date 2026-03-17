@@ -24,7 +24,7 @@ This document describes how to add and discover corpus cases for P1 (contracts),
 - **Location:** Cases are defined in code: `impl/src/labtrust_portfolio/llm_planning.py` (`RED_TEAM_CASES`, `CONFUSABLE_DEPUTY_CASES`). Current counts: 8 red-team, 4 confusable deputy. Validator v0.2 applies allow_list + safe_args (path traversal, dangerous patterns).
 - **Schema (per case):** `id`, `description`, `step` (tool/args), `expected_block` (bool).
 - **How to add:** Add a new entry to the appropriate list in `llm_planning.py`; re-run `scripts/llm_redteam_eval.py`. Full table: `scripts/export_llm_redteam_table.py`. No file discovery; counts are fixed per run.
-- **Run manifest:** `run_manifest.red_team_case_count`, `run_manifest.red_team_cases` (in red_team_results.json); `run_manifest.confusable_deputy_case_count` (in confusable_deputy_results.json).
+- **Run manifest:** `run_manifest.red_team_case_count`, `run_manifest.red_team_cases` (in red_team_results.json); `run_manifest.confusable_deputy_case_count` (in confusable_deputy_results.json). When `--real-llm --real-llm-runs N`: `real_llm.n_runs_per_case`, `real_llm.pass_rate_pct`, `real_llm.pass_rate_ci95_*` (Wilson), per-case pass_rate_pct and latency stats.
 
 ## Summary
 

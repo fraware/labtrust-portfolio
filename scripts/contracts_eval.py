@@ -34,8 +34,35 @@ def _timestamp_only_allows(state: dict, event: dict) -> bool:
     return event_ts > prev_ts
 
 
+def _ownership_only_allows(state: dict, event: dict) -> bool:
+    """Baseline policy: allow iff writer is owner or no owner (no temporal check)."""
+    ownership = state.get("ownership", {})
+    payload = event.get("payload", {})
+    key = payload.get("task_id") or payload.get("key")
+    if not key:
+        return True
+    writer = payload.get("writer") or event.get("actor", {}).get("id", "agent_1")
+    owner = ownership.get(key)
+    return owner is None or owner == writer
+
+
+def _accept_all(_state: dict, _event: dict) -> bool:
+    """Baseline policy: allow all writes."""
+    return True
+
+
 def _run_corpus_with_policy(corpus_files: list, policy: str) -> tuple[list[dict], int]:
-    """Run corpus; policy in ('contract', 'timestamp_only'). Returns (per_seq_results, total_denials)."""
+    """Run corpus; policy in ('contract', 'timestamp_only', 'ownership_only', 'accept_all').
+    Returns (per_seq_results, total_denials)."""
+    policy_fns = {
+        "contract": lambda s, e: validate(s, e).verdict == ALLOW,
+        "timestamp_only": _timestamp_only_allows,
+        "ownership_only": _ownership_only_allows,
+        "accept_all": _accept_all,
+    }
+    fn = policy_fns.get(policy)
+    if not fn:
+        return [], 0
     results = []
     total_denials = 0
     for path in corpus_files:
@@ -48,11 +75,7 @@ def _run_corpus_with_policy(corpus_files: list, policy: str) -> tuple[list[dict]
         allows = 0
         denials = 0
         for ev in events:
-            if policy == "contract":
-                verdict = validate(state, ev)
-                ok = verdict.verdict == ALLOW
-            else:
-                ok = _timestamp_only_allows(state, ev)
+            ok = fn(state, ev)
             if ok:
                 allows += 1
                 state = apply_event_to_state(state, ev)
@@ -227,6 +250,13 @@ def main() -> int:
         )
 
     corpus_sequences = [r["sequence"] for r in results]
+    total_expected_denials = 0
+    for path in corpus_files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if "expected_verdicts" not in data:
+            continue
+        total_expected_denials += sum(1 for ex in data["expected_verdicts"] if ex == "deny")
+
     out_data = {
         "corpus_eval": True,
         "sequences": results,
@@ -243,19 +273,79 @@ def main() -> int:
     if args.baseline:
         out_data["violations_would_apply_without_validator"] = total_denials_with_validator
 
-    # Timestamp-only baseline (no ownership): comparison to another consistency approach
+    # Baselines: timestamp_only, ownership_only, accept_all
     _, timestamp_only_denials = _run_corpus_with_policy(corpus_files, "timestamp_only")
+    _, ownership_only_denials = _run_corpus_with_policy(corpus_files, "ownership_only")
+    _, accept_all_denials = _run_corpus_with_policy(corpus_files, "accept_all")
     out_data["baseline_timestamp_only_denials"] = timestamp_only_denials
     out_data["baseline_timestamp_only_missed"] = (
         total_denials_with_validator - timestamp_only_denials
     )
+    out_data["baseline_ownership_only_denials"] = ownership_only_denials
+    out_data["baseline_ownership_only_missed"] = (
+        total_expected_denials - ownership_only_denials
+    )
+    out_data["baseline_accept_all_denials"] = accept_all_denials
+    out_data["baseline_accept_all_missed"] = total_expected_denials
+
+    # Ablation: which failure classes slip through when disabling contract ingredients
+    out_data["ablation"] = {
+        "full_contract": {"violations_denied": total_denials_with_validator, "violations_missed": total_expected_denials - total_denials_with_validator},
+        "timestamp_only": {"violations_denied": timestamp_only_denials, "violations_missed": total_expected_denials - timestamp_only_denials},
+        "ownership_only": {"violations_denied": ownership_only_denials, "violations_missed": total_expected_denials - ownership_only_denials},
+        "accept_all": {"violations_denied": accept_all_denials, "violations_missed": total_expected_denials},
+    }
+
+    # TP/FP/FN and precision/recall (per-event; expected_verdicts = ground truth)
+    tp = fp = fn = 0
+    for path in corpus_files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if "events" not in data or "expected_verdicts" not in data:
+            continue
+        state = dict(data["initial_state"])
+        events = data["events"]
+        expected = data["expected_verdicts"]
+        for ev, exp in zip(events, expected):
+            verdict = validate(state, ev)
+            actual = "allow" if verdict.verdict == ALLOW else "deny"
+            if exp == "deny" and actual == "deny":
+                tp += 1
+            elif exp == "allow" and actual == "deny":
+                fp += 1
+            elif exp == "deny" and actual == "allow":
+                fn += 1
+            if actual == "allow":
+                state = apply_event_to_state(state, ev)
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    out_data["detection_metrics"] = {
+        "true_positives": tp,
+        "false_positives": fp,
+        "false_negatives": fn,
+        "precision": round(precision, 4),
+        "recall": round(recall, 4),
+    }
+
+    # Latency percentiles (over per-sequence time_per_write_us)
+    times_us = [r.get("time_per_write_us", 0) for r in results if "time_per_write_us" in r]
+    latency_median_us = latency_p95_us = latency_p99_us = None
+    if times_us:
+        sorted_times = sorted(times_us)
+        n = len(sorted_times)
+        latency_median_us = round(sorted_times[n // 2], 2)
+        latency_p95_us = round(sorted_times[min(int(0.95 * n), n - 1)], 2)
+        latency_p99_us = round(sorted_times[min(int(0.99 * n), n - 1)], 2)
+    out_data["latency_percentiles_us"] = {
+        "median": latency_median_us,
+        "p95": latency_p95_us,
+        "p99": latency_p99_us,
+    }
 
     # Excellence metrics (STANDARDS_OF_EXCELLENCE.md)
     n_ok = sum(1 for r in results if r.get("detection_ok", False))
     detection_rate_pct = round(100.0 * n_ok / len(results), 1) if results else 0.0
-    times_us = [r.get("time_per_write_us", 0) for r in results if "time_per_write_us" in r]
-    overhead_p99_us = None
-    if times_us:
+    overhead_p99_us = latency_p99_us
+    if times_us and overhead_p99_us is None:
         sorted_times = sorted(times_us)
         p99_idx = min(int(0.99 * len(sorted_times)), len(sorted_times) - 1) if len(sorted_times) > 1 else 0
         overhead_p99_us = round(sorted_times[p99_idx], 2)

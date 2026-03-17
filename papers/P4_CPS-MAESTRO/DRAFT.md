@@ -2,7 +2,7 @@
 
 **Draft (v0.1). Paper ID: P4_CPS-MAESTRO.**
 
-**Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Repro time: `python scripts/repro_time_p4.py` records wall-clock to `datasets/runs/repro_manifest.json` (repro_wall_min). Target: under 20 min for minimal run.
+**Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Minimal run target: under 20 min. Repro time optional: `python scripts/repro_time_p4.py` (writes repro_manifest.json).
 
 **Minimal run (under 20 min):** `python scripts/maestro_fault_sweep.py --scenarios toy_lab_v0,lab_profile_v0 --seeds 3` then `python scripts/maestro_baselines.py` then `python scripts/export_p4_maestro_flow.py` then `python scripts/export_maestro_tables.py` then `python scripts/plot_maestro_recovery.py`.
 
@@ -58,11 +58,11 @@ Dataset layout and release process in `bench/maestro/REPRODUCIBILITY.md`. All ru
 
 ## 7. Baseline results and fault sweep
 
-**Key results.** (1) Fault sweep: tasks_completed_mean/stdev by scenario and setting (no_drop, drop_005, delay_01, etc.); publishable run uses --seeds 20 and --scenarios toy_lab_v0,lab_profile_v0; run_manifest in multi_sweep.json. (2) Recovery metrics when faults occur (non-vacuous for drop_005, drop_005_delay_01): steps_to_completion_after_first_fault_mean, tasks_completed_after_fault_mean in multi_sweep per-scenario summaries. (3) Anti-gaming: run maestro_antigaming_eval.py; scoring_proof and success_criteria_met.antigaming_penalized in antigaming_results.json; excellence_metrics: anti_gaming_margin_tasks, legitimate_safe_min, pathological_max_tasks_completed. (4) Baselines: Centralized, Blackboard, RetryHeavy from baseline_summary (maestro_baselines.py). (5) Excellence metrics (multi_sweep.json): fault_coverage, scenario_diversity, variance_reported, n_seeds_per_setting. *Numbers from multi_sweep.json, antigaming_results.json, baseline_summary.json. Regenerate with maestro_fault_sweep.py, maestro_baselines.py, maestro_antigaming_eval.py, export_maestro_tables.py. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+**Key results.** (1) Fault sweep: tasks_completed_mean/stdev by scenario and setting (no_drop, drop_005, delay_01, etc.); publishable run uses --seeds 20 and --scenarios toy_lab_v0,lab_profile_v0; run_manifest in multi_sweep.json. (2) Recovery metrics when faults occur (non-vacuous for drop_005, drop_005_delay_01): steps_to_completion_after_first_fault_mean, tasks_completed_after_fault_mean in multi_sweep per-scenario summaries. (3) Anti-gaming: run `python scripts/maestro_antigaming_eval.py`; scoring_proof and success_criteria_met.antigaming_penalized in antigaming_results.json; excellence_metrics: anti_gaming_margin_tasks, legitimate_safe_min, pathological_max_tasks_completed. (4) Baselines: Centralized, Blackboard, RetryHeavy from baseline_summary (maestro_baselines.py). (5) Excellence metrics (multi_sweep.json): fault_coverage, scenario_diversity, variance_reported, n_seeds_per_setting. *Numbers from multi_sweep.json, antigaming_results.json, baseline_summary.json. Regenerate with `python scripts/maestro_fault_sweep.py`, `python scripts/maestro_baselines.py`, `python scripts/export_maestro_tables.py`. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
 
-Tables are generated from machine-readable artifacts. The **run manifest** for the fault sweep is in `datasets/runs/maestro_fault_sweep/multi_sweep.json`: top-level key `run_manifest` contains `seeds`, `scenarios`, `fault_settings`, and `fault_params`. Baseline run info is in `bench/maestro/baseline_summary.json`. For publishable tables use `--seeds 20` and both scenarios (`toy_lab_v0`, `lab_profile_v0`). Run `scripts/maestro_fault_sweep.py --scenarios toy_lab_v0,lab_profile_v0 --seeds 20`, then `scripts/maestro_baselines.py`, then `scripts/export_maestro_tables.py` to regenerate the tables below. Figure 1: `scripts/plot_maestro_recovery.py` (reads multi_sweep.json). Sources: `datasets/runs/maestro_fault_sweep/multi_sweep.json`, `bench/maestro/baseline_summary.json`. Benchmark release: `bench/maestro/BENCHMARK_RELEASE.v0.1.md`, `benchmark_scenarios.v0.1.json`.
+Tables are generated from machine-readable artifacts. The **run manifest** for the fault sweep is in `datasets/runs/maestro_fault_sweep/multi_sweep.json`: top-level key `run_manifest` contains `seeds`, `scenarios`, `fault_settings`, and `fault_params`. Baseline run info is in `bench/maestro/baseline_summary.json`. For publishable tables use `--seeds 20` and both scenarios (`toy_lab_v0`, `lab_profile_v0`). Run `python scripts/maestro_fault_sweep.py --scenarios toy_lab_v0,lab_profile_v0 --seeds 20`, then `python scripts/maestro_baselines.py`, then `python scripts/export_maestro_tables.py` to regenerate the tables below. Figure 1: `python scripts/plot_maestro_recovery.py` (reads multi_sweep.json). Sources: `datasets/runs/maestro_fault_sweep/multi_sweep.json`, `bench/maestro/baseline_summary.json`. Benchmark release: `bench/maestro/BENCHMARK_RELEASE.v0.1.md`, `benchmark_scenarios.v0.1.json`.
 
-**Table 1 — Fault sweep.** Settings: no_drop, drop_005, delay_01, drop_005_delay_01, calibration_invalid_01. Per-scenario sweep.json and multi_sweep.json contain per_run and variance. Regenerate with `python scripts/export_maestro_tables.py` after `scripts/maestro_fault_sweep.py`.
+**Table 1 — Fault sweep.** Settings: no_drop, drop_005, delay_01, drop_005_delay_01, calibration_invalid_01. Units: tasks_completed (count), p95_latency_ms (ms). N seeds per cell; run_manifest in multi_sweep.json. Per-scenario sweep.json and multi_sweep.json contain per_run and variance. Regenerate with `python scripts/export_maestro_tables.py` after `python scripts/maestro_fault_sweep.py`.
 
 | Scenario | Setting | tasks_completed_mean | tasks_completed_stdev | p95_latency_ms_mean | p95_latency_ms_stdev |
 |----------|---------|---------------------|----------------------|---------------------|----------------------|
@@ -77,7 +77,7 @@ Tables are generated from machine-readable artifacts. The **run manifest** for t
 | lab_profile_v0 | drop_005_delay_01 | 4.50 | 0.53 | 32.71 | 20.95 |
 | lab_profile_v0 | calibration_invalid_01 | 5 | 0.00 | 40.19 | 18.49 |
 
-**Table 2 — Baseline (Centralized vs Blackboard).** Reference adapter comparison. Same pipeline; only default fault params differ (no true architectural difference in v0.1). Regenerate with `python scripts/export_maestro_tables.py` after `scripts/maestro_baselines.py`.
+**Table 2 — Baseline (Centralized vs Blackboard).** Reference adapter comparison. Same pipeline; only default fault params differ (no true architectural difference in v0.1). Units: tasks_completed (count), p95_latency_ms (ms). Run_manifest in baseline_summary.json. Regenerate with `python scripts/export_maestro_tables.py` after `scripts/maestro_baselines.py`.
 
 | Adapter | Seed | tasks_completed | coordination_messages | p95_latency_ms |
 |---------|------|----------------|------------------------|----------------|
@@ -104,14 +104,12 @@ Tables are generated from machine-readable artifacts. The **run manifest** for t
 
 **Fault sweep:** Default scenarios toy_lab_v0, lab_profile_v0; four settings (no_drop, drop_005, delay_01, drop_005_delay_01). Output: tasks_completed_mean/stdev, p95_latency_ms_mean/stdev per setting. Variance (stdev across seeds) is reported.
 
-**Figure 1 — Recovery proxy (tasks_completed vs fault setting).** Recovery proxy only (tasks_completed vs fault setting); not MTTR or time-to-safe-state. Mean tasks_completed across seeds per fault setting from multi_sweep. Regenerate with `python scripts/plot_maestro_recovery.py` (output `docs/figures/p4_recovery_curve.png`). See Limitations.
+**Figure 1 — Recovery proxy (tasks_completed vs fault setting).** Recovery proxy only (tasks_completed [count] vs fault setting); not MTTR or time-to-safe-state. Mean tasks_completed across seeds per fault setting from multi_sweep; multi-scenario overlay when both toy_lab_v0 and lab_profile_v0 are run. Run_manifest in multi_sweep.json. Regenerate with `python scripts/plot_maestro_recovery.py` (output `docs/figures/p4_recovery_curve.png`). See Limitations.
 
-## References (placeholders)
+## References
 
-Replace with actual references before submission. See [PAPER_ARTIFACT_STYLE.md](../docs/PAPER_ARTIFACT_STYLE.md).
-
-- [1] Author. Title. Venue, Year. (e.g. multi-agent or coordination benchmark: SMAC, MAPF.)
-- [2] Author. Title. Venue, Year. (e.g. CPS or robotics testbed.)
+- [1] M. Samvelyan et al., "The StarCraft Multi-Agent Challenge," in Proc. AAMAS, 2019; extended in NeurIPS Deep RL Workshop, 2019. arXiv:1902.04043.
+- [2] J. Song et al., "When Cyber-Physical Systems Meet AI: A Benchmark, an Evaluation, and a Way Forward," in Proc. ICSE-SEIP, 2021.
 
 ## 8. Limitations
 

@@ -1,18 +1,19 @@
-%% P6 Typed-plan firewall flow (auto-generated)
-%% Plan -> validate_plan / policy_check_step -> allow | deny
+%% P6 Decision path (auto-generated): planner -> typed step -> allow-list -> safe_args -> capture -> allow/deny
 flowchart LR
-  subgraph input[Input]
-    P[Typed plan]
+  subgraph in[Input]
+    P[Planner output]
   end
-  subgraph firewall[Firewall]
-    V[validate_plan]
-    C[policy_check_step]
-  end
-  subgraph outcome[Outcome]
-    A[allow]
-    D[deny]
-  end
-  P --> V
-  V --> C
-  C --> A
-  C --> D
+  T[Typed step]
+  AL[Allow-list]
+  SA[Safe_args]
+  Cap[Capture]
+  Allow[Allow]
+  Deny1[Deny]
+  Deny2[Deny]
+  P --> T
+  T --> AL
+  AL -->|pass| SA
+  AL -->|fail| Deny1
+  SA -->|pass| Cap
+  SA -->|fail| Deny2
+  Cap --> Allow

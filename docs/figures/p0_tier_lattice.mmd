@@ -1,0 +1,8 @@
+%% P0 MADS-CPS tier lattice (Figure 2)
+%% Tier 1 = artifacts + schema; Tier 2 = + replay; Tier 3 = + PONR coverage
+flowchart TB
+  T1[Tier 1: Artifacts present and schema-valid]
+  T2[Tier 2: Tier 1 + replay_ok and schema_validation_ok]
+  T3[Tier 3: Tier 2 + PONR coverage]
+  T1 --> T2
+  T2 --> T3

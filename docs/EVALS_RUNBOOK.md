@@ -29,7 +29,7 @@ PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experime
 
 PowerShell: `$env:PYTHONPATH="impl\src"; $env:LABTRUST_KERNEL_DIR="$PWD\kernel"; python scripts/run_paper_experiments.py [--quick] [--paper P0|...|P8]`
 
-Per-paper runs: P0 (E3 multi-scenario + E2 redaction + export E3 table + build_p0_conformance_summary); P1 (corpus + scale-test with variance); P2 (delay sweep, two scenarios, 20 seeds); P3 (replay + overhead curve, --overhead-runs 20; optional --l1-twin); P4 (fault sweep 20 seeds, two scenarios + antigaming + baselines); P5 (multiscenario 20 seeds + --fault-mix, held-out eval, export scaling tables; trigger_met and excellence_metrics); P6 (red-team + confusable + adapter latency, two scenarios, five adapter seeds; optional --real-llm for Table 1b); P7 (assurance + three profiles + audit_bundle + export tables); P8 (collapse sweep then meta_eval --non-vacuous --fallback-adapter retry_heavy, 20 seeds; trigger_met and no_safety_regression). After a full run, see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. **P0 conformance summary:** `python scripts/build_p0_conformance_summary.py` writes `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. **P7 one-command audit:** `python scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR and review if release dir contains evidence_bundle.json.
+Per-paper runs: P0 (E1 conformance corpus + E2 redaction + E3 replay link + E4 multi-adapter + Table 1/2/3 + Figures 1-3 + build_p0_conformance_summary); P1 (corpus + scale-test with variance); P2 (delay sweep, two scenarios, 20 seeds); P3 (replay + overhead curve, --overhead-runs 20; optional --l1-twin); P4 (fault sweep 20 seeds, two scenarios + antigaming + baselines); P5 (multiscenario 20 seeds + --fault-mix, held-out eval, export scaling tables; trigger_met and excellence_metrics); P6 (red-team + confusable + adapter latency, 3 scenarios, 20 seeds; optional --real-llm for Table 1b; --run-baseline, --denial-stats); P7 (assurance + three profiles + audit_bundle + export tables); P8 (collapse sweep then meta_eval --non-vacuous --fallback-adapter retry_heavy, 20 seeds; trigger_met and no_safety_regression). After a full run, see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. **P0 conformance summary:** `python scripts/build_p0_conformance_summary.py` writes `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. **P7 one-command audit:** `python scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR and review if release dir contains evidence_bundle.json.
 
 ## Environment
 
@@ -55,12 +55,12 @@ PYTHONPATH=impl/src python scripts/contracts_eval.py [--out datasets/runs/contra
 PYTHONPATH=impl/src python scripts/contracts_eval.py --scale-test [--scale-events 100000]
 ```
 
-## P2 — REP-CPS
+## P2 — REP-CPS (safety-gated profile)
 
 - **Bottleneck scenario:** `toy_lab_v0` (configurable via `--scenario`).
 - **Script:** `scripts/rep_cps_eval.py`
-- **Output:** `datasets/runs/rep_cps_eval/summary.json` (and per-run dirs under `rep_cps/`, `centralized/`). Also: `aggregation_variants` (method, bias, max_influence_per_compromised_agent), `sybil_sweep[]`, `safety_gate_denial.json`.
-- **Metrics:** adapter comparison (tasks_completed), aggregation under compromise (bias robust vs naive); clipping and median_of_means variants; sybil stress test; safety-gate denial record. When `--aggregation-steps > 1`: convergence (steps_to_convergence, convergence_achieved_rate) in summary; Table 4 via `python scripts/export_rep_cps_convergence_table.py`.
+- **Output:** `datasets/runs/rep_cps_eval/summary.json` (and per-run dirs under `rep_cps/`, `centralized/`). Also: `aggregation_variants`, `sybil_sweep[]`, `profile_ablation[]` (Table 5), `safety_gate_denial.json`.
+- **Metrics:** adapter comparison (tasks_completed; adapter parity); aggregation under compromise (robust reduces observed bias vs naive); profile ablation (no auth, no freshness, no rate limit, no robust agg, full profile); sybil stress test; safety-gate denial record. Trigger not met in evaluated scenario (contribution is profile and harness). When `--aggregation-steps > 1`: optional convergence (steps_to_convergence, convergence_achieved_rate); Table 4 via `python scripts/export_rep_cps_convergence_table.py`.
 - **Figure 1:** `python scripts/plot_rep_cps_summary.py` (output `docs/figures/p2_rep_cps_tasks.png`; tasks_completed by policy from summary.json). Required for peer-review; no optional figures.
 
 ```bash
@@ -101,7 +101,7 @@ python scripts/plot_scaling_mae.py [--results datasets/runs/scaling_eval/heldout
 - **Script:** `scripts/llm_redteam_eval.py`
 - **Output:** `datasets/runs/llm_eval/red_team_results.json`; `confusable_deputy_results.json` (adversarial args inducing privilege); `e2e_denial_trace.json` (blocked + safe recovery); with `--run-adapter`: `adapter_latency.json` (runs, tail_latency_p95_mean_ms, scenarios, seeds; optional latency_acceptable if `--latency-threshold-ms` set).
 - **Metrics:** red-team pass/fail (8 cases); confusable deputy (4 cases); jailbreak-style cases (prompt-injection style args; results in red_team_results.json under `jailbreak_style`); E2E denial trace; optional tail latency from adapter runs (obtained with `--run-adapter`). Optional real-LLM: `--real-llm` when `.env` has OPENAI_API_KEY or ANTHROPIC_API_KEY; results merged into red_team_results.json. OWASP LLM Top 10 coverage: `docs/P6_OWASP_MAPPING.md`.
-- **Options:** `--out DIR`; `--run-adapter`; `--adapter-scenarios toy_lab_v0,lab_profile_v0`; `--adapter-seeds 7,14,21,28,35` (publishable: multiple seeds for latency variance); `--latency-threshold-ms N`; `--real-llm` (optional; requires .env API keys; run manually for Table 1b). **Publishable:** `run_paper_experiments.py --paper P6` uses two scenarios and five adapter seeds; verify success_criteria_met.trigger_met in red_team_results.json.
+- **Options:** `--out DIR`; `--run-adapter`; `--adapter-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0` (default: 3 scenarios); `--adapter-seeds` (default: 1..20); `--denial-stats` (with --run-adapter: denial-injection plan, denial_trace_stats.json); `--run-baseline` (gated vs weak vs ungated, baseline_comparison.json); `--latency-threshold-ms N`; `--real-llm` (real LLM over red-team + confusable-deputy; requires .env API keys); `--real-llm-runs N` (default 5 runs per case for pass_rate and 95% Wilson CI). **Real-LLM dependency:** `pip install openai` in the env where you run (e.g. corridor-os-py3.12). **Publishable:** 3 scenarios, 20 seeds; `--real-llm --real-llm-runs 5` for Table 1b; verify success_criteria_met.trigger_met. Export: `export_p6_baseline_table.py` (3-way when weak present), `export_p6_artifact_hashes.py`.
 - **Figure 1:** `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`; requires adapter_latency.json from `--run-adapter`).
 - **Integration test:** `tests/test_llm_p6.py` runs eval with `--run-adapter --adapter-scenarios toy_lab_v0 --adapter-seeds 7` and asserts both artifacts.
 
@@ -152,23 +152,25 @@ python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/compar
 python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json
 ```
 
-## P0 — E1 conformance, E3 variance, E2 redaction
+## P0 — E1 corpus, E2 redaction, E3 replay link, E4 algorithm-independence
 
-- **E1:** Each run (thin-slice or adapter) may write `conformance.json` under the run dir (tier, pass, reasons). CLI: `labtrust_portfolio check-conformance <run_dir>` also writes conformance.json. E1 result location: `<run_dir>/conformance.json`.
-
-## P0 — E3 variance and E2 redaction
-
-- **E3 script:** `scripts/produce_p0_e3_release.py`; E3 multi-scenario: `scripts/replay_link_e3.py --scenarios toy_lab_v0,lab_profile_v0 --runs N`.
-- **E3 output:** `datasets/runs/e3_summary.json`, `datasets/runs/p0_e3_variance.json`; with multi-scenario, summary includes `per_scenario[]` and run dirs under `datasets/runs/e3/<scenario_id>/seed_<n>`. With release: `datasets/releases/p0_e3_release`. Evidence bundle schema requires `verification_mode` (public | evaluator | regulator). See `kernel/mads/VERIFICATION_MODES.v0.1.md`.
-- **E2 script:** `scripts/e2_redaction_demo.py` — runs thin-slice once, redacts trace, writes `trace_redacted.json` and `evidence_bundle_redacted.json` (verification_mode, redaction_manifest) to output dir. The redacted trace is for audit only (payloads replaced by refs); it is not replayed, and the bundle has replay_ok false. CI runs this; redacted artifacts live at `datasets/runs/e2_redaction_demo/`.
-- **P0 tables/figures:** `export_e3_table.py` (full table), `export_e3_table.py --compact` (per-scenario variance + CI), `export_e2_admissibility_matrix.py` (E2 admissibility matrix), `plot_e3_latency.py` (E3 p95 latency by scenario). Conformance summary: `build_p0_conformance_summary.py` → `datasets/releases/portfolio_v0.1/p0_conformance_summary.json` (see `docs/P0_CONFORMANCE_SUMMARY_SPEC.md`).
+- **E1 (conformance corpus):** `scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus` builds challenge set (case_* dirs, corpus_manifest.json). `scripts/export_e1_corpus_table.py` produces Table 1. Conformance: `labtrust_portfolio check-conformance <run_dir>`; each run dir may have `conformance.json`.
+- **E2:** `scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo` writes `trace_redacted.json` and `evidence_bundle_redacted.json`. `scripts/export_e2_admissibility_matrix.py` produces Table 2 (4-col verification-mode admissibility matrix).
+- **E3:** `scripts/produce_p0_e3_release.py --runs N`; E3 multi-scenario: `scripts/replay_link_e3.py --scenarios toy_lab_v0,lab_profile_v0 --runs N`. Use `--standalone-verifier` to run verifier as separate process (`scripts/verify_maestro_from_trace.py`). Output: `datasets/runs/e3_summary.json`, `p0_e3_variance.json`; release: `datasets/releases/p0_e3_release`. Evidence bundle: `verification_mode` (public | evaluator | regulator). See `kernel/mads/VERIFICATION_MODES.v0.1.md`.
+- **E4:** `scripts/run_p0_e4_multi_adapter.py --seeds N` runs centralized and rep_cps adapters; `scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json` produces Table 3.
+- **P0 tables/figures:** Table 1: build_p0_conformance_corpus, export_e1_corpus_table. Table 2: e2_redaction_demo, export_e2_admissibility_matrix. Table 3: run_p0_e4_multi_adapter, export_p0_table3. Figure 1: export_p0_assurance_pipeline. Figure 2: export_p0_tier_lattice. Figure 3: export_p0_redaction_figure. Per-seed E3: export_e3_table. plot_e3_latency. build_p0_conformance_summary → `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. See `papers/P0_MADS-CPS/DRAFT.md` Appendix.
 
 ```bash
-PYTHONPATH=impl/src python scripts/produce_p0_e3_release.py --runs 10
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus
+python scripts/export_e1_corpus_table.py --corpus datasets/runs/p0_conformance_corpus
 PYTHONPATH=impl/src python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo
-python scripts/export_e3_table.py
-python scripts/export_e3_table.py --compact
 python scripts/export_e2_admissibility_matrix.py
+PYTHONPATH=impl/src python scripts/produce_p0_e3_release.py --runs 10
+PYTHONPATH=impl/src python scripts/run_p0_e4_multi_adapter.py --seeds 10
+python scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json
+python scripts/export_p0_assurance_pipeline.py
+python scripts/export_p0_tier_lattice.py
+python scripts/export_p0_redaction_figure.py
 python scripts/plot_e3_latency.py
 python scripts/build_p0_conformance_summary.py
 ```
@@ -189,4 +191,4 @@ PYTHONPATH=impl/src python scripts/maestro_antigaming_eval.py [--out datasets/ru
 
 ## CI
 
-The CI workflow runs the test job (including P1–P8 integration tests and meta-controller unit tests) and the conditional-evals job: P0 E3 (`produce_p0_e3_release.py --runs 5 --scenarios toy_lab_v0,lab_profile_v0 --no-release`), P0 E2 (`e2_redaction_demo.py`), replay_eval (corpus: all `*_trace.json` in bench/replay/corpus), maestro_fault_sweep (--seeds 5), maestro_baselines, contracts_eval, run_assurance_eval, rep_cps_eval (--delay-sweep 0,0.05,0.1), generate_multiscenario_runs, scaling_heldout_eval, llm_redteam_eval, meta_eval --run-naive --fault-threshold 0, meta_collapse_sweep (--drop-probs 0.15,0.2 --seeds 3). Results are written under `datasets/runs/` and `bench/maestro/` as above.
+The CI workflow runs the test job (including P1–P8 integration tests and meta-controller unit tests) and the conditional-evals job: P0 E1 (build_p0_conformance_corpus), P0 E3 (`produce_p0_e3_release.py --runs 5 --scenarios toy_lab_v0,lab_profile_v0 --no-release`), P0 E2 (`e2_redaction_demo.py`), replay_eval (corpus: all `*_trace.json` in bench/replay/corpus), maestro_fault_sweep (--seeds 5), maestro_baselines, contracts_eval, run_assurance_eval, rep_cps_eval (--delay-sweep 0,0.05,0.1), generate_multiscenario_runs, scaling_heldout_eval, llm_redteam_eval, meta_eval --run-naive --fault-threshold 0, meta_collapse_sweep (--drop-probs 0.15,0.2 --seeds 3). Results are written under `datasets/runs/` and `bench/maestro/` as above.

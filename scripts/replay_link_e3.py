@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """
 E3 (Replay link): Independent verifier recomputes MAESTRO metrics from TRACE.
-Run with multiple seeds and report variance and 95% CIs. Usage:
-  PYTHONPATH=impl/src python scripts/replay_link_e3.py [--runs N] [--out FILE]
+Run with multiple seeds and report variance and 95% CIs.
+Use --standalone-verifier to run the verifier as a separate process (scripts/verify_maestro_from_trace.py)
+so that the producer and verifier are distinct code paths. Usage:
+  PYTHONPATH=impl/src python scripts/replay_link_e3.py [--runs N] [--out FILE] [--standalone-verifier]
 """
 from __future__ import annotations
 
 import argparse
 import json
 import math
+import os
 import statistics
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 # t_{0.975, df} for 95% two-sided CI (df = n-1)
@@ -49,10 +54,20 @@ def main() -> int:
         default="toy_lab_v0",
         help="Comma-separated scenario ids (e.g. toy_lab_v0,lab_profile_v0)",
     )
+    ap.add_argument(
+        "--standalone-verifier",
+        action="store_true",
+        help="Run verifier as separate process (verify_maestro_from_trace.py) for independent replay link",
+    )
     args = ap.parse_args()
 
     from labtrust_portfolio.thinslice import run_thin_slice
     from labtrust_portfolio.maestro import maestro_report_from_trace
+
+    verifier_script = REPO_ROOT / "scripts" / "verify_maestro_from_trace.py"
+    env = os.environ.copy()
+    env.setdefault("LABTRUST_KERNEL_DIR", str(REPO_ROOT / "kernel"))
+    env.setdefault("PYTHONPATH", str(REPO_ROOT / "impl" / "src"))
 
     scenario_ids = [s.strip() for s in args.scenarios.split(",") if s.strip()]
     if not scenario_ids:
@@ -77,9 +92,33 @@ def main() -> int:
             trace_path = run_dir / "trace.json"
             maestro_stored_path = run_dir / "maestro_report.json"
             trace = json.loads(trace_path.read_text(encoding="utf-8"))
-            recomputed = maestro_report_from_trace(
-                trace["run_id"], trace["scenario_id"], trace
-            )
+            if args.standalone_verifier and verifier_script.exists():
+                with tempfile.NamedTemporaryFile(
+                    mode="w", suffix=".json", delete=False
+                ) as f:
+                    out_path = f.name
+                try:
+                    r = subprocess.run(
+                        [
+                            sys.executable,
+                            str(verifier_script),
+                            str(trace_path),
+                            out_path,
+                        ],
+                        capture_output=True,
+                        cwd=str(REPO_ROOT),
+                        env=env,
+                    )
+                    if r.returncode != 0:
+                        recomputed = {"metrics": {"tasks_completed": 0, "coordination_messages": 0, "task_latency_ms_p95": 0.0}}
+                    else:
+                        recomputed = json.loads(Path(out_path).read_text(encoding="utf-8"))
+                finally:
+                    Path(out_path).unlink(missing_ok=True)
+            else:
+                recomputed = maestro_report_from_trace(
+                    trace["run_id"], trace["scenario_id"], trace
+                )
             stored = json.loads(maestro_stored_path.read_text(encoding="utf-8"))
             match = (
                 recomputed["metrics"]["tasks_completed"]

@@ -7,17 +7,16 @@ This document defines the **Coordination Contract Benchmark v0.1**: a reusable b
 - **Version:** v0.1
 - **Corpus location:** `bench/contracts/corpus/` (relative to repo root)
 
-## Sequences (N = 7)
+## Sequences (N = 25)
 
-| Sequence file | Failure class | Description |
-|---------------|---------------|-------------|
-| good_sequence | — | Single writer, monotonic timestamps; all events allowed. |
-| split_brain_sequence | split_brain | Second writer for same key denied (ownership). |
-| stale_write_sequence | stale_write | Event timestamp before last_ts for key; deny. |
-| reorder_sequence | reorder_violation | Second event has lower ts than first; allow then deny. |
-| unsafe_lww_sequence | reorder_violation | Unsafe last-write-wins under delay/reorder; deny. |
-| multi_writer_contention | split_brain | Two writers same task_id; second denied after first owns. |
-| edge_case_timestamps | (ordering) | Same-ts events; ordering by seq. |
+The challenge corpus includes sequences partitioned by failure class, with positive and negative controls:
+
+- **Positive controls (good_*):** good_sequence, good_two_keys, good_three_events, good_four_events, good_single_allow, good_sequence_4events, multi_key_no_conflict, conflicting_writes_independent_keys, duplicate_delivery, same_ts_same_writer, edge_case_timestamps.
+- **Split-brain:** split_brain_sequence, split_brain_same_epoch, split_brain_second_key, split_brain_three_writers, multi_writer_contention.
+- **Stale write / reorder:** stale_write_sequence, stale_write_sequence_2, stale_write_margin, reorder_sequence, reorder_first_deny, reorder_three_events, reorder_multi_key, unsafe_lww_sequence.
+- **Boundary:** stale_write_exact (ts equals last_ts; validator uses strict > so allow).
+
+Discovery: all `*.json` files in the corpus directory; see corpus location above.
 
 ## Schema
 

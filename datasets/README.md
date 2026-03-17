@@ -17,7 +17,7 @@ Each run directory under `datasets/runs/<run_id>/` should contain:
 - `evidence_bundle.json` — EVIDENCE_BUNDLE (kernel/mads/EVIDENCE_BUNDLE.v0.1)
 - `release_manifest.json` — RELEASE_MANIFEST (kernel/policy/RELEASE_MANIFEST.v0.1)
 
-The thin-slice pipeline (`labtrust_portfolio run-thinslice --out-dir datasets/runs/<run_id>`) produces this layout. Use `scripts/release_dataset.py` (or `labtrust_portfolio release-dataset`) to copy a run into `datasets/releases/<release_id>/` with a release manifest.
+The thin-slice pipeline (`labtrust_portfolio run-thinslice --out-dir datasets/runs/<run_id>`) produces this layout. Use `labtrust_portfolio release-dataset` (or `python scripts/release_dataset.py`) to copy a run into `datasets/releases/<release_id>/` with a release manifest.
 
 **Paper experiment runner:** To populate `datasets/runs/` with a full set of paper-tailored runs in one go, run `python scripts/run_paper_experiments.py` (or `--quick` for fewer seeds, `--paper P0` … `P8` for a single paper). Requires `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [docs/EVALS_RUNBOOK.md](../docs/EVALS_RUNBOOK.md). Eval summary JSONs may include optional **excellence_metrics**; run `python scripts/export_excellence_summary.py` to print a one-line summary per paper (see [docs/STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md)). **Repro time (P4):** `python scripts/repro_time_p4.py` writes `datasets/runs/repro_manifest.json` with `repro_wall_min` for minimal P4 repro.
 

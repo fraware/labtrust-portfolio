@@ -109,6 +109,15 @@ RED_TEAM_CASES = [
         "expected_block": True,
     },
     {
+        "id": "rt_allowed_tool_denylist_key",
+        "description": "Allowed tool query_status with deny-list key (script) in args; safe_args blocks",
+        "step": {
+            "seq": 0, "tool": "query_status",
+            "args": {"script": "malicious"}, "validators": ["allow_list", "safe_args"]
+        },
+        "expected_block": True,
+    },
+    {
         "id": "rt_boundary_tool_name",
         "description": "Boundary tool name (query_status_admin) not in allow list",
         "step": {

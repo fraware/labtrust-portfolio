@@ -223,23 +223,43 @@ def p5(quick: bool) -> bool:
 
 
 def p6(quick: bool) -> bool:
-    # Red-team + confusable + adapter latency; publishable: two scenarios, 5 adapter seeds for variance
-    scenarios = "toy_lab_v0" if quick else "toy_lab_v0,lab_profile_v0"
-    adapter_seeds = "7" if quick else "7,14,21,28,35"
+    # Red-team + confusable + adapter latency + denial-stats + baseline (tool-level and args-unsafe)
+    # Publishable: 3 scenarios, 20 seeds. Real-LLM (Table 1b): run manually with --real-llm (requires .env API keys)
+    scenarios = "toy_lab_v0" if quick else "toy_lab_v0,lab_profile_v0,warehouse_v0"
+    adapter_seeds = "7" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
     cmd = [
         sys.executable,
         str(REPO / "scripts" / "llm_redteam_eval.py"),
         "--out", str(RUNS / "llm_eval"),
         "--run-adapter",
+        "--denial-stats",
+        "--run-baseline",
         "--adapter-scenarios", scenarios,
         "--adapter-seeds", adapter_seeds,
     ]
-    # For real-LLM evidence (Table 1b), run manually: llm_redteam_eval.py --real-llm (requires .env API keys)
-    return run(
+    if not run(
         cmd,
-        "P6 LLM red-team + confusable + adapter latency",
+        "P6 LLM red-team + adapter + denial-stats + baseline (tool-level)",
         timeout=300 if not quick else 180,
-    )
+    ):
+        return False
+    if not quick:
+        cmd_args = [
+            sys.executable,
+            str(REPO / "scripts" / "llm_redteam_eval.py"),
+            "--out", str(RUNS / "llm_eval"),
+            "--run-baseline",
+            "--baseline-plan", "args_unsafe",
+            "--baseline-scenarios", scenarios,
+            "--baseline-seeds", adapter_seeds,
+        ]
+        if not run(
+            cmd_args,
+            "P6 baseline (args-unsafe, safe_args ablation)",
+            timeout=120,
+        ):
+            return False
+    return True
 
 
 def p7(quick: bool) -> bool:

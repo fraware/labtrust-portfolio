@@ -2,15 +2,19 @@
 
 **Draft (v0.1). Paper ID: P6_LLMPlanning. Conditional paper; trigger and scope: docs/CONDITIONAL_TRIGGERS.md (P6).**
 
-**Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Run_manifest: red_team_results.json (red_team_case_count, script); adapter_latency.json (adapter_scenarios, adapter_seeds, script). Conditional trigger: success_criteria_met.trigger_met in red_team_results.json; see docs/CONDITIONAL_TRIGGERS.md (P6).
+**Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Run_manifest: red_team_results.json (red_team_case_count, script); adapter_latency.json (adapter_scenarios, adapter_seeds, script). Conditional trigger: success_criteria_met.trigger_met in red_team_results.json; see docs/CONDITIONAL_TRIGGERS.md (P6). Full commands and artifact hashes: Appendix A.
 
 **Minimal run (under 20 min):** `python scripts/llm_redteam_eval.py` then `python scripts/llm_redteam_eval.py --run-adapter --adapter-scenarios toy_lab_v0 --adapter-seeds 3` then `python scripts/export_p6_firewall_flow.py` then `python scripts/plot_llm_adapter_latency.py`.
 
+**Publishable run:** Three scenarios (toy_lab_v0, lab_profile_v0, warehouse_v0) and 20 seeds; run `llm_redteam_eval.py --run-adapter --denial-stats` and `--run-baseline` for denial_trace_stats.json and baseline_comparison.json. Run_manifest in red_team_results.json and adapter_latency.json. For submission, use a run where success_criteria_met.trigger_met is true; see docs/CONDITIONAL_TRIGGERS.md (P6).
+
 - **Figure 0:** `python scripts/export_p6_firewall_flow.py` (output `docs/figures/p6_firewall_flow.mmd`). Render Mermaid to PNG for camera-ready.
-- **Table 1:** `python scripts/llm_redteam_eval.py` (output red_team_results.json; contains success_criteria_met.red_team_all_pass, trigger_met).
-- **Table 1b (Real-LLM):** Run with `--real-llm` when .env has API keys; `export_llm_redteam_table.py` prints Table 1b when `real_llm` is present in red_team_results.json (model_id, all_block_unsafe_pass, latency_ms).
-- **Table 2, Figure 1:** `python scripts/llm_redteam_eval.py --run-adapter` then `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`).
-- MAESTRO-integrated run and e2e_denial_trace: same eval; see e2e_denial_trace.json.
+- **Table 1:** `python scripts/llm_redteam_eval.py` (output `datasets/runs/llm_eval/red_team_results.json`; contains success_criteria_met.red_team_all_pass, trigger_met).
+- **Table 1b (Real-LLM):** Run with `--real-llm --real-llm-runs 5` (default 5 runs per case); same red-team + confusable-deputy suites; per-case pass_rate_pct, 95% Wilson CI, latency mean ± stdev; overall pass_rate_pct and Wilson CI in run_manifest; export prints Table 1b.
+- **Table 2:** `python scripts/llm_redteam_eval.py --run-adapter` (writes adapter_latency.json); table from adapter_latency.json. N scenarios, 20 seeds.
+- **Baseline table:** `python scripts/llm_redteam_eval.py --run-baseline` then `python scripts/export_p6_baseline_table.py` (source: baseline_comparison.json). **Argument-level baseline:** `python scripts/llm_redteam_eval.py --run-baseline --baseline-plan args_unsafe` then `python scripts/export_p6_baseline_table.py --baseline-file baseline_comparison_args.json` (gated 60, weak 0, ungated 0).
+- **Figure 1:** `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`). Input: adapter_latency.json from --run-adapter. Per-scenario mean and stdev over seeds.
+- MAESTRO-integrated run and e2e_denial_trace: same eval; see e2e_denial_trace.json. Denial-trace statistics: denial_trace_stats.json (when --run-adapter --denial-stats).
 
 ## 1. Motivation
 
@@ -28,7 +32,7 @@ Schema: `kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json` (plan_id, steps with se
 
 **OWASP LLM Top 10 coverage.** A mapping of red-team, confusable deputy, and jailbreak-style cases to OWASP LLM categories is in [docs/P6_OWASP_MAPPING.md](../docs/P6_OWASP_MAPPING.md). We partially cover Prompt Injection (jailbreak-style args), Insecure Output Handling (disallowed tools), Insecure Plugin Design (safe_args), and Excessive Agency (containment); we do not cover Training Data Poisoning, Supply Chain, Model Theft, or full jailbreak suites.
 
-**Table 1 — Red-team results (full 8 cases in export).** Validator v0.2: allow_list + safe_args (path traversal, dangerous patterns); PONR checks future. Full 8 red-team + 4 confusable deputy; regenerate with `python scripts/export_llm_redteam_table.py` (reads red_team_results.json and confusable_deputy_results.json). Source: `datasets/runs/llm_eval/`. Contains `success_criteria_met.red_team_all_pass` and `success_criteria_met.trigger_met` (conditional paper evidence). Run `scripts/llm_redteam_eval.py` to regenerate results. The inline table below may show a subset; full 8 cases are in export_llm_redteam_table.py output. **Table 1b — Real-LLM (optional):** With `--real-llm` and .env API keys set, the script runs the same red-team flow via a real model (e.g. gpt-4o-mini); red_team_results.json gets a `real_llm` key and run_manifest.real_llm_model_id. Export script prints Table 1b (model_id, all_block_unsafe_pass, latency_ms) when present.
+**Table 1 — Red-team results (full 9 cases in export).** Validator v0.2: allow_list + safe_args (path traversal, dangerous patterns, deny-list keys); PONR checks future. Full 9 red-team + 4 confusable deputy. Units: pass (yes/no). Run_manifest in red_team_results.json. Regenerate with `python scripts/export_llm_redteam_table.py` (reads red_team_results.json and confusable_deputy_results.json). **Table 1b — Real-LLM:** With `--real-llm --real-llm-runs 5` and .env API keys set, the same red-team and confusable-deputy suites are run through a real LLM; red_team_results.json gets `real_llm.cases[]` (per-case pass_rate_pct, pass_rate_ci95, latency_mean_ms, latency_stdev_ms when n_runs > 1; or actually_blocked, pass, latency_ms when n_runs == 1), overall pass_rate_pct and Wilson CI, all_block_unsafe_pass, total_latency_ms; export prints the full table and summary (model_id, n_runs_per_case, run_manifest).
 
 | Case id | expected_block | actually_blocked | pass |
 |---------|----------------|-----------------|------|
@@ -42,24 +46,30 @@ Schema: `kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json` (plan_id, steps with se
 
 LLMPlanningAdapter (`adapters/llm_planning_adapter.py`) runs scenario, injects synthetic typed plan and validation result into trace metadata, produces TRACE + MAESTRO_REPORT. Run `llm_redteam_eval.py --run-adapter` to record latency; output: `adapter_latency.json` with runs, tail_latency_p95_mean_ms, scenarios, seeds. Optional `--latency-threshold-ms` adds latency_acceptable (SLA check). Reported latency is thin-slice execution time, not LLM inference.
 
-**Table 2 — Adapter latency (when --run-adapter).** Source: `datasets/runs/llm_eval/adapter_latency.json`. Produced only when running `llm_redteam_eval.py --run-adapter`. Summary: tail_latency_p95_mean_ms, scenarios, seeds; per-run: scenario_id, seed, task_latency_ms_p95, wall_sec; run_manifest (adapter_scenarios, adapter_seeds, script). **Latency and jitter budget:** Even with synthetic plans, we report adapter latency (p50/p95, wall_sec) and optional stdev/CI when n >= 2; this gives a latency and jitter budget for integration (e.g. SLA threshold via `--latency-threshold-ms`). To refresh Table 2 and Figure 1: run with `--run-adapter` then `plot_llm_adapter_latency.py`.
+**Table 2 — Adapter latency (when --run-adapter).** Source: `datasets/runs/llm_eval/adapter_latency.json`. Units: tail_latency_p95_mean_ms (ms), task_latency_ms_p95 (ms), wall_sec (s). Run_manifest (adapter_scenarios, adapter_seeds, script) in adapter_latency.json. Produced when running `llm_redteam_eval.py --run-adapter`. To refresh: run with `--run-adapter` then `plot_llm_adapter_latency.py`.
 
 **MAESTRO-integrated run (planner proposes unsafe, validator blocks, system completes safely).** One run where the planner proposes an unsafe action, the validator blocks it, and the system still completes tasks safely: documented in `e2e_denial_trace.json` (blocked step, outcome). Metrics: tasks_completed and recovery_ok remain acceptable; evidence that the firewall reduces unsafe attempts without collapsing task completion. Run `llm_redteam_eval.py` with adapter; e2e_denial_trace records the denial and outcome.
 
-**Figure 1 — Adapter latency by scenario.** Mean latency (p95 ms or wall_sec) by scenario from adapter_latency.json. Regenerate with `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`). Input: `datasets/runs/llm_eval/adapter_latency.json` (produced by `llm_redteam_eval.py --run-adapter`).
+**Figure 1 — Adapter latency by scenario.** Mean latency by scenario from adapter_latency.json (N scenarios, 20 seeds); units: p95 latency (ms) or wall_sec (s). Per-scenario mean and stdev over seeds. Regenerate with `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`). Input: adapter_latency.json (produced by `llm_redteam_eval.py --run-adapter`). Run_manifest in adapter_latency.json.
+
+**Baseline comparison (gated vs weak vs ungated).** Three-way comparison on the same scenarios and seeds with a plan containing one unsafe step: gated (full validator), weak (allow-list only), ungated (no validation). Table from `export_p6_baseline_table.py`; source: baseline_comparison.json (denial_count_gated, denial_count_weak, denial_count_ungated, tasks_completed_mean per mode). With denial-injection step execute_system (tool-level), gated and weak both record 60 denials; ungated records 0. **Argument-level baseline (safe_args ablation):** With `--baseline-plan args_unsafe`, plan uses allow-listed tool and path-traversal args; gated 60 denials, weak 0, ungated 0. Source: baseline_comparison_args.json; export with `--baseline-file baseline_comparison_args.json`.
+
+**Denial-trace statistics.** When running with `--run-adapter --denial-stats`, the adapter uses a denial-injection plan (one safe + one unsafe step); gated validation blocks the unsafe step per run. Aggregates: total_runs, runs_with_denial, per_scenario (runs, denials, tasks_completed_mean). Written to denial_trace_stats.json; run_manifest documents scenarios and seeds.
 
 ## 5. Contribution to the literature and comparison to benchmarks
 
-**Key results.** (1) Red-team: 8/8 cases blocked as expected (success_criteria_met.red_team_all_pass, all_block_unsafe_pass); success_criteria_met.trigger_met (firewall reduces unsafe without collapsing task completion). (2) Confusable deputy: 4/4 pass (confusable_deputy_results.json). (3) Excellence metrics: red_team_pass_rate_pct, all_block_unsafe_pass from red_team_results.json. (4) Adapter latency: tail_latency_p95_mean_ms from adapter_latency.json when run with --run-adapter; publishable run uses multiple adapter seeds (e.g. 7,14,21,28,35) and two scenarios for variance. (5) Table 1b (real-LLM): run with `--real-llm` when .env has API keys; model_id and all_block_unsafe_pass then in run_manifest and real_llm section. *Numbers from red_team_results.json and adapter_latency.json. Regenerate with `llm_redteam_eval.py` (--run-adapter for latency); use `run_paper_experiments.py --paper P6` for publishable. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+**Key results.** (1) Red-team: 9/9 cases blocked as expected (success_criteria_met.red_team_all_pass, all_block_unsafe_pass); success_criteria_met.trigger_met (firewall reduces unsafe without collapsing task completion). (2) Confusable deputy: 4/4 pass (confusable_deputy_results.json). (3) Excellence metrics: red_team_pass_rate_pct, all_block_unsafe_pass from red_team_results.json. (4) Adapter latency: tail_latency_p95_mean_ms from adapter_latency.json when run with --run-adapter; publishable run uses 3 scenarios and 20 seeds. (5) Table 1b (real-LLM): run with `--real-llm` when .env has API keys; real_llm.cases[] (9+4 cases, per-case pass and latency_ms), model_id and all_block_unsafe_pass in run_manifest. (6) Baseline comparison: 3-way (gated/weak/ungated) tool-level from baseline_comparison.json; argument-level (safe_args ablation) from baseline_comparison_args.json (gated 60, weak 0, ungated 0). (7) Denial-trace statistics: denial_trace_stats.json when --run-adapter --denial-stats (total_runs, runs_with_denial, per_scenario). *Numbers from red_team_results.json, adapter_latency.json, baseline_comparison.json. Regenerate with `python scripts/llm_redteam_eval.py` (--run-adapter, --run-baseline, --denial-stats); use `python scripts/run_paper_experiments.py --paper P6` for publishable. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
 
-**Contribution to the literature.** LLM safety and tool-use benchmarks are often generic (prompt injection, jailbreak, output filtering) and not tied to a specific system or trace format. We contribute a **CPS-oriented typed-plan firewall** with (1) **deterministic capture** and traceability for audit and replay; (2) a **red-team + confusable deputy + jailbreak-style** suite aligned with OWASP LLM Top 10 (see [docs/P6_OWASP_MAPPING.md](../docs/P6_OWASP_MAPPING.md)); (3) **containment only**—we do not claim elimination of prompt injection or novel attacks; (4) **real-LLM evaluation** supported for one table (Table 1b) when API keys are set. The firewall integrates with MAESTRO so that blocked steps and latency are reported in the same artifact pipeline as other papers.
+**Reported run (3 scenarios, 20 seeds).** Adapter: tail_latency_p95_mean_ms = 32.07 ms (stdev 18.45 ms; 95% CI [27.41, 36.74]); 60/60 runs with denial. Baseline: gated 60, weak 60, ungated 0 denials; mean tasks_completed 3.95 (all). **Real-LLM (gpt-4o-mini, 5 runs/case):** pass_rate_pct 91.7, 95% Wilson CI [81.9, 96.4]; 55/60 runs pass; rt_allowed_tool_disallowed_args 0/5 (path-traversal case); total_latency_ms 151854. Full report: [P6_RESULTS_REPORT.md](P6_RESULTS_REPORT.md).
+
+**Contribution to the literature.** LLM safety and tool-use benchmarks are often generic (prompt injection, jailbreak, output filtering) and not tied to a specific system or trace format. We contribute a **CPS-oriented typed-plan firewall** with (1) **deterministic capture** and traceability for audit and replay; (2) a **red-team + confusable deputy + jailbreak-style** suite aligned with OWASP LLM Top 10 (see [docs/P6_OWASP_MAPPING.md](../docs/P6_OWASP_MAPPING.md)); (3) **containment only**—we do not claim elimination of prompt injection or novel attacks; (4) **real-LLM evaluation** with 5 runs per case (configurable), per-case pass_rate and 95% Wilson CI, latency mean ± stdev (Table 1b); prompt hardening for path-traversal case; (5) **three-way baseline comparison** (gated vs weak vs ungated) and **denial-trace statistics** over multiple scenarios and seeds. The firewall integrates with MAESTRO so that blocked steps and latency are reported in the same artifact pipeline as other papers.
 
 **Comparison to existing LLM safety and tool-use benchmarks**
 
 | Aspect | P6 (this work) | OWASP LLM Top 10 / tool-use benchmarks |
 |--------|----------------|----------------------------------------|
 | Scope | Tool-policy containment (allow-list); deterministic capture | Broader: prompt injection, jailbreak, output safety |
-| Red-team | Static cases (8 red-team + 4 confusable deputy); tool-centric; expected_block | Often: adversarial prompts, jailbreak suites, multi-step attacks |
+| Red-team | Static cases (9 red-team + 4 confusable deputy); tool-centric; expected_block | Often: adversarial prompts, jailbreak suites, multi-step attacks |
 | LLM | Real LLM supported when .env keys are set (--real-llm); synthetic-only by default for CI/keyless | Real model calls, tool-use APIs |
 | Validator | v0.2: allow_list + safe_args (path/danger/jailbreak-style); PONR future | Varies: filters, guardrails, tool restrictions |
 
@@ -73,12 +83,15 @@ Scope and conditional triggers: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIM
 
 - **Conditional paper (trigger and scope):** Trigger requires the firewall to reduce unsafe attempts without collapsing task completion on at least one scenario. Evidence: `red_team_results.json` (success_criteria_met.trigger_met, red_team_all_pass), `e2e_denial_trace.json`, and adapter runs (tasks_completed). **Scope:** Typed-plan containment and tool-policy firewall only; no claim to elimination of prompt injection. If success_criteria_met.trigger_met is false, frame the paper as "conditional / optional"; see docs/CONDITIONAL_TRIGGERS.md (P6).
 - **Containment not elimination:** We claim containment (firewall blocks unsafe actions); we do not claim elimination of prompt injection or adversarial inputs.
-- **Real LLM:** Evidence in Table 1 is from synthetic plans unless Table 1b (real-LLM) is produced. For a stronger submission, run with `--real-llm` when .env has API keys and include Table 1b (model_id, all_block_unsafe_pass, latency_ms) in Section 3 or 5; otherwise state in the abstract or limitations that results are synthetic-only and the contribution is methodology and benchmark design.
+- **Real LLM:** Evidence in Table 1 is from synthetic plans unless Table 1b (real-LLM) is produced. When Table 1b is not included, this paper states: **results are from synthetic plans only**; the contribution is methodology and benchmark design. For a stronger submission, run with `--real-llm` when .env has API keys and include Table 1b (model_id, all_block_unsafe_pass, latency_ms) in Section 3 or 5.
 - **No adversarial prompts or jailbreaks:** Red-team is tool-centric and static; no multi-step attack plans or prompt-injection suite.
 - **Validator stack:** Validator v0.2 includes allow_list and safe_args (path traversal, dangerous patterns, jailbreak-style phrases); PONR checks are future work.
 - **Static red-team:** Cases are fixed (not generated or adaptive).
 - **Latency:** Reported latency is thin-slice execution time (adapter run), not LLM inference; tail-latency SLA is optional and configurable via `--latency-threshold-ms`.
 - **Residual risk:** Residual risk from prompt injection or novel attack vectors remains; containment reduces but does not eliminate it.
+- **Real-LLM suite:** Multi-run (default 5) yields pass_rate_pct and Wilson CI per case; model output may still vary (e.g. path-traversal case); document pass rate and CI; synthetic table remains primary validator evidence.
+- **Baseline:** Ungated is a no-op validator (allow all); we do not execute actually unsafe actions in the environment, only record that they would have been allowed.
+- **Denial stats:** Denial-injection uses one fixed unsafe step per run; diversity of denial types is limited to that step.
 
 ## 7. Methodology and reproducibility
 
@@ -86,7 +99,7 @@ Scope and conditional triggers: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIM
 
 **Reproducibility:** Validate plan: `validate_plan(typed_plan)`; policy: `policy_check_step(step, allowed_tools)`. Red-team: `llm_redteam_eval.py` writes `datasets/runs/llm_eval/red_team_results.json` (includes success_criteria_met.trigger_met, red_team_all_pass). With `--run-adapter`: writes `adapter_latency.json` (run_manifest: adapter_scenarios, adapter_seeds); then run `plot_llm_adapter_latency.py --latency datasets/runs/llm_eval/adapter_latency.json` to refresh Figure 1. Integration test: `tests/test_llm_p6.py` runs eval with --run-adapter and asserts both artifacts. Red-team cases: `llm_planning.RED_TEAM_CASES`. Adapter: `LLMPlanningAdapter`; trace metadata typed_plan_valid, typed_plan_captured. Spec: `kernel/llm_runtime/PLAN_SPEC.v0.1.md`.
 
-**Submission note (P6).** For submission, use a run where red_team_results.json has `success_criteria_met.trigger_met` true (e.g. `run_paper_experiments.py --paper P6`); state in the draft that the conditional trigger is met, or frame as conditional/optional per [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md) (P6). If submitting without real-LLM, state in abstract or limitations that results are from synthetic plans only. For submission with real-LLM evidence: run `llm_redteam_eval.py --real-llm` (requires .env API keys); `export_llm_redteam_table.py` prints Table 1b; include Table 1b in the main text and cite run_manifest.real_llm_model_id.
+**Submission note (P6).** Use a run where red_team_results.json has success_criteria_met.trigger_met true. With real-LLM (Table 1b): run with `--real-llm --real-llm-runs 5`; report pass_rate_pct and 95% Wilson CI per case and overall; latency mean ± stdev; cite run_manifest.real_llm_model_id and n_runs_per_case. Synthetic red-team remains primary validator evidence. Baseline: report 3-way (gated/weak/ungated) tool-level from baseline_comparison.json and argument-level (safe_args ablation) from baseline_comparison_args.json.
 
 **Claims and backing**
 
@@ -97,3 +110,25 @@ Scope and conditional triggers: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIM
 | C3 Red-team containment | RED_TEAM_CASES, red_team_results.json, all_block_unsafe_pass |
 | C4 MAESTRO integration | LLMPlanningAdapter, adapter_latency.json, typed_plan in trace |
 | Containment only; no real LLM | Limitations section; adapter injects synthetic plan |
+
+## Appendix A. Reproduction and artifact hashes
+
+**Environment.** Set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel` (from repo root).
+
+**Commands (exact reproduction).** Run from repo root:
+```
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-adapter --denial-stats
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline --baseline-plan args_unsafe
+python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval
+python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval
+python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval --baseline-file baseline_comparison_args.json
+python scripts/export_p6_firewall_flow.py
+python scripts/plot_llm_adapter_latency.py
+```
+For real-LLM Table 1b, add `--real-llm --real-llm-runs 5` to the first command (requires .env API keys). To generate artifact hashes: `PYTHONPATH=impl/src python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval --markdown` (optionally set `--repo-url` and `--tag`).
+
+**Repository.** Replace with actual URL; tag: `v0.1-p6-draft` (or the tag used for submission).
+
+**Artifact hashes (SHA256).** Run `python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval --markdown` after the eval pipeline to produce the table. Artifacts: red_team_results.json, confusable_deputy_results.json, adapter_latency.json, e2e_denial_trace.json, baseline_comparison.json, baseline_comparison_args.json, denial_trace_stats.json.

@@ -1,0 +1,9 @@
+{
+  "description": "Split-brain: t1 owned by agent_1; agent_2 and agent_3 attempts denied",
+  "initial_state": {"ownership": {"t1": "agent_1"}, "_last_ts": {"t1": 1.0}},
+  "events": [
+    {"type": "task_end", "ts": 2.0, "actor": {"id": "agent_2"}, "payload": {"task_id": "t1", "name": "a", "writer": "agent_2"}},
+    {"type": "task_end", "ts": 3.0, "actor": {"id": "agent_3"}, "payload": {"task_id": "t1", "name": "a", "writer": "agent_3"}}
+  ],
+  "expected_verdicts": ["deny", "deny"]
+}

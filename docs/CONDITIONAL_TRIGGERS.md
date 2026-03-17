@@ -6,7 +6,8 @@ Papers P2, P5, P6, and P8 are **conditional**: proceed only when their trigger c
 
 - **Trigger:** Sensitivity sharing materially influences scheduling or actuation decisions in the target architecture (lab/warehouse/traffic), and therefore becomes safety/security relevant.
 - **Trigger proof required:** REP-CPS improves robustness under compromise/delay **without throughput regression** on at least one **non-toy** lab scenario. Evidence in release: scenario id, centralized vs REP-CPS metrics, statement that trigger is met or not (if not, paper is "conditional / optional" only).
-- **Proceed when:** You can show that REP-like protocols are in scope for the lab (or other) profile and that naive forms break under CPS constraints.
+- **Current status:** Trigger is **not yet met** in the evaluated scenario: Table 1 shows identical tasks_completed_mean across REP-CPS, naive-in-loop, unsecured, and centralized. The paper is framed as a **profile-and-harness contribution**: typed, authenticated, rate-limited, safety-gated sensitivity-sharing profile with MAESTRO-compatible fault injection. Do not claim that sensitivity sharing materially influences actuation in the current scenario. Until a scenario where sensitivity sharing materially affects outcomes is added, the paper remains conditional/optional for the full trigger.
+- **Proceed when:** You can show that REP-like protocols are in scope for the lab (or other) profile and that naive forms break under CPS constraints; or submit as profile paper with honest scope (profile + harness, reduced observed bias under compromise).
 - **Dependency order:** After Contracts (P1) typed state and Replay/MAESTRO harnesses exist; REP-CPS is a profile inside the MADS envelope.
 
 ## P5 Scaling laws
@@ -19,7 +20,7 @@ Papers P2, P5, P6, and P8 are **conditional**: proceed only when their trigger c
 ## P6 LLM Planning
 
 - **Trigger:** An LLM is in the control plane (planning/toolcalling), OR a typed-plan + validator firewall is needed as a general containment pattern.
-- **Trigger proof required:** Firewall reduces unsafe attempts without collapsing task completion on at least one scenario family. Deliverable: evidence (unsafe blocked: red_team, confusable); tasks_completed non-zero or above threshold; document in release and P6.
+- **Trigger proof required:** Firewall reduces unsafe attempts without collapsing task completion on at least one scenario family. Deliverable: evidence (unsafe blocked: red_team 8/8, confusable deputy 4/4, jailbreak-style 2/2); real-LLM Table 1b (5 runs/case, pass_rate, Wilson CI); adapter latency and 3-way baseline; tasks_completed non-zero; document in release and P6.
 - **Proceed when:** You are building or evaluating an LLM-in-the-loop control plane and need containment and measurable robustness (not “elimination” of prompt injection).
 - **Dependency order:** LLM planning is a module inside the MADS envelope; evaluated on MAESTRO scenarios.
 

@@ -1,0 +1,1 @@
+**Case study: denial trace.** Planner proposed step {"tool": "query_status", "args": {"path": "../../../etc/passwd"}}. Validator: safe_args: path traversal (../) in args -> Deny. Step captured for audit; no execution.

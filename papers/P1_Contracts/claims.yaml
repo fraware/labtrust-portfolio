@@ -3,12 +3,12 @@
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P1_Contracts"
-title: "Coordination Contracts: Typed State, Ownership, and Valid Transitions Above Messaging"
+title: "Coordination Contracts: Typed State, Ownership, and Valid Transitions Above Messaging for Cyber-Physical Systems"
 release_id: "contracts_eval"
 
 claims:
   - id: "C1"
-    statement: "A minimal contract layer (typed state + ownership + valid transitions + temporal semantics) prevents common coordination pathologies (split-brain, stale writes, orphan authority, unsafe last-write-wins)."
+    statement: "Within a declared contract model, a trace-derived validator can detect and deny invalid writes corresponding to specified coordination failure classes (ownership conflicts, stale writes, reorder-sensitive violations)."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:
@@ -20,7 +20,7 @@ claims:
       confidence: high
 
   - id: "C2"
-    statement: "Contract validation can be executed from traces (no privileged hidden state), enabling auditability and replay-based debugging."
+    statement: "Contract validation can be executed from event traces plus declared configuration alone, without privileged hidden state, enabling auditability and replay-based diagnosis."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:
@@ -31,9 +31,9 @@ claims:
       figure_ids: []
       confidence: high
 
-  # C3: design/portability claim; no cross-transport empirical test in v0.1
+  # C3: design claim; no full cross-transport deployment in this version
   - id: "C3"
-    statement: "The contract surface is portable across ROS2/DDS and event-log architectures (DDS/Kafka-style), because it is defined above transport."
+    statement: "The contract model is transport-agnostic by construction (defined over event/state semantics above the messaging layer); the paper demonstrates this through a reference store and a LADS-shaped event mapping, not a full cross-transport deployment."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:
@@ -44,7 +44,7 @@ claims:
       confidence: medium
 
   - id: "C4"
-    statement: "A small reference implementation demonstrates enforceability with bounded overhead."
+    statement: "A reference implementation can enforce the contract with bounded per-write overhead on the evaluated workload."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:

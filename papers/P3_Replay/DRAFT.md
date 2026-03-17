@@ -9,7 +9,8 @@
 **Publishable run:** `--overhead-runs 20`; run_manifest in summary.json.
 
 - **Figure 0:** `python scripts/export_p3_replay_levels_diagram.py` (output `docs/figures/p3_replay_levels_diagram.mmd`). Render Mermaid to PNG for camera-ready.
-- **Table 1, Table 2:** `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20`; table content from summary. Single source: [generated_tables.md](generated_tables.md).
+- **Table 1:** `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20`, then `python scripts/export_replay_corpus_table.py` (table from summary; see [generated_tables.md](generated_tables.md)).
+- **Table 2:** Same run; Table 2 from summary.json overhead_stats (see [generated_tables.md](generated_tables.md)).
 - **Figure 1:** `python scripts/plot_replay_overhead.py` (output `docs/figures/p3_replay_overhead.png`). Run replay_eval with `--overhead-curve` first.
 
 ## 1. Motivation
@@ -47,10 +48,12 @@ RR and Scribe aim at full-process or I/O determinism for debugging; we do not. L
 
 - **Trace corpus:** (1) MAESTRO scenario (thin-slice) with expected pass; (2) nondeterminism trap: divergence at seq 0; (3) reorder trap: divergence at seq 1; (4) timestamp_reorder_trap: wrong state_hash_after at seq 1; (5) hash_mismatch_trap: wrong state_hash_after at seq 1 (three events). Corpus is discovered from all `*_trace.json` / `*_expected.json` pairs in `bench/replay/corpus/`; `divergence_localization_confidence` is computed over the full set. See `bench/replay/README.md` and `kernel/trace/REPLAY_LEVELS.v0.1.md`.
 
-**Key results.** (1) Fidelity: fidelity_pass true. (2) Corpus: all expected divergences detected; divergence_localization_confidence from summary; excellence_metrics: divergence_localization_accuracy_pct, overhead_p99_ms, l1_stub_ok, witness_slices_present. (3) L1 stub: l1_stub_ok when twin config present; overhead_stats and divergence metrics use N=20 replays (--overhead-runs 20, publishable default). (4) L1 twin: run with --l1-twin for full L1 (deterministic re-run); summary then includes l1_twin_ok and l1_twin_final_hash_match; main tables use L1 stub; report L1 twin in supplement or state "L1 stub only in main results; L1 twin available via --l1-twin". (5) Overhead: mean_ms, stdev_ms, p95_ms from overhead_stats (n_replays=20). *Numbers from summary.json. Regenerate with replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-runs 20. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+**Key results.** (1) Fidelity: fidelity_pass true. (2) Corpus: all expected divergences detected; divergence_localization_confidence from summary; excellence_metrics: divergence_localization_accuracy_pct, overhead_p99_ms, l1_stub_ok, witness_slices_present. (3) L1 stub: l1_stub_ok when twin config present; overhead_stats and divergence metrics use N=20 replays (--overhead-runs 20, publishable default). (4) L1 twin: run with --l1-twin for full L1 (deterministic re-run); summary then includes l1_twin_ok and l1_twin_final_hash_match; main tables use L1 stub; report L1 twin in supplement or state "L1 stub only in main results; L1 twin available via --l1-twin". (5) Overhead: mean_ms, stdev_ms, p95_ms from overhead_stats (n_replays=20). *Numbers from summary.json. Regenerate with replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-runs 20. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+
+**Results summary (excellence metrics).** From summary.json: **divergence_localization_accuracy_pct** (fraction of corpus traps where observed divergence_at_seq matches expected); **overhead_p99_ms** (p99 replay time over N replays); **l1_stub_ok** (true when twin config valid); **witness_slices_present** (witness_slices length > 0 when divergence detected). When run with --l1-twin, report **l1_twin_ok** and l1_twin_final_hash_match. See [STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md) (P3).
 
 - **Metrics:** Replay fidelity (pass/fail per trace), divergence detection (yes/no, divergence_at_seq), overhead (replay_time_ms per trace; distribution over N replays: mean, stdev, p95 in `overhead_stats`). The evaluation script `scripts/replay_eval.py` runs L0 replay on thin-slice and corpus traces, runs the L1 stub on the thin-slice trace, and outputs a JSON summary. Summary includes **replay_level** (L0|L1|L2), **nondeterminism_budget** (declared per level), **divergence_localization_confidence** (fraction of corpus traps localized at expected seq), plus fidelity_pass, l1_stub_ok, l1_stub_message, overhead_stats, corpus_divergence_detected, per_trace. Default `--overhead-runs 20` for overhead distribution.
-- **Table 1 — Corpus and fidelity.** Source: replay_eval summary.json. All corpus traces (one row per trace); regenerate with `python scripts/export_replay_corpus_table.py`. Corpus includes all `*_trace.json`/`*_expected.json` pairs in bench/replay/corpus (e.g. hash_mismatch_trap); full list in summary.json per_trace and corpus_divergence_detected. This table shows selected traces; the full corpus is listed in summary.json per_trace and in the output of export_replay_corpus_table.py.
+- **Table 1 — Corpus and fidelity.** Source: replay_eval summary.json. All corpus traces (one row per trace); regenerate with `python scripts/export_replay_corpus_table.py`. Run_manifest in summary.json. Corpus includes all `*_trace.json`/`*_expected.json` pairs in bench/replay/corpus; full list in summary.json per_trace and corpus_divergence_detected.
 
 | Trace | expected_replay_ok | expected_divergence_at_seq | observed replay_ok | observed divergence_at_seq |
 |-------|--------------------|----------------------------|--------------------|----------------------------|
@@ -59,7 +62,7 @@ RR and Scribe aim at full-process or I/O determinism for debugging; we do not. L
 | reorder_trap | false | 1 | false | 1 |
 | timestamp_reorder_trap | false | 1 | false | 1 |
 
-- **Table 2 — Replay overhead (source: summary overhead_stats).** N replays of thin-slice trace; mean_ms, stdev_ms, p95_ms.
+- **Table 2 — Replay overhead (source: summary overhead_stats).** N replays of thin-slice trace; mean_ms, stdev_ms, p95_ms (units: ms). Run_manifest in summary.json.
 
 | n_replays | mean_ms | stdev_ms | p95_ms |
 |-----------|---------|----------|--------|
@@ -79,12 +82,13 @@ Replay outcomes are admissible evidence (MADS): evidence bundle includes replay_
 
 **Reproducibility:** Run evaluation with **`--out` as the full file path** (not a directory): `python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json --overhead-curve --overhead-runs 20` (PYTHONPATH=impl/src, LABTRUST_KERNEL_DIR=kernel). Then `python scripts/plot_replay_overhead.py` to refresh Figure 1 (default reads `datasets/runs/replay_eval/summary.json`). Run manifest in summary.json: corpus_dir, overhead_runs, overhead_curve_runs, script. Corpus: `bench/replay/corpus/*.json` (including twin_config.json for L1 stub). Optional release: copy to `datasets/releases/p3_replay_eval`. See `datasets/README.md`. Integration test runs the eval and asserts on summary (fidelity_pass, l1_stub_ok, overhead_stats, corpus divergence at expected seq).
 
-**Submission note.** For submission, tables must be produced from replay_eval with --out as the full file path and --overhead-runs 20 (publishable); run_manifest in summary.json must be stated in the draft. Excellence metrics (divergence_localization_accuracy_pct, overhead_p99_ms, l1_stub_ok) are populated by the script; see RUN_RESULTS_SUMMARY.
+**Submission note.** For submission, tables must be produced from replay_eval with --out as the full file path and --overhead-runs 20 (publishable); run_manifest in summary.json must be stated in the draft. The run used for tables has run_manifest in datasets/runs/replay_eval/summary.json. Figure 1 caption includes units (p95 replay time in ms). Before submit, run the Phase 3 checklist in [STATE_OF_THE_ART_CRITERIA.md](../docs/STATE_OF_THE_ART_CRITERIA.md#3-submission-readiness-phase-3--hostile-reviewer-checklist). Excellence metrics (divergence_localization_accuracy_pct, overhead_p99_ms, l1_stub_ok) are populated by the script; see RUN_RESULTS_SUMMARY.
 
 ## 8. Limitations
 
 Scope and determinism levels: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper:
 
+- **Replay levels and scope:** L0 (control-plane replay) is implemented; L1 stub and L1 twin (--l1-twin) are available; L2 is design-only in kernel. We do not claim full hardware determinism; the scope is replay levels and nondeterminism detection (localization and diagnostics), not bit-identical deterministic replay on hardware.
 - **K3 (fidelity bound):** If replay fidelity cannot be bounded clearly (e.g. no clear pass/fail, or dependency on simulator internals), claims are narrowed to **detection and localization only** (no strong fidelity guarantee). The current design provides a clear L0 pass/fail and structured diagnostics (seq, expected_hash, got_hash, witness_slice).
 - **Synthetic traces:** Corpus and thin-slice traces are synthetic (MAESTRO thin-slice and hand-crafted trap traces); no real nondeterministic platform or hardware.
 - **L1:** Twin design is documented in `kernel/trace/L1_TWIN_DESIGN.v0.1.md`; only the stub (L0 + twin config validation) is implemented. Full twin replay (simulator execution) is not implemented; future work.

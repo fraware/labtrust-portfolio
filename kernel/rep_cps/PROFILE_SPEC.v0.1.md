@@ -2,7 +2,7 @@
 
 ## Scope
 
-Real-time, authenticated sensitivity-sharing profile for CPS coordination. Shared variables influence scheduling/actuation only through explicit safety gates (MADS-compatible).
+Timing-aware, authenticated sensitivity-sharing profile for CPS coordination. Shared variables influence scheduling/actuation only through explicit safety gates (MADS-compatible).
 
 ## Message schemas and windowing
 
@@ -21,10 +21,9 @@ Real-time, authenticated sensitivity-sharing profile for CPS coordination. Share
 - **Spoofing:** Impersonation; mitigated by auth hooks (signature or attested identity).
 - **Replay:** Old messages replayed; mitigated by timestamps/nonces and windowing.
 
-## Robust aggregation and influence bounds
+## Robust aggregation
 
-- **Aggregation:** Function that combines updates from multiple agents into a single value per variable. Robust form: e.g. trimmed mean, median, or Byzantine-resistant rule (e.g. discard extreme quartiles). Profile property `aggregation`: `method` (e.g. "trimmed_mean", "median"), `trim_fraction` (for trimmed mean).
-- **Influence bounds:** No single agent can move the aggregate more than a defined delta per update (clipping or bounded contribution). Acceptance test: with f compromised agents sending extremes, aggregate stays within specified bounds.
+- **Aggregation:** Function that combines updates from multiple agents into a single value per variable. Robust form: e.g. trimmed mean, median, or Byzantine-resistant rule (e.g. discard extreme quartiles). Profile property `aggregation`: `method` (e.g. "trimmed_mean", "median"), `trim_fraction` (for trimmed mean). In the evaluated harness, robust aggregation reduces observed compromise-induced bias relative to naive averaging; acceptance test: with f compromised agents sending extremes, aggregate bias is reduced vs naive mean.
 
 ## Safety-gate integration
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import statistics
 import sys
 from pathlib import Path
 
@@ -45,6 +46,12 @@ def main() -> int:
     scenarios = list(by_scenario.keys())
     values = [by_scenario[sid] for sid in scenarios]
     means = [sum(v) / len(v) for v in values]
+    stdevs = []
+    for v in values:
+        if len(v) >= 2:
+            stdevs.append(statistics.stdev(v))
+        else:
+            stdevs.append(0.0)
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     try:
@@ -52,11 +59,12 @@ def main() -> int:
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
-        ax.bar(range(len(scenarios)), means)
-        ax.set_xticks(range(len(scenarios)))
+        x_pos = range(len(scenarios))
+        ax.bar(x_pos, means, yerr=stdevs if any(s > 0 for s in stdevs) else None, capsize=3)
+        ax.set_xticks(x_pos)
         ax.set_xticklabels(scenarios, rotation=20)
         ax.set_ylabel("Latency (p95 ms or wall s)")
-        ax.set_title("P6 LLM adapter latency by scenario")
+        ax.set_title("P6 LLM adapter latency by scenario (N scenarios, 20 seeds)")
         plt.tight_layout()
         plt.savefig(args.out, dpi=150)
         plt.close()

@@ -1,26 +1,26 @@
-# P0 MADS-CPS claim table (Draft conversion checklist 2.1)
+# P0 MADS-CPS claim table (peer-review revision)
 # Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P0_MADS-CPS"
-title: "MADS-CPS: A Normative Minimum Assurance Bar for Agentic Cyber-Physical Workflows"
+title: "MADS-CPS: A Machine-Checkable Minimum Assurance Bar for Agentic Cyber-Physical Workflows"
 release_id: "p0_e3_release"
 
 claims:
   - id: "C1"
-    statement: "A normative minimum assurance bar is separable from any particular coordination algorithm; it constrains interfaces and evidence, not internal optimization."
+    statement: "Within a fixed declared envelope, conformance can be defined over external artifacts and validation predicates without reference to the internal coordination or planning algorithm."
     evidence:
       release_id: "p0_e3_release"
-      confidence: "high"  # kernel docs + Figure 0; Table 1 (E3) shows recomputation from TRACE independent of adapter
+      confidence: "high"
       artifact_paths:
         - "kernel/mads/NORMATIVE.v0.1.md"
         - "kernel/mads/VERIFICATION_MODES.v0.1.md"
         - "datasets/releases/p0_e3_release/release_manifest.json"
-      table_ids: ["Table 1"]
-      figure_ids: ["Figure 0"]
+      table_ids: ["Table 1", "Table 3"]
+      figure_ids: ["Figure 1"]
 
   - id: "C2"
-    statement: "Conformance tiers can be tested by artifact presence, runtime checks, and replayable evidence, enabling objective pass/fail under a declared envelope."
+    statement: "For a fixed schema set and declared envelope, conformance tiers reduce to machine-checkable predicates over artifact presence, schema validity, replay status, and PONR coverage."
     evidence:
       release_id: "p0_e3_release"
       artifact_paths:
@@ -28,10 +28,10 @@ claims:
         - "datasets/releases/p0_e3_release/conformance.json"
         - "impl/src/labtrust_portfolio/conformance.py"
       table_ids: ["Table 1", "Table 2"]
-      figure_ids: ["Figure 1"]
+      figure_ids: ["Figure 1", "Figure 2"]
 
   - id: "C3"
-    statement: "Evidence admissibility requires integrity, traceability, and replay at declared fidelity levels; raw logs or transcripts alone are insufficient."
+    statement: "Logs or transcripts that lack integrity binding, trace-to-report linkage, or declared replay semantics are insufficient for admissible third-party verification."
     evidence:
       release_id: "p0_e3_release"
       artifact_paths:
@@ -40,10 +40,10 @@ claims:
         - "datasets/runs/e2_redaction_demo/evidence_bundle_redacted.json"
         - "datasets/releases/p0_e3_release/trace.json"
       table_ids: ["Table 1", "Table 2"]
-      figure_ids: ["Figure 1"]
+      figure_ids: ["Figure 1", "Figure 3"]
 
   - id: "C4"
-    statement: "PONR enforcement operationalizes high impact by requiring mechanically checkable admissibility before irreversible or authoritative transitions."
+    statement: "PONR-gated release converts a qualitative notion of 'high impact' into an enforceable control: irreversible or authoritative transitions are denied unless admissibility predicates hold or an auditable override is recorded."
     evidence:
       release_id: "p0_e3_release"
       artifact_paths:
@@ -54,5 +54,5 @@ claims:
       table_ids: ["Table 1", "Table 2"]
       figure_ids: []
 
-# Draft conversion: Table 1 (export_e3_table.py), Table 2 (export_e2_admissibility_matrix.py), Figure 1 (plot_e3_latency.py).
-# Repro block at top of DRAFT.md.
+# E1: conformance corpus (Table 1); E2: admissibility matrix (Table 2); E3: replay link; E4: algorithm-independence (Table 3).
+# Reproduction commands and file paths: see Appendix in DRAFT.md.

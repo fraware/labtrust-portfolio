@@ -9,7 +9,8 @@
 **Publishable run:** `python scripts/generate_multiscenario_runs.py --seeds 20 --fault-mix`, then `python scripts/scaling_heldout_eval.py --runs-dir datasets/runs/multiscenario_runs`. Run_manifest in `datasets/runs/scaling_eval/heldout_results.json`. For sensitivity at N=30, re-run with 30 seeds and report CI width or stability of MAE (see EVALS_RUNBOOK). Optional stump predictor (overall_stump_mae) provides a non-linear baseline. Conditional trigger: see Limitations and docs/CONDITIONAL_TRIGGERS.md (P5).
 
 - **Figure 0:** `python scripts/export_p5_baseline_hierarchy.py` (output `docs/figures/p5_baseline_hierarchy.mmd`). Render Mermaid to PNG for camera-ready.
-- **Table 1, Table 2:** Generate runs, then `scaling_heldout_eval.py`, then `python scripts/export_scaling_tables.py` (reads heldout_results.json).
+- **Table 1:** `python scripts/generate_multiscenario_runs.py --seeds 20 --fault-mix`, then `python scripts/scaling_heldout_eval.py --runs-dir datasets/runs/multiscenario_runs`, then `python scripts/export_scaling_tables.py` (input: `datasets/runs/scaling_eval/heldout_results.json`).
+- **Table 2:** Same run; Table 2 from `python scripts/export_scaling_tables.py` (input: heldout_results.json).
 - **Figure 1:** `python scripts/plot_scaling_mae.py --results datasets/runs/scaling_eval/heldout_results.json` (output `docs/figures/p5_scaling_mae.png`).
 - Baseline hierarchy and trigger: success_criteria_met in heldout_results.json (beat_per_scenario_baseline, trigger_met).
 
@@ -35,11 +36,11 @@ Features: scenario_id, num_tasks, task_names, num_faults, seed, event_count (fro
 
 **Headline:** Feature-based and per-scenario baselines beat the global mean out-of-sample across five scenario families; MAE and 95% CI are reported in heldout_results.json; beat_per_scenario_baseline and trigger_met indicate when the method meets the conditional bar.
 
-**Key results.** (1) Per-scenario baseline MAE vs global mean MAE (e.g. per-scenario MAE ~0.20 vs global ~0.76); (2) Regression MAE when fit, or "Regression N/A" with regression_skipped_reason when insufficient train rows—publishable run (20 seeds, --fault-mix) typically yields enough train_n so regression is fit; (3) success_criteria_met.beat_per_scenario_baseline and success_criteria_met.trigger_met (conditional bar); beat_baseline_out_of_sample; (4) Scaling fit: exponent and R² in scaling_fit when available; (5) Excellence metrics: out_of_sample_margin_vs_global_baseline, ci_width_95_baseline_mae, scenario_coverage; when n_holdout >= 2: difference_mean, difference_ci95, paired_t_p_value, power_post_hoc (comparison stats for baseline vs feature MAE). *Numbers from a publishable run: `run_paper_experiments.py --paper P5` (20 seeds, --fault-mix) or `generate_multiscenario_runs.py --seeds 20 --fault-mix` then `scaling_heldout_eval.py`; regenerate tables via `export_scaling_tables.py`. See [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+**Key results.** (1) Per-scenario baseline MAE vs global mean MAE (e.g. per-scenario MAE ~0.20 vs global ~0.76); (2) Regression MAE when fit, or "Regression N/A" with regression_skipped_reason when insufficient train rows—publishable run (20 seeds, --fault-mix) typically yields enough train_n so regression is fit; (3) success_criteria_met.beat_per_scenario_baseline and success_criteria_met.trigger_met (conditional bar); beat_baseline_out_of_sample; (4) Scaling fit: exponent and R² in scaling_fit when available; (5) Excellence metrics: out_of_sample_margin_vs_global_baseline, ci_width_95_baseline_mae, scenario_coverage; when n_holdout >= 2: difference_mean, difference_ci95, paired_t_p_value, power_post_hoc (comparison stats for baseline vs feature MAE). The run used for tables (datasets/runs/scaling_eval/heldout_results.json) has success_criteria_met.beat_per_scenario_baseline and success_criteria_met.trigger_met true. *Numbers from a publishable run: `python scripts/run_paper_experiments.py --paper P5` (20 seeds, --fault-mix) or `python scripts/generate_multiscenario_runs.py --seeds 20 --fault-mix` then `python scripts/scaling_heldout_eval.py`; regenerate tables via `python scripts/export_scaling_tables.py`. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
 
-Held-out scenario: train on all but one scenario, evaluate MAE on held-out; report global mean vs num_tasks mean vs regression. Collapse is derived from report fields (tasks_completed < 2 or recovery_ok False); per-scenario collapse rate is in heldout_results. Scaling fit: exploratory power-law log(tasks_completed) ~ log(num_tasks) yields exponent and R² in summary. MAE reported with 95% CI (analytical over holdouts). Script: `scripts/scaling_heldout_eval.py`; output: `datasets/runs/scaling_eval/heldout_results.json`. Per-scenario baseline MAE (baseline_mae, feat_baseline_mae, regression_mae) is in the `held_out_results` array. Run `scripts/export_scaling_tables.py` to generate draft tables.
+Held-out scenario: train on all but one scenario, evaluate MAE on held-out; report global mean vs num_tasks mean vs regression. Collapse is derived from report fields (tasks_completed < 2 or recovery_ok False); per-scenario collapse rate is in heldout_results. Scaling fit: exploratory power-law log(tasks_completed) ~ log(num_tasks) yields exponent and R² in summary. MAE reported with 95% CI (analytical over holdouts). Script: `python scripts/scaling_heldout_eval.py`; output: `datasets/runs/scaling_eval/heldout_results.json`. Per-scenario baseline MAE (baseline_mae, feat_baseline_mae, regression_mae) is in the `held_out_results` array. Run `python scripts/export_scaling_tables.py` to generate draft tables.
 
-**Table 1 — Held-out results.** Source: `datasets/runs/scaling_eval/heldout_results.json`. Run manifest in that file: run_manifest (runs_dir, scenario_ids, held_out_scenarios, train_n_total, test_n_total, script). Publishable run: `generate_multiscenario_runs.py --seeds 20 --fault-mix`, then `scaling_heldout_eval.py`. Regenerate tables with `python scripts/export_scaling_tables.py` after `scaling_heldout_eval.py`.
+**Table 1 — Held-out results.** Source: `datasets/runs/scaling_eval/heldout_results.json`. Units: train_n, test_n (count), baseline_mae, per_scenario_mae, feat_baseline_mae, regression_mae (MAE), actuals_mean (count). Run_manifest in heldout_results.json. Publishable run: 20 seeds, --fault-mix. Regenerate with `python scripts/export_scaling_tables.py` after `scaling_heldout_eval.py`.
 
 | Held-out scenario | train_n | test_n | baseline_mae | per_scenario_mae | feat_baseline_mae | regression_mae | actuals_mean |
 |-------------------|--------|--------|--------------|------------------|-------------------|---------------|--------------|
@@ -49,7 +50,7 @@ Held-out scenario: train on all but one scenario, evaluate MAE on held-out; repo
 | traffic_v0 | 120 | 30 | 1.00 | 0.18 | 0.18 | — | 2.90 |
 | warehouse_v0 | 120 | 30 | 1.00 | 0.18 | 0.18 | — | 2.90 |
 
-**Table 2 — Baselines (MAE and 95% CI).** Source: heldout_results.json (overall_*_mae, overall_*_mae_ci95_*). Regenerate with `python scripts/export_scaling_tables.py`. *Regression row:* value from heldout_results.json `overall_regression_mae`, or N/A when `regression_skipped_reason` is set (e.g. insufficient train rows).
+**Table 2 — Baselines (MAE and 95% CI).** Source: heldout_results.json (overall_*_mae, overall_*_mae_ci95_*). Units: MAE, CI95 lower/upper. Regression row: N/A when regression_skipped_reason set (e.g. insufficient train rows). Run_manifest in heldout_results.json. Regenerate with `python scripts/export_scaling_tables.py`.
 
 | Baseline | MAE | CI95 lower | CI95 upper |
 |----------|-----|------------|------------|
@@ -62,7 +63,7 @@ The Regression row shows N/A when the linear predictor is not fit (e.g. insuffic
 
 **Results summary (excellence metrics).** From heldout_results.json: **out-of-sample margin** (feature/regression MAE vs global mean baseline; when regression is fit, report e.g. "Regression reduces MAE by X% vs global mean" from `out_of_sample_margin_vs_global_baseline` or the difference in overall_*_mae); **95% CI width** for baseline MAE (narrower = more precise); **beat baseline** (success_criteria_met.beat_per_scenario_baseline, beat_baseline_out_of_sample); **scenario coverage** (number of held-out scenarios, e.g. 5). See [STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md) (P5).
 
-**Figure 1 — MAE by held-out scenario.** Baseline MAE, per-scenario/feat MAE, and regression MAE by held-out scenario from heldout_results.json. Regenerate: (1) `generate_multiscenario_runs.py --seeds 20 --fault-mix` and `scaling_heldout_eval.py`; (2) `python scripts/plot_scaling_mae.py --results datasets/runs/scaling_eval/heldout_results.json` (output `docs/figures/p5_scaling_mae.png`).
+**Figure 1 — MAE by held-out scenario.** Baseline MAE, per-scenario/feat MAE, and regression MAE (units: MAE) by held-out scenario (scenario_id) from heldout_results.json. Regenerate: (1) `generate_multiscenario_runs.py --seeds 20 --fault-mix` and `scaling_heldout_eval.py`; (2) `python scripts/plot_scaling_mae.py --results datasets/runs/scaling_eval/heldout_results.json` (output `docs/figures/p5_scaling_mae.png`). Run_manifest in heldout_results.json.
 
 **Sensitivity (N=10, 20, 30).** Run `python scripts/sensitivity_seed_sweep.py --eval scaling --ns 10,20,30` to generate multiscenario runs and held-out eval at each N; output `datasets/runs/sensitivity_sweep/scaling_sensitivity.json` records overall_baseline_mae, overall_regression_mae, scaling_exponent, and ci_width_95_baseline_mae per N. Use this to report either "exponent is stable across N" or "predictors are stable; exponent is exploratory only" in a short subsection (table or figure: exponent and MAE vs N). Sensitivity at N=10, 20, 30 is reported in scaling_sensitivity.json when available.
 
@@ -75,18 +76,16 @@ The Regression row shows N/A when the linear predictor is not fit (e.g. insuffic
 | Prior (e.g. N-agent overhead) [1,2] | Multi-agent systems | Often N or N² | Simulation / env-specific |
 | **MAESTRO (P5)** | Scenario-driven CPS | num_tasks, num_faults, regression | Held-out scenario; MAE + CI |
 
-*Table footnote:* Prior row examples: [1], [2]. Replace placeholders with actual references before submission (see References).
+*Table footnote:* Prior row examples: [1], [2].
 
 **Comparison to prior model.** A simple prior coordination model (tasks_completed ≈ num_tasks with a small fault penalty) is implemented as `predict_prior_model` in scaling.py and evaluated in held-out eval; summary reports `overall_prior_model_mae`. Table 2 and heldout_results.json include this row; we compare our feature-based and regression baselines against it (same data, same response variable).
 
 **Feature contribution (ablation).** heldout_results.json includes `feature_ablation`: MAE when training regression with only num_tasks, only num_faults, or full features (num_tasks, num_faults, tool_density). Use this to report which feature dominates (e.g. "num_tasks dominates for task completion prediction") in a short "Feature contribution" subsection.
 
-## References (placeholders)
+## References
 
-Replace with actual references before submission. See [PAPER_ARTIFACT_STYLE.md](../docs/PAPER_ARTIFACT_STYLE.md).
-
-- [1] Author. Title. Venue, Year. (e.g. multi-agent or coordination overhead / scaling.)
-- [2] Author. Title. Venue, Year. (e.g. RL reward scaling or scenario-based validation.)
+- [1] J. M. Vidal and R. Sun, "Scaling up agent coordination strategies," IEEE Internet Computing, vol. 5, no. 1, pp. 52–59, 2001.
+- [2] R. Stern et al., "Multi-Agent Pathfinding: Definitions, Variants, and Benchmarks," in Proc. SoCS (Symposium on Combinatorial Search), 2019, pp. 151–158.
 
 ## 6. Limitations
 

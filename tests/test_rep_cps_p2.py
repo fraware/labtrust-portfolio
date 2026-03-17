@@ -83,6 +83,14 @@ class TestRepCpsEvalIntegration(unittest.TestCase):
             )
             self.assertEqual(summary.get("aggregation_steps"), 1)
 
+            self.assertIn("profile_ablation", summary)
+            ablation = summary["profile_ablation"]
+            self.assertIsInstance(ablation, list)
+            self.assertGreater(len(ablation), 0)
+            variant_names = [r.get("variant") for r in ablation]
+            self.assertIn("full_profile", variant_names)
+            self.assertIn("no_robust_aggregation", variant_names)
+
             self.assertIn("run_manifest", summary)
             rm = summary["run_manifest"]
             self.assertIn("seeds", rm)

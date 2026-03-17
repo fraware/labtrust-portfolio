@@ -1,17 +1,17 @@
 # P2 REP-CPS claim table (Draft conversion checklist 2.1)
-# Conditional paper; trigger_met in summary. See docs/CONDITIONAL_TRIGGERS.md.
+# Conditional paper; trigger not met in evaluated scenario. See docs/CONDITIONAL_TRIGGERS.md.
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P2_REP-CPS"
-title: "REP-CPS: A Real-Time, Authenticated Sensitivity-Sharing Profile for Cyber-Physical Coordination"
+title: "REP-CPS: A Safety-Gated Profile for Authenticated Sensitivity Sharing in Cyber-Physical Coordination"
 release_id: "rep_cps_eval"
 
 claims:
   - id: "C1"
-    statement: "A CPS profile makes sensitivity-sharing deployable: typed variables, bounded update rates, authenticated channels, robust aggregation under compromise."
+    statement: "A CPS-oriented sensitivity-sharing profile can make decentralized informational exchange deployable by specifying typed variables, freshness windows, rate limits, provenance, and authentication hooks."
     evidence:
       release_id: "rep_cps_eval"
-      confidence: "high"  # PROFILE_SPEC, example_profile, adapter; 20 seeds, script-generated tables
+      confidence: "high"
       artifact_paths:
         - "kernel/rep_cps/PROFILE_SPEC.v0.1.md"
         - "kernel/rep_cps/example_profile.v0.1.json"
@@ -20,10 +20,10 @@ claims:
       figure_ids: ["Figure 0"]
 
   - id: "C2"
-    statement: "Under compromised agents, robust aggregation maintains bounded influence (e.g. bias_robust < bias_naive) in offline and in-loop comparison."
+    statement: "In the evaluated attack harness, robust aggregation variants reduce compromise-induced bias relative to naive averaging."
     evidence:
       release_id: "rep_cps_eval"
-      confidence: "high"  # Table 2/3, harness; direct measure
+      confidence: "high"
       artifact_paths:
         - "datasets/runs/rep_cps_eval/summary.json"
         - "impl/src/labtrust_portfolio/rep_cps.py"
@@ -31,10 +31,10 @@ claims:
       figure_ids: []
 
   - id: "C3"
-    statement: "Protocol state does not directly actuate; it influences decisions only through explicit safety gates (MADS-compatible)."
+    statement: "Protocol output is not directly actuating; it influences downstream decisions only through explicit safety-gate mediation compatible with the broader assurance envelope."
     evidence:
       release_id: "rep_cps_eval"
-      confidence: "high"  # safety_gate_ok in trace; adapter integration
+      confidence: "high"
       artifact_paths:
         - "datasets/runs/rep_cps_eval/safety_gate_denial.json"
         - "impl/src/labtrust_portfolio/adapters/rep_cps_adapter.py"
@@ -42,10 +42,10 @@ claims:
       figure_ids: []
 
   - id: "C4"
-    statement: "The profile is testable via fault injection and compromised-agent suites in MAESTRO."
+    statement: "The profile can be evaluated reproducibly through MAESTRO-compatible fault injection and compromised-agent suites."
     evidence:
       release_id: "rep_cps_eval"
-      confidence: "high"  # rep_cps_eval.py, summary.json, integration test
+      confidence: "high"
       artifact_paths:
         - "datasets/runs/rep_cps_eval/summary.json"
         - "scripts/rep_cps_eval.py"

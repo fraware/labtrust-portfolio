@@ -1,29 +1,30 @@
-# Results per paper — Quick reference
+﻿# Results per paper — Quick reference
 
-This document explains what each paper (P0–P8) measures, where its results are written, and how to read them. All paths are relative to the repo root; results live under `datasets/runs/` unless noted. **Consolidated summary:** After running all paper experiments (`run_paper_experiments.py`), see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a single-file results summary per paper. **Where this appears in the draft:** For each paper, tables and figures are cited in `papers/Px_.../DRAFT.md` with captions and in-text interpretation; generated table content (with "How to read" and captions) lives in `papers/Px_.../generated_tables.md` where present.
+This document explains what each paper (P0–P8) measures, where its results are written, and how to read them. All paths are relative to the repo root; results live under `datasets/runs/` unless noted. **Current state:** All nine papers are at Draft; Phase 3 (submission-readiness) passed. Next: submission prep per [PRE_SUBMISSION_CHECKLIST.md](PRE_SUBMISSION_CHECKLIST.md). **Consolidated summary:** After running all paper experiments (`run_paper_experiments.py`), see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a single-file results summary per paper. **Where this appears in the draft:** For each paper, tables and figures are cited in `papers/Px_.../DRAFT.md` with captions and in-text interpretation; generated table content (with "How to read" and captions) lives in `papers/Px_.../generated_tables.md` where present.
 
 **Excellence metrics:** Eval summary JSONs may include an optional `excellence_metrics` block (see [STANDARDS_OF_EXCELLENCE.md](STANDARDS_OF_EXCELLENCE.md)). To print a one-line excellence summary across all papers: `python scripts/export_excellence_summary.py` (or `--json` for machine-readable output). Regenerate evals to populate excellence_metrics.
 
 ---
 
-## P0 — MADS-CPS (normative minimum bar)
+## P0 — MADS-CPS (machine-checkable minimum assurance bar)
 
-**What it measures:** Conformance tiers (E1), redaction (E2), and replay-link variance (E3). Does an independent verifier get the same MAESTRO metrics from TRACE across seeds?
+**What it measures:** E1 conformance corpus (challenge set with injected faults; checker agreement). E2 restricted auditability (4-col verification-mode admissibility matrix). E3 replay link (independent verifier; optional --standalone-verifier). E4 algorithm-independence (two adapters, same artifact interface).
 
 **Result locations:**
-- `datasets/runs/e3_summary.json` — E3 replay-link summary over N seeds (default 20 for publishable)
-- `datasets/runs/p0_e3_variance.json` — variance and 95% CIs
-- `datasets/runs/e2_redaction_demo/trace_redacted.json` — one redacted trace (E2)
-- `datasets/releases/p0_e3_release/` — released run (produced only when `produce_p0_e3_release.py` is run without `--no-release`; tables can be regenerated from `e3_summary.json` in `datasets/runs/` via export_e3_table.py when release is not produced)
-- `datasets/releases/portfolio_v0.1/p0_conformance_summary.json` — conformance aggregated over P0 runs (from `scripts/build_p0_conformance_summary.py`)
+- `datasets/runs/p0_conformance_corpus/` — E1 corpus (case_* dirs, corpus_manifest.json)
+- `datasets/runs/e3_summary.json` — E3 replay-link summary; `datasets/runs/p0_e3_variance.json` — variance and 95% CIs
+- `datasets/runs/p0_e4_summary.json` — E4 per-adapter (replay_match_rate, conformance_rate, p95_latency_ms_ci_95)
+- `datasets/runs/e2_redaction_demo/` — E2 redacted trace and evidence_bundle_redacted.json
+- `datasets/releases/p0_e3_release/` — released run; `datasets/releases/portfolio_v0.1/p0_conformance_summary.json` — build_p0_conformance_summary.py
 
 **How to read:**
-- **E3:** `tasks_completed_mean`, `tasks_completed_stdev`, `p95_latency_ms_mean`, `p99_latency_ms`, `all_match`, 95% CIs; `run_manifest` (seeds, scenario_ids, fault_settings, script; optional version from GIT_SHA); `success_criteria_met.e3_all_match`. Optional `excellence_metrics`: e3_ci_width_p95_ms, conformance_match_pct, n_scenarios, n_runs_per_scenario. With `--scenarios`: `per_scenario[]` (scenario_id, tasks_completed_mean/stdev, p95_latency_ms_mean/stdev, all_match, per_run). See `docs/REPORTING_STANDARD.md`.
-- **E1:** Conformance is per-run via `labtrust_portfolio check-conformance <run_dir>`, which writes `<run_dir>/conformance.json` (tier, pass, reasons); schema: `kernel/conformance/CONFORMANCE.v0.1.schema.json`. no single “E1 result file.”
-- **E2:** Redacted trace has payloads replaced by content-addressed refs; structure preserved for audit. The redacted trace is not replayed (L0 replay expects full payloads e.g. task_id); evidence_bundle_redacted has replay_ok false and replay_diagnostics noting audit-only.
-- **Verification mode:** Evidence bundle schema requires `verification_mode` (public | evaluator | regulator). Public bundles are verifiable but not required replayable; restricted bundles are replayable at L0/L1 when full trace exists. See `kernel/mads/VERIFICATION_MODES.v0.1.md`.
+- **E3:** tasks_completed_mean, p95_latency_ms_mean, all_match, run_manifest; --standalone-verifier uses verify_maestro_from_trace.py as separate process.
+- **E1:** corpus_manifest.json: case_id, fault_injected, expected_tier, observed_tier, agreement. Table 1: build_p0_conformance_corpus.py, export_e1_corpus_table.py.
+- **E2:** 4-col verification-mode admissibility matrix; redacted trace preserves schema and integrity, replay_ok false. export_e2_admissibility_matrix.py.
+- **E4:** per_adapter[]: scenario, controller, seeds, replay_match_rate, conformance_rate, p95_latency_ms_ci_95. export_p0_table3.py.
+- **Verification mode:** verification_mode (public | evaluator | regulator); kernel/mads/VERIFICATION_MODES.v0.1.md.
 
-**Tables and figures:** `python scripts/export_e3_table.py` (full table); `python scripts/export_e3_table.py --compact` (per-scenario variance + CI); `python scripts/export_e2_admissibility_matrix.py` (E2 redaction admissibility matrix); `python scripts/plot_e3_latency.py` (E3 p95 latency by scenario, output `docs/figures/p0_e3_latency.png`); `python scripts/build_p0_conformance_summary.py` (p0_conformance_summary.json). See `docs/P0_CONFORMANCE_SUMMARY_SPEC.md`.
+**Tables and figures:** Table 1: build_p0_conformance_corpus.py, export_e1_corpus_table.py. Table 2: e2_redaction_demo.py, export_e2_admissibility_matrix.py. Table 3: run_p0_e4_multi_adapter.py, export_p0_table3.py. Figures 1-3: export_p0_assurance_pipeline.py, export_p0_tier_lattice.py, export_p0_redaction_figure.py. Per-seed E3: export_e3_table.py. plot_e3_latency.py. build_p0_conformance_summary.py. See papers/P0_MADS-CPS/DRAFT.md Appendix.
 
 ---
 
@@ -31,17 +32,20 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 **Contribution / headline:** Trace-derived contract validation with seven corpus sequences; timestamp-only baseline comparison; gatekeeper integration. For a compact, presentable snapshot of key numbers, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (generated by run_paper_experiments.py).
 
-**What it measures:** Whether the contract validator correctly allows/denies event sequences (seven corpus sequences: good_sequence, split_brain, stale_write, reorder, unsafe_lww, multi_writer_contention, edge_case_timestamps). Scale test (long trace); gatekeeper denies release when contract invalid; lab-aligned instrument state machine.
+**What it measures:** Whether the contract validator correctly allows/denies event sequences (25-sequence challenge corpus: positive controls, split-brain, stale write/reorder, boundary cases). Scale test (long trace); gatekeeper denies release when contract invalid; lab-aligned instrument state machine.
 
 **Result locations:**
-- `datasets/runs/contracts_eval/eval.json` — corpus sequences, detection_ok, baseline_timestamp_only.
+- `datasets/runs/contracts_eval/eval.json` — corpus sequences, detection_ok, baselines (timestamp_only, ownership_only, accept_all), ablation, detection_metrics, latency_percentiles_us.
 - `datasets/runs/contracts_eval/scale_test.json` — when run with `--scale-test` (total_events, denials, total_time_sec, time_per_write_us, events_per_sec); with `--scale-test-runs 5`: events_per_sec_mean, events_per_sec_stdev, time_per_write_us_mean, time_per_write_us_stdev for variance.
 
 **How to read:**
-- `run_manifest`: corpus_sequences, corpus_dir, script. `success_criteria_met.all_detection_ok`: true when all sequences have detection_ok. Optional `excellence_metrics`: corpus_detection_rate_pct, overhead_p99_us, baseline_margin_denials.
+- `run_manifest`: corpus_sequences, corpus_sequence_count, corpus_dir, script. `success_criteria_met.all_detection_ok`: true when all sequences have detection_ok. `excellence_metrics`: corpus_detection_rate_pct, overhead_p99_us, baseline_margin_denials.
 - `sequences[]`: each has `sequence`, `detection_ok` (true = violations denied as expected), `allows`, `denials`, `time_per_write_us`.
 - `violations_denied_with_validator`: total violations correctly denied.
-- `baseline_timestamp_only_denials` / `baseline_timestamp_only_missed`: comparison to a timestamp-only (monotonicity) baseline.
+- `baseline_timestamp_only_denials` / `baseline_timestamp_only_missed`, `baseline_ownership_only_denials` / `baseline_ownership_only_missed`, `baseline_accept_all_denials` / `baseline_accept_all_missed`: comparison to baselines.
+- `ablation`: full_contract, timestamp_only, ownership_only, accept_all with violations_denied and violations_missed.
+- `detection_metrics`: true_positives, false_positives, false_negatives, precision, recall (per-event, expected_verdicts as ground truth).
+- `latency_percentiles_us`: median, p95, p99 validation latency.
 - **Gatekeeper:** `allow_release(run_dir, check_contracts=True)` runs contract validator on trace; if any event denied, release is blocked. CLI: `labtrust_portfolio release-dataset --check-contracts <run_dir> <release_id>` enables strict PONR gating; default is conformance-only. See `impl/.../gatekeeper.py` (`check_contracts_on_trace`).
 - **State machine:** `bench/contracts/README.md` documents alignment of single-writer contract with `instrument_state_machine.py` (idle/running transitions). Contract option `use_instrument_state_machine: true` enforces it.
 - **Trace-derivability:** All contract predicates are computed from trace alone (no privileged hidden state). See `docs/P1_TRACE_DERIVABILITY.md`. Kill criterion K1: if a predicate required hidden state, design loses portability.
@@ -51,25 +55,26 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 ---
 
-## P2 — REP-CPS (robust aggregation)
+## P2 — REP-CPS (safety-gated profile for sensitivity sharing)
 
-**Contribution / headline:** Robust aggregation bounds influence under compromise; adapter parity with centralized; conditional on trigger_met. For a compact, presentable snapshot of key numbers, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (generated by run_paper_experiments.py).
+**Contribution / headline:** Safety-gated, typed, authenticated, rate-limited sensitivity-sharing profile; robust aggregation reduces observed compromise-induced bias relative to naive averaging; adapter parity with centralized. In the evaluated scenario, sensitivity sharing does not materially change tasks_completed; the contribution is the profile and MAESTRO-compatible harness. For a compact snapshot, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (generated by run_paper_experiments.py).
 
-**What it measures:** REP-CPS adapter vs centralized baseline; robust (trimmed-mean, clipping, median_of_means) vs naive aggregation under compromise; delay sweep; sybil stress test; safety-gate integration.
+**What it measures:** REP-CPS adapter vs centralized baseline; robust (trimmed-mean, clipping, median_of_means) vs naive aggregation under compromise; delay sweep; sybil stress test; safety-gate integration; profile ablation (no auth, no freshness, no rate limit, no robust agg, full profile).
 
 **Result locations:**
-- `datasets/runs/rep_cps_eval/summary.json` — adapter comparison, aggregation_under_compromise, delay_sweep, aggregation_variants, sybil_sweep.
+- `datasets/runs/rep_cps_eval/summary.json` — adapter comparison, aggregation_under_compromise, delay_sweep, aggregation_variants, sybil_sweep, profile_ablation.
 - `datasets/runs/rep_cps_eval/safety_gate_denial.json` — claim that REP output cannot directly trigger actuation; denial trace recorded when policy rejects.
 
 **How to read:**
-- `run_manifest`: seeds, scenario_ids, delay_fault_prob_sweep, aggregation_steps_used, script. `aggregation_steps`, `convergence_achieved` (when --aggregation-steps > 1). `success_criteria_met`: adapter_parity (REP == centralized), robust_beats_naive. Optional `excellence_metrics`: influence_bound_max_per_compromised, bias_reduction_pct, safety_gate_integration, trigger_met. When n >= 2: `rep_cps_tasks_completed_ci95`, `centralized_tasks_completed_ci95`.
+- `run_manifest`: seeds, scenario_ids, delay_fault_prob_sweep, aggregation_steps_used, script. `aggregation_steps`, `convergence_achieved` (when --aggregation-steps > 1). `success_criteria_met`: adapter_parity (REP == centralized), robust_beats_naive. Optional `excellence_metrics`: bias_reduction_pct, safety_gate_integration; trigger not met in evaluated scenario (see `docs/CONDITIONAL_TRIGGERS.md`). When n >= 2: `rep_cps_tasks_completed_ci95`, `centralized_tasks_completed_ci95`.
 - Effect size: `excellence_metrics.bias_reduction_pct` (when aggregation_under_compromise has bias_naive > 0); comparison stats `difference_mean`, `difference_ci95`, `paired_t_p_value` when n >= 2 (adapter comparison).
-- `rep_cps_tasks_completed_mean` vs `centralized_tasks_completed_mean`: should be equal (no throughput regression).
-- `aggregation_under_compromise`: `honest_only_aggregate`, `with_compromise_robust_aggregate`, `with_compromise_naive_aggregate`; `bias_robust` < `bias_naive` means robust aggregation reduces bias under Byzantine inputs.
-- `aggregation_variants[]`: per method (trimmed_mean, median, clipping, median_of_means), `bias`, `max_influence_per_compromised_agent`. `success_criteria_met.trigger_met`: REP-CPS improves robustness without throughput regression on evaluated scenario (conditional; see `docs/CONDITIONAL_TRIGGERS.md`).
+- `rep_cps_tasks_completed_mean` vs `centralized_tasks_completed_mean`: equal in evaluated scenario (adapter parity; no throughput regression). Sensitivity sharing does not materially change tasks_completed in this scenario.
+- `aggregation_under_compromise`: `honest_only_aggregate`, `with_compromise_robust_aggregate`, `with_compromise_naive_aggregate`; `bias_robust` < `bias_naive` means robust aggregation reduces observed bias under Byzantine inputs in the evaluated harness.
+- `profile_ablation[]`: per variant (no_auth, no_freshness, no_rate_limit, no_robust_aggregation, no_safety_gate, full_profile), `bias`, `aggregate`, `failure`; Table 5 in generated_tables.md.
+- `aggregation_variants[]`: per method (trimmed_mean, median, clipping, median_of_means), `bias`, `max_influence_per_compromised_agent`.
 - `sybil_sweep[]`: per `n_compromised`, `bias_robust`, `bias_naive` (robust should degrade gracefully).
 - `delay_sweep[]`: per delay_fault_prob, tasks_completed mean/stdev and centralized baseline.
-- **Convergence (multi-step aggregation):** When `--aggregation-steps > 1`, summary includes `convergence_steps_to_convergence_mean`, `convergence_steps_to_convergence_stdev`, `convergence_achieved_rate`; per-seed `rep_cps_steps_to_convergence`. Table 4: `python scripts/export_rep_cps_convergence_table.py` (from summary.json).
+- **Multi-step aggregation (optional):** When `--aggregation-steps > 1`, summary includes `convergence_steps_to_convergence_mean`, `convergence_steps_to_convergence_stdev`, `convergence_achieved_rate`; per-seed `rep_cps_steps_to_convergence`. Table 4: `python scripts/export_rep_cps_convergence_table.py` (from summary.json).
 - `rep_cps_naive_tasks_completed_mean`, `rep_cps_unsecured_tasks_completed_mean`: naive-in-loop and unsecured baselines.
 
 ---
@@ -138,21 +143,26 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 ## P6 — LLM Planning (red-team and adapter latency)
 
-**Contribution / headline:** Typed-plan firewall and red-team suite with OWASP alignment; optional real-LLM table (Table 1b when keys set); containment only (no elimination claim). For a compact, presentable snapshot of key numbers, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (generated by run_paper_experiments.py).
+**Contribution / headline:** Typed-plan firewall and red-team suite with OWASP alignment; real-LLM table (Table 1b, 5 runs per case, pass_rate and Wilson CI); baseline 3-way (gated vs weak vs ungated); denial-trace statistics; containment only (no elimination claim). For a compact, presentable snapshot of key numbers, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (generated by run_paper_experiments.py).
 
-**What it measures:** Red-team: does the policy block disallowed tools and allow allowed ones? Confusable deputy: adversarial tool output (args requesting privilege) blocked. Jailbreak-style: prompt-injection style args (e.g. "ignore previous instructions") blocked by safe_args. Validator v0.2: allow_list + safe_args (path traversal, dangerous patterns, jailbreak-style phrases). E2E denial trace: planner proposes unsafe, validator blocks, system recovers. Adapter latency: p95 and wall time for synthetic adapter runs. **Evidence is from synthetic plans by default;** real-LLM mode (`--real-llm`) is optional; optional smoke: `scripts/llm_real_llm_smoke.py` when .env has keys (writes real_llm_smoke.json). Full table: `python scripts/export_llm_redteam_table.py` (8 red-team + 4 confusable deputy + jailbreak_style; optional Table 1b for real-LLM). OWASP LLM Top 10 coverage: [docs/P6_OWASP_MAPPING.md](P6_OWASP_MAPPING.md).
+**What it measures:** Red-team: policy blocks disallowed tools and allows allowed ones. Confusable deputy: adversarial args (privilege) blocked. Jailbreak-style: prompt-injection args blocked. Validator v0.2: allow_list + safe_args. E2E denial trace: planner proposes unsafe, validator blocks, recovery safe. Adapter latency: p95 and wall time over 3 scenarios, 20 seeds. **Real-LLM (state-of-the-art):** `--real-llm --real-llm-runs 5` runs 5 API calls per case; red_team_results.json real_llm has per-case pass_rate_pct, 95% Wilson CI, latency_mean_ms ± stdev; overall pass_rate_pct and Wilson CI. **Multi-model:** `--real-llm-models gpt-4.1-mini,gpt-4.1` runs the suite per model; results in real_llm_models[]; export_llm_redteam_table.py prints Table 1b with one subsection per model and a combined summary table. Latest run (2026-03-17): gpt-4.1-mini 55/65 (84.6%, Wilson [73.9, 91.4]), gpt-4.1 55/65 (84.6%, [73.9, 91.4]). **Baseline:** `--run-baseline` runs gated vs weak vs ungated; baseline_comparison.json (denial_count_gated/weak/ungated, tasks_completed_mean per mode). **Argument-level (safe_args ablation):** `--run-baseline --baseline-plan args_unsafe` uses allow-listed tool with path-traversal args; writes baseline_comparison_args.json; gated denies, weak/ungated allow. Export: `export_p6_baseline_table.py --baseline-file baseline_comparison_args.json`. **Denial stats:** `--run-adapter --denial-stats` writes denial_trace_stats.json. Export: export_llm_redteam_table.py, export_p6_baseline_table.py (3-way). OWASP LLM Top 10 coverage: [docs/P6_OWASP_MAPPING.md](P6_OWASP_MAPPING.md).
 
 **Result locations:**
-- `datasets/runs/llm_eval/red_team_results.json` — red-team cases (8)
-- `datasets/runs/llm_eval/confusable_deputy_results.json` — confusable deputy cases (4; args induce privilege; validate_plan_step blocks)
+- `datasets/runs/llm_eval/red_team_results.json` — red-team cases (9); when --real-llm: real_llm.cases[] (9+4)
+- `datasets/runs/llm_eval/confusable_deputy_results.json` — confusable deputy cases (4)
 - `datasets/runs/llm_eval/e2e_denial_trace.json` — claim and example: planner proposed unsafe, validator blocked, recovery safe
-- `datasets/runs/llm_eval/adapter_latency.json` — only when run with `--run-adapter`
+- `datasets/runs/llm_eval/adapter_latency.json` — when run with `--run-adapter` (default: 3 scenarios, 20 seeds); optional denial_stats block when --denial-stats
+- `datasets/runs/llm_eval/baseline_comparison.json` — when run with `--run-baseline` (gated vs weak vs ungated, tool-level unsafe)
+- `datasets/runs/llm_eval/baseline_comparison_args.json` — when run with `--run-baseline --baseline-plan args_unsafe` (argument-level path-traversal; safe_args ablation)
+- `datasets/runs/llm_eval/denial_trace_stats.json` — when run with `--run-adapter --denial-stats`
 
 **How to read:**
-- **Red-team:** `run_manifest` (red_team_cases, script); `success_criteria_met.red_team_all_pass`, `success_criteria_met.trigger_met` (conditional: firewall reduces unsafe without collapsing completion). `cases[]` each has `expected_block`, `actually_blocked`, `pass`. Optional `excellence_metrics`: red_team_pass_rate_pct, n_cases, n_pass. Eight cases (e.g. rt_unsafe_tool, rt_safe_tool, rt_unsafe_write, rt_safe_submit, rt_unsafe_shell, rt_allowed_tool_disallowed_args, rt_boundary_tool_name, rt_safe_read_only). **Jailbreak-style:** `red_team_results.json` may include `jailbreak_style` (cases with prompt-injection style args; all_pass). Real-LLM: optional `--real-llm` when `.env` has API keys; results merged into red_team_results.json; export_llm_redteam_table can emit Table 1b for real-LLM.
-- **Confusable deputy:** `success_criteria_met.confusable_deputy_all_pass`; `confusable_deputy_cases[]`, `all_pass`; excellence_metrics: confusable_deputy_pass_rate_pct. Validator blocks steps whose args request elevation/privilege.
-- **E2E denial:** `e2e_denial_trace.json` documents blocked step example and outcome (blocked, recovery safe).
-- **Adapter latency:** `run_manifest` (adapter_scenarios, adapter_seeds, script); `runs[]` (scenario_id, seed, task_latency_ms_p95, wall_sec); `tail_latency_p95_mean_ms`; excellence_metrics: denial_latency_p95_mean_ms, e2e_denial_trace_present. When n >= 2: `tail_latency_p95_stdev_ms`, `tail_latency_p95_ci95_lower/upper`.
+- **Red-team:** `run_manifest` (red_team_cases, script); `success_criteria_met.red_team_all_pass`, `trigger_met`. `cases[]`: expected_block, actually_blocked, pass. **Real-LLM:** When n_runs_per_case > 1: real_llm.cases[] (case_id, expected_block, n_runs, pass_count, pass_rate_pct, pass_rate_ci95_lower/upper, latency_mean_ms, latency_stdev_ms); pass_rate_pct, pass_rate_ci95_* overall; all_block_unsafe_pass, total_latency_ms. When n_runs_per_case == 1: actually_blocked, pass, latency_ms per case. **Jailbreak-style:** jailbreak_style (cases with prompt-injection style args).
+- **Confusable deputy:** `success_criteria_met.confusable_deputy_all_pass`; `confusable_deputy_cases[]`, `all_pass`.
+- **E2E denial:** `e2e_denial_trace.json` documents blocked step example and outcome.
+- **Adapter latency:** `run_manifest` (adapter_scenarios, adapter_seeds; publishable: 3 scenarios, 20 seeds); `runs[]` (scenario_id, seed, task_latency_ms_p95, wall_sec); `tail_latency_p95_mean_ms`; when n >= 2: stdev and 95% CI. Optional `denial_stats`: total_runs, runs_with_denial, per_scenario (runs, denials, tasks_completed_mean).
+- **Baseline comparison:** `baseline_comparison.json` (tool-level) and `baseline_comparison_args.json` (args_unsafe): rows (scenario_id, seed, gated_denials, weak_denials, ungated_denials, tasks_completed per mode); plan_type; excellence_metrics (denial_count_gated/weak/ungated, tasks_completed_mean per mode). For args_unsafe: expect gated denials = total runs, weak/ungated = 0.
+- **Denial trace stats:** `denial_trace_stats.json`: total_runs, runs_with_denial, per_scenario; run_manifest.
 
 ---
 
@@ -208,13 +218,13 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 | Paper | One-line result |
 |-------|------------------|
-| P0 | E3: multi-scenario, per_scenario[]; E2 redacted + admissibility matrix; E1 conformance.json per run; verification_mode required; p0_conformance_summary.json; export_e3_table (--compact), plot_e3_latency, build_p0_conformance_summary. |
+| P0 | E1 conformance corpus (build_p0_conformance_corpus, export_e1_corpus_table); E2 4-col admissibility matrix; E3 replay link (optional --standalone-verifier); E4 multi-adapter (run_p0_e4_multi_adapter, export_p0_table3); Table 1/2/3, Figures 1–3; verify_maestro_from_trace.py; repro in DRAFT Appendix. |
 | P1 | Contract validator: corpus detection_ok; scale_test; gatekeeper check_contracts; instrument state machine; P1_TRACE_DERIVABILITY.md; export_contracts_corpus_table, plot_contracts_scale. |
-| P2 | REP-CPS = centralized on tasks; aggregation_variants, sybil_sweep, safety_gate_denial; convergence (steps_to_convergence, Table 4) when --aggregation-steps > 1; robust lowers bias. |
+| P2 | REP-CPS safety-gated profile; adapter parity; aggregation_variants, sybil_sweep, profile_ablation (Table 5), safety_gate_denial; robust reduces observed bias; trigger not met in evaluated scenario. Optional convergence (Table 4) when --aggregation-steps > 1. |
 | P3 | Fidelity pass; root_cause_category; witness_slice per divergence; overhead_curve; plot_replay_overhead; L1 stub + L1 twin (--l1-twin); export_replay_corpus_table; L2 design subsection. |
 | P4 | Fault sweep (incl. calibration_invalid_01); recovery metrics (steps_after_fault, tasks_after_fault); Centralized/Blackboard/RetryHeavy baselines; anti-gaming + scoring_proof; adapter_costs.json; plot_maestro_recovery. |
 | P5 | Held-out MAE; per_scenario_baseline_mae; feature/regression; 95% CI; scaling_fit; success_criteria_met.trigger_met; --seeds 20, --fault-mix. |
-| P6 | Red-team (8) + confusable_deputy (4) + jailbreak_style; validator v0.2 (allow_list + safe_args); e2e_denial_trace; adapter_latency with --run-adapter; export_llm_redteam_table (Table 1b real-LLM when present); P6_OWASP_MAPPING; optional --real-llm. |
+| P6 | Red-team (9) + confusable_deputy (4) + jailbreak_style; validator v0.2; e2e_denial_trace; adapter_latency (3 scenarios, 20 seeds); real_llm with --real-llm-runs 5 (pass_rate, Wilson CI, latency mean±stdev); baseline 3-way tool-level + args_unsafe (safe_args ablation); denial_trace_stats; export_llm_redteam_table, export_p6_baseline_table [--baseline-file baseline_comparison_args.json], export_p6_artifact_hashes; P6_OWASP_MAPPING. |
 | P7 | mapping_check + ponr_coverage_ok; three profiles (lab, warehouse, medical); per_profile; P7_STANDARDS_MAPPING; audit_bundle.py (--release); PONR requires --scenario-id; export_assurance_gsn; P7_AUDITOR_FEEDBACK_PROTOCOL; non-goals; K7. |
 | P8 | fixed/meta/naive; --non-vacuous (collapse_sweep-driven drop_prob); optional --fallback-adapter blackboard|centralized|retry_heavy; --stress-preset very_high / regime_stress_v1; comparison.json + collapse_sweep.json; trigger_met; export_meta_tables; plot_meta_collapse. |
 

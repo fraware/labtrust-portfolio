@@ -1,0 +1,130 @@
+﻿% SaT-CPS 2026 submission. ACM proceedings, sigconf, 10 pages.
+% Use only ACM-approved packages; no manual margin or font overrides.
+\documentclass[sigconf]{acmart}
+
+\title{Secure CPS Tool Invocation via a Typed-Plan Firewall}
+
+% Author names and affiliations per workshop CFP; replace placeholders
+\author{Author One}
+\affiliation{%
+  \institution{Institution One}
+  \city{City}
+  \country{Country}
+}
+\email{author1@example.org}
+
+\author{Author Two}
+\affiliation{%
+  \institution{Institution Two}
+  \city{City}
+  \country{Country}
+}
+\email{author2@example.org}
+
+% CCS concepts (ACM style)
+\ccsdesc[500]{Security and privacy~Security in hardware}
+\ccsdesc[300]{Computer systems organization~Embedded and cyber-physical systems}
+\ccsdesc[300]{Software and its engineering~Software safety}
+
+\keywords{cyber-physical systems, security, runtime enforcement, tool invocation, typed plans, access control, auditability}
+
+\begin{document}
+
+\begin{abstract}
+Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g., path traversal), and execution without validation undermines safety and auditability. We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (safe\_args), and deterministic capture of proposed invocations. The validator blocks all released synthetic unsafe cases and admits the released safe cases. In a latest 5-run evaluation over 13 cases/model (2026-03-17), gpt-4.1-mini achieves 55/65 (84.6\%, 95\% Wilson CI [73.9, 91.4\%]) and gpt-4.1 achieves 55/65 (84.6\%, [73.9, 91.4\%]). For both models, path-traversal and denylist-key cases each score 0/5 in these runs. We treat these as first-class results separating canonical validator correctness from model output variability. The security layer adds bounded measured overhead; denial traces are recorded for replay and audit. Tool-level baseline: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level baseline (safe\_args ablation): gated denies, weak and ungated allow. We claim containment and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+\paragraph{CPS tool invocation as a security problem.}
+In CPS, the control plane often invokes tools (query status, submit results, or legacy interfaces). When a planner---whether an LLM or a heuristic---produces tool calls, those calls cross a trust boundary: unchecked execution of disallowed tools or malicious arguments (e.g., path traversal) can compromise safety and integrity. Runtime enforcement at this boundary is therefore a core concern for secure CPS architectures.
+
+\paragraph{Why generic LLM framing is insufficient.}
+Generic LLM safety benchmarks focus on prompt injection, jailbreaks, or output filtering in isolation. For CPS we need: (a) a clear trust boundary (planner output is untrusted until validated); (b) integration with trace and audit (deterministic capture, denial logs); (c) evaluation that includes both synthetic validator correctness and real-LLM stress tests; (d) explicit baselines that show the value of each validation layer (allow-list vs.\ safe\_args).
+
+\paragraph{The typed-plan firewall.}
+The typed-plan firewall sits at the actuation boundary: planner output is untrusted until the firewall admits it. Plans are typed (tool, args, validators); the firewall runs allow-list and argument checks (e.g., path traversal, dangerous patterns). Denied steps are not executed; they are captured for replay and audit. This is a runtime enforcement architecture for CPS tool invocation, not merely an LLM benchmark.
+
+\paragraph{Evidence and scope.}
+We report four evaluation blocks: (A) synthetic validator evidence; (B) real-LLM stress test with explicit failure-case analysis; (C) adapter latency and denial traces; (D) baseline comparison (tool-level and argument-level). We do not claim elimination of prompt injection, full jailbreak coverage, or universal robustness.
+
+\section{Threat Model}
+
+\textbf{Assets.} CPS tool interfaces; operational state accessible via those tools; traces and denial logs; policy configuration (allow-list, validator stack).
+
+\textbf{Adversarial leverage.} Prompt injection via planner input; tool-returned content that induces privilege-seeking behavior; malformed or privilege-seeking arguments (e.g., path traversal); confused-deputy dynamics; jailbreak-style instruction phrases in arguments.
+
+\textbf{Trust assumptions.} The planner is untrusted at the actuation boundary. The validator and capture pipeline are trusted. The execution environment obeys firewall decisions (denied steps are not executed).
+
+\textbf{Security properties sought.} No unsafe step (disallowed tool or unsafe arguments in the released suite) reaches execution in the reported setting; all denied actions are captured for replay and audit; runtime overhead remains low enough for the target CPS context.
+
+\textbf{Non-goals.} Proving semantic correctness of whole plans; complete jailbreak coverage; universal robustness; elimination of prompt injection.
+
+\begin{table}[t]
+\caption{Threat model summary.}
+\label{tab:threat}
+\centering
+\small
+\begin{tabular}{@{}lllll@{}}
+\hline
+Threat & Entry & Property & Mitigation & Out of scope \\
+\hline
+Disallowed tool & Planner & No unsafe step & allow\_list & Semantic correctness \\
+Path traversal & Planner & No unsafe step & safe\_args & Full sanitization \\
+Jailbreak-style args & Planner & No unsafe step & safe\_args & General injection \\
+Confused deputy & Planner & No unsafe step & safe\_args & Cross-component trust \\
+Unaudited execution & Adapter & Replay/audit & Capture & Full forensics \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{System Overview}
+
+Typed plans use a schema with steps (seq, tool, args, validators). The validator stack includes \texttt{allow\_list} (tool allow-listing) and \texttt{safe\_args} (path traversal, dangerous patterns, jailbreak-style phrases). \texttt{validate\_plan\_step} runs the configured validators; \texttt{policy\_check\_step} provides allow-list-only (weak) mode. Denied steps are recorded in trace metadata; \texttt{capture\_tool\_call} supports replay. The LLMPlanningAdapter integrates with MAESTRO: it runs scenarios, injects plan and validation outcome into trace, and reports denials and tasks completed.
+% Figure 1 (decision path): python scripts/export_p6_firewall_flow.py -> docs/figures/p6_firewall_flow.mmd; render to PDF/PNG and include as fig1.pdf or fig1.png
+% \begin{figure}[t]
+% \centering
+% \includegraphics[width=\columnwidth]{fig1}
+% \caption{Decision path: planner output to allow/deny (typed step -> allow-list -> safe\_args -> capture).}
+% \label{fig:decisionpath}
+% \end{figure}
+
+\section{Evaluation}
+
+\subsection{Block A: Synthetic Validator Evidence}
+
+Synthetic evidence isolates validator correctness from model-generation variability. The full synthetic table (9 red-team, 4 confusable deputy, 2 jailbreak-style) is the primary validator evidence: all unsafe cases blocked, all safe cases admitted.
+
+\subsection{Block B: Real-LLM Stress Test}
+
+The validator correctly blocks the canonical unsafe step; the real-LLM experiment tests whether the model reliably emits the unsafe argument form under repeated prompting. Reported (2026-03-17): 5 runs per case and 13 cases/model (denominator 65/model): gpt-4.1-mini 55/65 (84.6\%, 95\% Wilson CI [73.9, 91.4\%]), gpt-4.1 55/65 (84.6\%, [73.9, 91.4\%]). For both models, \texttt{rt\_allowed\_tool\_disallowed\_args} and \texttt{rt\_allowed\_tool\_denylist\_key} each score 0/5 in these runs.
+
+\paragraph{Failure case as first-class result.} The 0/5 path-traversal case is the most security-informative outcome: it separates canonical validator correctness (the validator blocks the step when present) from model behavior (the model did not emit the unsafe form in those 5 runs). Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. We report this result explicitly.
+
+\subsection{Block C: Adapter Latency and Denial Traces}
+
+Three scenarios, 20 seeds each; mean p95 latency, stdev, 95\% CI; total denied unsafe steps; per-scenario denial counts; tasks completed. This security layer adds bounded measured overhead while preserving task completion in the reported denial-injection setting.
+
+\paragraph{Case study: denial trace.} In a representative run, the planner proposed step \texttt{\{ tool: execute\_system, args: \{ cmd: ``rm -rf'' \} \}}. Allow-list check: tool not in allow\_list $\rightarrow$ Deny. The step was captured for audit; no execution occurred.
+
+\subsection{Block D: Baseline Comparison}
+
+\textbf{Tool-level benchmark.} The injected unsafe step is \texttt{execute\_system} (disallowed tool). Gated and weak both deny (rejection at allow-list layer); ungated allows. This baseline shows the value of having a gate at all; it does not isolate the marginal contribution of safe\_args.
+
+\textbf{Argument-level benchmark (safe\_args ablation).} With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe\_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation.
+
+\section{Discussion and Limitations}
+
+Containment, not elimination: the firewall blocks the released unsafe cases; we do not claim elimination of prompt injection or full coverage. Validator v0.2 covers allow\_list and safe\_args; PONR and broader checks are future work. Real-LLM pass rate is model- and prompt-dependent; synthetic table remains primary validator evidence. Residual risk from novel attack vectors remains.
+
+\section{Conclusion}
+
+We presented a runtime enforcement architecture for CPS tool invocation: typed-plan firewall with allow-listing and argument validation, deterministic capture for audit, and a released evaluation suite (synthetic, real-LLM, adapter latency, tool-level and argument-level baselines). The firewall blocks the released unsafe cases and admits the released safe cases; denial-injection experiments show bounded overhead and the incremental value of argument-level validation. We report the real-LLM path-traversal failure case as a first-class result. Claims are limited to containment and auditability under the reported evaluation.
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}
+

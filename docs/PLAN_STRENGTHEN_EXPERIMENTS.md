@@ -2,7 +2,7 @@
 
 This document is the single merged plan. It includes **Phases 1–6** (statistical rigor, scenario/fault coverage, corpus expansion, test strengthening, reporting, documentation), **Phase 7** (real LLM evaluation using API keys in `.env`), and **Phase 8** (implementation of Lean formal verification). The scope and "Out of scope" sections reflect that real LLM and formal verification are in scope; only real hardware remains out of scope.
 
-**Implementation status:** Phases 1–8 are implemented. Current state: stats helper and comparison metrics in meta/rep_cps/scaling evals; run_manifest seed_count and LABTRUST_FIXED_SEED; multi-scenario/defaults per plan; P1 contract corpus 7 sequences, P3 replay corpus 4 traps (discovery from `*_trace.json`), P6 red-team 8 cases + confusable deputy 4 cases; integration/stress tests and W3 test harness; repro_time_p4.py; real-LLM optional in P6; Lean W3 wedge and impl alignment doc. See [EXPERIMENTS_AND_LIMITATIONS.md](EXPERIMENTS_AND_LIMITATIONS.md) and [formal/lean/README.md](../formal/lean/README.md).
+**Implementation status:** Phases 1–8 are implemented. Current state: stats helper and comparison metrics in meta/rep_cps/scaling evals; run_manifest seed_count and LABTRUST_FIXED_SEED; multi-scenario/defaults per plan; P1 contract corpus 25 sequences, P3 replay corpus 4 traps (discovery from `*_trace.json`), P6 red-team 8 cases + confusable deputy 4 cases; integration/stress tests and W3 test harness; repro_time_p4.py; real-LLM optional in P6; Lean W3 wedge and impl alignment doc. See [EXPERIMENTS_AND_LIMITATIONS.md](EXPERIMENTS_AND_LIMITATIONS.md) and [formal/lean/README.md](../formal/lean/README.md).
 
 **Tier 2 / Raised bar (implemented):**
 

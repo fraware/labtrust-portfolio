@@ -34,22 +34,23 @@ claims:
     statement: "A CPS-specific red-team suite (prompt injection, malformed toolcalls, excessive agency) is required and sufficient to exercise key failure modes."
     evidence:
       release_id: "llm_eval"
-      confidence: "medium"  # 8 red-team + 4 confusable + jailbreak-style; OWASP mapping; containment only
+      confidence: "medium"  # 8 red-team + 4 confusable + jailbreak-style; OWASP mapping; real-LLM 5 runs/case, containment only
       artifact_paths:
         - "datasets/runs/llm_eval/red_team_results.json"
         - "datasets/runs/llm_eval/confusable_deputy_results.json"
-      table_ids: ["Table 1"]
+      table_ids: ["Table 1", "Table 1b"]
       figure_ids: []
 
   - id: "C4"
     statement: "Under MAESTRO faults, the pattern reduces safety violations without unacceptable tail latency."
     evidence:
       release_id: "llm_eval"
-      confidence: "medium"  # e2e_denial_trace, adapter latency; conditional on trigger_met
+      confidence: "medium"  # e2e_denial_trace, adapter latency, 3-way baseline; conditional on trigger_met
       artifact_paths:
         - "datasets/runs/llm_eval/adapter_latency.json"
         - "datasets/runs/llm_eval/e2e_denial_trace.json"
-      table_ids: ["Table 2"]
+        - "datasets/runs/llm_eval/baseline_comparison.json"
+      table_ids: ["Table 2", "Baseline table"]
       figure_ids: ["Figure 1"]
 
-# Table 1: red_team. Table 2: adapter latency. Figure 1: plot_llm_adapter_latency.py.
+# Table 1: red_team (synthetic). Table 1b: real-LLM (5 runs/case, pass_rate, Wilson CI). Table 2: adapter latency. Baseline: gated/weak/ungated. Figure 1: plot_llm_adapter_latency.py.

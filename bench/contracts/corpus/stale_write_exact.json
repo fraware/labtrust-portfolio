@@ -1,0 +1,8 @@
+{
+  "description": "Boundary: event ts equals last_ts; validator uses strict > so equal is allowed",
+  "initial_state": {"ownership": {"t1": "agent_1"}, "_last_ts": {"t1": 5.0}},
+  "events": [
+    {"type": "task_end", "ts": 5.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "name": "a", "writer": "agent_1"}}
+  ],
+  "expected_verdicts": ["allow"]
+}

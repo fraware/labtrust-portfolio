@@ -1,0 +1,9 @@
+{
+  "description": "Split-brain: agent_2 writes t2 (allow) then tries t1 owned by agent_1 (deny)",
+  "initial_state": {"ownership": {"t1": "agent_1"}, "_last_ts": {"t1": 1.0}},
+  "events": [
+    {"type": "task_start", "ts": 2.0, "actor": {"id": "agent_2"}, "payload": {"task_id": "t2", "name": "b", "writer": "agent_2"}},
+    {"type": "task_end", "ts": 2.5, "actor": {"id": "agent_2"}, "payload": {"task_id": "t1", "name": "a", "writer": "agent_2"}}
+  ],
+  "expected_verdicts": ["allow", "deny"]
+}

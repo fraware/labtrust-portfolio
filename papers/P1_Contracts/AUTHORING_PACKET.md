@@ -13,10 +13,10 @@ What does “coordination” mean in CPS when messaging is not authority—i.e.,
 - Must map cleanly to lab instrument substrates; explicitly include an interoperability hook to **OPC UA LADS** state machines. citeturn0search13turn0search16
 
 ## 3) Claims
-- **C1:** A minimal contract layer (typed state + ownership + valid transitions + temporal semantics) prevents common coordination pathologies (split-brain, stale writes, orphan authority, unsafe last-write-wins).
-- **C2:** Contract validation can be executed from traces (no privileged hidden state), enabling auditability and replay-based debugging.
-- **C3:** The contract surface is portable across ROS2/DDS and event-log architectures (DDS/Kafka-style), because it is defined above transport.
-- **C4:** A small reference implementation demonstrates enforceability with bounded overhead.
+- **C1:** Within a declared contract model, a trace-derived validator can detect and deny invalid writes corresponding to specified coordination failure classes (ownership conflicts, stale writes, reorder-sensitive violations).
+- **C2:** Contract validation can be executed from event traces plus declared configuration alone, without privileged hidden state, enabling auditability and replay-based diagnosis.
+- **C3:** The contract model is transport-agnostic by construction (defined over event/state semantics above the messaging layer); the paper demonstrates this through a reference store and a LADS-shaped event mapping, not a full cross-transport deployment.
+- **C4:** A reference implementation can enforce the contract with bounded per-write overhead on the evaluated workload.
 
 ## 4) Outline
 1. Motivation: “communication ≠ coordination” with concrete failure classes

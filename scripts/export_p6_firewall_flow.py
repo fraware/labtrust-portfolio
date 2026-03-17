@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Export P6 LLM Planning typed-plan firewall flow diagram (Figure 0).
-Plan -> validate_plan -> allow | deny (policy_check_step).
-Output: docs/figures/p6_firewall_flow.mmd (Mermaid). Required for peer-review.
-Usage: python scripts/export_p6_firewall_flow.py [--out path]
+Export P6 LLM Planning decision-path figure: planner output -> typed step -> allow-list ->
+safe_args -> capture -> allow/deny. Output: docs/figures/p6_firewall_flow.mmd (Mermaid).
+Regenerate: python scripts/export_p6_firewall_flow.py [--out path]
 """
 from __future__ import annotations
 
@@ -13,24 +12,26 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = REPO / "docs" / "figures" / "p6_firewall_flow.mmd"
 
-MERMAID = """%% P6 Typed-plan firewall flow (auto-generated)
-%% Plan -> validate_plan / policy_check_step -> allow | deny
+# Decision path: Planner output -> Typed step -> Allow-list -> (fail) Deny; (pass) -> Safe_args -> (fail) Deny; (pass) -> Capture -> Allow
+MERMAID = """%% P6 Decision path (auto-generated): planner -> typed step -> allow-list -> safe_args -> capture -> allow/deny
 flowchart LR
-  subgraph input[Input]
-    P[Typed plan]
+  subgraph in[Input]
+    P[Planner output]
   end
-  subgraph firewall[Firewall]
-    V[validate_plan]
-    C[policy_check_step]
-  end
-  subgraph outcome[Outcome]
-    A[allow]
-    D[deny]
-  end
-  P --> V
-  V --> C
-  C --> A
-  C --> D
+  T[Typed step]
+  AL[Allow-list]
+  SA[Safe_args]
+  Cap[Capture]
+  Allow[Allow]
+  Deny1[Deny]
+  Deny2[Deny]
+  P --> T
+  T --> AL
+  AL -->|pass| SA
+  AL -->|fail| Deny1
+  SA -->|pass| Cap
+  SA -->|fail| Deny2
+  Cap --> Allow
 """
 
 
