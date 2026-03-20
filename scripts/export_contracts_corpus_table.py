@@ -39,6 +39,21 @@ def main() -> int:
         lines.append(f"| {seq} | {ok} | {denials} |")
     lines.append("")
     lines.append(f"**Timestamp-only baseline:** denials with timestamp-only policy: {ts_denials}. Violations the contract catches but timestamp-only would allow (missed): {ts_missed}. Run contracts_eval.py with --baseline to populate.")
+    ablation_by_class = data.get("ablation_by_class", {})
+    if ablation_by_class:
+        lines.append("")
+        lines.append("## Ablation by failure class")
+        lines.append("")
+        lines.append("| Class | Policy | Violations denied | Violations missed |")
+        lines.append("|-------|--------|--------------------|--------------------|")
+        for fc in sorted(ablation_by_class.keys()):
+            for policy in ("full_contract", "timestamp_only", "ownership_only", "accept_all"):
+                row = ablation_by_class[fc][policy]
+                lines.append(f"| {fc} | {policy} | {row['violations_denied']} | {row['violations_missed']} |")
+    det = data.get("detection_metrics", {})
+    if det:
+        lines.append("")
+        lines.append(f"**Detection metrics:** TP={det.get('true_positives')}, FP={det.get('false_positives')}, FN={det.get('false_negatives')}, precision={det.get('precision')}, recall={det.get('recall')}, F1={det.get('f1')}.")
     for line in lines:
         print(line)
     return 0

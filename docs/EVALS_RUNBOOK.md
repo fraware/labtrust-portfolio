@@ -10,7 +10,7 @@ For interpretation of results and a plan for follow-up experiments across all pa
 
 **Sensitivity (N=10, 20, 30):** To compare results across sample sizes, run the same eval at N=10, 20, 30 and compare `difference_mean`, `difference_ci95`, `difference_ci_width`, `paired_t_p_value` in the output JSONs. Or use `PYTHONPATH=impl/src python scripts/sensitivity_seed_sweep.py [--eval meta|rep_cps]` to run meta_eval (or rep_cps_eval) at N=10, 20, 30 and write `datasets/runs/sensitivity_sweep/sensitivity_summary.json` with one row per N. Use this to report "results stable at N=20, N=30" or "CI narrows with N."
 
-**Camera-ready / key numbers:** For a presentable snapshot of P5, P6, P8 key results (MAE, trigger_met, red-team pass, no_safety_regression, etc.), see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (written by `run_paper_experiments.py`). To export a markdown "Key results" block from the latest run artifacts: `python scripts/export_key_results_p5_p6_p8.py` (reads heldout_results.json, comparison.json, red_team_results.json under `datasets/runs/`). Use the output to paste into drafts or verify numbers after a publishable run.
+**Camera-ready / key numbers:** For P5, P6, P8, see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) (written when those evals are run; often via `run_paper_experiments.py`). To export a markdown "Key results" block: `python scripts/export_key_results_p5_p6_p8.py`. **P3** and other papers use their own JSON under `datasets/runs/` (see [RESULTS_PER_PAPER.md](RESULTS_PER_PAPER.md)); P3: `replay_eval/summary.json` and `verify_p3_replay_summary.py`.
 
 ## Paper-tailored experiment runner
 
@@ -29,7 +29,7 @@ PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experime
 
 PowerShell: `$env:PYTHONPATH="impl\src"; $env:LABTRUST_KERNEL_DIR="$PWD\kernel"; python scripts/run_paper_experiments.py [--quick] [--paper P0|...|P8]`
 
-Per-paper runs: P0 (E1 conformance corpus + E2 redaction + E3 replay link + E4 multi-adapter + Table 1/2/3 + Figures 1-3 + build_p0_conformance_summary); P1 (corpus + scale-test with variance); P2 (delay sweep, two scenarios, 20 seeds); P3 (replay + overhead curve, --overhead-runs 20; optional --l1-twin); P4 (fault sweep 20 seeds, two scenarios + antigaming + baselines); P5 (multiscenario 20 seeds + --fault-mix, held-out eval, export scaling tables; trigger_met and excellence_metrics); P6 (red-team + confusable + adapter latency, 3 scenarios, 20 seeds; optional --real-llm for Table 1b; --run-baseline, --denial-stats); P7 (assurance + three profiles + audit_bundle + export tables); P8 (collapse sweep then meta_eval --non-vacuous --fallback-adapter retry_heavy, 20 seeds; trigger_met and no_safety_regression). After a full run, see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. **P0 conformance summary:** `python scripts/build_p0_conformance_summary.py` writes `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. **P7 one-command audit:** `python scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR and review if release dir contains evidence_bundle.json.
+Per-paper runs: P0 (E1 conformance corpus + E2 redaction + E3 replay link + E4 multi-adapter + Table 1/2/3 + Figures 1-3 + build_p0_conformance_summary); P1 (corpus + scale-test with variance); P2 (delay sweep, two scenarios, 20 seeds); P3 (replay + overhead curve + baselines + multi-seed thin-slice seeds + verify_p3_replay_summary; --overhead-runs 20; optional --l1-twin); P4 (fault sweep 20 seeds, two scenarios + antigaming + baselines); P5 (multiscenario 20 seeds + --fault-mix, held-out eval, export scaling tables; trigger_met and excellence_metrics); P6 (red-team 9 cases + confusable + adapter latency, 3 scenarios, 20 seeds; optional --real-llm for Table 1b; --run-baseline [--baseline-plan benign|args_unsafe]; --denial-stats; --latency-decomposition; export_p6_reproducibility_table, export_p6_layer_attribution, export_p6_failure_analysis, export_p6_cross_model_heatmap, export_p6_latency_decomposition; optional p6_concurrency_benchmark, p6_capture_ablation, p6_storage_benchmark, p6_cost_model, p6_policy_sweep, p6_replanning_benchmark, p6_adaptive_suite_run); P7 (assurance + three profiles + audit_bundle + export tables); P8 (collapse sweep then meta_eval --non-vacuous --fallback-adapter retry_heavy, 20 seeds; trigger_met and no_safety_regression). After a full run, see [datasets/runs/RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. **P0 conformance summary:** `python scripts/build_p0_conformance_summary.py` writes `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. **P7 one-command audit:** `python scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR and review if release dir contains evidence_bundle.json.
 
 ## Environment
 
@@ -44,43 +44,50 @@ export PYTHONPATH="impl/src"
 ## P1 — Contracts
 
 - **Script:** `scripts/contracts_eval.py`
-- **Output:** `datasets/runs/contracts_eval/eval.json` (corpus sequences, excellence_metrics: corpus_detection_rate_pct, overhead_p99_us, baseline_margin_denials); with `--scale-test`: `scale_test.json` (long-trace validator timing; use `--scale-test-runs 5` for mean/stdev of events_per_sec and time_per_write_us). Publishable run includes scale test (run_paper_experiments.py runs corpus eval then scale-test with 100k events and 5 runs).
+- **Output:** `datasets/runs/contracts_eval/eval.json` (corpus sequences, detection_ok by exact verdict vector, excellence_metrics, ablation, ablation_by_class, detection_metrics with F1, latency_percentiles_us with event-level CI95, resource_and_cost; run_manifest.script_version, corpus_fingerprint); with `--baseline`: baseline and ablation fields populated. With `--scale-test`: `scale_test.json` (use `--scale-test-runs 5` for mean/stdev). With `--scale-sweep 1000,10000,100000`: `scale_sweep.json`. Transport parity: `python scripts/contracts_transport_parity.py` writes `transport_parity.json`. Publishable run includes corpus eval with --baseline, scale test (or scale sweep), and transport parity.
 - **Gatekeeper:** `allow_release(run_dir, check_contracts=True)` runs contract validator on trace; use for strict PONR gating. CLI: `labtrust_portfolio release-dataset --check-contracts <run_dir> <release_id>` denies release when any trace event is contract-denied; default (no flag) is conformance-only so thin-slice runs can release.
 - **State machine:** `impl/.../instrument_state_machine.py`; contract `use_instrument_state_machine: true` aligns single-writer with idle/running transitions. See `bench/contracts/README.md`.
 - **Lab profile integration:** One PONR transition (release) is gated: contract-invalid trace leads to gatekeeper denying release. See `tests/test_thinslice_e2e.TestThinSliceE2E.test_gatekeeper_denies_when_contract_invalid` and `docs/P1_TRACE_DERIVABILITY.md`.
 - **Tables/figures:** Corpus table: `python scripts/export_contracts_corpus_table.py`. Scale throughput figure: `python scripts/plot_contracts_scale.py` (output `docs/figures/p1_scale_throughput.png`).
 
 ```bash
-PYTHONPATH=impl/src python scripts/contracts_eval.py [--out datasets/runs/contracts_eval]
-PYTHONPATH=impl/src python scripts/contracts_eval.py --scale-test [--scale-events 100000]
+PYTHONPATH=impl/src python scripts/contracts_eval.py [--out datasets/runs/contracts_eval] [--baseline]
+PYTHONPATH=impl/src python scripts/contracts_eval.py --scale-test [--scale-events 100000] [--scale-test-runs 5]
+PYTHONPATH=impl/src python scripts/contracts_eval.py --scale-sweep 1000,10000,100000 [--scale-test-runs 5]
+PYTHONPATH=impl/src python scripts/contracts_transport_parity.py [--out datasets/runs/contracts_eval]
 ```
 
 ## P2 — REP-CPS (safety-gated profile)
 
 - **Bottleneck scenario:** `toy_lab_v0` (configurable via `--scenario`).
 - **Script:** `scripts/rep_cps_eval.py`
-- **Output:** `datasets/runs/rep_cps_eval/summary.json` (and per-run dirs under `rep_cps/`, `centralized/`). Also: `aggregation_variants`, `sybil_sweep[]`, `profile_ablation[]` (Table 5), `safety_gate_denial.json`.
-- **Metrics:** adapter comparison (tasks_completed; adapter parity); aggregation under compromise (robust reduces observed bias vs naive); profile ablation (no auth, no freshness, no rate limit, no robust agg, full profile); sybil stress test; safety-gate denial record. Trigger not met in evaluated scenario (contribution is profile and harness). When `--aggregation-steps > 1`: optional convergence (steps_to_convergence, convergence_achieved_rate); Table 4 via `python scripts/export_rep_cps_convergence_table.py`.
-- **Figure 1:** `python scripts/plot_rep_cps_summary.py` (output `docs/figures/p2_rep_cps_tasks.png`; tasks_completed by policy from summary.json). Required for peer-review; no optional figures.
+- **Output:** `datasets/runs/rep_cps_eval/summary.json` (and per-run dirs under `rep_cps/`, `centralized/`). Also: `aggregation_variants`, `sybil_sweep[]`, `magnitude_sweep[]`, `trim_fraction_sweep[]`, `resilience_envelope`, `latency_cost`, `profile_ablation[]` (Table 6), `safety_gate_denial` (including `safety_gate_campaign`, `denial_trace_recorded`), `n_sensitivity`.
+- **Metrics:** adapter comparison (tasks_completed; adapter parity); aggregation under compromise (robust reduces observed bias vs naive); latency/cost (wall time per policy, aggregation compute ms, overhead vs centralized); resilience envelope (safe operating region, failure boundary); safety-gate campaign (pass/deny counts; denial when aggregate exceeds threshold); profile ablation; sybil/magnitude/trim sweeps. Trigger not met in evaluated scenario (contribution is profile and harness). When `--aggregation-steps > 1`: optional convergence (steps_to_convergence, convergence_achieved_rate); Table 4 via `python scripts/export_rep_cps_convergence_table.py`. N-sensitivity: `python scripts/sensitivity_seed_sweep.py --eval rep_cps --ns 20,30`.
+- **Tables:** `python scripts/export_rep_cps_tables.py` (Tables 1–7 from summary.json, including latency Table 5 and resilience Table 7).
+- **Figure 1:** `python scripts/plot_rep_cps_summary.py` (output `docs/figures/p2_rep_cps_tasks.png`; tasks_completed by policy). **Figure 2:** `python scripts/plot_rep_cps_latency.py` (output `docs/figures/p2_rep_cps_latency.png`; latency by policy).
 
 ```bash
 # Publishable: default 20 seeds. Quick/CI: --seeds 2 or --seeds 5.
 PYTHONPATH=impl/src python scripts/rep_cps_eval.py [--scenario toy_lab_v0] [--out datasets/runs/rep_cps_eval]
 # Delay sweep + second scenario (publishable default 20 seeds):
 PYTHONPATH=impl/src python scripts/rep_cps_eval.py --delay-sweep 0,0.05,0.1 --scenarios toy_lab_v0,lab_profile_v0
+python scripts/export_rep_cps_tables.py
 python scripts/export_rep_cps_convergence_table.py [--summary datasets/runs/rep_cps_eval/summary.json]
 PYTHONPATH=impl/src python scripts/plot_rep_cps_summary.py
+PYTHONPATH=impl/src python scripts/plot_rep_cps_latency.py
 ```
 
 ## P3 — Replay
 
 - **Script:** `scripts/replay_eval.py`
-- **Output:** `datasets/runs/replay_eval/summary.json` (or `--out` path). **Use a file path for `--out`** (e.g. `datasets/runs/replay_eval/summary.json`), not a directory; the script writes the summary JSON to that file. Includes `per_trace[]` with `root_cause_category` and **witness_slice** per divergence; top-level **witness_slices** (aggregate of all divergence witness slices); `overhead_stats`; with `--overhead-curve`: `overhead_curve[]` (event_count, p95_replay_ms).
+- **Output:** `datasets/runs/replay_eval/summary.json` (or `--out` path). **Use a file path for `--out`** (e.g. `datasets/runs/replay_eval/summary.json`), not a directory. Includes `schema_version`, `baseline_overhead`, `multi_seed_overhead`, `corpus_outcome_wilson_ci95`, `per_trace[]` with `root_cause_category` and **witness_slice** per divergence; top-level **witness_slices**; `overhead_stats` (empirical p95/p99, bootstrap CIs); with `--overhead-curve`: `overhead_curve[]` (event_count, p95_replay_ms, optional CI fields).
 - **L1:** L1 stub (L0 + twin config validation) and L1 twin (--l1-twin: deterministic re-run of control-plane state machine; l1_twin_ok, l1_twin_final_hash_match in summary). L2 aspirational with design subsection in REPLAY_LEVELS. Full corpus table: `python scripts/export_replay_corpus_table.py`. See `bench/replay/README.md` and `kernel/trace/REPLAY_LEVELS.v0.1.md`.
 - **Figure:** `python scripts/plot_replay_overhead.py` (p95 replay ms vs event count from overhead_curve).
 
 ```bash
-PYTHONPATH=impl/src python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json [--corpus-dir bench/replay/corpus] [--overhead-curve] [--overhead-runs 20]
+PYTHONPATH=impl/src python scripts/replay_eval.py --out datasets/runs/replay_eval/summary.json [--corpus-dir bench/replay/corpus] [--overhead-curve] [--overhead-runs 20] [--thin-slice-seeds 42,43,44,45,46] [--bootstrap-reps 500] [--warmup 0] [--no-baselines]
+python scripts/plot_replay_overhead.py
+python scripts/verify_p3_replay_summary.py --strict-curve
 ```
 
 ## P5 — Scaling
@@ -96,12 +103,16 @@ python scripts/export_scaling_tables.py [--results datasets/runs/scaling_eval/he
 python scripts/plot_scaling_mae.py [--results datasets/runs/scaling_eval/heldout_results.json]
 ```
 
+**Prime Intellect (disks + pods) for heavy P5/P8:** [PRIME_COMPUTE_P5_P8.md](PRIME_COMPUTE_P5_P8.md).
+
 ## P6 — LLM Planning
 
 - **Script:** `scripts/llm_redteam_eval.py`
-- **Output:** `datasets/runs/llm_eval/red_team_results.json`; `confusable_deputy_results.json` (adversarial args inducing privilege); `e2e_denial_trace.json` (blocked + safe recovery); with `--run-adapter`: `adapter_latency.json` (runs, tail_latency_p95_mean_ms, scenarios, seeds; optional latency_acceptable if `--latency-threshold-ms` set).
-- **Metrics:** red-team pass/fail (8 cases); confusable deputy (4 cases); jailbreak-style cases (prompt-injection style args; results in red_team_results.json under `jailbreak_style`); E2E denial trace; optional tail latency from adapter runs (obtained with `--run-adapter`). Optional real-LLM: `--real-llm` when `.env` has OPENAI_API_KEY or ANTHROPIC_API_KEY; results merged into red_team_results.json. OWASP LLM Top 10 coverage: `docs/P6_OWASP_MAPPING.md`.
-- **Options:** `--out DIR`; `--run-adapter`; `--adapter-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0` (default: 3 scenarios); `--adapter-seeds` (default: 1..20); `--denial-stats` (with --run-adapter: denial-injection plan, denial_trace_stats.json); `--run-baseline` (gated vs weak vs ungated, baseline_comparison.json); `--latency-threshold-ms N`; `--real-llm` (real LLM over red-team + confusable-deputy; requires .env API keys); `--real-llm-runs N` (default 5 runs per case for pass_rate and 95% Wilson CI). **Real-LLM dependency:** `pip install openai` in the env where you run (e.g. corridor-os-py3.12). **Publishable:** 3 scenarios, 20 seeds; `--real-llm --real-llm-runs 5` for Table 1b; verify success_criteria_met.trigger_met. Export: `export_p6_baseline_table.py` (3-way when weak present), `export_p6_artifact_hashes.py`.
+- **Output:** `datasets/runs/llm_eval/red_team_results.json` (9 red-team cases; run_manifest with timestamp_iso, evaluator_version, policy_version, prompt_template_hash; per-case attribution and denial_by_layer; cross_model_summary when 2+ models; run_details for argument-level cases when n_runs>1); `confusable_deputy_results.json` (4 cases; attribution); `e2e_denial_trace.json`; with `--run-adapter`: `adapter_latency.json` (runs, tail_latency_p95_mean_ms; optional latency_decomposition when `--latency-decomposition`; optional denial_stats when `--denial-stats`); `baseline_comparison.json`, `baseline_comparison_args.json` (with `--run-baseline`); `baseline_benign.json` (with `--run-baseline --baseline-plan benign`); `denial_trace_stats.json` (with `--run-adapter --denial-stats`).
+- **Metrics:** red-team pass/fail (9 cases); confusable deputy (4); jailbreak-style (in red_team_results.json); E2E denial trace; adapter tail latency; baseline 3-way (gated/weak/ungated) tool-level, args_unsafe, benign. Optional real-LLM: `--real-llm` with `--real-llm-provider auto` (default): `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in `.env`; `gpt-*` / `claude-*` model ids; or **Prime Inference** (below). Results in `real_llm` or `real_llm_models[]`. OWASP: `docs/P6_OWASP_MAPPING.md`.
+- **Options:** `--out DIR`; `--run-adapter`; `--adapter-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0` (default: 3 scenarios); `--adapter-seeds` (default: 1..20); `--denial-stats` (with --run-adapter: denial_trace_stats.json); `--run-baseline` (gated vs weak vs ungated); `--baseline-plan benign|args_unsafe` (benign = utility/false-positive study; args_unsafe = safe_args ablation); `--latency-decomposition` (adapter_latency.json gains latency_decomposition); `--latency-threshold-ms N`; `--real-llm`; `--real-llm-provider auto|openai|anthropic|prime` (default auto); `--real-llm-models` / `--real-llm-model`; `--real-llm-runs N` (default 5). **Publishable:** 3 scenarios, 20 seeds; `--real-llm --real-llm-runs 5` for Table 1b; verify success_criteria_met.trigger_met.
+- **Prime Inference (P6):** OpenAI-compatible API at `https://api.pinference.ai/api/v1` ([Chat Completions](https://docs.primeintellect.ai/api-reference/inference-chat-completions)). Set **`PRIME_INTELLECT_API_KEY`** (or `PRIME_API_KEY`) in `.env`; API key must have **Inference** permission ([overview](https://docs.primeintellect.ai/inference/overview)). Optional **`PRIME_TEAM_ID`**: sent as header `X-Prime-Team-ID` for team billing. Use `--real-llm-provider prime` and model ids from `prime inference models` (example: `meta-llama/llama-3.1-70b-instruct`). The eval retries with exponential backoff on HTTP 429. Smoke: `--real-llm-runs 1` and one model before a full Table 1b run.
+- **Tables/figures:** Red-team: `export_llm_redteam_table.py --out-dir datasets/runs/llm_eval`. Baseline: `export_p6_baseline_table.py` (use `--baseline-file baseline_comparison_args.json` or baseline_benign.json as needed). Artifact hashes: `export_p6_artifact_hashes.py`. Reproducibility table: `export_p6_reproducibility_table.py`. Layer attribution: `export_p6_layer_attribution.py`. Failure analysis: `export_p6_failure_analysis.py`. Cross-model heatmap: `export_p6_cross_model_heatmap.py`. Latency decomposition: `export_p6_latency_decomposition.py`. Firewall flow: `export_p6_firewall_flow.py`. Denial-trace case study: `export_p6_denial_trace_case_study.py --trace path`. **Optional experiments:** p6_concurrency_benchmark.py, p6_capture_ablation.py, p6_storage_benchmark.py, p6_cost_model.py, p6_policy_sweep.py, p6_replanning_benchmark.py, p6_adaptive_suite_run.py. See papers/P6_LLMPlanning/sat-cps2026/EXPERIMENTS_RUNBOOK.md.
 - **Figure 1:** `python scripts/plot_llm_adapter_latency.py` (output `docs/figures/p6_adapter_latency.png`; requires adapter_latency.json from `--run-adapter`).
 - **Integration test:** `tests/test_llm_p6.py` runs eval with `--run-adapter --adapter-scenarios toy_lab_v0 --adapter-seeds 7` and asserts both artifacts.
 
@@ -110,6 +121,10 @@ PYTHONPATH=impl/src python scripts/llm_redteam_eval.py [--out datasets/runs/llm_
 PYTHONPATH=impl/src python scripts/llm_redteam_eval.py --run-adapter --adapter-scenarios toy_lab_v0 --adapter-seeds 7
 python scripts/plot_llm_adapter_latency.py [--latency datasets/runs/llm_eval/adapter_latency.json]
 PYTHONPATH=impl/src python scripts/llm_redteam_eval.py --run-adapter --latency-threshold-ms 5000   # SLA check
+# Prime Inference (after prime login / API key with Inference permission):
+PYTHONPATH=impl/src python scripts/llm_redteam_eval.py --real-llm --real-llm-provider prime --real-llm-models meta-llama/llama-3.1-70b-instruct --real-llm-runs 1
+# Prime top-4 matrix (stable ranking run):
+PYTHONPATH=impl/src python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_prime_matrix_top4_n3 --real-llm --real-llm-provider prime --real-llm-models x-ai/grok-4-fast,google/gemini-2.5-flash,openai/gpt-4.1-mini,qwen/qwen3-30b-a3b-instruct-2507 --real-llm-runs 3
 ```
 
 Exit code 1 if any red-team case fails (expected_block not satisfied).
@@ -134,20 +149,21 @@ python scripts/export_assurance_gsn.py
 
 ## P8 — Meta-Coordination
 
-- **Scenario:** `regime_stress_v0` with configurable `drop_completion_prob`.
-- **Script:** `scripts/meta_eval.py`
-- **Output:** `--out DIR` (default `datasets/runs/meta_eval`); writes `comparison.json` (fixed, meta_controller, optional naive_switch_baseline when `--run-naive`, meta_reduces_collapse, no_safety_regression, collapse_definition, per_seed, run_manifest, success_criteria_met.trigger_met, excellence_metrics).
-- **Run manifests:** comparison.json includes run_manifest (seeds, scenario_id, fault_threshold, script); collapse_sweep.json (from meta_collapse_sweep.py) includes run_manifest (seeds, drop_probs, scenario_id, script).
-- **Args:** `--out`, `--seeds`, `--collapse-threshold` (default 2), `--drop-prob` (default 0.15), `--fault-threshold` (default 1; 0 = naive: switch on any fault), `--run-naive` (also run meta with fault_threshold=0 as naive baseline), `--hysteresis N` (thrash control; require N consecutive fault observations before switch; default 1), `--non-vacuous` (run or read collapse_sweep, use smallest drop_prob where collapse_count > 0; exit with message if none found), `--collapse-sweep-path` (path to collapse_sweep.json when using --non-vacuous), `--fallback-adapter blackboard|centralized|retry_heavy` (when set, meta run uses fallback adapter when switch is decided; two coordination paths). `--stress-preset very_high` (higher drop_prob) or scenario `regime_stress_v1.yaml` for second stress scenario.
-- **Collapse:** `tasks_completed < threshold` or `recovery_ok` false (from report.faults); per-seed results include `recovery_ok` when present. Integration test: `tests/test_meta_p8.py` runs meta_eval with `--out <temp>`, `--run-naive`, `--fault-threshold 0` and asserts comparison.json (no_safety_regression, meta_reduces_collapse, regime_switch_count_total >= 1), then runs `export_meta_tables.py`. Unit tests: `TestMetaController` cover `decide_switch` and `regime_switch_event`. A stress test runs with `--collapse-threshold 4` to exercise collapse metrics when tasks_completed < 4.
-- **Export:** `scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json [--table2]` prints markdown Table 1 (fixed vs meta vs naive) and Table 2 (per-seed). **Figure 1:** Run `meta_collapse_sweep.py` first to produce collapse_sweep.json, then `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (output `docs/figures/p8_meta_collapse.png`). Optional stress: run with `--drop-prob 0.25` or `0.3` or `--collapse-threshold 4` to observe collapse; run `meta_collapse_sweep.py` with `--drop-probs 0.15,0.2,0.25,0.3` (and `--seeds 1,...,10`) to get collapse_sweep.json. Thrash control: `--hysteresis N`; naive-switch baseline uses fault_threshold=0.
+- **Scenarios:** `regime_stress_v0` (default) and `regime_stress_v1` via `--scenario`; configurable `drop_completion_prob`.
+- **Scripts:** `scripts/meta_eval.py`, `scripts/meta_collapse_sweep.py`, `scripts/verify_p8_meta_artifacts.py`, `scripts/export_meta_tables.py`, `scripts/plot_meta_collapse.py`
+- **Output:** `--out DIR` (default `datasets/runs/meta_eval`); writes `comparison.json` with `schema_version`, fixed, meta_controller, optional naive_switch_baseline when `--run-naive`, `meta_non_worse_collapse`, `meta_strictly_reduces_collapse` (legacy alias `meta_reduces_collapse` = non-inferior counts), `collapse_paired_analysis` (McNemar, Wilson), `no_safety_regression`, `collapse_definition`, per_seed, `run_manifest` (includes `stress_selection_policy` when `--non-vacuous`), `success_criteria_met`, `excellence_metrics` (bootstrap `difference_ci95` labeled with `difference_ci95_method`; Student t CIs on per-arm means).
+- **Run manifests:** comparison.json `run_manifest` (seeds, seed_count, scenario_id, fault_threshold, hysteresis, script, schema_version, non_vacuous, stress_selection_policy); collapse_sweep.json includes `schema_version` and matching scenario_id.
+- **Args:** `--scenario regime_stress_v0|regime_stress_v1`, `--out`, `--seeds`, `--collapse-threshold` (default 2), `--drop-prob` (default 0.15), `--fault-threshold` (default 1; 0 = naive: switch on any fault), `--run-naive`, `--hysteresis N`, `--non-vacuous` (smallest drop_prob with any fixed-regime collapse in sweep; records policy in manifest), `--collapse-sweep-path`, `--fallback-adapter blackboard|centralized|retry_heavy`, `--stress-preset high|very_high`.
+- **Collapse:** `tasks_completed < threshold` or `recovery_ok` false. Integration tests: `tests/test_meta_p8.py`, `tests/test_stats_p8_tools.py`.
+- **Export:** `export_meta_tables.py` prints Table 1, interpretation blocks, optional Table 2. **Figure 1:** `plot_meta_collapse.py` plots mean tasks_completed with 95% t-intervals and collapse rate with Wilson 95% intervals.
 
-**Publishable (state-of-the-art / non-vacuous):** `run_paper_experiments.py --paper P8` runs collapse_sweep (20 seeds) then meta_eval --non-vacuous --fallback-adapter retry_heavy so Table 1 uses a drop_prob where collapse_count > 0 and two real regimes are compared. Verify comparison.json has success_criteria_met.trigger_met and no_safety_regression true. Manual order: (1) `meta_collapse_sweep.py` (20 seeds, --drop-probs 0.15,0.2,0.25,0.3), (2) `meta_eval.py --run-naive --fault-threshold 0 --non-vacuous --fallback-adapter retry_heavy`, (3) `export_meta_tables.py`, (4) `plot_meta_collapse.py`. If no drop_prob in the sweep has collapse, present Table 1 as methodology and auditability only. CI can omit --non-vacuous for speed.
+**Publishable:** `run_paper_experiments.py --paper P8` runs per-scenario collapse_sweep + meta_eval `--non-vacuous` for **regime_stress_v0** (output `meta_eval/comparison.json`) and **regime_stress_v1** (output `meta_eval/scenario_regime_stress_v1/comparison.json`), then exports tables for both. Verify: `verify_p8_meta_artifacts.py --comparison ...` (use `--strict-publishable` for release gates: N>=20 and stress policy when non-vacuous). **CI vs publishable:** CI uses fewer seeds and does not claim draft tables; local publishable uses 20 seeds.
 
 ```bash
-# Publishable (non-vacuous): collapse sweep then meta_eval --non-vacuous
-PYTHONPATH=impl/src python scripts/meta_collapse_sweep.py [--out datasets/runs/meta_eval] [--drop-probs 0.15,0.2,0.25,0.3] [--seeds 1,2,...,20]
-PYTHONPATH=impl/src python scripts/meta_eval.py --run-naive --fault-threshold 0 --non-vacuous [--out datasets/runs/meta_eval] [--seeds 1,2,...,20]
+# Publishable (non-vacuous): per scenario, collapse sweep then meta_eval --non-vacuous
+PYTHONPATH=impl/src python scripts/meta_collapse_sweep.py [--scenario regime_stress_v0] [--out datasets/runs/meta_eval] [--drop-probs 0.15,0.2,0.25,0.3] [--seeds 1,2,...,20]
+PYTHONPATH=impl/src python scripts/meta_eval.py --scenario regime_stress_v0 --run-naive --fault-threshold 0 --non-vacuous [--out datasets/runs/meta_eval] [--seeds 1,2,...,20]
+PYTHONPATH=impl/src python scripts/verify_p8_meta_artifacts.py --comparison datasets/runs/meta_eval/comparison.json --sweep datasets/runs/meta_eval/collapse_sweep.json
 python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json [--table2]
 python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json
 ```

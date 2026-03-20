@@ -2,12 +2,12 @@
 
 This document is the single merged plan. It includes **Phases 1–6** (statistical rigor, scenario/fault coverage, corpus expansion, test strengthening, reporting, documentation), **Phase 7** (real LLM evaluation using API keys in `.env`), and **Phase 8** (implementation of Lean formal verification). The scope and "Out of scope" sections reflect that real LLM and formal verification are in scope; only real hardware remains out of scope.
 
-**Implementation status:** Phases 1–8 are implemented. Current state: stats helper and comparison metrics in meta/rep_cps/scaling evals; run_manifest seed_count and LABTRUST_FIXED_SEED; multi-scenario/defaults per plan; P1 contract corpus 25 sequences, P3 replay corpus 4 traps (discovery from `*_trace.json`), P6 red-team 8 cases + confusable deputy 4 cases; integration/stress tests and W3 test harness; repro_time_p4.py; real-LLM optional in P6; Lean W3 wedge and impl alignment doc. See [EXPERIMENTS_AND_LIMITATIONS.md](EXPERIMENTS_AND_LIMITATIONS.md) and [formal/lean/README.md](../formal/lean/README.md).
+**Implementation status:** Phases 1–8 are implemented. Current state: stats helper and comparison metrics in meta/rep_cps/scaling evals; run_manifest seed_count and LABTRUST_FIXED_SEED; multi-scenario/defaults per plan; P1 contract corpus 51+ sequences (tiered benchmark: micro, meso, stress/adversarial), P3 replay corpus 4 traps (discovery from `*_trace.json`), P6 red-team 9 cases + confusable deputy 4 cases; **P8** publishable dual-scenario (`regime_stress_v0` + `regime_stress_v1`), `--non-vacuous` with `stress_selection_policy`, `collapse_paired_analysis` (McNemar/Wilson), `verify_p8_meta_artifacts.py`, CI verify + v1 smoke; integration/stress tests and W3 test harness; repro_time_p4.py; real-LLM optional in P6; Lean W3 wedge and impl alignment doc. See [EXPERIMENTS_AND_LIMITATIONS.md](EXPERIMENTS_AND_LIMITATIONS.md) and [formal/lean/README.md](../formal/lean/README.md).
 
 **Tier 2 / Raised bar (implemented):**
 
 - **Publishable default:** 20 seeds; sensitivity at 30 seeds. Scripts default to 20; CI keeps reduced seeds for speed.
-- **Power and sensitivity:** Comparison evals report difference_ci_width and power_post_hoc (post-hoc power); [sensitivity_seed_sweep.py](../scripts/sensitivity_seed_sweep.py) runs meta_eval or rep_cps_eval at N=10, 20, 30 and writes sensitivity_summary.json. Documented in [EVALS_RUNBOOK.md](EVALS_RUNBOOK.md).
+- **Power and sensitivity:** Comparison evals report difference_ci_width and power_post_hoc (post-hoc power); [sensitivity_seed_sweep.py](../scripts/sensitivity_seed_sweep.py) runs meta_eval (optional `--meta-scenario regime_stress_v0|regime_stress_v1`) or rep_cps_eval at N=10, 20, 30 and writes sensitivity_summary.json. Documented in [EVALS_RUNBOOK.md](EVALS_RUNBOOK.md).
 - **Formal verification:** Three Lean wedges: W3 (evidence-bundle verifier; soundness lemmas stated, proofs use sorry pending Std); W1 (Gatekeeper fail-closed, proved); W2 (contract validator determinism, proved). Python test harness aligns impl to W3 spec.
 - **Corpora:** Documented expansion protocol ([CORPUS_EXPANSION.md](CORPUS_EXPANSION.md)); run_manifest includes corpus_sequence_count, replay_trap_count, red_team_case_count; optional parameterized generator for contracts ([generate_contract_corpus.py](../scripts/generate_contract_corpus.py)).
 
@@ -26,8 +26,8 @@ This document is the single merged plan. It includes **Phases 1–6** (statistic
 The portfolio already documents many limitations in DRAFTs (synthetic traces, thin-slice only, toy scenarios, no real hardware). The main actionable weaknesses are:
 
 - **Statistical rigor (addressed):** Previously 10 seeds was the bar; now publishable default is 20. Formal tests (t-test, bootstrap), effect-size, and power/sensitivity are implemented (see Tier 2 above).
-- **Scenario and fault coverage:** Single-scenario defaults (P0 E3: toy_lab_v0; P2: one scenario in many runs); P5 multiscenario uses only 2–3 fault settings; P8 collapse often vacuous (collapse_count = 0).
-- **Corpus and case diversity (addressed):** P1: 7 contract sequences (good_sequence, split_brain, stale_write, reorder, unsafe_lww, multi_writer_contention, edge_case_timestamps); P3: 4 replay traps (nondeterminism, reorder, timestamp_reorder, hash_mismatch) with corpus discovery; P6: 8 red-team + 4 confusable deputy cases.
+- **Scenario and fault coverage:** Single-scenario defaults (P0 E3: toy_lab_v0; P2: one scenario in many runs); P5 multiscenario uses only 2–3 fault settings; **P8** minimal/CI runs can still be vacuous on collapse, but publishable `run_paper_experiments.py --paper P8` uses `--non-vacuous` and dual stress scenarios (see [EVALS_RUNBOOK.md](EVALS_RUNBOOK.md) P8).
+- **Corpus and case diversity (addressed):** P1: 51+ contract sequences (tiered: positive controls, split-brain, stale/reorder, boundary, long-horizon, adversarial; see bench/contracts/BENCHMARK_SPEC.v0.1.md); P3: 4 replay traps (nondeterminism, reorder, timestamp_reorder, hash_mismatch) with corpus discovery; P6: 9 red-team + 4 confusable deputy cases.
 - **Test depth:** Integration tests use minimal seeds (1,2 or 2) and single scenario; no variance/CI assertions; no property-based or targeted stress tests beyond one P8 stress test.
 - **Reporting gaps:** Regression MAE in P5 is computed but Table 2 shows "—"; effect size vs baseline not consistently in summary JSONs; no repro wall-clock or claim-confidence in artifacts.
 - **Reproducibility and sensitivity:** No documented fixed RNG seed (e.g. LABTRUST_CI_SEED) used consistently; no sensitivity sweeps (e.g. seed range, fault-intensity) to show result stability.
@@ -76,8 +76,8 @@ The portfolio already documents many limitations in DRAFTs (synthetic traces, th
 7. **P5 multiscenario runs: regime_stress and fault-mix**
    - [scripts/generate_multiscenario_runs.py](../scripts/generate_multiscenario_runs.py): include `regime_stress_v0` in the scenario list when present; ensure `--fault-mix` is the recommended default for publishable. Add a third fault setting (e.g. delay or combined) so train/test diversity is higher.
 
-8. **P8 non-vacuous collapse**
-   - Define a "stress preset" (e.g. `--drop-prob 0.25` or a drop_prob chosen from collapse_sweep where collapse_count > 0). In [scripts/meta_eval.py](../scripts/meta_eval.py) and runbook: document "For non-vacuous trigger, run meta_collapse_sweep first, then meta_eval with --drop-prob &lt;value&gt; where collapse appears." Optionally add `--stress-preset high` that sets drop_prob to a value that typically yields at least one collapse in some seeds.
+8. **P8 non-vacuous collapse** *(largely implemented)*
+   - Publishable path: `meta_collapse_sweep.py` + `meta_eval.py --non-vacuous` with matching `--scenario`; `run_manifest.stress_selection_policy` records the rule; `run_paper_experiments.py --paper P8` runs v0 and v1. Stress presets `--stress-preset high|very_high` exist. Remaining gap (optional): separate calibration vs evaluation seed lists; fixed RetryHeavy-as-baseline runs if the draft claims “best fixed” beyond Centralized.
 
 ---
 
@@ -106,7 +106,7 @@ The portfolio already documents many limitations in DRAFTs (synthetic traces, th
 13. **Stress and sensitivity tests**
     - **P4:** Add a test that runs fault sweep with a high drop_completion_prob (e.g. 0.3) and asserts tasks_completed_mean drops vs no_drop.
     - **P5:** Add a test that runs held-out eval with at least 3 scenarios and asserts beat_baseline or trigger_met is present and held_out_results length >= 2.
-    - **P8:** Keep and document the existing collapse-threshold stress test; add a test that runs meta_eval with a drop_prob that causes at least one collapse in the fixed regime and asserts meta_reduces_collapse is true.
+    - **P8:** Existing collapse-threshold stress test + `verify_p8_meta_artifacts` + `regime_stress_v1` smoke; optional follow-up: hermetic non-vacuous integration test (heavier) asserting `stress_selection_policy` and `collapse_paired_analysis` (note `meta_reduces_collapse` = non-inferior counts, not strict improvement).
     - **P1:** Add a test that runs contracts_eval with --scale-test (small scale-events for speed, e.g. 1000) and asserts scale_test.json exists and has run_manifest and time_per_write_us (or equivalent).
 
 14. **CI evals: align with publishable defaults where feasible**

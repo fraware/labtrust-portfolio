@@ -8,25 +8,25 @@ This document defines the **full set of tables and figures** expected for each p
 |-------|-----------------------------|---------------|----------------|------------------------|
 | P0 MADS-CPS | Figure 1: Assurance pipeline (Trace → Report → Bundle → Conformance → Release) | Table 1 E1 corpus, Table 2 E2 4-col admissibility, Table 3 E3+E4 | Figure 2 tier lattice, Figure 3 redaction; plot_e3_latency | — |
 | P1 Contracts | Figure 0: Contract validation flow (event → validate → allow/deny) | Table 1 corpus, Table 2 policy comparison | Figure 1 scale throughput | — |
-| P2 REP-CPS | Figure 0: REP-CPS profile architecture (agents → aggregation → gate) | Table 1 adapter, Table 2 aggregation, Table 3 baselines, Table 5 profile ablation | Figure 1 tasks by policy | — |
-| P3 Replay | Figure 0: Replay levels (L0 / L1 / L2) and pipeline | Table 1 corpus/fidelity, Table 2 overhead | Figure 1 overhead vs trace size | Table: approach comparison |
+| P2 REP-CPS | Figure 0: REP-CPS profile architecture (agents → aggregation → gate) | Table 1 adapter, Table 2 aggregation, Table 3 baselines, Table 4 convergence (optional), Table 5 latency/cost, Table 6 profile ablation, Table 7 resilience envelope | Figure 1 tasks by policy, Figure 2 latency by policy | — |
+| P3 Replay | Figure 0: Replay levels (L0 / L1 / L2) and pipeline | Table 1 corpus/fidelity, Table 2 overhead, Table 3 baselines | Figure 1 overhead vs trace size (optional CI error bars) | Table: approach comparison |
 | P4 MAESTRO | Figure 0: Scenario → Adapter → Trace → Report flow | Table 1 fault sweep, Table 2 baselines | Figure 1 recovery curve | Table: benchmark comparison |
 | P5 Scaling | Figure 0: Baseline hierarchy (global → per-scenario → feature → regression) | Table 1 held-out, Table 2 MAE/CI | Figure 1 MAE by scenario | — |
-| P6 LLM Planning | Figure 0: Typed-plan firewall flow (plan → validate → allow/deny) | Table 1 red-team, Table 1b real-LLM (5 runs/case, pass_rate, Wilson CI), Table 2 adapter latency, Baseline (gated/weak/ungated) | Figure 1 adapter latency by scenario | Table: comparison to OWASP/benchmarks |
+| P6 LLM Planning | Figure 0: Typed-plan firewall flow (plan → validate → allow/deny) | Table 1 red-team (9 cases), Table 1b real-LLM (5 runs/case, pass_rate, Wilson CI; multi-model cross_model_summary), Table 2 adapter latency, Baseline (gated/weak/ungated; tool-level, args_unsafe, benign) | Figure 1 adapter latency by scenario | Table: comparison to OWASP/benchmarks; layer attribution; failure analysis; reproducibility table |
 | P7 Standards | Figure 0: Mapping flow (hazards → controls → evidence → audit) | Table 1 mapping/review, Table 2 per-scenario | Figure 1 GSN-lite graph | Table: framework comparison |
 | P8 Meta | Figure 0: Meta-controller state and switch criterion | Table 1 fixed vs meta vs naive, Table 2 per-seed | Figure 1 collapse sweep | Table: comparison to related work |
 
 ## Scripts that produce each visual
 
 - **P0:** Table 1: `build_p0_conformance_corpus.py`, `export_e1_corpus_table.py`. Table 2: `e2_redaction_demo.py`, `export_e2_admissibility_matrix.py`. Table 3: `run_p0_e4_multi_adapter.py`, `export_p0_table3.py`. Figure 1: `export_p0_assurance_pipeline.py`. Figure 2: `export_p0_tier_lattice.py`. Figure 3: `export_p0_redaction_figure.py`. `plot_e3_latency.py`.
-- **P1:** `export_contracts_corpus_table.py`, eval.json for Table 2, `plot_contracts_scale.py`, `export_p1_contract_flow.py` (Figure 0).
-- **P2:** summary.json for Table 1/2/3 and profile_ablation (Table 5), `plot_rep_cps_summary.py`, `export_p2_rep_profile_diagram.py` (Figure 0).
-- **P3:** replay_eval summary for tables, `plot_replay_overhead.py`, `export_p3_replay_levels_diagram.py` (Figure 0).
+- **P1:** `export_contracts_corpus_table.py` (Table 1 corpus + ablation-by-class digest), eval.json for Table 2 (policy comparison) and ablation_by_class, `plot_contracts_scale.py`, `export_p1_contract_flow.py` (Figure 0). Optional: scale_sweep.json, transport_parity.json for transport-invariance evidence.
+- **P2:** summary.json for Table 1–7 (adapter, aggregation, baselines, convergence, latency_cost, profile_ablation, resilience_envelope), `export_rep_cps_tables.py`, `plot_rep_cps_summary.py` (Figure 1), `plot_rep_cps_latency.py` (Figure 2), `export_p2_rep_profile_diagram.py` (Figure 0).
+- **P3:** replay_eval summary for tables (including `baseline_overhead`), `verify_p3_replay_summary.py`, `plot_replay_overhead.py`, `export_p3_replay_levels_diagram.py` (Figure 0).
 - **P4:** `export_maestro_tables.py`, `plot_maestro_recovery.py`, `export_p4_maestro_flow.py` (Figure 0).
 - **P5:** `export_scaling_tables.py`, `plot_scaling_mae.py`, `export_p5_baseline_hierarchy.py` (Figure 0).
-- **P6:** `export_llm_redteam_table.py` (Table 1 red-team + Table 1b real-LLM + confusable deputy), `llm_redteam_eval.py --real-llm --real-llm-runs 5`, `export_p6_baseline_table.py` (3-way baseline), `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
+- **P6:** `export_llm_redteam_table.py` (Table 1 red-team + Table 1b real-LLM + confusable deputy), `llm_redteam_eval.py --real-llm --real-llm-provider prime --real-llm-models x-ai/grok-4-fast,google/gemini-2.5-flash,openai/gpt-4.1-mini,qwen/qwen3-30b-a3b-instruct-2507 --real-llm-runs 3`, `export_p6_baseline_table.py` (3-way baseline; --baseline-file for args_unsafe or baseline_benign), `export_p6_artifact_hashes.py`, `export_p6_reproducibility_table.py`, `export_p6_layer_attribution.py`, `export_p6_failure_analysis.py`, `export_p6_cross_model_heatmap.py`, `export_p6_latency_decomposition.py`, `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
 - **P7:** `export_assurance_tables.py`, `export_assurance_gsn.py`, `export_p7_mapping_flow.py` (Figure 0).
-- **P8:** `export_meta_tables.py` (from comparison.json), `meta_collapse_sweep.py` then `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (Figure 1), `export_p8_meta_diagram.py` (Figure 0).
+- **P8:** `export_meta_tables.py` (from comparison.json; interpretation blocks), `verify_p8_meta_artifacts.py`, `meta_collapse_sweep.py` then `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (Figure 1: mean tasks_completed with t-CI, collapse rate with Wilson CI), `export_p8_meta_diagram.py` (Figure 0).
 
 ## Output paths
 

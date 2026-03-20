@@ -1,44 +1,47 @@
 # Generated tables for P0 (P0_MADS-CPS)
 
-**Paper title:** MADS-CPS: A Machine-Checkable Minimum Assurance Bar for Agentic Cyber-Physical Workflows.
+## From export_e3_table.py
 
-**How to read:** Table 1 is the E1 conformance challenge set (case ID, fault injected, expected/observed outcome, agreement). Table 2 is the verification-mode admissibility matrix (four columns: full, evaluator, regulator, public/redacted). Table 3 is replay-link and conformance by scenario/controller (E3 + E4). Per-seed E3 table is in the appendix.
+# Table 1 — E3 replay-link. tasks_completed, p95_latency_ms (ms), match per seed; N seeds (run_manifest in e3_summary.json).
 
-## Table 1 — Conformance challenge set (E1)
+# E3 Replay link (multi-scenario)
 
-Regenerate: `python scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus`, then `python scripts/export_e1_corpus_table.py --corpus datasets/runs/p0_conformance_corpus`.
+## Scenario: toy_lab_v0
 
-| Case ID | Fault injected | Expected outcome | Observed outcome | Agreement |
-|---------|----------------|------------------|------------------|-----------|
-| valid_toy | none | Tier 3 PASS | Tier 3 PASS | yes |
-| valid_lab | none | Tier 3 PASS | Tier 3 PASS | yes |
-| missing_artifact | missing artifact (maestro_report.json) | Tier 1 FAIL | Tier 1 FAIL | yes |
-| schema_invalid | schema-invalid artifact (trace) | Tier 1 FAIL | Tier 1 FAIL | yes |
-| hash_mismatch | hash mismatch (state_hash_after corrupted) | Tier 2 FAIL | Tier 2 FAIL | yes |
-| replay_mismatch | evidence_bundle.verification.replay_ok=false | Tier 2 FAIL | Tier 2 FAIL | yes |
-| missing_ponr | missing PONR event (lab_profile_v0) | Tier 3 FAIL | Tier 3 FAIL | yes |
-| stale_release_manifest | stale/incomplete release manifest | Tier 1 FAIL | Tier 1 FAIL | yes |
+| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
+|------|----------------|----------------------|----------------|-------|
+| 1 | 4 | 4 | 25.26 | yes |
+| 2 | 4 | 4 | 75.59 | yes |
+| 3 | 4 | 4 | 28.09 | yes |
+| 4 | 4 | 4 | 41.26 | yes |
+| 5 | 4 | 4 | 42.64 | yes |
+| **Summary (n=5)** | mean 4.00, stdev 0.00 | - | mean 42.57, stdev 20.01 | true |
+
+95% CI: tasks_completed [4, 4]; p95_latency_ms [17.72932831525616, 67.40489309336124]
+
+## Scenario: lab_profile_v0
+
+| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
+|------|----------------|----------------------|----------------|-------|
+| 1 | 5 | 5 | 25.03 | yes |
+| 2 | 5 | 5 | 71.50 | yes |
+| 3 | 5 | 5 | 28.77 | yes |
+| 4 | 5 | 5 | 40.41 | yes |
+| 5 | 5 | 5 | 46.40 | yes |
+| **Summary (n=5)** | mean 5.00, stdev 0.00 | - | mean 42.42, stdev 18.40 | true |
+
+95% CI: tasks_completed [5, 5]; p95_latency_ms [19.57868896825692, 65.26817519704065]
+
+## From export_e2_admissibility_matrix.py
 
 ## Table 2 — Verification-mode admissibility matrix (E2)
-
-Regenerate: `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo`, then `python scripts/export_e2_admissibility_matrix.py`.
 
 | Predicate | Full mode | Evaluator mode | Regulator mode | Public/redacted mode |
 |-----------|-----------|----------------|----------------|----------------------|
 | schema_validation_ok | yes | yes | yes | yes |
 | integrity_ok (hashes) | yes | yes | yes | yes |
-| replay_ok (L0/L1) | yes | yes (full trace); no (redacted) | yes (full); no (redacted) | no (redacted); N/A (public) |
-| PONR coverage | yes | yes (full); N/A (redacted) | yes (full); N/A (redacted) | N/A (redacted) |
+| replay_ok (L0/L1) | yes | yes (full trace); no (redacted) | yes (full); no (redacted) | no (redacted); N/A (public, replay not required) |
+| PONR coverage | yes | yes (full); N/A (redacted, structure only) | yes (full); N/A (redacted) | N/A (redacted) |
 
-## Table 3 — Replay-link and conformance across controllers/scenarios (E3 + E4)
+Full mode: all artifacts present and unredacted; all predicates checkable. Evaluator and regulator: when trace is redacted, payloads are content-addressed refs; replay is not run, so replay_ok is false; schema and integrity remain checkable. Public/redacted: when redacted, same as evaluator redacted; when public and unredacted, replay is not required by mode so replay_ok may be N/A. See kernel/mads/VERIFICATION_MODES.v0.1.md.
 
-Regenerate E4: `python scripts/run_p0_e4_multi_adapter.py --seeds 10`, then `python scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json`. Optionally merge E3: `--e3 datasets/runs/e3_summary.json`.
-
-| Scenario | Controller | Seeds | Replay match rate | Latency mean (95% CI) ms | Conformance rate |
-|----------|-------------|-------|-------------------|---------------------------|------------------|
-| toy_lab_v0 | centralized | 10 | 1.00 | (from run) | 1.00 |
-| toy_lab_v0 | rep_cps | 10 | (from run) | (from run) | (from run) |
-
-## Appendix: Per-seed E3 table
-
-Regenerate: `python scripts/produce_p0_e3_release.py --runs 20`, then `python scripts/export_e3_table.py`. Summary row: mean, stdev, 95% CI for tasks_completed and p95_latency_ms; run_manifest in e3_summary.json.

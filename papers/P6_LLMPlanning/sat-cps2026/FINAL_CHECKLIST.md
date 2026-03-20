@@ -2,20 +2,42 @@
 
 Paper is ready for submission only when all items are true.
 
-- [ ] **Title** sounds like a CPS security paper (e.g. secure or auditable runtime enforcement for tool invocation).
-- [ ] **Abstract** contains main numbers (9/9 synthetic; real-LLM: gpt-4.1-mini 55/65, gpt-4.1 55/65; Wilson CI [73.9, 91.4]) and the main failures (path-traversal 0/5 and denylist-key 0/5 for both models).
-- [ ] **Introduction** defines the trust boundary early (planner output untrusted until firewall admits it).
-- [ ] **Threat model** has explicit assets, adversarial leverage, trust assumptions, and non-goals (and table).
-- [ ] **Synthetic suite** is clearly primary validator evidence (Block A): 9 red-team, 4 confusable deputy, 2 jailbreak-style.
-- [ ] **Real-LLM section** includes denominator, CI, and failure-case analysis (Block B): gpt-4.1-mini 55/65 (84.6%), gpt-4.1 55/65 (84.6%); path-traversal 0/5 and denylist-key 0/5 both reported.
-- [ ] **Block C** includes adapter latency and the denial-trace case study (e.g. execute_system denied, captured for audit).
-- [ ] **Figure 1** is the decision path (planner output -> allow-list -> safe_args -> capture -> allow/deny); regenerate with export_p6_firewall_flow.py.
-- [ ] **Baseline section** explicitly states what it does and does not prove (tool-level and argument-level) (Block D).
-- [ ] **Discussion** says "containment" and never "elimination"; no banned words.
-- [ ] **Paper** is in ACM proceedings format and within the 10-page cap.
-- [ ] **Author names and affiliations** are present as requested by the workshop CFP.
+## Narrative and venue fit
 
-After submission, run Review 1--3 from REVIEW_PROTOCOL.md and record sign-off.
+- [ ] **Title** reads as CPS security / runtime enforcement for tool invocation (not a generic LLM leaderboard paper).
+- [ ] **Abstract** states the synthetic primary result (9/9 red-team, 4/4 confusable, 2/2 jailbreak-style in the released suite) and the **canonical OpenAI real-LLM** numbers: **gpt-4.1-mini and gpt-4.1 each 55/65** (84.6%, Wilson **[73.9, 91.4]**; 5 runs/case, 13 cases/model, 2026-03-17), including explicit mention of **0/5** on path-traversal and denylist-key cases.
+- [ ] If the abstract mentions **Prime Inference** or four models, it **labels the run separately** (N=3, 39 trials/model, different output dir) and does not imply the same experiment as OpenAI N=5.
+- [ ] **Introduction** places the trust boundary early: planner output is untrusted until the firewall admits it.
+- [ ] **Threat model** lists assets, adversarial leverage, trust assumptions, non-goals, and includes the summary table.
+- [ ] **Discussion** uses **containment** language only; no banned words from SUBMISSION_STANDARD.md.
 
-See SUBMISSION_STANDARD.md (five axes, page budget) and EXPERIMENTS_RUNBOOK.md (artifacts).
+## Evidence blocks (A--D)
 
+- [ ] **Block A:** Synthetic suite is clearly primary validator evidence; cites `red_team_results.json`, `confusable_deputy_results.json`.
+- [ ] **Block B:** Real-LLM denominator, Wilson CI, and **failure-case** discussion (argument-level rows); cites OpenAI run manifest fields (`model_id`, `n_runs_per_case`, `prompt_template_hash` where applicable).
+- [ ] **Block C:** Adapter latency, denial counts, optional **latency decomposition** (`--latency-decomposition`); denial-trace **case study** (execute_system or equivalent).
+- [ ] **Block D:** Tool-level and argument-level baselines honestly framed; optional **benign** false-positive line if cited (`baseline_benign.json`).
+
+## Figures, format, compliance
+
+- [ ] **Figure 1 (decision path):** Regenerated via `export_p6_firewall_flow.py`; readable in PDF.
+- [ ] **Figure 2 (adapter latency):** Only if space allows; tied to `adapter_latency.json`.
+- [ ] **ACM proceedings** format, **10-page** cap including references.
+- [ ] **Authors and affiliations** per workshop CFP.
+
+## Reproducibility and artifact integrity
+
+- [ ] Every table number in the camera-ready draft maps to a file under `datasets/runs/llm_eval/` (or a clearly named alternate dir for Prime).
+- [ ] `run_manifest` fields are consistent with the text (`timestamp_iso`, `evaluator_version`, `policy_version`; real-LLM: `prompt_template_hash` where written).
+- [ ] Appendix or supplementary: `export_p6_artifact_hashes.py` + `export_p6_reproducibility_table.py` run on the **same** directory cited in the paper.
+- [ ] Optional deep-dive exports (if referenced): `export_p6_layer_attribution.py`, `export_p6_failure_analysis.py`, `export_p6_cross_model_heatmap.py`, `export_p6_latency_decomposition.py`.
+
+## Optional extended experiments (6--12)
+
+- [ ] Any claim about concurrency, capture-off ablation, storage, cost, policy sweep, replanning, or adaptive suite is backed by the corresponding `p6_*.json` artifact and script name in EXPERIMENTS_RUNBOOK.md.
+
+## Process
+
+- [ ] After submission (or before), run **Review 1--3** from REVIEW_PROTOCOL.md and record sign-off.
+
+See **SUBMISSION_STANDARD.md** (five axes), **EXPERIMENTS_RUNBOOK.md** (commands), **README.md** (evidence tiers), **claims_satcps.yaml** (C1--C4).

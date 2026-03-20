@@ -12,7 +12,7 @@ Each paper has a defined kernel ownership and integration contract so the portfo
 | **P5 Scaling laws** | None (consumes only) | MAESTRO datasets; Replay traces | Feature extractor; modeling code; architecture recommendation CLI | — |
 | **P6 LLM Planning** | LLM runtime (typed plan schema, validator, toolcalling capture) | MAESTRO scenarios | TYPED_PLAN; validator; red-team suite; MAESTRO adapter | Full assurance; containment + robustness only |
 | **P7 Standards mapping** | Assurance-pack templates (hazards→controls→evidence→audit) | MADS tiers/PONRs; Replay and MAESTRO trace/report artifacts | ASSURANCE_PACK; hazard log template; lab instantiation; mapping checker | — |
-| **P8 Meta-coordination** | Meta-controller (switching criteria, safety constraints) | MAESTRO; Replay; MADS PONRs as invariant | Meta-controller spec; MAESTRO scenarios for regime stress | —; safety (PONRs) invariant across regimes |
+| **P8 Meta-coordination** | Meta-controller (switching criteria, safety constraints) | MAESTRO; Replay; MADS PONRs as invariant | Meta-controller spec; MAESTRO scenarios for regime stress; eval artifacts (`comparison.json`, optional `scenario_regime_stress_v1/`, `verify_p8_meta_artifacts.py`) | —; safety (PONRs) invariant across regimes |
 
 ## Dependency overview
 

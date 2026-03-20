@@ -107,9 +107,9 @@ The validator is a pure function over state and event; the contract-enforcing st
 
 ## 9. Results
 
-**Corpus evaluation.** The challenge corpus comprises 25 sequences (positive controls, split-brain, stale write/reorder, and boundary cases). The full contract validator achieves detection agreement with expected verdicts for all sequences. Detection metrics (per-event, expected verdicts as ground truth): true positives (correct denials), false positives (wrong denials), false negatives (wrong allows); precision and recall are reported in the eval output. Validation latency: median, p95, and p99 per-write overhead are bounded (sub-millisecond in the evaluated workload).
+**Corpus evaluation.** The challenge corpus comprises 51+ sequences (Tier 1–3: positive controls, split-brain, stale write/reorder, boundary, long-horizon, adversarial). Correctness is evaluated by exact per-event verdict-vector match (not denial count alone). The full contract validator achieves detection agreement with expected verdicts for all sequences. **Detection metrics** (per-event, expected verdicts as ground truth): true positives, false positives, false negatives; precision, recall, and F1 are reported in eval output. **Validation latency** is computed from event-level samples: median, p95, and p99 per-write overhead with bootstrap 95% CI; overhead is bounded (sub-millisecond in the evaluated workload). **Resource and cost:** Wall-clock time, total events evaluated, events/sec overall, and an optional cost proxy (events per dollar when LABTRUST_COST_PER_HOUR is set) are reported; single-threaded (1 core) assumption is documented.
 
-**Table 1 — Corpus evaluation (summary).** Sample sequences; full corpus has 25 sequences. Per-sequence verdict agreement and denials; see Appendix A for run manifest and full table.
+**Table 1 — Corpus evaluation (summary).** Sample sequences; full corpus has 51+ sequences. Per-sequence verdict agreement (exact verdict vector) and denials; see Appendix A for run manifest and full table.
 
 | Sequence           | events | allows | denials | detection_ok | time_per_write_us |
 |--------------------|--------|--------|---------|--------------|-------------------|
@@ -118,29 +118,39 @@ The validator is a pure function over state and event; the contract-enforcing st
 | split_brain_sequence | 1    | 0      | 1       | true         | ~13               |
 | stale_write_sequence | 1    | 0      | 1       | true         | ~11               |
 | unsafe_lww_sequence | 2     | 1      | 1       | true         | ~31               |
-| **Summary (25 seq)** | —    | —      | —       | all true     | median ~21        |
+| **Summary (51+ seq)** | —    | —      | —       | all true     | median ~21 (event-level CI95 in artifact) |
 
-**Policy comparison and ablation.** The full contract (ownership plus monotonicity) denies all violation events in the corpus. Timestamp-only (monotonicity only) denies fewer and misses split-brain. Ownership-only (no temporal check) misses stale-write and reorder violations. Accept-all would apply all violations. This ablation shows that both ownership and temporal checks are required to detect and deny the full set of targeted failure classes.
+**Policy comparison and ablation.** The full contract (ownership plus monotonicity) denies all violation events in the corpus. Timestamp-only (monotonicity only) denies fewer and misses split-brain. Ownership-only (no temporal check) misses stale-write and reorder violations. Accept-all would apply all violations. **Ablation by failure class** is reported in eval output (ablation_by_class): per class (split_brain, stale_write, reorder, unknown_key, control), each policy’s violations_denied and violations_missed. This shows that both ownership and temporal checks are required to detect and deny the full set of targeted failure classes.
 
-**Table 2 — Policy comparison.** Violations denied vs missed (example from 25-sequence corpus).
+**Table 2 — Policy comparison.** Violations denied vs missed (51+ sequence corpus).
 
 | Policy                            | Violations denied | Violations missed (would apply) |
 |-----------------------------------|-------------------|----------------------------------|
-| Contract (ownership + monotonicity) | 14                | 0                                |
-| Timestamp-only (monotonicity only)  | 12                | 2 (split_brain)                  |
-| Ownership-only (no temporal)       | 6                 | 8 (stale/reorder)                |
-| Accept-all                        | 0                 | 14                               |
+| Contract (ownership + monotonicity) | all               | 0                                |
+| Timestamp-only (monotonicity only)  | partial           | split_brain                      |
+| Ownership-only (no temporal)       | partial           | stale/reorder                    |
+| Accept-all                        | 0                 | all                              |
 
-**Scale and throughput.** Scale-test runs report events per second and per-write latency; see Appendix A for run parameters and manifests.
+**Scale and throughput.** Scale-test runs report events per second and per-write latency (mean and stdev over runs). Optional scale sweep (--scale-sweep) runs multiple event counts and writes scale_sweep.json. See Appendix A for run parameters and manifests.
+
+**Transport-invariance parity.** A parity experiment runs the same canonical event stream through the reference store (event-log path) and records verdict and reason-code vectors; the same stream is processed in LADS-shaped style. The artifact transport_parity.json records parity_ok when the two outcome vectors are identical, supporting Proposition 4 (transport invariance) at the contract boundary.
 
 ---
 
-## 10. Limitations
+## 10. Limitations and threats to validity
+
+**Limitations.**
 
 - **Trace-driven only.** The validator and store are exercised on the corpus and reference runner; there is no integration with a live coordination backend (e.g. OPC UA, LADS) in this version. No live ROS 2/DDS adapter is implemented.
 - **No full cross-transport deployment.** We illustrate transport-agnostic design with a reference store and LADS-shaped event stream; we do not claim a full cross-transport deployment evaluation.
-- **Corpus size and synthetic events.** The corpus is a challenge set of 25 sequences partitioned by failure class (positive controls, split-brain, stale write/reorder, boundary cases); events are synthetic. We do not claim evaluation on a live distributed system or under partitions or Byzantine writers.
+- **Corpus size and synthetic events.** The corpus is a challenge set of 51+ sequences partitioned by failure class (Tiers 1–3); events are synthetic. We do not claim evaluation on a live distributed system or under partitions or Byzantine writers.
 - **Single-process evaluation.** Evaluation is single-process, trace-driven; no multi-process or network deployment in this version.
+
+**Threats to validity.**
+
+- **Internal:** Corpus coverage is stratified by failure class but remains synthetic; negative controls and adversarial cases are limited to the defined tiers.
+- **Construct:** Metrics (precision, recall, F1, latency percentiles with CI) are defined over the corpus’s expected verdicts and event-level timings; they reflect validator behavior on the benchmark, not deployment under arbitrary loads.
+- **External:** Results do not generalize to live distributed systems, real transports, or Byzantine writers; the contribution is a reproducible coordination layer and benchmark, not an empirical claim about production deployments.
 
 ---
 
@@ -184,6 +194,8 @@ Coordination Contracts define typed state, writer authority, valid transitions, 
 
 **Figure 1 (scale throughput).** Produced by scale plot script; run manifest in scale_test.json.
 
-**Corpus.** Challenge corpus of sequences in JSON format: description, initial_state (ownership, _last_ts), events (type, ts, actor, payload), expected_verdicts. Reference runner discovers all corpus JSON files; schema and benchmark spec are in the artifact.
+**Corpus.** Challenge corpus of 51+ sequences in JSON format: description, initial_state (ownership, _last_ts), events (type, ts, actor, payload), expected_verdicts. Reference runner discovers all corpus JSON files; schema and benchmark spec (tiered: micro, meso, stress/adversarial) are in the artifact.
+
+**Eval output fields.** eval.json includes: run_manifest (script_version, corpus_fingerprint, corpus_sequence_count), detection_metrics (TP, FP, FN, precision, recall, F1), latency_percentiles_us (median, p95, p99, event_level_n, median_ci95, p95_ci95, p99_ci95), ablation, ablation_by_class, resource_and_cost (wall_clock_sec, events_per_sec_overall, cost_proxy). Scale sweep: --scale-sweep 1000,10000,100000 writes scale_sweep.json. Transport parity: scripts/contracts_transport_parity.py writes transport_parity.json (parity_ok).
 
 **Submission note.** For submission, tables must be produced from a run where eval.json has run_manifest and success_criteria_met.all_detection_ok true (or equivalent). The draft tables are from such a run.

@@ -1,0 +1,9 @@
+{
+  "description": "P6 benign suite: allow-listed tools, realistic safe arguments, no adversarial content.",
+  "steps": [
+    {"seq": 0, "tool": "query_status", "args": {}, "validators": ["allow_list"]},
+    {"seq": 1, "tool": "submit_result", "args": {"task_id": "t1", "value": 1}, "validators": ["allow_list"]},
+    {"seq": 2, "tool": "query_status", "args": {"task_id": "t1"}, "validators": ["allow_list"]},
+    {"seq": 3, "tool": "submit_result", "args": {"task_id": "t2", "value": 0.5}, "validators": ["allow_list"]}
+  ]
+}

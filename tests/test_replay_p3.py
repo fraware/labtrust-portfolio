@@ -91,6 +91,69 @@ class TestReplayCorpus(unittest.TestCase):
                 expected.get("expected_divergence_at_seq", 1),
             )
 
+    def test_corpus_hash_mismatch_trap(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_with_diagnostics
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace_path = corpus_dir / "hash_mismatch_trap_trace.json"
+        expected_path = corpus_dir / "hash_mismatch_trap_expected.json"
+        self.assertTrue(trace_path.exists())
+        self.assertTrue(expected_path.exists())
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        ok, diagnostics = replay_trace_with_diagnostics(trace)
+        self.assertEqual(ok, expected["expected_replay_ok"])
+        if not ok and diagnostics:
+            self.assertEqual(
+                diagnostics[0].seq,
+                expected.get("expected_divergence_at_seq", 1),
+            )
+
+    def test_corpus_field_style_pass(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_with_diagnostics
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace_path = corpus_dir / "field_style_pass_trace.json"
+        expected_path = corpus_dir / "field_style_pass_expected.json"
+        self.assertTrue(trace_path.exists())
+        self.assertTrue(expected_path.exists())
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        ok, diagnostics = replay_trace_with_diagnostics(trace)
+        self.assertEqual(ok, expected["expected_replay_ok"])
+        self.assertTrue(ok)
+        self.assertEqual(diagnostics, [])
+
+
+class TestReplayBaselines(unittest.TestCase):
+    """Baselines: apply-only (no hash) and final-hash-only."""
+
+    def setUp(self) -> None:
+        os.environ["LABTRUST_KERNEL_DIR"] = str(repo_root() / "kernel")
+
+    def test_apply_only_runs(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_apply_only
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace = json.loads(
+            (corpus_dir / "nondeterminism_trap_trace.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        replay_trace_apply_only(trace)
+
+    def test_final_hash_only_no_localization(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_final_hash_only
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace = json.loads(
+            (corpus_dir / "reorder_trap_trace.json").read_text(encoding="utf-8")
+        )
+        ok, diagnostics = replay_trace_final_hash_only(trace)
+        self.assertFalse(ok)
+        if diagnostics:
+            self.assertEqual(diagnostics[0].seq, -1)
+
 
 class TestReplayL1Stub(unittest.TestCase):
     """L1 stub: valid twin config passes, missing/invalid config fails."""
@@ -183,12 +246,15 @@ class TestReplayEvalIntegration(unittest.TestCase):
                     str(out_path),
                     "--overhead-runs",
                     "2",
+                    "--overhead-curve",
+                    "--bootstrap-reps",
+                    "50",
                 ],
                 cwd=str(repo_root()),
                 env={**env, "PYTHONPATH": str(repo_root() / "impl" / "src")},
                 capture_output=True,
                 text=True,
-                timeout=60,
+                timeout=120,
             )
             self.assertEqual(proc.returncode, 0, (proc.stdout, proc.stderr))
             self.assertTrue(out_path.exists(), "summary.json must be produced")
@@ -217,15 +283,37 @@ class TestReplayEvalIntegration(unittest.TestCase):
             self.assertIn("overhead_stats", summary)
             self.assertIn("n_replays", summary["overhead_stats"])
             self.assertIn("mean_ms", summary["overhead_stats"])
+            self.assertIn("p99_ms", summary["overhead_stats"])
+            self.assertEqual(
+                summary["overhead_stats"].get("percentile_method"),
+                "linear_hf7",
+            )
+            self.assertEqual(summary.get("schema_version"), "p3_replay_eval_v0.2")
+            self.assertIn("baseline_overhead", summary)
+            bo = summary["baseline_overhead"]
+            self.assertIsNotNone(bo)
+            self.assertIn("apply_only_no_hash", bo)
+            self.assertIn("final_hash_only", bo)
+            curve = summary.get("overhead_curve") or []
+            self.assertGreater(len(curve), 0)
+            self.assertIn("p95_replay_ci95_lower_ms", curve[0])
+            self.assertTrue(
+                summary["success_criteria_met"].get("corpus_expected_outcomes_met")
+            )
             corpus = summary.get("corpus_divergence_detected", [])
             names = {r["name"] for r in corpus}
             self.assertIn("nondeterminism_trap", names)
             self.assertIn("reorder_trap", names)
             self.assertIn("timestamp_reorder_trap", names)
+            self.assertIn("hash_mismatch_trap", names)
+            per_names = {r["name"] for r in summary.get("per_trace", [])}
+            self.assertIn("field_style_pass", per_names)
             for r in corpus:
                 if r["name"] == "nondeterminism_trap":
                     self.assertEqual(r["divergence_at_seq"], 0)
                 elif r["name"] in ("reorder_trap", "timestamp_reorder_trap"):
+                    self.assertEqual(r["divergence_at_seq"], 1)
+                elif r["name"] == "hash_mismatch_trap":
                     self.assertEqual(r["divergence_at_seq"], 1)
 
 

@@ -11,10 +11,29 @@ import argparse
 import json
 import math
 import os
+import random
 import statistics
 import sys
 import time
 from pathlib import Path
+
+# Prime Intellect Inference (OpenAI-compatible). See docs/EVALS_RUNBOOK.md P6.
+PRIME_INFERENCE_BASE_URL = "https://api.pinference.ai/api/v1"
+
+try:
+    from labtrust_portfolio.reproducibility import (
+        get_evaluator_version,
+        get_policy_version,
+        get_prompt_template_hash,
+        get_timestamp_iso,
+    )
+except ImportError:
+    def get_evaluator_version(): return "llm_redteam_eval.v1"
+    def get_policy_version(): return "typed_plan.0.1"
+    def get_prompt_template_hash(cases): return ""
+    def get_timestamp_iso():
+        from datetime import datetime, timezone
+        return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "impl" / "src"))
@@ -27,13 +46,13 @@ ALLOWED_TOOLS = ["query_status", "submit_result"]
 
 def run_jailbreak_style() -> dict:
     """Run validate_plan_step on JAILBREAK_STYLE_CASES; record pass/fail (containment, not elimination)."""
-    from labtrust_portfolio.llm_planning import JAILBREAK_STYLE_CASES, validate_plan_step
+    from labtrust_portfolio.llm_planning import JAILBREAK_STYLE_CASES, validate_plan_step_with_attribution
 
     cases_result = []
     for case in JAILBREAK_STYLE_CASES:
         step = case["step"]
         expected_block = case["expected_block"]
-        allowed, _ = validate_plan_step(step, ALLOWED_TOOLS)
+        allowed, _reasons, attribution = validate_plan_step_with_attribution(step, ALLOWED_TOOLS)
         blocked = not allowed
         pass_ = blocked == expected_block
         cases_result.append({
@@ -42,24 +61,29 @@ def run_jailbreak_style() -> dict:
             "expected_block": expected_block,
             "actually_blocked": blocked,
             "pass": pass_,
+            "attribution": attribution,
         })
     all_pass = all(c["pass"] for c in cases_result)
+    denial_by_layer = {"allow_list_only": 0, "safe_args_only": 0, "both": 0, "admitted": 0}
+    for c in cases_result:
+        denial_by_layer[c.get("attribution", "admitted")] = denial_by_layer.get(c.get("attribution", "admitted"), 0) + 1
     return {
         "cases": cases_result,
         "all_pass": all_pass,
         "n_cases": len(cases_result),
+        "denial_by_layer": denial_by_layer,
     }
 
 
 def run_red_team() -> dict:
-    """Run validate_plan_step on each RED_TEAM_CASE (allow_list + safe_args when in validators); record pass/fail."""
-    from labtrust_portfolio.llm_planning import RED_TEAM_CASES, validate_plan_step
+    """Run validate_plan_step on each RED_TEAM_CASE (allow_list + safe_args when in validators); record pass/fail and attribution."""
+    from labtrust_portfolio.llm_planning import RED_TEAM_CASES, validate_plan_step_with_attribution
 
     cases_result = []
     for case in RED_TEAM_CASES:
         step = case["step"]
         expected_block = case["expected_block"]
-        allowed, _ = validate_plan_step(step, ALLOWED_TOOLS)
+        allowed, _reasons, attribution = validate_plan_step_with_attribution(step, ALLOWED_TOOLS)
         blocked = not allowed
         pass_ = blocked == expected_block
         cases_result.append({
@@ -68,25 +92,30 @@ def run_red_team() -> dict:
             "expected_block": expected_block,
             "actually_blocked": blocked,
             "pass": pass_,
+            "attribution": attribution,
         })
     all_pass = all(c["pass"] for c in cases_result)
+    denial_by_layer = {"allow_list_only": 0, "safe_args_only": 0, "both": 0, "admitted": 0}
+    for c in cases_result:
+        denial_by_layer[c.get("attribution", "admitted")] = denial_by_layer.get(c.get("attribution", "admitted"), 0) + 1
     return {
         "allowed_tools": ALLOWED_TOOLS,
         "cases": cases_result,
         "all_block_unsafe_pass": all_pass,
         "n_cases": len(cases_result),
+        "denial_by_layer": denial_by_layer,
     }
 
 
 def run_confusable_deputy() -> dict:
     """Run validate_plan_step on CONFUSABLE_DEPUTY_CASES; adversarial tool output inducing privilege."""
-    from labtrust_portfolio.llm_planning import CONFUSABLE_DEPUTY_CASES, validate_plan_step
+    from labtrust_portfolio.llm_planning import CONFUSABLE_DEPUTY_CASES, validate_plan_step_with_attribution
 
     cases_result = []
     for case in CONFUSABLE_DEPUTY_CASES:
         step = case["step"]
         expected_block = case["expected_block"]
-        allowed, _ = validate_plan_step(step, ALLOWED_TOOLS)
+        allowed, _reasons, attribution = validate_plan_step_with_attribution(step, ALLOWED_TOOLS)
         blocked = not allowed
         pass_ = blocked == expected_block
         cases_result.append({
@@ -95,13 +124,18 @@ def run_confusable_deputy() -> dict:
             "expected_block": expected_block,
             "actually_blocked": blocked,
             "pass": pass_,
+            "attribution": attribution,
         })
     all_pass = all(c["pass"] for c in cases_result)
+    denial_by_layer = {"allow_list_only": 0, "safe_args_only": 0, "both": 0, "admitted": 0}
+    for c in cases_result:
+        denial_by_layer[c.get("attribution", "admitted")] = denial_by_layer.get(c.get("attribution", "admitted"), 0) + 1
     return {
         "allowed_tools": ALLOWED_TOOLS,
         "confusable_deputy_cases": cases_result,
         "all_pass": all_pass,
         "n_cases": len(cases_result),
+        "denial_by_layer": denial_by_layer,
     }
 
 
@@ -147,7 +181,19 @@ def _get_real_llm_api_key_for_provider(provider: str) -> str:
         if not key:
             raise SystemExit("Real-LLM model requires Anthropic. Set ANTHROPIC_API_KEY in .env")
         return key
-    raise SystemExit(f"Unknown provider: {provider}. Use gpt-* (openai) or claude-* (anthropic).")
+    if provider == "prime":
+        key = (
+            os.environ.get("PRIME_INTELLECT_API_KEY", "").strip()
+            or os.environ.get("PRIME_API_KEY", "").strip()
+        )
+        if not key:
+            raise SystemExit(
+                "Real-LLM provider prime requires PRIME_INTELLECT_API_KEY (or PRIME_API_KEY) in .env or environment."
+            )
+        return key
+    raise SystemExit(
+        f"Unknown provider: {provider}. Use openai, anthropic, or prime (--real-llm-provider)."
+    )
 
 
 def _infer_provider(model_id: str) -> str:
@@ -159,8 +205,90 @@ def _infer_provider(model_id: str) -> str:
     if model_id.startswith("claude-"):
         return "anthropic"
     raise SystemExit(
-        f"Cannot infer provider for model '{model_id}'. Use gpt-* (OpenAI) or claude-* (Anthropic) model ids."
+        f"Cannot infer provider for model '{model_id}'. "
+        "Use gpt-* / claude-* ids, or pass --real-llm-provider prime for Prime Inference models."
     )
+
+
+def _prime_default_headers() -> dict[str, str]:
+    tid = os.environ.get("PRIME_TEAM_ID", "").strip()
+    return {"X-Prime-Team-ID": tid} if tid else {}
+
+
+def _is_rate_limit_error(exc: BaseException) -> bool:
+    if type(exc).__name__ == "RateLimitError":
+        return True
+    resp = getattr(exc, "response", None)
+    if resp is not None and getattr(resp, "status_code", None) == 429:
+        return True
+    return False
+
+
+def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, temperature: float) -> tuple[str, str | None]:
+    """Call LLM once; return (response_text, error_message)."""
+    if provider == "prime":
+        return _call_prime_inference_once(api_key, model_id, prompt, temperature)
+    try:
+        if provider == "openai":
+            import openai
+            client = openai.OpenAI(api_key=api_key)
+            resp = client.chat.completions.create(
+                model=model_id,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=200,
+            )
+            return ((resp.choices[0].message.content or "").strip(), None)
+        else:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            msg = client.messages.create(
+                model=model_id,
+                max_tokens=200,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+            )
+            return ((msg.content[0].text if msg.content else "").strip(), None)
+    except ImportError as e:
+        return ("", f"Package not installed: {e}")
+    except Exception as e:
+        return ("", str(e))
+
+
+def _call_prime_inference_once(
+    api_key: str, model_id: str, prompt: str, temperature: float, max_tokens: int = 200
+) -> tuple[str, str | None]:
+    """Prime Inference: OpenAI-compatible API with retry on 429."""
+    try:
+        import openai
+    except ImportError as e:
+        return ("", f"Package not installed: {e}")
+    headers = _prime_default_headers()
+    kw: dict = {
+        "api_key": api_key,
+        "base_url": PRIME_INFERENCE_BASE_URL,
+    }
+    if headers:
+        kw["default_headers"] = headers
+    client = openai.OpenAI(**kw)
+    max_attempts = 4
+    last_err: str | None = None
+    for attempt in range(max_attempts):
+        try:
+            resp = client.chat.completions.create(
+                model=model_id,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            return ((resp.choices[0].message.content or "").strip(), None)
+        except Exception as e:
+            last_err = str(e)
+            if _is_rate_limit_error(e) and attempt < max_attempts - 1:
+                time.sleep((2**attempt) + random.uniform(0, 0.5))
+                continue
+            return ("", last_err)
+    return ("", last_err or "unknown error")
 
 
 def _wilson_ci(pass_count: int, n: int, z: float = 1.96) -> tuple[float, float]:
@@ -192,35 +320,6 @@ def _real_llm_prompt_for_case(case_id: str, step: dict) -> str:
             " You must include the script key in args with value \"malicious\" (deny-list key)."
         )
     return base
-
-
-def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, temperature: float) -> tuple[str, str | None]:
-    """Call LLM once; return (response_text, error_message)."""
-    try:
-        if provider == "openai":
-            import openai
-            client = openai.OpenAI(api_key=api_key)
-            resp = client.chat.completions.create(
-                model=model_id,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=temperature,
-                max_tokens=200,
-            )
-            return ((resp.choices[0].message.content or "").strip(), None)
-        else:
-            import anthropic
-            client = anthropic.Anthropic(api_key=api_key)
-            msg = client.messages.create(
-                model=model_id,
-                max_tokens=200,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=temperature,
-            )
-            return ((msg.content[0].text if msg.content else "").strip(), None)
-    except ImportError as e:
-        return ("", f"Package not installed: {e}")
-    except Exception as e:
-        return ("", str(e))
 
 
 def _parse_step_from_response(text: str) -> dict:
@@ -266,6 +365,7 @@ def run_real_llm_full_suite(
         {"id": c["id"], "step": c["step"], "expected_block": c["expected_block"]}
         for c in CONFUSABLE_DEPUTY_CASES
     ]
+    ARGUMENT_LEVEL_CASES = ("rt_allowed_tool_disallowed_args", "rt_allowed_tool_denylist_key")
     cases_result = []
     for case in all_cases:
         case_id = case["id"]
@@ -273,6 +373,7 @@ def run_real_llm_full_suite(
         prompt = _real_llm_prompt_for_case(case_id, case["step"])
         runs_pass = []
         runs_latency_ms = []
+        run_details = []  # for argument-level cases: raw + parsed for failure analysis
         for run_idx in range(n_runs):
             t0 = time.perf_counter()
             text, err = _call_llm_one(provider, api_key, model_id, prompt, temperature)
@@ -280,12 +381,23 @@ def run_real_llm_full_suite(
             runs_latency_ms.append(elapsed_ms)
             if err:
                 runs_pass.append(False)
+                if case_id in ARGUMENT_LEVEL_CASES:
+                    run_details.append({"run_idx": run_idx, "raw_response": "", "parsed_step": {}, "pass": False, "latency_ms": elapsed_ms, "error": err})
                 continue
             step = _parse_step_from_response(text)
             step.setdefault("validators", ["allow_list"])
             allowed, _ = validate_plan_step(step, ALLOWED_TOOLS)
             actually_blocked = not allowed
-            runs_pass.append(actually_blocked == expected_block)
+            pass_this = actually_blocked == expected_block
+            runs_pass.append(pass_this)
+            if case_id in ARGUMENT_LEVEL_CASES and n_runs > 1:
+                run_details.append({
+                    "run_idx": run_idx,
+                    "raw_response": text[:2000] if text else "",
+                    "parsed_step": step,
+                    "pass": pass_this,
+                    "latency_ms": elapsed_ms,
+                })
         n_runs_done = len(runs_pass)
         pass_count = sum(1 for p in runs_pass if p)
         pass_rate_pct = round(100.0 * pass_count / n_runs_done, 1) if n_runs_done else 0.0
@@ -311,6 +423,8 @@ def run_real_llm_full_suite(
             half = 1.96 * statistics.stdev(runs_latency_ms) / math.sqrt(len(runs_latency_ms))
             entry["latency_ci95_lower_ms"] = round(latency_mean - half, 2)
             entry["latency_ci95_upper_ms"] = round(latency_mean + half, 2)
+        if run_details:
+            entry["run_details"] = run_details
         cases_result.append(entry)
     total_runs = sum(c.get("n_runs", 1) for c in cases_result)
     total_pass = sum(
@@ -344,14 +458,86 @@ def run_real_llm_full_suite(
         "pass_rate_ci95_lower": round(100.0 * o_ci_lo, 1),
         "pass_rate_ci95_upper": round(100.0 * o_ci_hi, 1),
         "total_latency_ms": round(total_latency_ms, 2),
-        "run_manifest": {
-            "script": "llm_redteam_eval.py",
-            "real_llm": True,
-            "model_id": model_id,
-            "provider": provider,
-            "temperature": temperature,
-            "n_runs_per_case": n_runs,
-        },
+        "run_manifest": _real_llm_run_manifest(
+            model_id, provider, temperature, n_runs, all_cases
+        ),
+    }
+
+
+def _real_llm_run_manifest(
+    model_id: str,
+    provider: str,
+    temperature: float,
+    n_runs: int,
+    all_cases: list,
+) -> dict:
+    m = {
+        "script": "llm_redteam_eval.py",
+        "real_llm": True,
+        "model_id": model_id,
+        "provider": provider,
+        "temperature": temperature,
+        "n_runs_per_case": n_runs,
+        "timestamp_iso": get_timestamp_iso(),
+        "prompt_template_hash": get_prompt_template_hash(all_cases),
+        "evaluator_version": get_evaluator_version(),
+        "policy_version": get_policy_version(),
+    }
+    if provider == "prime":
+        m["real_llm_provider"] = "prime"
+        m["inference_base_url"] = PRIME_INFERENCE_BASE_URL
+    return m
+
+
+def _compute_cross_model_summary(real_llm_models: list[dict]) -> dict | None:
+    """
+    When len(real_llm_models) >= 2, compute per-case pass rates by model,
+    per-case variance across models, and pairwise disagreement matrix.
+    Returns None if fewer than 2 successful model results.
+    """
+    successful = [m for m in real_llm_models if not m.get("error") and m.get("cases")]
+    if len(successful) < 2:
+        return None
+    model_ids = [m["model_id"] for m in successful]
+    # Build case_id -> list of (model_idx, pass_rate 0-1) for alignment
+    case_rates: dict[str, list[tuple[int, float]]] = {}
+    for midx, m in enumerate(successful):
+        for c in m["cases"]:
+            cid = c.get("case_id", "")
+            n_runs = c.get("n_runs", 1)
+            pass_count = c.get("pass_count", 0)
+            rate = pass_count / n_runs if n_runs else 0.0
+            case_rates.setdefault(cid, []).append((midx, rate))
+    per_case_pass_rates = {}
+    per_case_variance = {}
+    for cid, pairs in case_rates.items():
+        by_model = {model_ids[i]: round(r * 100, 1) for i, r in pairs}
+        per_case_pass_rates[cid] = by_model
+        if len(pairs) >= 2:
+            rates = [r for _, r in pairs]
+            per_case_variance[cid] = round(statistics.variance(rates), 4)
+    # Disagreement: (i, j) = count of cases where model i passed (>=0.5) and model j failed (<0.5) or vice versa
+    disagreement_matrix = []
+    for i in range(len(model_ids)):
+        row = []
+        for j in range(len(model_ids)):
+            if i == j:
+                row.append(0)
+                continue
+            count = 0
+            for cid, pairs in case_rates.items():
+                di = dict(pairs)
+                ri = di.get(i, 0.0)
+                rj = di.get(j, 0.0)
+                if (ri >= 0.5 and rj < 0.5) or (ri < 0.5 and rj >= 0.5):
+                    count += 1
+            row.append(count)
+        disagreement_matrix.append(row)
+    return {
+        "model_ids": model_ids,
+        "per_case_pass_rates": per_case_pass_rates,
+        "per_case_variance": per_case_variance,
+        "disagreement_matrix": disagreement_matrix,
     }
 
 
@@ -445,13 +631,24 @@ def run_real_llm_redteam(model_id: str = "gpt-4o-mini", temperature: float = 0.0
     }
 
 
+def _percentile(sorted_list: list[float], p: float) -> float:
+    """p in [0,100]. Returns percentile value."""
+    if not sorted_list:
+        return 0.0
+    k = (len(sorted_list) - 1) * p / 100
+    f = int(k)
+    c = f + 1 if f + 1 < len(sorted_list) else f
+    return sorted_list[f] + (k - f) * (sorted_list[c] - sorted_list[f]) if c > f else sorted_list[f]
+
+
 def run_adapter_latency(
     scenarios: list[str],
     seeds: list[int],
     out_dir: Path,
     use_denial_plan: bool = False,
+    record_timings: bool = False,
 ) -> dict:
-    """Run LLMPlanningAdapter on given scenarios; record task_latency_ms_p95 per run."""
+    """Run LLMPlanningAdapter on given scenarios; record task_latency_ms_p95 per run. Optionally record step timings for decomposition."""
     from labtrust_portfolio.adapters.llm_planning_adapter import (
         LLMPlanningAdapter,
         _denial_injection_plan_steps,
@@ -459,8 +656,10 @@ def run_adapter_latency(
     from labtrust_portfolio.adapters.base import run_adapter
 
     plan_override = _denial_injection_plan_steps() if use_denial_plan else None
-    adapter = LLMPlanningAdapter(validation_mode="gated", plan_override=plan_override)
+    adapter = LLMPlanningAdapter(validation_mode="gated", plan_override=plan_override, record_timings=record_timings)
     runs = []
+    all_validation_ms: list[float] = []
+    all_capture_ms: list[float] = []
     for scenario_id in scenarios:
         for seed in seeds:
             run_dir = out_dir / "adapter_runs" / scenario_id / f"seed_{seed}"
@@ -479,6 +678,17 @@ def run_adapter_latency(
             if use_denial_plan:
                 run_entry["denials_count"] = result.maestro_report.get("denials_count", 0)
                 run_entry["tasks_completed"] = m.get("tasks_completed", 0)
+            if record_timings and result.trace_path and result.trace_path.exists():
+                try:
+                    trace = json.loads(result.trace_path.read_text(encoding="utf-8"))
+                    meta = trace.get("metadata", {})
+                    for st in meta.get("step_timings_ms", []):
+                        if "validation_ms" in st:
+                            all_validation_ms.append(st["validation_ms"])
+                    if "capture_total_ms" in meta:
+                        all_capture_ms.append(meta["capture_total_ms"])
+                except Exception:
+                    pass
             runs.append(run_entry)
     p95s = [r["task_latency_ms_p95"] for r in runs]
     mean_p95 = sum(p95s) / len(p95s) if p95s else 0.0
@@ -513,6 +723,23 @@ def run_adapter_latency(
             "runs_with_denial": runs_with_denial,
             "per_scenario": per_scenario,
         }
+    if record_timings and (all_validation_ms or all_capture_ms):
+        def stats(arr: list[float]) -> dict:
+            if not arr:
+                return {"p50": 0, "p95": 0, "p99": 0, "max": 0, "stdev": 0, "samples": 0}
+            s = sorted(arr)
+            return {
+                "p50": round(_percentile(s, 50), 4),
+                "p95": round(_percentile(s, 95), 4),
+                "p99": round(_percentile(s, 99), 4),
+                "max": round(max(arr), 4),
+                "stdev": round(statistics.stdev(arr), 4) if len(arr) >= 2 else 0,
+                "samples": len(arr),
+            }
+        out["latency_decomposition"] = {
+            "validation_ms": stats(all_validation_ms),
+            "capture_total_ms": stats(all_capture_ms),
+        }
     return out
 
 
@@ -523,7 +750,7 @@ def run_baseline_comparison(
     baseline_plan: str = "tool_unsafe",
 ) -> dict:
     """Run gated, weakly-gated, and ungated adapter with denial-injection plan; compare denials and tasks_completed.
-    baseline_plan: 'tool_unsafe' (execute_system) or 'args_unsafe' (allow-listed tool, path traversal in args)."""
+    baseline_plan: 'tool_unsafe' (execute_system), 'args_unsafe' (path traversal in args), or 'benign' (all safe steps; false-positive study)."""
     from labtrust_portfolio.adapters.llm_planning_adapter import (
         LLMPlanningAdapter,
         _denial_injection_plan_steps,
@@ -531,7 +758,10 @@ def run_baseline_comparison(
     )
     from labtrust_portfolio.adapters.base import run_adapter
 
-    if baseline_plan == "args_unsafe":
+    if baseline_plan == "benign":
+        from labtrust_portfolio.adapters.llm_planning_adapter import _benign_plan_steps
+        plan_override = _benign_plan_steps()
+    elif baseline_plan == "args_unsafe":
         plan_override = _denial_injection_plan_steps_args_unsafe()
     else:
         plan_override = _denial_injection_plan_steps()
@@ -572,7 +802,7 @@ def run_baseline_comparison(
     mean_gated = sum(gated_tasks) / len(gated_tasks) if gated_tasks else 0
     mean_weak = sum(weak_tasks) / len(weak_tasks) if weak_tasks else 0
     mean_ungated = sum(ungated_tasks) / len(ungated_tasks) if ungated_tasks else 0
-    return {
+    result = {
         "plan_type": baseline_plan,
         "rows": rows,
         "run_manifest": {
@@ -581,6 +811,9 @@ def run_baseline_comparison(
             "script": "llm_redteam_eval.py",
             "modes": ["gated", "weak", "ungated"],
             "baseline_plan": baseline_plan,
+            "timestamp_iso": get_timestamp_iso(),
+            "evaluator_version": get_evaluator_version(),
+            "policy_version": get_policy_version(),
         },
         "excellence_metrics": {
             "denial_count_gated": denial_count_gated,
@@ -592,6 +825,18 @@ def run_baseline_comparison(
             "difference_mean": round(mean_gated - mean_ungated, 2),
         },
     }
+    if baseline_plan == "benign":
+        total_runs = len(rows)
+        benign_acceptance_gated = total_runs - denial_count_gated if total_runs else 0
+        benign_acceptance_weak = total_runs - denial_count_weak if total_runs else 0
+        benign_acceptance_ungated = total_runs - denial_count_ungated if total_runs else 0
+        result["benign_acceptance_rate_gated"] = round(100.0 * benign_acceptance_gated / total_runs, 1) if total_runs else 100.0
+        result["benign_acceptance_rate_weak"] = round(100.0 * benign_acceptance_weak / total_runs, 1) if total_runs else 100.0
+        result["benign_acceptance_rate_ungated"] = round(100.0 * benign_acceptance_ungated / total_runs, 1) if total_runs else 100.0
+        result["false_positive_count_gated"] = denial_count_gated
+        result["false_positive_count_weak"] = denial_count_weak
+        result["false_positive_count_ungated"] = denial_count_ungated
+    return result
 
 
 def main() -> int:
@@ -641,7 +886,10 @@ def main() -> int:
         type=str,
         default=None,
         metavar="MODEL1,MODEL2,...",
-        help="Comma-separated models for real-LLM (e.g. gpt-4o-mini,gpt-4o,claude-3-5-haiku-20241022); infers provider from prefix (gpt- -> openai, claude- -> anthropic). Requires API keys for each provider used.",
+        help=(
+            "Comma-separated models for real-LLM. With --real-llm-provider auto: gpt-* (OpenAI), "
+            "claude-* (Anthropic). With prime: Prime Inference model ids (e.g. meta-llama/llama-3.1-70b-instruct)."
+        ),
     )
     ap.add_argument(
         "--real-llm-runs",
@@ -649,6 +897,18 @@ def main() -> int:
         default=5,
         metavar="N",
         help="Number of API runs per case for real-LLM (default 5 for pass_rate and latency CI)",
+    )
+    ap.add_argument(
+        "--real-llm-provider",
+        type=str,
+        choices=("auto", "openai", "anthropic", "prime"),
+        default="auto",
+        metavar="PROVIDER",
+        help=(
+            "LLM backend for --real-llm: auto (infer from model id: gpt-/claude-), "
+            "or prime for Prime Inference (PRIME_INTELLECT_API_KEY; optional PRIME_TEAM_ID). "
+            "See https://docs.primeintellect.ai/api-reference/inference-chat-completions"
+        ),
     )
     ap.add_argument(
         "--run-baseline",
@@ -670,14 +930,19 @@ def main() -> int:
     ap.add_argument(
         "--baseline-plan",
         type=str,
-        choices=("tool_unsafe", "args_unsafe"),
+        choices=("tool_unsafe", "args_unsafe", "benign"),
         default="tool_unsafe",
-        help="Denial-injection plan: tool_unsafe (execute_system) or args_unsafe (path traversal in args); args_unsafe writes baseline_comparison_args.json",
+        help="Baseline plan: tool_unsafe, args_unsafe, or benign (false-positive study); benign writes baseline_benign.json",
     )
     ap.add_argument(
         "--denial-stats",
         action="store_true",
         help="With --run-adapter: use denial-injection plan and write denial_trace_stats.json",
+    )
+    ap.add_argument(
+        "--latency-decomposition",
+        action="store_true",
+        help="With --run-adapter: record per-step validation/capture timings and add latency_decomposition to adapter_latency.json",
     )
     args = ap.parse_args()
 
@@ -689,41 +954,65 @@ def main() -> int:
         "red_team_cases": [c["id"] for c in cases],
         "red_team_case_count": len(cases),
         "script": "llm_redteam_eval.py",
+        "timestamp_iso": get_timestamp_iso(),
+        "evaluator_version": get_evaluator_version(),
+        "policy_version": get_policy_version(),
     }
     if args.real_llm:
         if args.real_llm_models:
             model_list = [m.strip() for m in args.real_llm_models.split(",") if m.strip()]
         else:
             model_list = [args.real_llm_model]
+
+        def _provider_for_real_llm(mid: str) -> str:
+            if args.real_llm_provider == "prime":
+                return "prime"
+            if args.real_llm_provider == "openai":
+                return "openai"
+            if args.real_llm_provider == "anthropic":
+                return "anthropic"
+            return _infer_provider(mid)
+
         real_llm_models = []
         for model_id in model_list:
+            prov_label = "?"
             try:
-                provider = _infer_provider(model_id)
-                api_key = _get_real_llm_api_key_for_provider(provider)
+                prov_label = _provider_for_real_llm(model_id)
+                api_key = _get_real_llm_api_key_for_provider(prov_label)
                 real_out = run_real_llm_full_suite(
                     model_id=model_id,
                     temperature=0.0,
                     n_runs=max(1, args.real_llm_runs),
-                    provider=provider,
+                    provider=prov_label,
                     api_key=api_key,
                 )
                 real_llm_models.append(real_out)
             except SystemExit:
                 raise
             except Exception as e:
+                try:
+                    prov_label = _provider_for_real_llm(model_id)
+                except SystemExit:
+                    prov_label = args.real_llm_provider
                 real_llm_models.append({
                     "real_llm_used": True,
-                    "provider": _infer_provider(model_id) if model_id else "?",
+                    "provider": prov_label,
                     "model_id": model_id,
                     "error": str(e),
                 })
         red_team["real_llm_models"] = real_llm_models
         red_team["run_manifest"]["real_llm_used"] = True
+        if args.real_llm_provider == "prime":
+            red_team["run_manifest"]["real_llm_provider"] = "prime"
+            red_team["run_manifest"]["inference_base_url"] = PRIME_INFERENCE_BASE_URL
         if len(real_llm_models) == 1:
             red_team["real_llm"] = real_llm_models[0]
             red_team["run_manifest"]["real_llm_model_id"] = real_llm_models[0].get("model_id", args.real_llm_model)
         else:
             red_team["run_manifest"]["real_llm_model_ids"] = [m.get("model_id", "?") for m in real_llm_models]
+        cross = _compute_cross_model_summary(real_llm_models)
+        if cross:
+            red_team["cross_model_summary"] = cross
     red_team["success_criteria_met"] = {
         "red_team_all_pass": red_team.get("all_block_unsafe_pass", False),
         "trigger_met": red_team.get("all_block_unsafe_pass", False),
@@ -747,6 +1036,9 @@ def main() -> int:
     confusable["run_manifest"] = {
         "confusable_deputy_case_count": len(cd_cases),
         "script": "llm_redteam_eval.py",
+        "timestamp_iso": get_timestamp_iso(),
+        "evaluator_version": get_evaluator_version(),
+        "policy_version": get_policy_version(),
     }
     cd_n_pass = sum(1 for c in cd_cases if c.get("pass", False))
     confusable["excellence_metrics"] = {
@@ -777,6 +1069,8 @@ def main() -> int:
         )
         if args.baseline_plan == "args_unsafe":
             base_path = args.out / "baseline_comparison_args.json"
+        elif args.baseline_plan == "benign":
+            base_path = args.out / "baseline_benign.json"
         else:
             base_path = args.out / "baseline_comparison.json"
         base_path.write_text(json.dumps(baseline, indent=2) + "\n", encoding="utf-8")
@@ -790,11 +1084,15 @@ def main() -> int:
             seeds,
             args.out,
             use_denial_plan=args.denial_stats,
+            record_timings=args.latency_decomposition,
         )
         latency["run_manifest"] = {
             "adapter_scenarios": scenarios,
             "adapter_seeds": seeds,
             "script": "llm_redteam_eval.py",
+            "timestamp_iso": get_timestamp_iso(),
+            "evaluator_version": get_evaluator_version(),
+            "policy_version": get_policy_version(),
         }
         if args.latency_threshold_ms is not None:
             mean_p95 = latency.get("tail_latency_p95_mean_ms", 0.0)

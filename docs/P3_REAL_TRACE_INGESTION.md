@@ -17,6 +17,10 @@ If the external trace has no `state_hash_after` fields, the replay engine can st
 
 ## When real traces exist
 
-1. Place trace files (and optional expected outcomes) in a directory (e.g. `bench/replay/corpus/real_platform/`).
-2. Run `scripts/replay_eval.py` with `--corpus-dir` pointing to that directory (if the script supports it) or add the corpus discovery rule to include the new path.
-3. Report in P3 DRAFT: one subsection and one table row with L0 pass/fail, divergence localization, and overhead (replay_time_ms from summary).
+1. Place trace files (and optional expected outcomes) in a directory under `bench/replay/corpus/` (or pass `--corpus-dir` to `replay_eval.py`). Discovery uses `*_trace.json` / `*_expected.json` pairs in that directory.
+2. For a redacted production log, map to TRACE first; include `expected_replay_ok` and `expected_divergence_at_seq` when ground truth is known.
+3. The checked-in `field_style_pass_trace.json` is a **synthetic** TRACE-conformant trace (alternate thin-slice seed) used as an external-validity proxy until a real trace is released.
+
+## Portfolio note
+
+P3 `replay_eval` summary (`datasets/runs/replay_eval/summary.json`) lists `field_style_pass` in `per_trace` when present in the corpus. Regenerate tables with `export_replay_corpus_table.py` after adding real traces.

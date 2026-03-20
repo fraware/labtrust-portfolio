@@ -63,13 +63,50 @@ def table1(data: dict) -> list[str]:
     lines.append(row_fixed)
     lines.append(row_meta)
     if naive:
+        naive_per = naive.get("per_seed") or []
+        naive_collapse = naive.get("collapse_count")
+        if naive_collapse is None and naive_per:
+            naive_collapse = sum(1 for s in naive_per if s.get("collapse"))
+        naive_cc = _fmt(naive_collapse) if naive_collapse is not None else "-"
         row_naive = (
             f"| naive (fault_threshold=0) | "
-            f"{_fmt(naive.get('tasks_completed_mean'))} | - | "
+            f"{_fmt(naive.get('tasks_completed_mean'))} | {naive_cc} | "
             f"{_fmt(naive.get('regime_switch_count_total'))} |"
         )
         lines.append(row_naive)
     lines.append("")
+    return lines
+
+
+def interpretation_lines(data: dict) -> list[str]:
+    """Camera-ready semantics: strict vs non-inferior collapse (ties allowed)."""
+    cpa = data.get("collapse_paired_analysis")
+    if not cpa:
+        return []
+    lines = [
+        "## Collapse outcome interpretation (paired seeds)",
+        "",
+        f"- **Non-inferior on counts (meta <= fixed):** `meta_non_worse_collapse` = "
+        f"{data.get('meta_non_worse_collapse', data.get('meta_reduces_collapse'))}",
+        f"- **Strict improvement (meta < fixed):** `meta_strictly_reduces_collapse` = "
+        f"{data.get('meta_strictly_reduces_collapse', 'n/a')}",
+        f"- **McNemar (discordant pairs only) p (two-sided):** "
+        f"{cpa.get('mcnemar_exact_p_value_two_sided', 'n/a')}",
+        f"- **Wilson 95% CI - fixed collapse rate:** {cpa.get('fixed_collapse_rate_wilson_ci95', 'n/a')}",
+        f"- **Wilson 95% CI - meta collapse rate:** {cpa.get('meta_collapse_rate_wilson_ci95', 'n/a')}",
+        "",
+    ]
+    rm = data.get("run_manifest") or {}
+    pol = rm.get("stress_selection_policy")
+    if pol:
+        lines.append("## Stress selection (non-vacuous runs)")
+        lines.append("")
+        lines.append(f"- **rule_id:** `{pol.get('rule_id', '')}`")
+        lines.append(f"- **chosen_drop_completion_prob:** {pol.get('chosen_drop_completion_prob', 'n/a')}")
+        src = pol.get("source_path_repo_relative") or pol.get("source_path")
+        if src:
+            lines.append(f"- **source:** `{src}`")
+        lines.append("")
     return lines
 
 
@@ -121,6 +158,8 @@ def main() -> int:
         return 1
     data = json.loads(path.read_text(encoding="utf-8"))
     for line in table1(data):
+        print(line)
+    for line in interpretation_lines(data):
         print(line)
     if args.table2:
         for line in table2(data):

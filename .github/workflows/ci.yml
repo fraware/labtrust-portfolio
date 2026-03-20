@@ -63,7 +63,8 @@ jobs:
         env:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
         run: |
-          PYTHONPATH=impl/src python scripts/replay_eval.py --overhead-curve --overhead-runs 5
+          PYTHONPATH=impl/src python scripts/replay_eval.py --overhead-curve --overhead-runs 5 --bootstrap-reps 50 --thin-slice-seeds 42
+          PYTHONPATH=impl/src python scripts/verify_p3_replay_summary.py --strict-curve
       - name: P4 MAESTRO fault sweep (multi-scenario)
         env:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
@@ -115,6 +116,16 @@ jobs:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
         run: |
           PYTHONPATH=impl/src python scripts/meta_eval.py --seeds 1,2,3 --run-naive --fault-threshold 0
+      - name: P8 Meta scenario v1 smoke
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/meta_eval.py --seeds 1,2 --scenario regime_stress_v1 --out /tmp/p8_meta_v1_ci
+      - name: P8 verify comparison schema
+        env:
+          LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
+        run: |
+          PYTHONPATH=impl/src python scripts/verify_p8_meta_artifacts.py --comparison datasets/runs/meta_eval/comparison.json
       - name: P8 Meta collapse sweep (2 drop_probs, 3 seeds)
         env:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel

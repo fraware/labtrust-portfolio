@@ -1,0 +1,1 @@
+{"description": "Split-brain: agent_1 owns t1, agent_2 owns t2; agent_3 tries t1 (deny)", "initial_state": {"ownership": {"t1": "agent_1", "t2": "agent_2"}, "_last_ts": {"t1": 1.0, "t2": 2.0}}, "events": [{"type": "task_end", "ts": 3.0, "actor": {"id": "agent_3"}, "payload": {"task_id": "t1", "writer": "agent_3"}}], "expected_verdicts": ["deny"]}

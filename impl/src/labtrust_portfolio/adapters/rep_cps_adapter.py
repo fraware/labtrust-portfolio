@@ -93,11 +93,18 @@ class REPCPSAdapter:
                 method=aggregation_method,
                 trim_fraction=0.25,
             )
+        # Safety gate: deny actuation when aggregate exceeds safe threshold (e.g. under attack)
+        SAFETY_GATE_MAX_LOAD = 2.0
+        safety_gate_ok = (
+            agg_value is not None
+            and float(agg_value) <= SAFETY_GATE_MAX_LOAD
+        )
+
         if "metadata" not in trace:
             trace["metadata"] = {}
         trace["metadata"]["rep_cps"] = True
         trace["metadata"]["rep_cps_aggregate_load"] = agg_value
-        trace["metadata"]["rep_cps_safety_gate_ok"] = True
+        trace["metadata"]["rep_cps_safety_gate_ok"] = safety_gate_ok
         trace["metadata"]["rep_cps_aggregation_steps"] = len(step_values) or 1
         trace["metadata"]["rep_cps_converged"] = converged or (aggregation_steps <= 1)
         if aggregation_steps > 1:

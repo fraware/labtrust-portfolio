@@ -37,8 +37,19 @@ def main() -> int:
         import matplotlib.pyplot as plt
         x = [e["event_count"] for e in curve]
         y = [e["p95_replay_ms"] for e in curve]
+        yerr = None
+        if curve and all(
+            "p95_replay_ci95_lower_ms" in e and "p95_replay_ci95_upper_ms" in e
+            for e in curve
+        ):
+            lo = [e["p95_replay_ms"] - e["p95_replay_ci95_lower_ms"] for e in curve]
+            hi = [e["p95_replay_ci95_upper_ms"] - e["p95_replay_ms"] for e in curve]
+            yerr = [lo, hi]
         fig, ax = plt.subplots()
-        ax.plot(x, y, "o-")
+        if yerr is not None:
+            ax.errorbar(x, y, yerr=yerr, fmt="o-", capsize=3, elinewidth=1)
+        else:
+            ax.plot(x, y, "o-")
         ax.set_xlabel("Event count (trace size)")
         ax.set_ylabel("Replay p95 (ms)")
         ax.set_title("P3 Replay: p95 time vs trace size")

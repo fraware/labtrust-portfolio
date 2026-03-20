@@ -1,10 +1,10 @@
 # P1 Coordination Contracts
 
-Corpus under `corpus/`: 25 sequences (positive controls, split-brain, stale write/reorder, boundary cases). Eval: `scripts/contracts_eval.py` iterates over all JSON files in corpus; add new sequences with the same schema (description, initial_state, events, expected_verdicts).
+Corpus under `corpus/`: 51+ sequences (tiered: micro, meso, stress/adversarial—positive controls, split-brain, stale write/reorder, boundary, long-horizon, adversarial). Eval: `scripts/contracts_eval.py` iterates over all JSON files in corpus; add new sequences with the same schema (description, initial_state, events, expected_verdicts).
 
 ## Benchmark
 
-The corpus is released as **Coordination Contract Benchmark v0.1**. See [BENCHMARK_SPEC.v0.1.md](BENCHMARK_SPEC.v0.1.md) for the full spec: N=25 sequences, failure classes (split_brain, stale_write, reorder_violation), schema, discovery rule, and version. Reference runner: `scripts/contracts_eval.py`. Reference table: `scripts/export_contracts_corpus_table.py`.
+The corpus is released as **Coordination Contract Benchmark v0.1**. See [BENCHMARK_SPEC.v0.1.md](BENCHMARK_SPEC.v0.1.md) for the full spec: N=51+ sequences, tiered protocol (Tier 1 micro, Tier 2 meso, Tier 3 stress/adversarial), failure classes (split_brain, stale_write, reorder_violation, unknown_key, control), schema, discovery rule, and version. Reference runner: `scripts/contracts_eval.py` (use `--baseline` for policy comparison and ablation). Reference table: `scripts/export_contracts_corpus_table.py`. Scale sweep: `--scale-sweep 1000,10000,100000`. Transport parity: `scripts/contracts_transport_parity.py` writes `transport_parity.json`.
 
 ## Corpus expansion
 

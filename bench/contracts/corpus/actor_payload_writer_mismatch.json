@@ -1,0 +1,1 @@
+{"description": "Adversarial: actor id agent_1 but payload writer agent_2; key owned by agent_1 -> deny (split_brain)", "initial_state": {"ownership": {"t1": "agent_1"}, "_last_ts": {"t1": 1.0}}, "events": [{"type": "task_end", "ts": 2.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "writer": "agent_2"}}], "expected_verdicts": ["deny"]}

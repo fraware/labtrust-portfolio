@@ -1,0 +1,1 @@
+{"description": "Positive: coordination_message events (validator allows)", "initial_state": {"ownership": {}, "_last_ts": {}}, "events": [{"type": "coordination_message", "ts": 1.0, "actor": {"id": "agent_1"}, "payload": {}}, {"type": "coordination_message", "ts": 2.0, "actor": {"id": "agent_2"}, "payload": {}}], "expected_verdicts": ["allow", "allow"]}

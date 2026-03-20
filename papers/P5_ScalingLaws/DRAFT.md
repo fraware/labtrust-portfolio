@@ -34,9 +34,9 @@ Features: scenario_id, num_tasks, task_names, num_faults, seed, event_count (fro
 
 ## 5. Evaluation
 
-**Headline:** Feature-based and per-scenario baselines beat the global mean out-of-sample across five scenario families; MAE and 95% CI are reported in heldout_results.json; beat_per_scenario_baseline and trigger_met indicate when the method meets the conditional bar.
+**Headline:** Feature-based and regression predictors beat the global mean out-of-sample across six scenario families; MAE and 95% CI are reported in heldout_results.json; beat_per_scenario_baseline and trigger_met indicate when the method meets the conditional bar.
 
-**Key results.** (1) Per-scenario baseline MAE vs global mean MAE (e.g. per-scenario MAE ~0.20 vs global ~0.76); (2) Regression MAE when fit, or "Regression N/A" with regression_skipped_reason when insufficient train rows—publishable run (20 seeds, --fault-mix) typically yields enough train_n so regression is fit; (3) success_criteria_met.beat_per_scenario_baseline and success_criteria_met.trigger_met (conditional bar); beat_baseline_out_of_sample; (4) Scaling fit: exponent and R² in scaling_fit when available; (5) Excellence metrics: out_of_sample_margin_vs_global_baseline, ci_width_95_baseline_mae, scenario_coverage; when n_holdout >= 2: difference_mean, difference_ci95, paired_t_p_value, power_post_hoc (comparison stats for baseline vs feature MAE). The run used for tables (datasets/runs/scaling_eval/heldout_results.json) has success_criteria_met.beat_per_scenario_baseline and success_criteria_met.trigger_met true. *Numbers from a publishable run: `python scripts/run_paper_experiments.py --paper P5` (20 seeds, --fault-mix) or `python scripts/generate_multiscenario_runs.py --seeds 20 --fault-mix` then `python scripts/scaling_heldout_eval.py`; regenerate tables via `python scripts/export_scaling_tables.py`. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
+**Key results.** (1) Global baseline MAE 0.695 vs regression MAE 0.072 and per-scenario baseline MAE 0.072; (2) success_criteria_met.beat_per_scenario_baseline=true and success_criteria_met.trigger_met=true; beat_baseline_out_of_sample=true; (3) Scaling fit: exponent 1.0139 and R² 0.8984; (4) Excellence metrics: out_of_sample_margin_vs_global_baseline 0.4018, ci_width_95_baseline_mae 0.7328, scenario_coverage 6; paired_t_p_value 0.0709 and power_post_hoc 0.6623 for baseline vs feature MAE comparison. *Numbers from the latest publishable-style run: `python scripts/run_paper_experiments.py --paper P5` (20 seeds, --fault-mix) or `python scripts/generate_multiscenario_runs.py --seeds 20 --fault-mix` then `python scripts/scaling_heldout_eval.py`; regenerate tables via `python scripts/export_scaling_tables.py`. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
 
 Held-out scenario: train on all but one scenario, evaluate MAE on held-out; report global mean vs num_tasks mean vs regression. Collapse is derived from report fields (tasks_completed < 2 or recovery_ok False); per-scenario collapse rate is in heldout_results. Scaling fit: exploratory power-law log(tasks_completed) ~ log(num_tasks) yields exponent and R² in summary. MAE reported with 95% CI (analytical over holdouts). Script: `python scripts/scaling_heldout_eval.py`; output: `datasets/runs/scaling_eval/heldout_results.json`. Per-scenario baseline MAE (baseline_mae, feat_baseline_mae, regression_mae) is in the `held_out_results` array. Run `python scripts/export_scaling_tables.py` to generate draft tables.
 
@@ -44,20 +44,21 @@ Held-out scenario: train on all but one scenario, evaluate MAE on held-out; repo
 
 | Held-out scenario | train_n | test_n | baseline_mae | per_scenario_mae | feat_baseline_mae | regression_mae | actuals_mean |
 |-------------------|--------|--------|--------------|------------------|-------------------|---------------|--------------|
-| lab_profile_v0 | 120 | 30 | 1.50 | 0.18 | 1.50 | — | 4.90 |
-| regime_stress_v0 | 120 | 30 | 0.38 | 0.18 | 0.18 | — | 3.90 |
-| toy_lab_v0 | 120 | 30 | 0.38 | 0.18 | 0.18 | — | 3.90 |
-| traffic_v0 | 120 | 30 | 1.00 | 0.18 | 0.18 | — | 2.90 |
-| warehouse_v0 | 120 | 30 | 1.00 | 0.18 | 0.18 | — | 2.90 |
+| lab_profile_v0 | 400 | 80 | 1.40 | 0.07 | 1.40 | 0.07 | 4.96 |
+| regime_stress_v0 | 400 | 80 | 0.26 | 0.07 | 0.07 | 0.07 | 3.96 |
+| regime_stress_v1 | 400 | 80 | 0.26 | 0.07 | 0.07 | 0.07 | 3.96 |
+| toy_lab_v0 | 400 | 80 | 0.26 | 0.07 | 0.07 | 0.07 | 3.96 |
+| traffic_v0 | 400 | 80 | 1.00 | 0.07 | 0.07 | 0.07 | 2.96 |
+| warehouse_v0 | 400 | 80 | 1.00 | 0.07 | 0.07 | 0.07 | 2.96 |
 
 **Table 2 — Baselines (MAE and 95% CI).** Source: heldout_results.json (overall_*_mae, overall_*_mae_ci95_*). Units: MAE, CI95 lower/upper. Regression row: N/A when regression_skipped_reason set (e.g. insufficient train rows). Run_manifest in heldout_results.json. Regenerate with `python scripts/export_scaling_tables.py`.
 
 | Baseline | MAE | CI95 lower | CI95 upper |
 |----------|-----|------------|------------|
-| Global mean | 0.85 | 0.48 | 1.23 |
-| Per-scenario mean (scenario identity allowed) | 0.18 | — | — |
-| Num-tasks mean | 0.44 | -0.02 | 0.91 |
-| Regression | — | — | — |
+| Global mean | 0.70 | 0.33 | 1.06 |
+| Per-scenario mean (scenario identity allowed) | 0.07 | — | — |
+| Num-tasks mean | 0.29 | -0.10 | 0.69 |
+| Regression | 0.07 | — | — |
 
 The Regression row shows N/A when the linear predictor is not fit (e.g. insufficient training rows or singular matrix); see heldout_results.json overall_regression_mae and regression_skipped_reason; export_scaling_tables.py prints the reason. The implementation tries full features first, then falls back to num_tasks-only (fewer rows required). Publishable run (20 seeds, --fault-mix) typically yields enough train_n per held-out scenario so regression is fit; see run_manifest.train_n_total. **For submission:** use a publishable run (20 seeds, --fault-mix); if regression remains N/A (regression_skipped_reason in heldout_results.json), report "Regression N/A (insufficient train rows)" in the table and do not claim regression improvement in the abstract or conclusions.
 

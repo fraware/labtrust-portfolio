@@ -1,6 +1,6 @@
 # P2 REP-CPS: Real sensitivity-sharing integration
 
-This document describes how to plug a **real sensitivity-sharing setting** (live shared state from sensors or coordination middleware) into the same REP-CPS profile: `aggregate()` and auth/provenance checks. REP-CPS is a safety-gated, typed, authenticated, rate-limited profile; protocol output does not directly actuate. When a real feed is available, a script can read from it and produce one summary JSON (bias with and without robust aggregation, profile_ablation if applicable).
+This document describes how to plug a **real sensitivity-sharing setting** (live shared state from sensors or coordination middleware) into the same REP-CPS profile: `aggregate()` and auth/provenance checks. REP-CPS is a safety-gated, typed, authenticated, rate-limited profile; protocol output does not directly actuate. When a real feed is available, a script can read from it and produce one summary JSON (bias with and without robust aggregation, profile_ablation, latency_cost, resilience_envelope if applicable). Current eval (rep_cps_eval.py) writes to datasets/runs/rep_cps_eval/summary.json; tables and figures are regenerated via export_rep_cps_tables.py and plot_rep_cps_summary.py / plot_rep_cps_latency.py.
 
 ## Required event shape
 
@@ -32,5 +32,5 @@ The REP-CPS safety gate does not actuate directly; MADS tier (e.g. Tier 2) is re
 When a real sensitivity-sharing feed is available:
 
 1. Implement a script that reads from that feed (e.g. `scripts/rep_cps_live_feed_run.py`), produces updates in the required shape, and calls `aggregate()` (and optionally the same multi-step loop as REPCPSAdapter).
-2. Write one summary JSON (e.g. `datasets/runs/rep_cps_live/feed_summary.json`) with run_manifest, bias metrics with and without REP-CPS (e.g. bias_robust, bias_naive).
+2. Write one summary JSON (e.g. `datasets/runs/rep_cps_live/feed_summary.json`) with run_manifest, bias metrics with and without REP-CPS (e.g. bias_robust, bias_naive), and optionally latency_cost, profile_ablation, resilience_envelope if the same structure as rep_cps_eval/summary.json is used.
 3. Add a short subsection in P2 DRAFT and one table row citing the run.

@@ -8,9 +8,9 @@ This document interprets the current evaluation outputs across the portfolio and
 
 - **P2 REP-CPS:** Safety-gated profile for sensitivity sharing; robust aggregation reduces observed compromise-induced bias (trimmed_mean, clipping, median_of_means); aggregation_variants, sybil_sweep, profile_ablation in summary; safety_gate_denial.json documents REP output gated by policy. Trigger not met in evaluated scenario (tasks_completed identical across policies); contribution is profile and harness. Eval writes to `rep_cps_eval/`.
 - **P5 Scaling:** Global-mean and per-scenario-mean baselines; num_tasks/feature regression; 95% CI for MAE; scaling_fit (exploratory). Scripts: `scaling_heldout_eval.py`, `export_scaling_tables.py`; output: `scaling_eval/heldout_results.json`. Use `generate_multiscenario_runs.py --fault-mix` (default 20 seeds) for publishable.
-- **P6 LLM:** Red-team (8 cases) and confusable deputy (4 cases); confusable_deputy_results.json (adversarial args blocked); e2e_denial_trace.json; adapter latency with --run-adapter. Evidence from synthetic plans by default; optional --real-llm. Eval writes to `llm_eval/`.
-- **P8 Meta:** Regime switches with `--run-naive --fault-threshold 0`; naive baseline; `--hysteresis N` for thrash control; meta_collapse_sweep.py writes collapse_sweep.json (drop_prob sweep). Run manifests in comparison.json and collapse_sweep.json. Eval writes to `meta_eval/comparison.json`; Figure 1 from plot_meta_collapse.py (input collapse_sweep.json).
-- **Core (P0, P3, P4, P1, P5, P7):** Eval scripts run in CI; results under `datasets/runs/` (P0 E1: p0_conformance_corpus/, corpus_manifest.json; P0 E2: e2_redaction_demo/; P0 E3: e3_summary.json, p0_e3_variance.json; P0 E4: p0_e4_summary.json; P0 conformance summary: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json; replay_eval with witness_slice and top-level witness_slices in summary; maestro_fault_sweep, maestro_antigaming/antigaming_results.json with scoring_proof; contracts_eval, P1_TRACE_DERIVABILITY.md; assurance_eval, audit_bundle --release; scaling_eval with trigger_met). **Conditional (P2, P5, P6, P8):** success_criteria_met includes trigger_met where applicable; see docs/CONDITIONAL_TRIGGERS.md for required evidence. **Real eval launches:** P1, P2, P3, P4, P5, P6, P7, and P8 each have an integration test; see tests/test_contracts_p1.py, test_rep_cps_p2.py, test_replay_p3.py, test_maestro_p4.py, test_scaling_p5.py, test_llm_p6.py, test_assurance_p7.py, test_meta_p8.py. P5: test_scaling_p5.py runs generate_multiscenario_runs then scaling_heldout_eval and asserts on heldout_results.json. CI runs generate_multiscenario_runs --seeds 2 and scaling_heldout_eval.
+- **P6 LLM:** Red-team (9 cases) and confusable deputy (4 cases); confusable_deputy_results.json (adversarial args blocked); e2e_denial_trace.json; adapter latency with --run-adapter; run_manifest, layer attribution, cross_model_summary when 2+ models; baseline 3-way (tool-level, args_unsafe, benign). Evidence from synthetic plans by default; optional --real-llm with `--real-llm-provider auto|prime`. Latest Prime top-4 matrix (N=3): grok-4-fast 100.0% [91.0,100.0], gemini-2.5-flash/gpt-4.1-mini/qwen3-30b-a3b at 84.6% [70.3,92.8]. Eval writes to `llm_eval/` and `llm_eval_prime_matrix_top4_n3/`.
+- **P8 Meta:** `meta_eval.py` with `--scenario regime_stress_v0|regime_stress_v1`, optional `--run-naive --fault-threshold 0`, `--non-vacuous` + documented `stress_selection_policy`, optional `--fallback-adapter retry_heavy`. Outputs `comparison.json` (`schema_version`, `collapse_paired_analysis`, non-inferior vs strict collapse fields), `collapse_sweep.json` (`schema_version`). Publishable runner: `run_paper_experiments.py --paper P8` (v0 + v1). Verify: `verify_p8_meta_artifacts.py`. Figure 1: `plot_meta_collapse.py` (t-CI + Wilson intervals).
+- **Core (P0, P3, P4, P1, P5, P7):** Eval scripts run in CI; results under `datasets/runs/` (P0 E1: p0_conformance_corpus/, corpus_manifest.json; P0 E2: e2_redaction_demo/; P0 E3: e3_summary.json, p0_e3_variance.json; P0 E4: p0_e4_summary.json; P0 conformance summary: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json; **P3:** `replay_eval/summary.json` with `schema_version: p3_replay_eval_v0.2`, `baseline_overhead`, `multi_seed_overhead`, `corpus_outcome_wilson_ci95`, witness slices, optional `overhead_curve`; `verify_p3_replay_summary.py`; maestro_fault_sweep, maestro_antigaming/antigaming_results.json with scoring_proof; contracts_eval, P1_TRACE_DERIVABILITY.md; assurance_eval, audit_bundle --release; scaling_eval with trigger_met). **Conditional (P2, P5, P6, P8):** success_criteria_met includes trigger_met where applicable; see docs/CONDITIONAL_TRIGGERS.md for required evidence. **Real eval launches:** P1, P2, P3, P4, P5, P6, P7, and P8 each have an integration test; see tests/test_contracts_p1.py, test_rep_cps_p2.py, test_replay_p3.py, test_maestro_p4.py, test_scaling_p5.py, test_llm_p6.py, test_assurance_p7.py, test_meta_p8.py. P5: test_scaling_p5.py runs generate_multiscenario_runs then scaling_heldout_eval and asserts on heldout_results.json. CI runs generate_multiscenario_runs --seeds 2 and scaling_heldout_eval.
 
 ---
 
@@ -20,7 +20,7 @@ This document interprets the current evaluation outputs across the portfolio and
 
 | Metric | Value | Meaning |
 |--------|--------|--------|
-| Scenario | toy_lab_v0 | Bottleneck scenario (4 tasks) |
+| Scenario | toy_lab_v0, lab_profile_v0 | Two scenarios; publishable default |
 | Seeds | 20 (publishable default) | CI may use fewer; mean and stdev reported |
 | rep_cps_tasks_completed_mean | from summary | Same as centralized |
 | centralized_tasks_completed_mean | from summary | Baseline |
@@ -32,14 +32,17 @@ This document interprets the current evaluation outputs across the portfolio and
 | with_compromise_naive_aggregate | ~4.19 | Plain mean with same inputs |
 | bias_robust | ~3.24 | |robust − honest| |
 | bias_naive | ~3.87 | |naive − honest| |
-| profile_ablation[] | from summary | No auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant (Table 5). |
+| profile_ablation[] | from summary | No auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant (Table 6). |
+| latency_cost | from summary | Wall time per policy, aggregation compute ms, overhead vs centralized; Table 5. Figure 2: plot_rep_cps_latency.py. |
+| resilience_envelope | from summary | safe_operating_region_n_compromised_max, failure_boundary_n_compromised; Table 7. |
+| safety_gate_campaign | from summary | pass_count_rep_cps, deny_count_unsecured, denial_trace_recorded. |
 
 ### Interpretation
 
 - **Adapter parity:** REP-CPS and Centralized complete the same number of tasks on average; no throughput regression from the protocol in this setup.
 - **Robust vs naive aggregation:** Under 2 Byzantine agents (extreme value 10), robust (trimmed mean) stays closer to the honest aggregate (0.32) than naive mean (4.19). So **robust aggregation reduces bias under compromise**.
-- **Real tests and launches:** CI runs rep_cps_eval with reduced seeds for speed. Publishable default is 20 seeds. Integration tests in tests/test_rep_cps_p2.py run the eval script and real adapter runs, asserting summary structure and invariants (bias_robust < bias_naive, rate_limit exercised, adapter parity). Naive-in-loop and unsecured baselines are in the adapter and eval.
-- **Validity and robustness:** Summary includes run_manifest (seeds, scenario_ids, delay_sweep, script), profile_ablation (Table 5), and 95% CI for tasks_completed when n >= 2. success_criteria_met (adapter_parity, robust_beats_naive) is machine-checked in CI. Conditional paper: in the evaluated scenario, sensitivity sharing does not materially change tasks_completed; the contribution is the profile and MAESTRO-compatible harness. See docs/CONDITIONAL_TRIGGERS.md (P2). Use default (20 seeds) for publishable tables.
+- **Real tests and launches:** CI runs rep_cps_eval with reduced seeds for speed. Publishable default is 20 seeds, two scenarios (toy_lab_v0, lab_profile_v0), delay sweep. Integration tests in tests/test_rep_cps_p2.py run the eval script and real adapter runs, asserting summary structure and invariants (bias_robust < bias_naive, rate_limit exercised, adapter parity, latency_cost, resilience_envelope). Naive-in-loop and unsecured baselines are in the adapter and eval.
+- **Validity and robustness:** Summary includes run_manifest (seeds, scenario_ids, delay_sweep, script), profile_ablation (Table 6), latency_cost (Table 5), resilience_envelope (Table 7), safety_gate_campaign, and 95% CI for tasks_completed when n >= 2. success_criteria_met (adapter_parity, robust_beats_naive) is machine-checked in CI. Conditional paper: in the evaluated scenario, sensitivity sharing does not materially change tasks_completed; the contribution is the profile and MAESTRO-compatible harness. See docs/CONDITIONAL_TRIGGERS.md (P2). Use default (20 seeds, two scenarios) for publishable tables. Regenerate tables with `python scripts/export_rep_cps_tables.py`; figures with plot_rep_cps_summary.py and plot_rep_cps_latency.py.
 
 ### Follow-up experiments (P2)
 
@@ -119,45 +122,49 @@ Five cases total. Adapter latency (with --run-adapter): adapter_latency.json has
 
 ## 4. P8 Meta-Coordination — Interpretation
 
-Integration test: tests/test_meta_p8.py runs meta_eval with --out <temp>, --run-naive, --fault-threshold 0 and asserts comparison.json and regime_switch_count_total >= 1.
+**Integration tests:** `tests/test_meta_p8.py` runs `meta_eval` in a temp directory (`--run-naive`, `--fault-threshold` 0), checks `comparison.json` schema fields (including `collapse_paired_analysis`, `meta_non_worse_collapse`, `meta_strictly_reduces_collapse`), runs `export_meta_tables.py` and `verify_p8_meta_artifacts.py`, and includes a `regime_stress_v1` smoke run. `tests/test_stats_p8_tools.py` covers Student t critical values and McNemar helpers.
 
 ### Results (from `datasets/runs/meta_eval/comparison.json`)
 
+Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run; see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md)):
+
 | Metric | Fixed (Centralized) | Meta-controller |
 |--------|----------------------|-----------------|
-| tasks_completed_mean | 3.33 | 3.33 |
-| collapse_count (tasks_completed < 2) | 0 | 0 |
-| regime_switch_count_total (meta) | — | 2 |
-| naive_switch_baseline | tasks_completed_mean 3.33 | regime_switch_count_total 2 |
+| tasks_completed_mean | 3.40 | 3.40 |
+| collapse_count (per run_manifest definition) | 1 | 1 |
+| regime_switch_count_total (meta, sum per_seed) | — | 8 |
+| naive_switch_baseline | tasks_completed_mean 3.40; collapse_count exported in Table 1 | regime_switch_count_total 8 |
 
-With --run-naive and --fault-threshold 0, naive baseline and regime switches are exercised. Example run (regime_stress_v0, 3 seeds): fixed and meta both tasks_completed_mean 3.33, collapse_count 0; meta and naive each show 2 regime switches across seeds.
+**Secondary scenario:** After `run_paper_experiments.py --paper P8`, also read `datasets/runs/meta_eval/scenario_regime_stress_v1/comparison.json` for external-validity rows (same schema).
 
 ### Interpretation
 
-- **No collapse:** Under drop_completion_prob=0.15 and 3 seeds, neither fixed nor meta fell below 2 tasks completed. So **collapse** (as defined) was not observed; “meta reduces collapse” is trivially true (0 ≤ 0).
-- **Regime switches:** With --fault-threshold 0, decide_switch triggers (fault_count > 0); meta and naive each report regime_switch_count_total = 2 (e.g. seeds 2 and 3). Table: `export_meta_tables.py` or `export_meta_tables.py datasets/runs/meta_eval/comparison.json`.
-- **No safety regression:** meta mean >= 90% of fixed mean; satisfied.
-- **Validity and robustness:** comparison.json includes run_manifest and success_criteria_met (no_safety_regression, meta_reduces_collapse, trigger_met). Conditional paper: trigger_met = meta beats best fixed regime in at least one stress regime with no safety regression; see docs/CONDITIONAL_TRIGGERS.md. Fixed and meta_controller report tasks_completed_ci95 when n >= 2. Use default (20 seeds) for publishable; CI may use fewer.
+- **Non-inferiority vs strict improvement:** `meta_reduces_collapse` means **non-inferiority** on collapse counts (meta <= fixed), not necessarily strict reduction. Use `meta_strictly_reduces_collapse`, `collapse_paired_analysis`, and `excellence_metrics.mcnemar_exact_p_value_two_sided` for paired binary readouts; Wilson CIs marginalize collapse **rates** (not a paired test).
+- **Vacuous case:** If fixed and meta both have collapse_count 0, non-inferiority holds vacuously; the draft should not imply a meaningful “win” unless non-vacuous stress was used.
+- **Regime switches:** With `--fault-threshold` 0 and `--run-naive`, the naive baseline typically shows many switches; compare to meta `regime_switch_count_total` for thrash discussion.
+- **No safety regression:** meta mean >= 90% of fixed mean (`no_safety_regression`).
+- **Validity:** Prefer publishable defaults (20 seeds), `meta_eval --non-vacuous` with `stress_selection_policy`, and dual-scenario artifacts from `run_paper_experiments.py --paper P8`. CI uses fewer seeds; do not cite CI outputs as table sources.
 
 ### Follow-up experiments (P8)
 
-1. **Trigger regime switches:** Run `scripts/meta_collapse_sweep.py --drop-probs 0.15,0.2,0.25,0.3` to see at which drop_prob the fixed regime collapses; output: collapse_sweep.json (per_run: drop_prob, seed, tasks_completed, collapsed).
-2. **Naive switching baseline:** Implement “switch on every fault” or time-based switch; compare tasks_completed and collapse to meta-controller (expect meta to do better or match).
-3. **More seeds and stress levels:** Sweep drop_completion_prob (e.g. 0.1, 0.15, 0.2, 0.25) with 20 seeds (or 5–10 for quick checks); report collapse_count and regime_switch_count per (regime, stress); show “meta reduces collapse” when collapse occurs.
-4. **Define collapse more sharply (optional):** Optionally tie collapse to missed_deadline_count, unsafe_action_attempt_count, or MTTR; document in kernel/spec.
+1. **Stress calibration:** Run `meta_collapse_sweep.py` with `--scenario` matching the eval; widen `--drop-probs` if a scenario never collapses.
+2. **Fixed RetryHeavy baseline (optional):** If claims need “best fixed” beyond Centralized, add an explicit fixed-adapter baseline run and document it in the draft (narrow claims if only Centralized is evaluated).
+3. **Hysteresis sweep:** Compare `excellence_metrics.switch_audit_trail_total` and collapse counts for `--hysteresis 1,2,3`.
+4. **Separate calibration seeds (optional):** Run sweep on a held-out seed list and fix `drop_prob` before the evaluation seeds (document in `run_manifest`).
 
-**P8 verification (SOTA):**
+**P8 verification (current repo):**
 
 | Check | Status |
 |-------|--------|
-| meta_eval --out hermetic | test_meta_p8 runs in temp dir |
-| comparison.json: fixed, meta_controller, naive_switch_baseline | asserted |
-| no_safety_regression true | asserted |
-| meta_reduces_collapse true | asserted |
-| regime_switch_count_total >= 1 (naive) | asserted |
-| export_meta_tables.py on comparison.json | run and exit 0 asserted |
-| Unit tests: decide_switch, regime_switch_event | TestMetaController |
-| Draft: switch criterion, Table 1, comparison, Limitations | in DRAFT.md |
+| meta_eval --out hermetic | `test_meta_p8` temp dir |
+| comparison.json core fields | `schema_version`, arms, `collapse_paired_analysis`, success_criteria_met |
+| no_safety_regression; non-inferior collapse | asserted (`meta_non_worse_collapse` / `meta_reduces_collapse`) |
+| naive regime_switch_count_total >= 1 | asserted when `--run-naive` |
+| export_meta_tables.py | exit 0 asserted |
+| verify_p8_meta_artifacts.py | exit 0 asserted |
+| regime_stress_v1 smoke | dedicated test |
+| Unit tests: decide_switch, regime_switch_event | `TestMetaController` |
+| Draft / claims | tiered claims; see `papers/P8_MetaCoordination/DRAFT.md`, `claims.yaml` |
 
 ---
 
@@ -173,9 +180,9 @@ With --run-naive and --fault-threshold 0, naive baseline and regime switches are
 
 ### P3 (Replay)
 
-- **Existing:** replay_eval.py (L0 fidelity, divergence, corpus, L1 stub, overhead_stats); corpus: nondeterminism_trap, reorder_trap, timestamp_reorder_trap; twin_config.json for L1; summary includes replay_level (L0|L1|L2), nondeterminism_budget (declared), divergence_localization_confidence, l1_stub_ok, overhead_stats (n_replays, mean_ms, stdev_ms, p95_ms). **Root cause:** per-divergence root_cause_category (scheduler, tool_io, timestamp, unknown) and witness_slice (events around divergence_at_seq). **Overhead curve:** run with `--overhead-curve` to get overhead_curve[] (event_count, p95_replay_ms; stdev per bin when n > 1); figure: scripts/plot_replay_overhead.py. **L1 claim:** L1 = control-plane replay with recorded observations (trace-only; not physics replay). See bench/replay/README.md, kernel/trace/REPLAY_LEVELS.v0.1.md. Draft: Table 1 (corpus/fidelity), Table 2 (overhead), comparison subsection, Limitations, claims table.
-- **Validity and robustness:** run_manifest (corpus_dir, overhead_runs, overhead_curve_runs, script); success_criteria_met (fidelity_pass, corpus_divergences_detected). Corpus is fixed; no sample-size issue; expected divergences documented in corpus.
-- **Follow-up:** Run `replay_eval.py` (optional `--overhead-runs 20`, `--overhead-curve`); save summary to `datasets/runs/replay_eval/summary.json`. Report fidelity, divergence, root_cause_category, and overhead distribution in draft.
+- **Existing:** `replay_eval.py` produces `datasets/runs/replay_eval/summary.json` with `schema_version: p3_replay_eval_v0.2`. **Corpus:** traps (nondeterminism, reorder, timestamp_reorder, hash_mismatch), optional **field_style_pass**, `twin_config.json` for L1 stub. Summary includes `replay_level`, `nondeterminism_budget`, `divergence_localization_confidence`, `corpus_outcome_wilson_ci95`, `l1_stub_ok`, `overhead_stats` (empirical p95/p99, bootstrap CIs, `percentile_method`), `baseline_overhead` (apply-only, final-hash-only, witness_window ablation, paired full_vs_apply_only), `multi_seed_overhead`, `excellence_metrics` (`overhead_p99_empirical`, corpus accuracy). **Root cause:** `root_cause_category` and `witness_slice` per divergence. **Overhead curve:** `--overhead-curve` populates `overhead_curve[]` (optional p95 CI per bin); figure: `plot_replay_overhead.py`; verify: `verify_p3_replay_summary.py`. **L1:** control-plane replay with recorded observations (not physics). See `bench/replay/README.md`, `kernel/trace/REPLAY_LEVELS.v0.1.md`, `papers/P3_Replay/DRAFT.md`, `generated_tables.md`.
+- **Validity and robustness:** `run_manifest` (corpus_dir, overhead_runs, thin_slice_seeds, bootstrap_reps, platform, python_version); `success_criteria_met` (fidelity_pass, corpus_expected_outcomes_met). Publishable defaults: `--overhead-runs 20`, multi-seed thin-slice list, `--bootstrap-reps` 500+ as in DRAFT.
+- **Follow-up:** Run `replay_eval.py` per [EVALS_RUNBOOK.md](EVALS_RUNBOOK.md) P3 section; `plot_replay_overhead.py`; `verify_p3_replay_summary.py --strict-curve` when using the curve figure.
 
 ### P4 (MAESTRO)
 
@@ -249,10 +256,10 @@ With --run-naive and --fault-threshold 0, naive baseline and regime switches are
 |-------|-------------------------|-------------|-----------|
 | P2 | rep_cps_eval/summary.json | Robust aggregation reduces bias; delay sweep + scenarios in place | Draft; optional naive-in-loop adapter |
 | P5 | scaling_eval/heldout_results.json | Regression, collapse, 95% CI, scaling_fit; feat/regression beat global | Draft; more seeds optional |
-| P6 | llm_eval/red_team_results.json | 5/5 red-team pass; adapter latency recorded | Draft |
-| P8 | meta_eval/comparison.json | Regime switches with fault_threshold=0; naive baseline in comparison | Draft |
+| P6 | llm_eval/red_team_results.json | Red-team + confusable + jailbreak-style suites; adapter latency; optional real-LLM matrix | Draft |
+| P8 | meta_eval/comparison.json (+ optional scenario_regime_stress_v1/) | Non-inferior collapse vs fixed, paired stats, auditable switches; publishable dual-scenario + non-vacuous stress policy | Draft; verify_p8_meta_artifacts |
 | P0 | p0_conformance_corpus/, e3_summary.json, p0_e4_summary.json, e2_redaction_demo/, p0_conformance_summary.json | E1 corpus; E2 4-col matrix; E3 replay link (optional standalone verifier); E4 multi-adapter; Table 1/2/3, Figures 1-3; repro in DRAFT Appendix | Claim table + Appendix |
-| P3 | replay_eval/summary.json | Corpus + L0 replay; fidelity and divergence | Draft |
+| P3 | replay_eval/summary.json | L0 + corpus + baselines + multi-seed; schema v0.2; verify script | Draft |
 | P4 | maestro_fault_sweep/ (multi_sweep.json) | Multi-scenario; drop + delay_fault_prob sweep | Draft |
 | P1 | contracts_eval/eval.json | Corpus verdicts; P1_TRACE_DERIVABILITY; export_contracts_corpus_table, plot_contracts_scale | Claim table + repro block |
 | P7 | assurance_eval/results.json | Mapping + PONR; audit_bundle --release; Part 11 mechanical; export_assurance_gsn | Claim table + repro block |
@@ -278,9 +285,9 @@ The following were run and written under `datasets/runs/`:
 | P2 | `rep_cps_eval.py --delay-sweep 0,0.05,0.1` (CI) | `rep_cps_eval/summary.json` |
 | P5 | `scaling_heldout_eval.py` (regression, collapse, CI, scaling_fit) | `scaling_eval/heldout_results.json`; tables: `export_scaling_tables.py` |
 | P6 | `llm_redteam_eval.py --run-adapter` (5 red-team cases) | `llm_eval/red_team_results.json`, `adapter_latency.json` |
-| P8 | `meta_eval.py --drop-prob 0.25 --seeds 1..5` | `meta_eval/comparison.json` |
+| P8 | `meta_eval.py` (CI: `--run-naive --fault-threshold 0`, `--seeds` 1,2,3; v1 smoke; `verify_p8_meta_artifacts`) | `meta_eval/comparison.json` |
 
-P5 feat baseline (predict by same `num_tasks` on train) improves over global mean: `overall_feat_baseline_mae` 0.3 vs `overall_baseline_mae` 0.8. P6 red-team expanded to 5 cases (all pass); adapter latency recorded. P8 at 0.25 drop prob still had no regime switches in this run; lower `fault_threshold` or more seeds may be needed to observe switches.
+P5 feat baseline (predict by same `num_tasks` on train) improves over global mean: `overall_feat_baseline_mae` 0.3 vs `overall_baseline_mae` 0.8. P6 red-team expanded to 9 cases (all pass in synthetic suite); adapter latency recorded. P8: use `--fault-threshold 0 --run-naive` to exercise naive switches; publishable pipeline uses `run_paper_experiments.py --paper P8` (non-vacuous, dual scenario, optional `retry_heavy`).
 
 ---
 
@@ -290,7 +297,7 @@ P5 feat baseline (predict by same `num_tasks` on train) improves over global mea
 |-------|----------------|------------|
 | **P2** | Delay sweep + second scenario | `rep_cps_eval.py --delay-sweep 0,0.05,0.1 --scenarios toy_lab_v0,lab_profile_v0 --seeds 1,2,3`; output includes `delay_sweep` and per-scenario stability. |
 | **P4** | delay_fault_prob sweep | `maestro_fault_sweep.py` now has 4 settings: no_drop, drop_005, delay_01, drop_005_delay_01; each setting has `delay_fault_prob` in summary. |
-| **P8** | fault_threshold + naive baseline | `meta_eval.py --fault-threshold 0 --run-naive`; MetaAdapter accepts `fault_threshold` via fault_params; naive run uses threshold=0 (switch on any fault). Regime switches now trigger when faults occur; comparison includes `naive_switch_baseline`. |
+| **P8** | Non-vacuous stress + dual scenario + paired stats | `run_paper_experiments.py --paper P8`; `meta_eval.py --scenario`, `--non-vacuous`, `stress_selection_policy`, `collapse_paired_analysis`, `verify_p8_meta_artifacts.py`; `meta_collapse_sweep.py` writes `schema_version` on sweep JSON. |
 | **P0** | Table 1 (E1 corpus) | `build_p0_conformance_corpus.py`, `export_e1_corpus_table.py`. |
 | **P0** | Table 2 (E2 admissibility) | `e2_redaction_demo.py`, `export_e2_admissibility_matrix.py` (4-col verification-mode matrix). |
 | **P0** | Table 3 (E3+E4) | `run_p0_e4_multi_adapter.py`, `export_p0_table3.py`; optionally merge E3 via produce_p0_e3_release + export_p0_table3 --e3. |

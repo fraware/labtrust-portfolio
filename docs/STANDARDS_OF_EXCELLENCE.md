@@ -34,10 +34,12 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
-| Corpus detection rate (%) | Fraction of corpus sequences with detection_ok true (target 100%). | eval.json; export_contracts_corpus_table. |
-| Overhead p99 (us) | 99th percentile time per write (validator + state update). | eval.json per-sequence; report max or p99. |
-| Throughput (events/sec) | With --scale-test: events_per_sec; report mean and stdev over runs. | scale_test.json. |
-| Baseline margin | Violations denied with validator vs timestamp-only (count difference). | eval.json (violations_denied_with_validator, baseline_timestamp_only_denials). |
+| Corpus detection rate (%) | Fraction of corpus sequences with detection_ok true (exact per-event verdict match; target 100%). | eval.json; export_contracts_corpus_table. |
+| Overhead p99 (us) | Event-level 99th percentile time per write; latency_percentiles_us.p99 and p99_ci95 (bootstrap). | eval.json latency_percentiles_us. |
+| Throughput (events/sec) | With --scale-test: events_per_sec; with --scale-sweep: sweep_results per size. Report mean and stdev over runs. | scale_test.json; scale_sweep.json. |
+| Baseline margin | Violations denied with validator vs timestamp-only (count difference). Ablation by failure class in ablation_by_class. | eval.json (violations_denied_with_validator, baseline_timestamp_only_denials, ablation_by_class). |
+| Resource and cost | wall_clock_sec, events_per_sec_overall, cost_proxy (events_per_dollar when LABTRUST_COST_PER_HOUR set). | eval.json resource_and_cost. |
+| Transport parity | Same canonical sequence, event-log vs LADS-shaped; parity_ok when verdict vectors match. | transport_parity.json (contracts_transport_parity.py). |
 
 ### P2 — REP-CPS
 
@@ -45,18 +47,23 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 |--------|-------------|-----------------|
 | Bias reduction (%) | (bias_naive - bias_robust) / bias_naive when bias_naive > 0; robust aggregation reduces observed compromise-induced bias. | summary.json aggregation_under_compromise. |
 | Max influence per compromised (optional) | aggregation_variants[].max_influence_per_compromised_agent for trimmed_mean. | summary.json. |
-| Safety gate integration | Boolean: protocol output does not actuate without policy check. | summary.json safety_gate_denial. |
+| Safety gate integration | Boolean: protocol output does not actuate without policy check; safety_gate_campaign (pass/deny counts), denial_trace_recorded. | summary.json safety_gate_denial. |
 | Adapter parity, robust_beats_naive | success_criteria_met; trigger not met in evaluated scenario (paper is profile-and-harness contribution). | summary.json. |
-| Profile ablation | profile_ablation[]: no auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant. | summary.json profile_ablation. |
+| Profile ablation | profile_ablation[]: no auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant (Table 6). | summary.json profile_ablation; generated_tables.md Table 6. |
+| Latency/cost | wall_sec per policy, aggregation_compute_ms, policy_overhead_vs_centralized (Table 5). Figure 2: plot_rep_cps_latency.py. | summary.json latency_cost. |
+| Resilience envelope | safe_operating_region_n_compromised_max, failure_boundary_n_compromised (Table 7). | summary.json resilience_envelope. |
 
 ### P3 — Replay
 
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
-| Divergence localization accuracy | Fraction of corpus traps where observed divergence_at_seq == expected. | summary.json; corpus_divergences_detected, per_trace. |
-| Overhead p99 (ms) | p99 replay time over N replays (in addition to mean, stdev, p95). | overhead_stats or derived. |
+| Corpus outcome accuracy | Fraction of corpus rows (pass + traps) matching expected outcome; `divergence_localization_accuracy_pct` in excellence_metrics. | summary.json; per_trace; corpus_outcome_wilson_ci95. |
+| Divergence localization (seq traps) | Fraction of seq-expected traps where divergence_at_seq matches; divergence_localization_wilson_ci95. | summary.json; corpus_expected pairs. |
+| Overhead p99 (ms) | Empirical p99 over N replays (linear percentile); not a normal approximation. | overhead_stats; overhead_p99_empirical in excellence_metrics. |
+| Baseline margin | full_vs_apply_only (paired bootstrap CI) in baseline_overhead. | replay_eval summary.json. |
+| Multi-seed variability | multi_seed_overhead.across_seeds_stdev_of_means_ms. | replay_eval summary.json. |
 | L1 stub pass | l1_stub_ok true when twin config valid. | summary.json. |
-| L1 twin pass | l1_twin_ok true when --l1-twin and deterministic re-run matches state hash. | summary.json (with --l1-twin). |
+| L1 twin pass | l1_twin_ok when --l1-twin. | summary.json (with --l1-twin). |
 | Witness slices present | Top-level witness_slices length > 0 when divergence detected. | summary.json. |
 
 ### P4 — CPS-MAESTRO
@@ -101,10 +108,12 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
-| Collapse reduction | meta_controller collapse_count vs fixed (or naive); or collapse rate difference. | comparison.json. |
+| Collapse (non-inferior vs strict) | Non-inferior: `meta_non_worse_collapse` (meta_collapses <= fixed). Strict: `meta_strictly_reduces_collapse` (meta_collapses < fixed). | comparison.json. |
+| Paired binary collapse | McNemar exact two-sided on discordant pairs; Wilson CIs on marginal rates. | comparison.json `collapse_paired_analysis`. |
 | No safety regression | success_criteria_met.no_safety_regression (meta >= 90% of fixed or similar). | comparison.json. |
 | Switch audit trail | regime_switch_count_total present; every switch justifiable from trace. | comparison.json; trace regime_switch events. |
-| Trigger met | meta_reduces_collapse true; non-vacuous comparison. | comparison.json. |
+| Trigger met | no_safety_regression and meta_non_worse_collapse; stress policy in manifest when non-vacuous. | comparison.json. |
+| Stress calibration | Pre-specified rule for drop_prob when `--non-vacuous`. | comparison.json `run_manifest.stress_selection_policy`. |
 
 ## Implementation notes
 

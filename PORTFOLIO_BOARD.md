@@ -2,7 +2,7 @@
 
 This file is the canonical, repo-native portfolio board. Mirror to GitHub Projects if desired, but treat **this** as truth.
 
-**Current state:** All nine papers (P0–P8) are at **Draft** stage. Phase 3 (submission-readiness) checklist passed 2025-03-11 for each; see `papers/Px_*/PHASE3_PASSED.md`. Next step for each: submission prep (tag release, final pass, venue format) per [docs/PRE_SUBMISSION_CHECKLIST.md](docs/PRE_SUBMISSION_CHECKLIST.md). For conditional papers (P2, P5, P6, P8), the checklist includes a **Conditional papers** subsection (trigger, regression/evidence, non-vacuous run) and references [docs/CONDITIONAL_TRIGGERS.md](docs/CONDITIONAL_TRIGGERS.md). Eval summary JSONs include optional `excellence_metrics`; run `python scripts/export_excellence_summary.py` to print a summary. After running all paper evals: [datasets/runs/RUN_RESULTS_SUMMARY.md](datasets/runs/RUN_RESULTS_SUMMARY.md) for a consolidated results summary. Strengthened experiments and known limitations: [docs/EXPERIMENTS_AND_LIMITATIONS.md](docs/EXPERIMENTS_AND_LIMITATIONS.md); plan: [docs/PLAN_STRENGTHEN_EXPERIMENTS.md](docs/PLAN_STRENGTHEN_EXPERIMENTS.md).
+**Current state:** All nine papers (P0–P8) are at **Draft** stage. Phase 3 (submission-readiness) checklist passed 2025-03-11 for each; see `papers/Px_*/PHASE3_PASSED.md`. Next step for each: submission prep (tag release, final pass, venue format) per [docs/PRE_SUBMISSION_CHECKLIST.md](docs/PRE_SUBMISSION_CHECKLIST.md). For conditional papers (P2, P5, P6, P8), the checklist includes a **Conditional papers** subsection (trigger, regression/evidence, non-vacuous run) and references [docs/CONDITIONAL_TRIGGERS.md](docs/CONDITIONAL_TRIGGERS.md). Eval summary JSONs include optional `excellence_metrics`; run `python scripts/export_excellence_summary.py` to print a summary. [datasets/runs/RUN_RESULTS_SUMMARY.md](datasets/runs/RUN_RESULTS_SUMMARY.md) consolidates **P5/P6/P8** key numbers; other papers use per-eval JSON under `datasets/runs/` (see [docs/RESULTS_PER_PAPER.md](docs/RESULTS_PER_PAPER.md)). Strengthened experiments and known limitations: [docs/EXPERIMENTS_AND_LIMITATIONS.md](docs/EXPERIMENTS_AND_LIMITATIONS.md); plan: [docs/PLAN_STRENGTHEN_EXPERIMENTS.md](docs/PLAN_STRENGTHEN_EXPERIMENTS.md).
 
 ## Stages (exactly five)
 - **Spec** — scoped, non-overlapping thesis + artifacts named in kernel; explicit kill criteria
@@ -29,7 +29,7 @@ Paper owners are TBD unless set in the board.
 | P5 | Scaling Laws (coordination tax) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
 | P6 | LLM Planning (typed plans + validators) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
 | P7 | Standards Mapping (assurance pack) | core-kernel | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
-| P8 | Meta-Coordination (regime switching) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
+| P8 | Meta-Coordination (regime switching) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Evidence: dual-scenario publishable run, `verify_p8_meta_artifacts`, tiered collapse claims; submission prep per PRE_SUBMISSION_CHECKLIST. |
 
 ## Trigger criteria for conditional modules
 - **P2 REP-CPS**: only if sensitivity sharing materially influences scheduling/actuation under partial/compromised information.

@@ -91,6 +91,18 @@ class TestRepCpsEvalIntegration(unittest.TestCase):
             self.assertIn("full_profile", variant_names)
             self.assertIn("no_robust_aggregation", variant_names)
 
+            self.assertIn("resilience_envelope", summary)
+            env_res = summary["resilience_envelope"]
+            self.assertIn("safe_operating_region_n_compromised_max", env_res)
+            self.assertIn("failure_boundary_n_compromised", env_res)
+            self.assertIn("magnitude_sweep", summary)
+            self.assertIn("trim_fraction_sweep", summary)
+
+            self.assertIn("latency_cost", summary)
+            lc = summary["latency_cost"]
+            self.assertIn("wall_sec_rep_cps_mean", lc)
+            self.assertIn("policy_overhead_vs_centralized_ms_rep_cps", lc)
+
             self.assertIn("run_manifest", summary)
             rm = summary["run_manifest"]
             self.assertIn("seeds", rm)

@@ -120,10 +120,16 @@ class TestMetaEvalIntegration(unittest.TestCase):
             self.assertIn("meta_controller", data)
             self.assertIn("naive_switch_baseline", data)
             self.assertIn("meta_reduces_collapse", data)
+            self.assertIn("meta_non_worse_collapse", data)
+            self.assertIn("meta_strictly_reduces_collapse", data)
+            self.assertIn("collapse_paired_analysis", data)
+            self.assertEqual(data["meta_non_worse_collapse"], data["meta_reduces_collapse"])
+            self.assertIn("schema_version", data)
             self.assertIn("no_safety_regression", data)
             self.assertIn("run_manifest", data)
             rm = data["run_manifest"]
             self.assertIn("seeds", rm)
+            self.assertIn("schema_version", rm)
             self.assertEqual(len(rm["seeds"]), 3, "run_manifest.seeds length must match --seeds 1,2,3")
             if "seed_count" in rm:
                 self.assertEqual(rm["seed_count"], 3)
@@ -137,6 +143,16 @@ class TestMetaEvalIntegration(unittest.TestCase):
                 lo, hi = meta["tasks_completed_ci95"]
                 self.assertLessEqual(lo, meta["tasks_completed_mean"])
                 self.assertGreaterEqual(hi, meta["tasks_completed_mean"])
+            self.assertEqual(
+                fix.get("tasks_completed_ci95_method"),
+                "student_t_equal_tailed_95",
+            )
+            cpa = data["collapse_paired_analysis"]
+            self.assertIn("mcnemar_exact_p_value_two_sided", cpa)
+            self.assertEqual(len(cpa["fixed_collapse_rate_wilson_ci95"]), 2)
+            em = data["excellence_metrics"]
+            self.assertIn("difference_ci95_method", em)
+            self.assertIn("collapse_outcome_strict_improvement", em)
             self.assertIn("success_criteria_met", data)
             sc = data["success_criteria_met"]
             self.assertTrue(sc.get("no_safety_regression"), "no_safety_regression must hold")
@@ -180,6 +196,52 @@ class TestMetaEvalIntegration(unittest.TestCase):
                 export_proc.returncode, 0,
                 "export_meta_tables.py must succeed on comparison.json",
             )
+            verify_script = repo_root() / "scripts" / "verify_p8_meta_artifacts.py"
+            verify_proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(verify_script),
+                    "--comparison",
+                    str(comparison_path),
+                ],
+                cwd=str(repo_root()),
+                env={**env, "PYTHONPATH": pypath},
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertEqual(
+                verify_proc.returncode, 0,
+                (verify_proc.stdout, verify_proc.stderr),
+            )
+
+    def test_meta_eval_scenario_regime_stress_v1_runs(self) -> None:
+        env = os.environ.copy()
+        pypath = str(repo_root() / "impl" / "src")
+        script = repo_root() / "scripts" / "meta_eval.py"
+        with tempfile.TemporaryDirectory() as td:
+            out_dir = Path(td) / "meta_v1"
+            out_dir.mkdir(parents=True)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "--out",
+                    str(out_dir),
+                    "--scenario",
+                    "regime_stress_v1",
+                    "--seeds",
+                    "1,2",
+                ],
+                cwd=str(repo_root()),
+                env={**env, "PYTHONPATH": pypath},
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            self.assertEqual(proc.returncode, 0, (proc.stdout, proc.stderr))
+            data = json.loads((out_dir / "comparison.json").read_text(encoding="utf-8"))
+            self.assertEqual(data.get("scenario_id"), "regime_stress_v1")
 
     def test_meta_eval_stress_collapse_threshold_exercises_collapse_metric(self) -> None:
         """Run with higher collapse threshold so collapse_count can be non-zero."""

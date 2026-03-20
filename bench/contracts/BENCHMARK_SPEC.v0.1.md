@@ -7,16 +7,38 @@ This document defines the **Coordination Contract Benchmark v0.1**: a reusable b
 - **Version:** v0.1
 - **Corpus location:** `bench/contracts/corpus/` (relative to repo root)
 
-## Sequences (N = 25)
+## Sequences (N = 51+)
 
-The challenge corpus includes sequences partitioned by failure class, with positive and negative controls:
+The challenge corpus is stratified by failure class and by tier. Discovery: all `*.json` files in the corpus directory via `sorted(corpus_dir.glob("*.json"))`.
 
-- **Positive controls (good_*):** good_sequence, good_two_keys, good_three_events, good_four_events, good_single_allow, good_sequence_4events, multi_key_no_conflict, conflicting_writes_independent_keys, duplicate_delivery, same_ts_same_writer, edge_case_timestamps.
-- **Split-brain:** split_brain_sequence, split_brain_same_epoch, split_brain_second_key, split_brain_three_writers, multi_writer_contention.
-- **Stale write / reorder:** stale_write_sequence, stale_write_sequence_2, stale_write_margin, reorder_sequence, reorder_first_deny, reorder_three_events, reorder_multi_key, unsafe_lww_sequence.
+### Tier 1 — Micro (correctness)
+
+Short sequences (1–10 events) covering:
+
+- **Positive controls (good_*):** good_sequence, good_two_keys, good_three_events, good_four_events, good_five_events, good_six_keys, good_seven_events, good_eight_events, good_ten_events, good_single_allow, good_sequence_4events, good_interleaved_6, good_three_keys_cycle, multi_key_no_conflict, conflicting_writes_independent_keys, duplicate_delivery, same_ts_same_writer, edge_case_timestamps, coordination_message_passthrough.
+- **Split-brain:** split_brain_sequence, split_brain_same_epoch, split_brain_second_key, split_brain_three_writers, split_brain_four_writers, split_brain_five_writers, split_brain_delayed_conflict, split_brain_two_keys, split_brain_then_allow, multi_writer_contention.
+- **Stale write / reorder:** stale_write_sequence, stale_write_sequence_2, stale_write_sequence_3, stale_write_sequence_4, stale_write_margin, stale_write_delayed_delivery, stale_then_allow, reorder_sequence, reorder_first_deny, reorder_three_events, reorder_multi_key, reorder_burst_four, reorder_mid_chain, reorder_first_event_deny, unsafe_lww_sequence.
 - **Boundary:** stale_write_exact (ts equals last_ts; validator uses strict > so allow).
 
-Discovery: all `*.json` files in the corpus directory; see corpus location above.
+### Tier 2 — Meso (long-horizon and mixed-key)
+
+- **Long-horizon:** long_horizon_10 (10 events, one key).
+- **Mixed-key contention:** mixed_key_contention_8 (8 events across multiple keys).
+
+### Tier 3 — Stress and adversarial
+
+- **Adversarial / robustness:** actor_payload_writer_mismatch (actor id vs payload writer; split_brain), burst_duplicate_three (same-ts burst), unknown_key_deny, good_then_unknown_key (empty task_id).
+
+### Required reporting per tier
+
+- **Tier 1:** Per-sequence detection_ok (exact per-event verdict match), corpus_detection_rate_pct, detection_metrics (TP/FP/FN, precision, recall, F1).
+- **Tier 2:** Same as Tier 1; report latency and throughput for long-horizon runs.
+- **Tier 3:** Same as Tier 1; document expected behavior for malformed/adversarial cases.
+
+### Acceptance criteria
+
+- A validator satisfies the benchmark if for every sequence, the validator's verdict per event matches `expected_verdicts[i]` (detection_ok true for all sequences).
+- Run manifest must include corpus_sequence_count, corpus_fingerprint, and script_version.
 
 ## Schema
 

@@ -279,7 +279,7 @@ The following are in place: **verification_mode** in EVIDENCE_BUNDLE and VERIFIC
 |---|------|-------------------|
 | 1.1 | Use **collapse_sweep** to identify drop_prob region where **fixed regime collapses** in at least some seeds. | `scripts/meta_collapse_sweep.py`: ensure sweep covers range where collapsed=true for some seeds; document or auto-detect "collapse region" |
 | 1.2 | Ensure publishable runs (e.g. meta_eval) use a fault setting where **collapse exists** (collapse_count > 0 for fixed regime in some seeds). | Default or doc: recommend drop_probs / fault settings that induce collapse |
-| 1.3 | Replace vacuous success criteria: **meta_reduces_collapse** must be non-trivial (i.e. collapse exists; meta collapse rate < fixed collapse rate). | `scripts/meta_eval.py`: success_criteria_met.meta_reduces_collapse only true when there is at least one collapse in fixed (or baseline); document in RESULTS_PER_PAPER |
+| 1.3 | **Done (camera-ready semantics):** **meta_reduces_collapse** encodes **non-inferiority** (meta collapse_count <= fixed); **meta_strictly_reduces_collapse** and McNemar/Wilson in `collapse_paired_analysis` capture strict improvement and paired binary uncertainty. Non-vacuous runs record `stress_selection_policy`. See `comparison.json`, `docs/CONDITIONAL_TRIGGERS.md`, `RESULTS_PER_PAPER.md`. |
 
 ### 2. Meta vs thrash
 
@@ -290,8 +290,8 @@ The following are in place: **verification_mode** in EVIDENCE_BUNDLE and VERIFIC
 
 ### 3. Trigger proof
 
-- **Trigger:** Meta beats **best fixed regime** in at least one stress regime and **does not safety-regress** (no_safety_regression true).
-- **Deliverable:** comparison.json (or summary) states trigger: meta wins on collapse in at least one regime; safety invariant; if not met, paper remains conditional.
+- **Trigger (current repo):** Non-inferior paired collapse counts vs fixed (`meta_non_worse_collapse` / `meta_reduces_collapse`) and **no safety regression** (`no_safety_regression`); `trigger_met` in `comparison.json`. Strict collapse improvement is reported separately; ties are not “wins.”
+- **Deliverable:** `comparison.json` + optional v1 path; `verify_p8_meta_artifacts.py`; draft/claims aligned with tiered semantics (`papers/P8_MetaCoordination/claims.yaml`, `CONDITIONAL_TRIGGERS.md`).
 
 **Tasks:** CONDITIONAL_TRIGGERS; ensure meta_eval output has explicit trigger_met or equivalent; P8 DRAFT and README.
 

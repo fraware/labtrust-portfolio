@@ -45,6 +45,8 @@ When two conditions are compared (e.g. fixed vs meta, robust vs naive, baseline 
 
 For publishable comparisons, report either post-hoc power (when p > alpha) or note that the CI excludes zero; optionally report CI width. Scripts `meta_eval.py`, `rep_cps_eval.py`, and `scaling_heldout_eval.py` populate these via `labtrust_portfolio.stats` (paired_t_test, bootstrap_ci_difference, effect_size_mean_diff, power_paired_t_test). See STANDARDS_OF_EXCELLENCE.md.
 
+**P8 meta_eval (paired binary collapse):** Report `collapse_paired_analysis` (Wilson 95% CIs on marginal collapse rates; exact two-sided McNemar on discordant pairs) and distinguish **non-inferior counts** (`meta_non_worse_collapse`, alias `meta_reduces_collapse`) from **strict improvement** (`meta_strictly_reduces_collapse`). Per-arm mean `tasks_completed` CIs use Student’s t (`tasks_completed_ci95_method`); paired continuous summary uses bootstrap on paired resampling (`difference_ci95_method`). When using `--non-vacuous`, record `run_manifest.stress_selection_policy` for pre-specified stress calibration.
+
 ### 6. Success / kill criteria (recommended)
 
 Summary JSON may include a `success_criteria_met` or `kill_criteria` block so that paper claims (e.g. "beat baseline", "no safety regression") are machine-checkable. For conditional papers (P2, P5, P6, P8), `success_criteria_met.trigger_met` indicates whether the trigger proof required by `docs/CONDITIONAL_TRIGGERS.md` is satisfied. Export scripts and integration tests can assert on these fields.
@@ -61,7 +63,7 @@ Summary JSON may include a `success_criteria_met` or `kill_criteria` block so th
 
 - **P0 E3:** `replay_link_e3.py` writes `e3_summary.json` and `p0_e3_variance.json`; both include run_manifest (seeds, scenario_id). Statistics: mean, stdev, p95, p99, 95% CI. Default `--runs 20` for publishable tables.
 - **P4 MAESTRO fault sweep:** `maestro_fault_sweep.py` writes `multi_sweep.json` with run_manifest (seeds, scenarios, fault settings). Statistics: mean, stdev, p95, p99 per metric. Default `--seeds 20` for publishable tables; CI may use fewer for speed.
-- **P3 Replay:** `replay_eval.py` writes `replay_eval/summary.json` with replay_level, nondeterminism_budget, divergence_localization_confidence; overhead_stats; root_cause_category and witness_slice per divergence; top-level witness_slices; with `--overhead-curve`, overhead_curve[] (event_count, p95_replay_ms); with `--l1-twin`, l1_twin_ok and l1_twin_final_hash_match. Full corpus table: `scripts/export_replay_corpus_table.py`.
+- **P3 Replay:** `replay_eval.py` writes `replay_eval/summary.json` (`schema_version: p3_replay_eval_v0.2`) with replay_level, nondeterminism_budget, divergence_localization_confidence, corpus_outcome_wilson_ci95; overhead_stats (mean, stdev, empirical p95/p99, CIs; `percentile_method`); baseline_overhead (apply-only, final-hash-only, witness_window ablation, paired full_vs_apply_only); multi_seed_overhead; root_cause_category and witness_slice per divergence; top-level witness_slices; with `--overhead-curve`, overhead_curve[] (event_count, p95_replay_ms, optional p95 CI); with `--l1-twin`, l1_twin_ok, l1_twin_final_hash_match, l1_twin_replay_time_ms. Full corpus table: `scripts/export_replay_corpus_table.py`. Verify: `scripts/verify_p3_replay_summary.py`.
 - **Other evals:** P1, P2, P5, P6, P7, P8 summary outputs include run_manifest (seeds, scenario, fault settings, script) and, where stochastic, mean/stdev and 95% CI when n >= 2. See runbook "CI vs publishable" and per-script help.
 
 ## References

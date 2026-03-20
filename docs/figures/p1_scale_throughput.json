@@ -2,19 +2,19 @@
   "throughput_sweep": [
     {
       "events": 2000,
-      "events_per_sec": 59295.1
+      "events_per_sec": 116569.82
     },
     {
       "events": 20000,
-      "events_per_sec": 78584.84
+      "events_per_sec": 141611.17
     },
     {
       "events": 100000,
-      "events_per_sec": 64374.99
+      "events_per_sec": 145222.86
     },
     {
       "events": 200000,
-      "events_per_sec": 57619.53
+      "events_per_sec": 118256.57
     }
   ]
 }

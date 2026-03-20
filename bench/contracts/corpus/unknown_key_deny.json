@@ -1,0 +1,1 @@
+{"description": "Robustness: task_start with empty task_id -> unknown_key deny", "initial_state": {"ownership": {}, "_last_ts": {}}, "events": [{"type": "task_start", "ts": 1.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "", "writer": "agent_1"}}], "expected_verdicts": ["deny"]}

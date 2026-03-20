@@ -61,11 +61,50 @@ def apply_event(state: Dict[str, Any], ev: Dict[str, Any]) -> Dict[str, Any]:
 
     return s
 
+
 def replay_trace(trace: Dict[str, Any]) -> Tuple[bool, str]:
     ok, diag = replay_trace_with_diagnostics(trace)
     if ok:
         return (True, "replay ok")
     return (False, diag[0].message() if diag else "replay failed")
+
+
+def replay_trace_apply_only(trace: Dict[str, Any]) -> None:
+    """
+    Baseline timing path: apply events in order with no hash checks.
+    Does not verify correctness; use for overhead comparison only.
+    """
+    state: Dict[str, Any] = {}
+    for ev in trace.get("events", []):
+        state = apply_event(state, ev)
+
+
+def replay_trace_final_hash_only(
+    trace: Dict[str, Any],
+) -> Tuple[bool, List[DivergenceDiagnostic]]:
+    """
+    Baseline verification: apply all events; compare only final_state_hash.
+    No per-event localization (cannot detect which event caused mismatch mid-trace).
+    """
+    state: Dict[str, Any] = {}
+    events = trace.get("events", [])
+    for ev in events:
+        state = apply_event(state, ev)
+    final_expected = trace.get("final_state_hash", "")
+    final_got = state_hash(state)
+    if final_got != final_expected:
+        diagnostics: List[DivergenceDiagnostic] = [
+            DivergenceDiagnostic(
+                seq=-1,
+                expected_hash=final_expected,
+                got_hash=final_got,
+                event_type="final",
+                root_cause_category="unknown",
+                witness_slice=events[-2:] if len(events) >= 2 else list(events),
+            )
+        ]
+        return (False, diagnostics)
+    return (True, [])
 
 
 def replay_trace_with_diagnostics(

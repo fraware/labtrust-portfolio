@@ -22,22 +22,23 @@ How do we turn “logs” into **replayable causal programs** suitable for audit
 1. Motivation: replayability as the missing glue between robotics, distributed systems, and safety cases
 2. Replay Levels and nondeterminism budgets (formalized)
 3. Trace format: event ontology, causal links, time model
-4. Replay engine: deterministic scheduling for L0; twin bindings for L1
-5. Divergence detection + attribution
-6. Evaluation: nondeterminism traps + fault recovery curves
+4. Replay engine: deterministic scheduling for L0; baselines (apply-only, final-hash-only); twin bindings for L1
+5. Divergence detection + attribution (witness slices)
+6. Evaluation: corpus traps + field-style pass trace + multi-seed thin-slice overhead + baselines (not fault recovery curves; recovery-style metrics belong to P4 MAESTRO)
 7. Evidence integration
 
 ## 5) Experiment plan
 - Scenarios:
-  - one MAESTRO scenario;
-  - one “nondeterminism trap” scenario (timing race + async reorder).
+  - MAESTRO thin-slice (multi-seed family for sensitivity);
+  - trap corpus (nondeterminism, reorder, timestamp reorder, hash mismatch);
+  - field-style pass trace (TRACE-conformant proxy for external mapping).
 - Metrics:
-  - replay fidelity (L0 exactness),
-  - divergence detection rate,
-  - localization accuracy,
-  - overhead (log size, replay time).
-- Baselines: naive logging; partial tracing; best-effort replays.
-- Stressors: scheduling jitter, tool flakiness, message reorder.
+  - replay fidelity (L0 pass/fail per trace),
+  - corpus outcome accuracy and Wilson CI,
+  - localization at expected seq for traps,
+  - overhead: empirical mean, stdev, p95, p99; bootstrap CIs; overhead vs trace size.
+- Baselines (implemented in `replay_eval.py`): apply-only (no hash); final-hash-only (no per-event localization); witness_window=0 ablation on pass path.
+- Cross-reference: fault sweeps and recovery proxies are evaluated in P4 (`maestro_fault_sweep`), not in P3.
 
 ## 6) Artifact checklist
 - `kernel/trace/TRACE.v0.1.schema.json`

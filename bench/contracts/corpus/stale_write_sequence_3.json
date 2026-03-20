@@ -1,0 +1,1 @@
+{"description": "Stale variant: last_ts 7.0, event 6.0", "initial_state": {"ownership": {"t1": "agent_1"}, "_last_ts": {"t1": 7.0}}, "events": [{"type": "task_end", "ts": 6.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "writer": "agent_1"}}], "expected_verdicts": ["deny"]}

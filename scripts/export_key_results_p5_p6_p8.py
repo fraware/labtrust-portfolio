@@ -104,13 +104,21 @@ def p8_block(runs: Path) -> list[str]:
         lines.append("*No comparison.json found.*")
         lines.append("")
         return lines
-    lines.append(f"- no_safety_regression: {data.get('no_safety_regression', '—')}")
-    lines.append(f"- meta_reduces_collapse: {data.get('meta_reduces_collapse', '—')}")
+    lines.append(f"- no_safety_regression: {data.get('no_safety_regression', 'n/a')}")
+    lines.append(f"- meta_reduces_collapse (non-inferior counts): {data.get('meta_reduces_collapse', 'n/a')}")
+    lines.append(
+        f"- meta_strictly_reduces_collapse: {data.get('meta_strictly_reduces_collapse', 'n/a')}"
+    )
+    em = data.get("excellence_metrics") or {}
+    if em.get("mcnemar_exact_p_value_two_sided") is not None:
+        lines.append(
+            f"- McNemar p (paired collapse, two-sided): {em.get('mcnemar_exact_p_value_two_sided')}"
+        )
     meta = data.get("meta_controller") or {}
     fixed = data.get("fixed") or {}
-    rsc = meta.get("regime_switch_count_total", "—")
+    rsc = meta.get("regime_switch_count_total", "n/a")
     lines.append(f"- regime_switch_count_total: {rsc}")
-    lines.append(f"- fixed collapse_count: {fixed.get('collapse_count', '—')}")
+    lines.append(f"- fixed collapse_count: {fixed.get('collapse_count', 'n/a')}")
     if data.get("fallback_tasks_completed_mean") is not None:
         fb = data.get("fallback_tasks_completed_mean")
         lines.append(f"- fallback_tasks_completed_mean (two regimes): {fb}")

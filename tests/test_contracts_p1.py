@@ -167,6 +167,70 @@ class TestContractsEvalIntegration(unittest.TestCase):
             self.assertIn("violations_denied_with_validator", data)
             self.assertIn("baseline_timestamp_only_denials", data)
             self.assertIn("baseline_timestamp_only_missed", data)
+            # Verdict-vector correctness: detection_ok is per-event match, not just denial count
+            for seq in data["sequences"]:
+                self.assertIn("detection_ok", seq)
+                if "actual_verdicts" in seq and "expected_verdicts" not in seq:
+                    pass  # actual_verdicts present for debugging
+            # Event-level latency and CI
+            self.assertIn("latency_percentiles_us", data)
+            lp = data["latency_percentiles_us"]
+            self.assertIn("event_level_n", lp)
+            self.assertIn("median_ci95", lp)
+            self.assertIn("p95_ci95", lp)
+            self.assertIn("p99_ci95", lp)
+            # Detection metrics include F1
+            self.assertIn("detection_metrics", data)
+            self.assertIn("f1", data["detection_metrics"])
+            # Run manifest includes script_version and corpus_fingerprint
+            rm = data["run_manifest"]
+            self.assertIn("script_version", rm)
+            self.assertIn("corpus_fingerprint", rm)
+
+
+class TestContractsVerdictVectorCorrectness(unittest.TestCase):
+    """Regression: detection_ok must be exact per-event verdict match, not denial count."""
+
+    def test_detection_ok_false_when_one_verdict_wrong(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            corpus_dir = Path(td) / "corpus"
+            corpus_dir.mkdir()
+            # One sequence: two events, both allow
+            path = corpus_dir / "one_sequence.json"
+            path.write_text(
+                json.dumps({
+                    "description": "Two allows",
+                    "initial_state": {"ownership": {}, "_last_ts": {}},
+                    "events": [
+                        {"type": "task_start", "ts": 1.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "writer": "agent_1"}},
+                        {"type": "task_end", "ts": 2.0, "actor": {"id": "agent_1"}, "payload": {"task_id": "t1", "writer": "agent_1"}},
+                    ],
+                    "expected_verdicts": ["allow", "deny"],  # second should be allow; wrong
+                }),
+                encoding="utf-8",
+            )
+            script = _repo_root() / "scripts" / "contracts_eval.py"
+            out_dir = Path(td) / "out"
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "--out",
+                    str(out_dir),
+                    "--corpus",
+                    str(corpus_dir),
+                ],
+                cwd=str(_repo_root()),
+                env={**os.environ, "PYTHONPATH": str(_repo_root() / "impl" / "src")},
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertEqual(proc.returncode, 0)
+            data = json.loads((out_dir / "eval.json").read_text(encoding="utf-8"))
+            self.assertFalse(data["success_criteria_met"]["all_detection_ok"])
+            self.assertEqual(len(data["sequences"]), 1)
+            self.assertFalse(data["sequences"][0]["detection_ok"])
 
 
 class TestContractsScaleTest(unittest.TestCase):

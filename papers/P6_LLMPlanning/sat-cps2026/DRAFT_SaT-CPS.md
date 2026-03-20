@@ -14,7 +14,7 @@
 
 
 
-(1) **CPS security problem.** Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g. path traversal), and execution without validation undermines safety and auditability. (2) **Mechanism.** We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (safe_args), and deterministic capture of proposed invocations. (3) **Synthetic result.** The validator blocks all released synthetic unsafe cases and admits the released safe cases (red-team, confusable deputy, jailbreak-style). (4) **Real-LLM result.** Latest 5-run evaluation over 13 cases/model (2026-03-17): gpt-4.1-mini 55/65 (84.6%, 95% Wilson CI [73.9, 91.4]), gpt-4.1 55/65 (84.6%, [73.9, 91.4]). For both models, path-traversal (rt_allowed_tool_disallowed_args) and denylist-key (rt_allowed_tool_denylist_key) cases each score 0/5 in these runs. We treat these as first-class results separating canonical validator correctness from model output variability and motivating argument-level controls. (5) **Adapter and latency.** The security layer adds bounded measured overhead; denial traces are recorded for replay and audit. (6) **Baseline.** Tool-level benchmark: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level benchmark (safe_args ablation): gated denies, weak and ungated allow -- demonstrating incremental value of argument validation. (7) **Bounded claim.** We claim containment of the released unsafe cases and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
+(1) **CPS security problem.** Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g. path traversal), and execution without validation undermines safety and auditability. (2) **Mechanism.** We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (safe_args), and deterministic capture of proposed invocations. (3) **Synthetic result.** The validator blocks all released synthetic unsafe cases and admits the released safe cases (9 red-team, 4 confusable deputy, 2 jailbreak-style). (4) **Real-LLM result (OpenAI, canonical).** With 5 runs per case and 13 cases per model (65 trials per model; 2026-03-17), gpt-4.1-mini and gpt-4.1 each achieve 55/65 (84.6%, 95% Wilson CI [73.9, 91.4]). Both models score 0/5 on the path-traversal and denylist-key argument-level cases in that run. Multi-model summaries and disagreement matrices are recorded in red_team_results.json. (5) **Optional cross-provider matrix.** A separate four-model run on Prime Inference (N=3, 39 trials per model; 2026-03-18) is documented in EXPERIMENTS_RUNBOOK.md for reviewers who want a second provider surface; denominators and models differ from the OpenAI canonical run and must not be merged without relabeling. (6) **Adapter and latency.** The security layer adds bounded measured overhead; denial traces are recorded for replay and audit; optional latency decomposition (validation vs capture) is available in adapter_latency.json when --latency-decomposition is used. (7) **Baseline.** Tool-level benchmark: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level benchmark (safe_args ablation): gated denies, weak and ungated allow. Benign suite: gated should admit safe steps while preserving the adversarial separation in the other baselines. (8) **Bounded claim.** We claim containment of the released unsafe cases and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
 
 
 
@@ -110,6 +110,10 @@ Typed plans: schema with steps (seq, tool, args, validators). Validator stack: a
 
 
 
+**Research questions.** (Q1) Does the validator correctly separate safe and unsafe cases on the synthetic suite? (Q2) Does that separation persist when an LLM must realize the unsafe argument forms under repeated prompting? (Q3) Can the enforcement layer be embedded with bounded overhead and replayable denial traces? (Q4) What does each validation layer contribute (tool vs argument)? (Q5) Do measured safe cases remain admissible? **Statistical treatment.** Pass rates use 95% Wilson score intervals; latency uses mean, stdev, and 95% CI for the mean; baselines report denial counts and task completion. **Artifact integrity.** Every result maps to one exact artifact; run export_p6_artifact_hashes.py and export_p6_reproducibility_table.py for the appendix reproducibility table (model_id, timestamp, seed, prompt_template_hash, evaluator_version, policy_version, artifact_hash).
+
+
+
 ### Block A --  Synthetic validator evidence
 
 
@@ -122,11 +126,19 @@ Synthetic evidence isolates validator correctness from model-generation variabil
 
 
 
-The validator correctly blocks the canonical unsafe step; the real-LLM experiment tests whether the model reliably emits the unsafe argument form under repeated prompting. Reported (2026-03-17): 5 runs per case and 13 cases/model (denominator 65/model): gpt-4.1-mini 55/65 (84.6%, 95% Wilson CI [73.9, 91.4]), gpt-4.1 55/65 (84.6%, [73.9, 91.4]). For both models, rt_allowed_tool_disallowed_args is 0/5 and rt_allowed_tool_denylist_key is 0/5 in this run.
+The validator correctly blocks the canonical unsafe step; the real-LLM experiment tests whether models reliably emit unsafe argument forms under repeated prompting.
 
 
 
-**Failure case as first-class result.** The 0/5 path-traversal case is the most security-informative outcome: it separates canonical validator correctness (the validator blocks the step when present) from model behavior (the model did not emit the unsafe form in those 5 runs). Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. We report this result explicitly; no apology or hiding.
+**Canonical OpenAI run (Table 1b).** Reported (2026-03-17): 5 runs per case, 13 cases per model (65 trials per model). Models gpt-4.1-mini and gpt-4.1 each score 55/65 (84.6%, 95% Wilson CI [73.9, 91.4]). Both score 0/5 on rt_allowed_tool_disallowed_args (path traversal) and 0/5 on rt_allowed_tool_denylist_key. Command: `llm_redteam_eval.py --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 5`. Output: red_team_results.json (real_llm_models[], cross_model_summary when multiple models).
+
+
+
+**Optional Prime Inference four-model matrix.** Reported (2026-03-18): 3 runs per case, 13 cases/model (39 trials/model). x-ai/grok-4-fast 39/39 (100.0%, Wilson [91.0, 100.0]); google/gemini-2.5-flash, openai/gpt-4.1-mini, qwen/qwen3-30b-a3b-instruct-2507 each 33/39 (84.6%, [70.3, 92.8]). Disagreement matrix isolates two argument-level cases. Use a **separate** output directory (e.g. llm_eval_prime_matrix_top4_n3) so OpenAI N=5 runs are not overwritten. See EXPERIMENTS_RUNBOOK.md.
+
+
+
+**Failure case as first-class result.** The 0/5 path-traversal and 0/5 denylist-key outcomes under OpenAI are the most security-informative rows: they separate canonical validator correctness (the validator blocks the step when present) from model behavior (the model did not emit the unsafe form in those runs). Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. We report this result explicitly; no apology or hiding.
 
 
 
@@ -140,6 +152,8 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 **Case study: denial trace.** In a representative run, the planner proposed step { tool: execute_system, args: { cmd: "rm -rf" } }. Allow-list check: tool not in allow_list -> Deny. The step was captured for audit; no execution occurred. Regenerate snippet from a baseline trace: `python scripts/export_p6_denial_trace_case_study.py --trace datasets/runs/llm_eval/baseline_runs/gated/toy_lab_v0/seed_1/trace.json`.
 
+**Latency decomposition and layer attribution.** With --latency-decomposition, adapter_latency.json includes per-component timings (validation_ms, capture_total_ms) with p50/p95/p99. Layer attribution (denial by allow_list_only, safe_args_only, both, admitted) is in red_team_results.json and confusable_deputy_results.json per case; export_p6_layer_attribution.py produces the stacked-bar table. Argument-level failure analysis (exact unsafe vs omitted vs safe substitution, etc.) is produced by export_p6_failure_analysis.py from real-LLM run_details.
+
 
 
 ### Block D --  Baseline comparison (honest framing)
@@ -151,6 +165,8 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 **Argument-level benchmark (safe_args ablation).** With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation. Reported: 60 runs; gated 60 denials, weak 0, ungated 0; tasks_completed_mean 3.95. Source: baseline_comparison.json (tool-level), baseline_comparison_args.json (argument-level); export_p6_baseline_table.py [--baseline-file baseline_comparison_args.json].
+
+**Utility-security tradeoff.** Benign suite (--baseline-plan benign) runs gated/weak/ungated on all-safe steps; baseline_benign.json reports benign_acceptance_rate and false_positive_count per mode. Gated should preserve benign acceptance (no over-denial) while improving unsafe denial in the adversarial baselines.
 
 
 
@@ -190,7 +206,7 @@ We presented a runtime enforcement architecture for CPS tool invocation: typed-p
 
 - **Figure 2 (adapter latency):** plot_llm_adapter_latency.py from adapter_latency.json; include only if compact and clearly answers overhead.
 
-- **Reproduction:** See EXPERIMENTS_RUNBOOK.md in this folder for one-shot commands, artifact locations, real-LLM (single and multi-model) manual run, and export scripts (including export_llm_redteam_table.py --out to write tables to file). Appendix A in main P6 DRAFT.md (papers/P6_LLMPlanning/DRAFT.md) for full reproduction; add args-unsafe baseline: `python scripts/llm_redteam_eval.py --run-baseline --baseline-plan args_unsafe`; export_p6_baseline_table.py --baseline-file baseline_comparison_args.json.
+- **Reproduction:** See EXPERIMENTS_RUNBOOK.md in this folder for the experiment roadmap (0--12), one-shot commands, artifact locations, OpenAI real-LLM (canonical Table 1b), optional Prime multi-model run, benign baseline, latency decomposition, and export scripts (export_llm_redteam_table.py, export_p6_reproducibility_table.py, export_p6_layer_attribution.py, export_p6_failure_analysis.py, export_p6_cross_model_heatmap.py, export_p6_latency_decomposition.py). Appendix A in papers/P6_LLMPlanning/DRAFT.md lists the core reproduction chain and artifact hashes.
 
 
 

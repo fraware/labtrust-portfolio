@@ -84,9 +84,10 @@ def p1(quick: bool) -> bool:
             sys.executable,
             str(REPO / "scripts" / "contracts_eval.py"),
             "--out", str(out),
+            "--baseline",
         ],
         "P1 Contracts corpus eval",
-        timeout=60,
+        timeout=120,
     )
     if not ok:
         return False
@@ -104,6 +105,17 @@ def p1(quick: bool) -> bool:
         ],
         "P1 Contracts scale test",
         timeout=180 if scale_test_runs > 1 else 120,
+    )
+    if not ok:
+        return False
+    ok = run(
+        [
+            sys.executable,
+            str(REPO / "scripts" / "contracts_transport_parity.py"),
+            "--out", str(out),
+        ],
+        "P1 Transport parity",
+        timeout=30,
     )
     return ok
 
@@ -128,6 +140,8 @@ def p2(quick: bool) -> bool:
 def p3(quick: bool) -> bool:
     out = RUNS / "replay_eval" / "summary.json"
     overhead_runs = 5 if quick else 20
+    thin_seeds = "42" if quick else "42,43,44,45,46"
+    bootstrap = "100" if quick else "1000"
     return run(
         [
             sys.executable,
@@ -135,9 +149,11 @@ def p3(quick: bool) -> bool:
             "--out", str(out),
             "--overhead-curve",
             "--overhead-runs", str(overhead_runs),
+            "--thin-slice-seeds", thin_seeds,
+            "--bootstrap-reps", bootstrap,
         ],
-        "P3 Replay eval + overhead curve",
-        timeout=120,
+        "P3 Replay eval + overhead curve + multi-seed + baselines",
+        timeout=600 if not quick else 180,
     )
 
 
@@ -297,35 +313,48 @@ def p7(quick: bool) -> bool:
 def p8(quick: bool) -> bool:
     seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
     meta_out = str(RUNS / "meta_eval")
-    # Publishable (not quick): run collapse sweep first, then meta_eval --non-vacuous so Table 1 uses drop_prob where collapse occurs
+    # Publishable (not quick): per-scenario collapse sweep + meta_eval --non-vacuous (primary: v0; external validity: v1).
     if not quick:
-        ok = run(
-            [
-                sys.executable,
-                str(REPO / "scripts" / "meta_collapse_sweep.py"),
-                "--out", meta_out,
-                "--drop-probs", "0.15,0.2,0.25,0.3",
-                "--seeds", seeds,
-            ],
-            "P8 Meta collapse sweep (for non-vacuous drop_prob)",
-            timeout=400,
-        )
-        if not ok:
-            return False
-        ok = run(
-            [
-                sys.executable,
-                str(REPO / "scripts" / "meta_eval.py"),
-                "--out", meta_out,
-                "--seeds", seeds,
-                "--run-naive",
-                "--fault-threshold", "0",
-                "--non-vacuous",
-                "--fallback-adapter", "retry_heavy",
-            ],
-            "P8 Meta-coordination (non-vacuous: fixed vs meta vs naive, two regimes)",
-            timeout=500,
-        )
+        scenarios = [
+            ("regime_stress_v0", meta_out, "0.15,0.2,0.25,0.3"),
+            (
+                "regime_stress_v1",
+                str(RUNS / "meta_eval" / "scenario_regime_stress_v1"),
+                "0.2,0.25,0.3,0.35,0.4",
+            ),
+        ]
+        for scen_id, out_dir, drop_probs in scenarios:
+            ok = run(
+                [
+                    sys.executable,
+                    str(REPO / "scripts" / "meta_collapse_sweep.py"),
+                    "--out", out_dir,
+                    "--scenario", scen_id,
+                    "--drop-probs", drop_probs,
+                    "--seeds", seeds,
+                ],
+                f"P8 Meta collapse sweep ({scen_id}, non-vacuous calibration)",
+                timeout=400,
+            )
+            if not ok:
+                return False
+            ok = run(
+                [
+                    sys.executable,
+                    str(REPO / "scripts" / "meta_eval.py"),
+                    "--out", out_dir,
+                    "--scenario", scen_id,
+                    "--seeds", seeds,
+                    "--run-naive",
+                    "--fault-threshold", "0",
+                    "--non-vacuous",
+                    "--fallback-adapter", "retry_heavy",
+                ],
+                f"P8 Meta-coordination (non-vacuous: {scen_id}, two coordination paths)",
+                timeout=500,
+            )
+            if not ok:
+                return False
     else:
         ok = run(
             [
@@ -341,15 +370,28 @@ def p8(quick: bool) -> bool:
         )
     if not ok:
         return False
-    run(
+    if not run(
         [
             sys.executable,
             str(REPO / "scripts" / "export_meta_tables.py"),
             "--comparison", str(RUNS / "meta_eval" / "comparison.json"),
         ],
-        "P8 Export meta tables",
+        "P8 Export meta tables (regime_stress_v0 primary)",
         timeout=15,
-    )
+    ):
+        return False
+    if not quick:
+        if not run(
+            [
+                sys.executable,
+                str(REPO / "scripts" / "export_meta_tables.py"),
+                "--comparison",
+                str(RUNS / "meta_eval" / "scenario_regime_stress_v1" / "comparison.json"),
+            ],
+            "P8 Export meta tables (regime_stress_v1)",
+            timeout=15,
+        ):
+            return False
     return True
 
 

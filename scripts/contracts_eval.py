@@ -10,16 +10,54 @@ datasets/runs/contracts_eval/eval.json. Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import os
+import random
 import statistics
 import sys
 import time
 from pathlib import Path
 
+try:
+    import resource
+except ImportError:
+    resource = None
+
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "impl" / "src"))
 
 from labtrust_portfolio.contracts import validate, apply_event_to_state, ALLOW
+
+SCRIPT_VERSION = "v0.2"
+
+
+def _bootstrap_percentile_ci(
+    samples: list[float],
+    percentile: float,
+    n_bootstrap: int = 1000,
+    ci: float = 0.95,
+    seed: int | None = None,
+) -> tuple[float, float]:
+    """Bootstrap CI for a percentile. percentile in [0,100]. Returns (lower, upper)."""
+    if not samples:
+        return (0.0, 0.0)
+    if seed is None:
+        seed = 42
+    rng = random.Random(seed)
+    n = len(samples)
+    quantile = percentile / 100.0
+    boot: list[float] = []
+    for _ in range(n_bootstrap):
+        resample = [samples[rng.randint(0, n - 1)] for _ in range(n)]
+        resample.sort()
+        idx = min(int(quantile * n), n - 1) if n else 0
+        boot.append(resample[idx])
+    boot.sort()
+    alpha = 1 - ci
+    lo_idx = int(alpha / 2 * n_bootstrap)
+    hi_idx = min(int((1 - alpha / 2) * n_bootstrap), n_bootstrap - 1)
+    return (boot[lo_idx], boot[hi_idx])
 
 
 def _timestamp_only_allows(state: dict, event: dict) -> bool:
@@ -49,6 +87,20 @@ def _ownership_only_allows(state: dict, event: dict) -> bool:
 def _accept_all(_state: dict, _event: dict) -> bool:
     """Baseline policy: allow all writes."""
     return True
+
+
+def _infer_failure_class(sequence_name: str) -> str:
+    """Infer failure class from sequence name for ablation breakdown."""
+    s = sequence_name.lower()
+    if "split_brain" in s or "multi_writer_contention" in s or "actor_payload" in s:
+        return "split_brain"
+    if "stale" in s:
+        return "stale_write"
+    if "reorder" in s or "unsafe_lww" in s:
+        return "reorder"
+    if "unknown_key" in s:
+        return "unknown_key"
+    return "control"
 
 
 def _run_corpus_with_policy(corpus_files: list, policy: str) -> tuple[list[dict], int]:
@@ -139,8 +191,87 @@ def main() -> int:
         default=1,
         help="When --scale-test: number of runs for mean/stdev of throughput (default 1); use 5+ for variance",
     )
+    ap.add_argument(
+        "--scale-sweep",
+        type=str,
+        default="",
+        help="Comma-separated scale sizes (e.g. 1000,10000,100000) for high-budget sweep; writes scale_sweep.json",
+    )
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
+
+    if args.scale_sweep:
+        sizes = [int(x.strip()) for x in args.scale_sweep.split(",") if x.strip()]
+        runs_per_size = max(1, args.scale_test_runs)
+        sweep_results = []
+        for n_events in sizes:
+            n = n_events
+            total_events_per_run = n * 2
+            runs_data = []
+            for _ in range(runs_per_size):
+                state = {"ownership": {}, "_last_ts": {}}
+                t0 = time.perf_counter()
+                denials = 0
+                for i in range(n):
+                    task_id = f"t{i % 1000}"
+                    ts = 1.0 + i * 0.01
+                    ev_start = {
+                        "type": "task_start",
+                        "ts": ts,
+                        "actor": {"id": f"agent_{i % 3}"},
+                        "payload": {"task_id": task_id, "name": "a", "writer": f"agent_{i % 3}"},
+                    }
+                    verdict = validate(state, ev_start)
+                    if verdict.verdict == ALLOW:
+                        state = apply_event_to_state(state, ev_start)
+                    else:
+                        denials += 1
+                    ev_end = {
+                        "type": "task_end",
+                        "ts": ts + 0.005,
+                        "actor": {"id": "agent_1"},
+                        "payload": {"task_id": task_id, "name": "a", "writer": "agent_1"},
+                    }
+                    verdict = validate(state, ev_end)
+                    if verdict.verdict == ALLOW:
+                        state = apply_event_to_state(state, ev_end)
+                    else:
+                        denials += 1
+                elapsed = time.perf_counter() - t0
+                events_per_sec = total_events_per_run / elapsed if elapsed > 0 else 0
+                time_per_write_us = elapsed * 1e6 / total_events_per_run if total_events_per_run else 0
+                runs_data.append({
+                    "total_time_sec": round(elapsed, 4),
+                    "time_per_write_us": round(time_per_write_us, 4),
+                    "events_per_sec": round(events_per_sec, 2),
+                    "denials": denials,
+                })
+            eps_list = [r["events_per_sec"] for r in runs_data]
+            tpu_list = [r["time_per_write_us"] for r in runs_data]
+            sweep_results.append({
+                "scale_events": n_events,
+                "total_events_per_run": total_events_per_run,
+                "runs": runs_per_size,
+                "events_per_sec_mean": round(statistics.mean(eps_list), 2),
+                "events_per_sec_stdev": round(statistics.stdev(eps_list), 2) if len(eps_list) > 1 else 0.0,
+                "time_per_write_us_mean": round(statistics.mean(tpu_list), 4),
+                "time_per_write_us_stdev": round(statistics.stdev(tpu_list), 4) if len(tpu_list) > 1 else 0.0,
+            })
+        sweep_out = {
+            "scale_sweep": True,
+            "sweep_results": sweep_results,
+            "run_manifest": {
+                "scale_sweep_sizes": sizes,
+                "scale_test_runs_per_size": runs_per_size,
+                "script": "contracts_eval.py",
+                "script_version": SCRIPT_VERSION,
+            },
+        }
+        (args.out / "scale_sweep.json").write_text(
+            json.dumps(sweep_out, indent=2) + "\n", encoding="utf-8"
+        )
+        print(json.dumps(sweep_out, indent=2))
+        return 0
 
     if args.scale_test:
         n = args.scale_events
@@ -190,6 +321,21 @@ def main() -> int:
         stdev_eps = statistics.stdev(events_per_sec_list) if len(events_per_sec_list) > 1 else 0.0
         mean_tpu = statistics.mean(time_per_write_list)
         stdev_tpu = statistics.stdev(time_per_write_list) if len(time_per_write_list) > 1 else 0.0
+        rss_kb_st = None
+        process_time_st = None
+        if resource is not None:
+            try:
+                usage = resource.getrusage(resource.RUSAGE_SELF)
+                process_time_st = usage.ru_utime + usage.ru_stime
+                rss_kb_st = getattr(usage, "ru_maxrss", None)
+            except Exception:
+                pass
+        cost_per_hour_st = None
+        try:
+            cost_per_hour_st = float(os.environ.get("LABTRUST_COST_PER_HOUR", "") or 0)
+        except ValueError:
+            pass
+        events_per_dollar_st = (mean_eps * 3600 / cost_per_hour_st) if cost_per_hour_st and cost_per_hour_st > 0 else None
         scale_result = {
             "scale_test": True,
             "total_events": total_events_per_run,
@@ -206,6 +352,13 @@ def main() -> int:
                 "scale_test_events": args.scale_events,
                 "scale_test_runs": args.scale_test_runs,
                 "script": "contracts_eval.py",
+                "script_version": SCRIPT_VERSION,
+            },
+            "resource_and_cost": {
+                "process_time_sec": round(process_time_st, 4) if process_time_st is not None else None,
+                "rss_kb": rss_kb_st,
+                "events_per_sec_per_core_assumption": "single-threaded (1 core)",
+                "events_per_dollar": round(events_per_dollar_st, 2) if events_per_dollar_st is not None else None,
             },
         }
         (args.out / "scale_test.json").write_text(
@@ -217,6 +370,8 @@ def main() -> int:
     corpus_files = sorted(args.corpus.glob("*.json"))
     results = []
     total_denials_with_validator = 0
+    event_level_latencies_us: list[float] = []
+    wall_clock_start = time.perf_counter()
     for path in corpus_files:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
@@ -226,26 +381,35 @@ def main() -> int:
         expected = data["expected_verdicts"]
         allows = 0
         denials = 0
-        t0 = time.perf_counter()
+        actual_verdicts: list[str] = []
+        seq_latencies_us: list[float] = []
         for i, ev in enumerate(events):
+            t0 = time.perf_counter()
             verdict = validate(state, ev)
+            elapsed_us = (time.perf_counter() - t0) * 1e6
+            seq_latencies_us.append(elapsed_us)
+            event_level_latencies_us.append(elapsed_us)
+            actual = "allow" if verdict.verdict == ALLOW else "deny"
+            actual_verdicts.append(actual)
             if verdict.verdict == ALLOW:
                 allows += 1
                 state = apply_event_to_state(state, ev)
             else:
                 denials += 1
-        elapsed = time.perf_counter() - t0
         n = len(events)
         total_denials_with_validator += denials
+        detection_ok = actual_verdicts == expected
+        total_time_us = sum(seq_latencies_us)
         results.append(
             {
                 "sequence": path.stem,
                 "events": n,
                 "allows": allows,
                 "denials": denials,
-                "detection_ok": denials == sum(1 for e in expected if e == "deny"),
-                "total_time_us": round(elapsed * 1e6, 2),
-                "time_per_write_us": round(elapsed * 1e6 / n, 2) if n else 0,
+                "detection_ok": detection_ok,
+                "actual_verdicts": actual_verdicts,
+                "total_time_us": round(total_time_us, 2),
+                "time_per_write_us": round(total_time_us / n, 2) if n else 0,
             }
         )
 
@@ -257,6 +421,53 @@ def main() -> int:
             continue
         total_expected_denials += sum(1 for ex in data["expected_verdicts"] if ex == "deny")
 
+    wall_clock_sec = time.perf_counter() - wall_clock_start
+    total_events_eval = sum(r["events"] for r in results)
+    rss_kb = None
+    process_time_sec = None
+    if resource is not None:
+        try:
+            usage = resource.getrusage(resource.RUSAGE_SELF)
+            process_time_sec = usage.ru_utime + usage.ru_stime
+            rss_kb = getattr(usage, "ru_maxrss", None)
+            if rss_kb is not None and sys.platform != "win32":
+                if sys.platform == "darwin":
+                    rss_kb = rss_kb  # macOS reports bytes in some versions
+                # Linux ru_maxrss is in KiB
+        except Exception:
+            pass
+    cost_per_hour = None
+    try:
+        cost_per_hour = float(os.environ.get("LABTRUST_COST_PER_HOUR", "") or 0)
+    except ValueError:
+        pass
+    events_per_sec_overall = total_events_eval / wall_clock_sec if wall_clock_sec > 0 else 0
+    events_per_dollar = None
+    if cost_per_hour and cost_per_hour > 0:
+        events_per_dollar = (events_per_sec_overall * 3600) / cost_per_hour
+    resource_and_cost = {
+        "wall_clock_sec": round(wall_clock_sec, 4),
+        "process_time_sec": round(process_time_sec, 4) if process_time_sec is not None else None,
+        "rss_kb": rss_kb,
+        "total_events_eval": total_events_eval,
+        "events_per_sec_overall": round(events_per_sec_overall, 2),
+        "events_per_sec_per_core_assumption": "single-threaded (1 core)",
+        "cost_proxy": {
+            "assumption": "LABTRUST_COST_PER_HOUR ($/hr) optional; not set" if not cost_per_hour else f"LABTRUST_COST_PER_HOUR={cost_per_hour} $/hr",
+            "events_per_dollar": round(events_per_dollar, 2) if events_per_dollar is not None else None,
+        },
+    }
+
+    corpus_fingerprint = hashlib.sha256(
+        "".join(
+            sorted(
+                path.read_text(encoding="utf-8")
+                for path in corpus_files
+                if path.suffix == ".json"
+            )
+        ).encode("utf-8")
+    ).hexdigest()[:16]
+
     out_data = {
         "corpus_eval": True,
         "sequences": results,
@@ -265,6 +476,8 @@ def main() -> int:
             "corpus_sequence_count": len(corpus_sequences),
             "corpus_dir": str(args.corpus),
             "script": "contracts_eval.py",
+            "script_version": SCRIPT_VERSION,
+            "corpus_fingerprint": corpus_fingerprint,
         },
     }
     out_data["violations_denied_with_validator"] = total_denials_with_validator
@@ -273,10 +486,10 @@ def main() -> int:
     if args.baseline:
         out_data["violations_would_apply_without_validator"] = total_denials_with_validator
 
-    # Baselines: timestamp_only, ownership_only, accept_all
-    _, timestamp_only_denials = _run_corpus_with_policy(corpus_files, "timestamp_only")
-    _, ownership_only_denials = _run_corpus_with_policy(corpus_files, "ownership_only")
-    _, accept_all_denials = _run_corpus_with_policy(corpus_files, "accept_all")
+    # Baselines: timestamp_only, ownership_only, accept_all (keep per-seq results for ablation_by_class)
+    ts_results, timestamp_only_denials = _run_corpus_with_policy(corpus_files, "timestamp_only")
+    own_results, ownership_only_denials = _run_corpus_with_policy(corpus_files, "ownership_only")
+    acc_results, accept_all_denials = _run_corpus_with_policy(corpus_files, "accept_all")
     out_data["baseline_timestamp_only_denials"] = timestamp_only_denials
     out_data["baseline_timestamp_only_missed"] = (
         total_denials_with_validator - timestamp_only_denials
@@ -295,6 +508,41 @@ def main() -> int:
         "ownership_only": {"violations_denied": ownership_only_denials, "violations_missed": total_expected_denials - ownership_only_denials},
         "accept_all": {"violations_denied": accept_all_denials, "violations_missed": total_expected_denials},
     }
+
+    # Class-level ablation: per failure class, which policy denies what
+    seq_to_expected: dict[str, int] = {}
+    for path in corpus_files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if "expected_verdicts" not in data:
+            continue
+        seq_to_expected[path.stem] = sum(1 for e in data["expected_verdicts"] if e == "deny")
+    seq_to_contract_denials = {r["sequence"]: r["denials"] for r in results}
+    seq_to_ts_denials = {r["sequence"]: r["denials"] for r in ts_results}
+    seq_to_own_denials = {r["sequence"]: r["denials"] for r in own_results}
+    seq_to_acc_denials = {r["sequence"]: r["denials"] for r in acc_results}
+    by_class: dict[str, dict[str, dict[str, int]]] = {}
+    for seq_name, expected_den in seq_to_expected.items():
+        fc = _infer_failure_class(seq_name)
+        if fc not in by_class:
+            by_class[fc] = {
+                "full_contract": {"violations_denied": 0, "violations_missed": 0},
+                "timestamp_only": {"violations_denied": 0, "violations_missed": 0},
+                "ownership_only": {"violations_denied": 0, "violations_missed": 0},
+                "accept_all": {"violations_denied": 0, "violations_missed": 0},
+            }
+        c_den = seq_to_contract_denials.get(seq_name, 0)
+        t_den = seq_to_ts_denials.get(seq_name, 0)
+        o_den = seq_to_own_denials.get(seq_name, 0)
+        a_den = seq_to_acc_denials.get(seq_name, 0)
+        by_class[fc]["full_contract"]["violations_denied"] += c_den
+        by_class[fc]["full_contract"]["violations_missed"] += expected_den - c_den
+        by_class[fc]["timestamp_only"]["violations_denied"] += t_den
+        by_class[fc]["timestamp_only"]["violations_missed"] += expected_den - t_den
+        by_class[fc]["ownership_only"]["violations_denied"] += o_den
+        by_class[fc]["ownership_only"]["violations_missed"] += expected_den - o_den
+        by_class[fc]["accept_all"]["violations_denied"] += a_den
+        by_class[fc]["accept_all"]["violations_missed"] += expected_den - a_den
+    out_data["ablation_by_class"] = by_class
 
     # TP/FP/FN and precision/recall (per-event; expected_verdicts = ground truth)
     tp = fp = fn = 0
@@ -318,42 +566,64 @@ def main() -> int:
                 state = apply_event_to_state(state, ev)
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
     out_data["detection_metrics"] = {
         "true_positives": tp,
         "false_positives": fp,
         "false_negatives": fn,
         "precision": round(precision, 4),
         "recall": round(recall, 4),
+        "f1": round(f1, 4),
     }
 
-    # Latency percentiles (over per-sequence time_per_write_us)
-    times_us = [r.get("time_per_write_us", 0) for r in results if "time_per_write_us" in r]
+    # Latency percentiles from event-level samples (not per-sequence averages)
     latency_median_us = latency_p95_us = latency_p99_us = None
-    if times_us:
-        sorted_times = sorted(times_us)
-        n = len(sorted_times)
-        latency_median_us = round(sorted_times[n // 2], 2)
-        latency_p95_us = round(sorted_times[min(int(0.95 * n), n - 1)], 2)
-        latency_p99_us = round(sorted_times[min(int(0.99 * n), n - 1)], 2)
+    latency_median_ci95 = latency_p95_ci95 = latency_p99_ci95 = None
+    if event_level_latencies_us:
+        sorted_lat = sorted(event_level_latencies_us)
+        n = len(sorted_lat)
+        latency_median_us = round(sorted_lat[n // 2], 4)
+        latency_p95_us = round(sorted_lat[min(int(0.95 * n), n - 1)], 4)
+        latency_p99_us = round(sorted_lat[min(int(0.99 * n), n - 1)], 4)
+        seed_bootstrap = 42
+        latency_median_ci95 = [
+            round(x, 4)
+            for x in _bootstrap_percentile_ci(
+                event_level_latencies_us, 50.0, n_bootstrap=1000, seed=seed_bootstrap
+            )
+        ]
+        latency_p95_ci95 = [
+            round(x, 4)
+            for x in _bootstrap_percentile_ci(
+                event_level_latencies_us, 95.0, n_bootstrap=1000, seed=seed_bootstrap
+            )
+        ]
+        latency_p99_ci95 = [
+            round(x, 4)
+            for x in _bootstrap_percentile_ci(
+                event_level_latencies_us, 99.0, n_bootstrap=1000, seed=seed_bootstrap
+            )
+        ]
     out_data["latency_percentiles_us"] = {
         "median": latency_median_us,
         "p95": latency_p95_us,
         "p99": latency_p99_us,
+        "event_level_n": len(event_level_latencies_us) if event_level_latencies_us else 0,
+        "median_ci95": latency_median_ci95,
+        "p95_ci95": latency_p95_ci95,
+        "p99_ci95": latency_p99_ci95,
     }
 
     # Excellence metrics (STANDARDS_OF_EXCELLENCE.md)
     n_ok = sum(1 for r in results if r.get("detection_ok", False))
     detection_rate_pct = round(100.0 * n_ok / len(results), 1) if results else 0.0
     overhead_p99_us = latency_p99_us
-    if times_us and overhead_p99_us is None:
-        sorted_times = sorted(times_us)
-        p99_idx = min(int(0.99 * len(sorted_times)), len(sorted_times) - 1) if len(sorted_times) > 1 else 0
-        overhead_p99_us = round(sorted_times[p99_idx], 2)
     out_data["excellence_metrics"] = {
         "corpus_detection_rate_pct": detection_rate_pct,
         "overhead_p99_us": overhead_p99_us,
         "baseline_margin_denials": total_denials_with_validator - timestamp_only_denials,
     }
+    out_data["resource_and_cost"] = resource_and_cost
 
     if args.throughput:
         # Run full corpus --scale times, repeat --throughput-runs; report mean and stdev

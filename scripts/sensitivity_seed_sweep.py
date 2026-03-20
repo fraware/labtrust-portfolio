@@ -2,9 +2,10 @@
 """
 Sensitivity seed sweep: run a key eval (meta_eval or rep_cps_eval) at N=10, 20, 30
 and record difference_mean, difference_ci95, difference_ci_width, paired_t_p_value per N.
+For meta_eval, pass --meta-scenario regime_stress_v0|regime_stress_v1 (publishable-style paths).
 Writes datasets/runs/sensitivity_sweep/sensitivity_summary.json.
 Usage:
-  PYTHONPATH=impl/src python scripts/sensitivity_seed_sweep.py [--eval meta|rep_cps] [--out DIR]
+  PYTHONPATH=impl/src python scripts/sensitivity_seed_sweep.py [--eval meta|rep_cps] [--out DIR] [--meta-scenario regime_stress_v0]
 """
 from __future__ import annotations
 
@@ -22,11 +23,11 @@ def _seeds_list(n: int) -> str:
     return ",".join(str(i) for i in range(1, n + 1))
 
 
-def run_meta_eval(seeds: str, out_dir: Path) -> dict | None:
+def run_meta_eval(seeds: str, out_dir: Path, scenario: str = "regime_stress_v0") -> dict | None:
     env = os.environ.copy()
     env.setdefault("LABTRUST_KERNEL_DIR", str(REPO / "kernel"))
     env["PYTHONPATH"] = str(REPO / "impl" / "src")
-    run_dir = out_dir / "meta_eval" / f"n_{len(seeds.split(','))}"
+    run_dir = out_dir / "meta_eval" / scenario / f"n_{len(seeds.split(','))}"
     run_dir.mkdir(parents=True, exist_ok=True)
     r = subprocess.run(
         [
@@ -34,6 +35,7 @@ def run_meta_eval(seeds: str, out_dir: Path) -> dict | None:
             str(REPO / "scripts" / "meta_eval.py"),
             "--seeds", seeds,
             "--out", str(run_dir),
+            "--scenario", scenario,
         ],
         cwd=str(REPO),
         env=env,
@@ -50,11 +52,14 @@ def run_meta_eval(seeds: str, out_dir: Path) -> dict | None:
     em = data.get("excellence_metrics", {})
     return {
         "n": len(seeds.split(",")),
+        "scenario": scenario,
         "difference_mean": em.get("difference_mean"),
         "difference_ci95": em.get("difference_ci95"),
         "difference_ci_width": em.get("difference_ci_width"),
         "paired_t_p_value": em.get("paired_t_p_value"),
         "power_post_hoc": em.get("power_post_hoc"),
+        "mcnemar_exact_p_value_two_sided": em.get("mcnemar_exact_p_value_two_sided"),
+        "collapse_outcome_strict_improvement": em.get("collapse_outcome_strict_improvement"),
     }
 
 
@@ -172,6 +177,12 @@ def main() -> int:
         default="10,20,30",
         help="Comma-separated sample sizes (default 10,20,30)",
     )
+    ap.add_argument(
+        "--meta-scenario",
+        type=str,
+        default="regime_stress_v0",
+        help="When --eval meta: MAESTRO scenario id (regime_stress_v0 or regime_stress_v1)",
+    )
     args = ap.parse_args()
     ns = [int(x.strip()) for x in args.ns.split(",") if x.strip()]
     if args.eval == "scaling":
@@ -192,13 +203,18 @@ def main() -> int:
     results = []
     for n in ns:
         seeds = _seeds_list(n)
-        row = runner(seeds, args.out)
+        row = (
+            runner(seeds, args.out, args.meta_scenario)
+            if args.eval == "meta"
+            else runner(seeds, args.out)
+        )
         if row:
             results.append(row)
         else:
             results.append({"n": n, "error": "run failed or missing output"})
     summary = {
         "eval": args.eval,
+        "meta_scenario": args.meta_scenario if args.eval == "meta" else None,
         "script": "sensitivity_seed_sweep.py",
         "sweep": results,
     }

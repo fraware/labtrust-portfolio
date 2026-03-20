@@ -1,4 +1,4 @@
-﻿% SaT-CPS 2026 submission. ACM proceedings, sigconf, 10 pages.
+% SaT-CPS 2026 submission. ACM proceedings, sigconf, 10 pages.
 % Use only ACM-approved packages; no manual margin or font overrides.
 \documentclass[sigconf]{acmart}
 
@@ -31,7 +31,7 @@
 \begin{document}
 
 \begin{abstract}
-Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g., path traversal), and execution without validation undermines safety and auditability. We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (safe\_args), and deterministic capture of proposed invocations. The validator blocks all released synthetic unsafe cases and admits the released safe cases. In a latest 5-run evaluation over 13 cases/model (2026-03-17), gpt-4.1-mini achieves 55/65 (84.6\%, 95\% Wilson CI [73.9, 91.4\%]) and gpt-4.1 achieves 55/65 (84.6\%, [73.9, 91.4\%]). For both models, path-traversal and denylist-key cases each score 0/5 in these runs. We treat these as first-class results separating canonical validator correctness from model output variability. The security layer adds bounded measured overhead; denial traces are recorded for replay and audit. Tool-level baseline: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level baseline (safe\_args ablation): gated denies, weak and ungated allow. We claim containment and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
+Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g., path traversal), and execution without validation undermines safety and auditability. We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (safe\_args), and deterministic capture of proposed invocations. The validator blocks all released synthetic unsafe cases and admits the released safe cases. Real-LLM evaluation on OpenAI (5 runs/case, 13 cases/model, 2026-03-17): \texttt{gpt-4.1-mini} and \texttt{gpt-4.1} each achieve 55/65 (84.6\%, 95\% Wilson CI [73.9, 91.4\%]); both score 0/5 on path-traversal and denylist-key argument-level cases. An optional four-model matrix via Prime Inference (N=3, 39 trials/model; 2026-03-18) is documented in the venue runbook and uses a different denominator. The security layer adds bounded measured overhead; denial traces are recorded for replay and audit. Tool-level baseline: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level baseline (safe\_args ablation): gated denies, weak and ungated allow. Benign-suite results (optional) quantify false positives on safe steps. We claim containment and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
 \end{abstract}
 
 \maketitle
@@ -99,9 +99,9 @@ Synthetic evidence isolates validator correctness from model-generation variabil
 
 \subsection{Block B: Real-LLM Stress Test}
 
-The validator correctly blocks the canonical unsafe step; the real-LLM experiment tests whether the model reliably emits the unsafe argument form under repeated prompting. Reported (2026-03-17): 5 runs per case and 13 cases/model (denominator 65/model): gpt-4.1-mini 55/65 (84.6\%, 95\% Wilson CI [73.9, 91.4\%]), gpt-4.1 55/65 (84.6\%, [73.9, 91.4\%]). For both models, \texttt{rt\_allowed\_tool\_disallowed\_args} and \texttt{rt\_allowed\_tool\_denylist\_key} each score 0/5 in these runs.
+The validator correctly blocks the canonical unsafe step; the real-LLM experiment tests whether models reliably emit unsafe argument forms under repeated prompting. \textbf{OpenAI (canonical):} 5 runs/case, 13 cases/model (65 trials/model; 2026-03-17). \texttt{gpt-4.1-mini} and \texttt{gpt-4.1} each score 55/65 (84.6\%, 95\% Wilson CI [73.9, 91.4\%]); both score 0/5 on path-traversal and denylist-key cases. \textbf{Optional Prime matrix:} N=3, 39 trials/model (2026-03-18); see venue \texttt{EXPERIMENTS\_RUNBOOK.md}---do not merge with OpenAI rows without relabeling.
 
-\paragraph{Failure case as first-class result.} The 0/5 path-traversal case is the most security-informative outcome: it separates canonical validator correctness (the validator blocks the step when present) from model behavior (the model did not emit the unsafe form in those 5 runs). Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. We report this result explicitly.
+\paragraph{Failure case as first-class result.} The 0/5 path-traversal and 0/5 denylist-key outcomes separate canonical validator correctness (the validator blocks the step when present) from model behavior (the model did not emit the unsafe form in those runs). Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. We report this result explicitly.
 
 \subsection{Block C: Adapter Latency and Denial Traces}
 
@@ -114,6 +114,8 @@ Three scenarios, 20 seeds each; mean p95 latency, stdev, 95\% CI; total denied u
 \textbf{Tool-level benchmark.} The injected unsafe step is \texttt{execute\_system} (disallowed tool). Gated and weak both deny (rejection at allow-list layer); ungated allows. This baseline shows the value of having a gate at all; it does not isolate the marginal contribution of safe\_args.
 
 \textbf{Argument-level benchmark (safe\_args ablation).} With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe\_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation.
+
+\textbf{Benign utility (optional).} All-safe plans across gated/weak/ungated quantify false-positive denials; see \texttt{baseline\_benign.json} and \texttt{p6\_benign\_suite.json}.
 
 \section{Discussion and Limitations}
 

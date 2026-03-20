@@ -18,7 +18,8 @@ sys.path.insert(0, str(REPO_ROOT / "impl" / "src"))
 if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO_ROOT / "kernel")
 
-META_EVAL_SCENARIO = "regime_stress_v0"
+META_EVAL_SCENARIO_DEFAULT = "regime_stress_v0"
+ALLOWED_META_SCENARIOS = frozenset({"regime_stress_v0", "regime_stress_v1"})
 DEFAULT_COLLAPSE_THRESHOLD = 2
 
 
@@ -29,6 +30,12 @@ def main() -> int:
         type=Path,
         default=REPO_ROOT / "datasets" / "runs" / "meta_eval",
         help="Output directory",
+    )
+    ap.add_argument(
+        "--scenario",
+        type=str,
+        default=META_EVAL_SCENARIO_DEFAULT,
+        help="MAESTRO scenario id (default: regime_stress_v0; also regime_stress_v1)",
     )
     ap.add_argument(
         "--drop-probs",
@@ -49,6 +56,12 @@ def main() -> int:
         help="tasks_completed below this => collapse",
     )
     args = ap.parse_args()
+    if args.scenario not in ALLOWED_META_SCENARIOS:
+        print(
+            f"Unsupported --scenario {args.scenario!r}; allowed: {sorted(ALLOWED_META_SCENARIOS)}",
+            file=sys.stderr,
+        )
+        return 2
 
     from labtrust_portfolio.adapters.centralized import CentralizedAdapter
     from labtrust_portfolio.adapters.base import run_adapter
@@ -65,7 +78,7 @@ def main() -> int:
             run_dir.mkdir(parents=True, exist_ok=True)
             result = run_adapter(
                 adapter,
-                META_EVAL_SCENARIO,
+                args.scenario,
                 run_dir,
                 seed=seed,
                 drop_completion_prob=drop_prob,
@@ -84,7 +97,9 @@ def main() -> int:
 
     collapse_count = sum(1 for r in results if r["collapsed"])
     summary = {
+        "schema_version": "p8_collapse_sweep_v0.2",
         "collapse_sweep": True,
+        "scenario_id": args.scenario,
         "collapse_threshold": args.collapse_threshold,
         "collapse_definition": f"tasks_completed < {args.collapse_threshold} or recovery_ok false",
         "drop_probs": drop_probs,
@@ -93,10 +108,11 @@ def main() -> int:
         "per_run": results,
         "run_manifest": {
             "seeds": seeds,
-            "scenario_id": META_EVAL_SCENARIO,
+            "scenario_id": args.scenario,
             "drop_probs": drop_probs,
             "collapse_threshold": args.collapse_threshold,
             "script": "meta_collapse_sweep.py",
+            "schema_version": "p8_collapse_sweep_v0.2",
         },
         "success_criteria_met": {"sweep_completed": True},
     }

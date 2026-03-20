@@ -235,16 +235,48 @@ def safe_args_check(step: Dict[str, Any]) -> Tuple[bool, List[str]]:
     return (len(violations) == 0, violations)
 
 
-def validate_plan_step(step: Dict[str, Any], allowed_tools: List[str]) -> Tuple[bool, List[str]]:
+def validate_plan_step(
+    step: Dict[str, Any], allowed_tools: List[str]
+) -> Tuple[bool, List[str]]:
     """Validate one step: allow_list + no privileged-action in args (confusable deputy) + optional safe_args. Returns (allowed, reasons)."""
+    allowed, _reasons, _attr = validate_plan_step_with_attribution(step, allowed_tools)
+    reasons = _reasons if not allowed else []
+    return (allowed, reasons)
+
+
+def validate_plan_step_with_attribution(
+    step: Dict[str, Any], allowed_tools: List[str]
+) -> Tuple[bool, List[str], str]:
+    """
+    Validate one step and return attribution: which layer(s) caused denial.
+    Returns (allowed, reasons, attribution).
+    attribution one of: "admitted" | "allow_list_only" | "safe_args_only" | "both"
+    """
+    reasons: List[str] = []
     tool = step.get("tool", "")
-    if tool not in allowed_tools:
-        return (False, ["tool not in allow_list"])
-    if _args_request_privilege(step.get("args", {})):
-        return (False, ["args request privilege (confusable deputy)"])
+    allow_list_ok = tool in allowed_tools
+    if not allow_list_ok:
+        reasons.append("tool not in allow_list")
+    privilege_ok = not _args_request_privilege(step.get("args", {}))
+    if not privilege_ok:
+        reasons.append("args request privilege (confusable deputy)")
     validators = step.get("validators", [])
+    safe_args_ok = True
     if "safe_args" in validators:
         ok, violations = safe_args_check(step)
+        safe_args_ok = ok
         if not ok:
-            return (False, [f"safe_args: {v}" for v in violations])
-    return (True, [])
+            reasons.extend([f"safe_args: {v}" for v in violations])
+    # Effective denial: allow_list blocks tool; privilege/safe_args block args
+    allow_list_denied = not allow_list_ok
+    args_denied = not privilege_ok or not safe_args_ok
+    if allow_list_denied and args_denied:
+        attribution = "both"
+    elif allow_list_denied:
+        attribution = "allow_list_only"
+    elif args_denied:
+        attribution = "safe_args_only"
+    else:
+        attribution = "admitted"
+    allowed = attribution == "admitted"
+    return (allowed, reasons, attribution)

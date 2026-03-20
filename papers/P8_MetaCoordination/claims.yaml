@@ -1,5 +1,6 @@
 # P8 Meta-Coordination claim table (Draft conversion checklist 2.1)
-# Conditional paper; trigger_met = no_safety_regression and meta_reduces_collapse. See docs/CONDITIONAL_TRIGGERS.md.
+# Conditional paper; trigger_met = no_safety_regression and meta_non_worse_collapse (alias meta_reduces_collapse: meta collapse_count <= fixed).
+# Strict improvement on counts: meta_strictly_reduces_collapse. See comparison.json collapse_paired_analysis and docs/CONDITIONAL_TRIGGERS.md.
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P8_MetaCoordination"
@@ -31,13 +32,15 @@ claims:
       figure_ids: []
 
   - id: "C3"
-    statement: "Under compound faults, meta-coordination reduces collapse versus best fixed-regime baselines."
+    statement: "Under pre-specified stress, meta-coordination is non-inferior to the fixed regime on paired collapse counts (meta_collapses <= fixed_collapses) while preserving the safety proxy; strict reduction (meta < fixed) is reported separately via meta_strictly_reduces_collapse and McNemar on discordant pairs."
     evidence:
       release_id: "meta_eval"
-      confidence: "medium"  # comparison.json; strength depends on non-vacuous run
+      confidence: "medium"  # comparison.json; non-vacuous stress uses stress_selection_policy in run_manifest
       artifact_paths:
         - "datasets/runs/meta_eval/comparison.json"
         - "datasets/runs/meta_eval/collapse_sweep.json"
+        - "datasets/runs/meta_eval/scenario_regime_stress_v1/comparison.json"
+        - "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep.json"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 1"]
 

@@ -31,13 +31,16 @@ claims:
       figure_ids: []
 
   - id: "C3"
-    statement: "A CPS-specific red-team suite (prompt injection, malformed toolcalls, excessive agency) is required and sufficient to exercise key failure modes."
+    statement: "A CPS-oriented red-team suite (9 red-team, 4 confusable deputy, jailbreak-style cases) exercises key planner failure modes aligned with OWASP LLM Top 10 categories referenced in the mapping doc."
     evidence:
       release_id: "llm_eval"
-      confidence: "medium"  # 8 red-team + 4 confusable + jailbreak-style; OWASP mapping; real-LLM 5 runs/case, containment only
+      confidence: "medium"  # OWASP mapping; real-LLM 5 runs/case optional; containment only
       artifact_paths:
         - "datasets/runs/llm_eval/red_team_results.json"
         - "datasets/runs/llm_eval/confusable_deputy_results.json"
+        - "docs/P6_OWASP_MAPPING.md"
+        - "datasets/p6_benign_suite.json"
+        - "datasets/p6_adaptive_suite.json"
       table_ids: ["Table 1", "Table 1b"]
       figure_ids: []
 
@@ -45,11 +48,14 @@ claims:
     statement: "Under MAESTRO faults, the pattern reduces safety violations without unacceptable tail latency."
     evidence:
       release_id: "llm_eval"
-      confidence: "medium"  # e2e_denial_trace, adapter latency, 3-way baseline; conditional on trigger_met
+      confidence: "medium"  # e2e_denial_trace, adapter latency, baselines; conditional on trigger_met
       artifact_paths:
         - "datasets/runs/llm_eval/adapter_latency.json"
         - "datasets/runs/llm_eval/e2e_denial_trace.json"
         - "datasets/runs/llm_eval/baseline_comparison.json"
+        - "datasets/runs/llm_eval/baseline_comparison_args.json"
+        - "datasets/runs/llm_eval/baseline_benign.json"
+        - "datasets/runs/llm_eval/denial_trace_stats.json"
       table_ids: ["Table 2", "Baseline table"]
       figure_ids: ["Figure 1"]
 
