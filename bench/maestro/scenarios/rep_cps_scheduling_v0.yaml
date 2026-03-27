@@ -1,0 +1,16 @@
+id: rep_cps_scheduling_v0
+family: lab
+description: >
+  Thin-slice lab scenario identical to toy_lab_v0 task list, but scheduling
+  is withheld when the REP-CPS safety gate denies (aggregate load above threshold).
+  Used to demonstrate task-level dependence on gated informational state under
+  spoofed duplicate-sender stress in the adapter harness.
+rep_cps_scheduling_dependent: true
+tasks:
+  - name: receive_sample
+  - name: centrifuge
+  - name: analyze
+  - name: report_results
+faults:
+  - name: drop_completion
+    param: drop_completion_prob

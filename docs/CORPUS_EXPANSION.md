@@ -5,9 +5,10 @@ This document describes how to add and discover corpus cases for P1 (contracts),
 ## P1 — Contracts
 
 - **Location:** `bench/contracts/corpus/`
-- **Current size:** 51+ sequences (tiered benchmark: micro, meso, stress/adversarial). See [BENCHMARK_SPEC.v0.1.md](../bench/contracts/BENCHMARK_SPEC.v0.1.md).
+- **Current size:** 54+ sequences (tiered benchmark: micro, meso, stress/adversarial including cross-key interleaving, delayed release/reassignment, concurrent controller races). See [BENCHMARK_SPEC.v0.1.md](../bench/contracts/BENCHMARK_SPEC.v0.1.md).
 - **Schema:** Each file is JSON: `description` (string), `initial_state` (object, e.g. ownership, _last_ts), `events` (array of events: type, ts, actor, payload), `expected_verdicts` (array of "allow"|"deny", length = events.length).
-- **Discovery:** `scripts/contracts_eval.py` uses `sorted(args.corpus.glob("*.json"))`; add any `.json` with the same schema. Use `--baseline` for policy comparison and ablation_by_class.
+- **Label governance (optional fields):** You may add top-level metadata for reviewability: `label_provenance` (`"manual"` | `"script"` | `"manual_review_of_script"`), `label_author` (string), `generation_seed` (integer, when script-generated), `second_review` (boolean). These are ignored by the runner but support benchmark defensibility; see `bench/contracts/BENCHMARK_SPEC.v0.1.md` (ground-truth labeling section).
+- **Discovery:** `scripts/contracts_eval.py` uses `sorted(args.corpus.glob("*.json"))`; add any `.json` with the same schema. Policy comparison, `ablation`, `ablation_by_class`, and `detection_metrics_by_class` are written to `eval.json` on every corpus run; `--baseline` adds an extra manifest field only (`violations_would_apply_without_validator`).
 - **Checklist:** One failure class per sequence; `expected_verdicts.length == events.length`; document scenario in `description`.
 - **Parameterized generator:** `scripts/generate_contract_corpus.py --writers W --tasks T [--out path]` generates one JSON (N-writer contention: first writer allow, rest deny per task). Add `--out bench/contracts/corpus/gen_Wwriter_Ttask.json` to extend the corpus without hand-writing.
 - **Run manifest:** `run_manifest.corpus_sequence_count`, `run_manifest.corpus_sequences`, `run_manifest.corpus_dir`, `run_manifest.corpus_fingerprint`, `run_manifest.script_version`. See `bench/contracts/README.md`.
@@ -15,10 +16,12 @@ This document describes how to add and discover corpus cases for P1 (contracts),
 ## P3 — Replay
 
 - **Location:** `bench/replay/corpus/`
-- **Schema:** Pairs of files: `NAME_trace.json` (trace format per kernel/trace) and `NAME_expected.json` with at least `expected_replay_ok` (bool), optionally `expected_divergence_at_seq`, `expected_diagnostic`. Checked-in examples include trap traces and an optional **field-style pass** pair (`field_style_pass_*`) as a TRACE-conformant external-validity proxy; see [P3_REAL_TRACE_INGESTION.md](P3_REAL_TRACE_INGESTION.md).
+- **Current set (checked-in):** Core traps (`nondeterminism_trap`, `reorder_trap`, `timestamp_reorder_trap`, `hash_mismatch_trap`); expanded traps (`long_horizon_trap`, `mixed_failure_trap`); pass traces (`benign_perturbation_pass`, `field_style_pass`, `field_style_pass_variant_b`); real-ingest example (`real_bucket_example`); `twin_config.json` for L1 stub. Auxiliary trap/pass JSON can be regenerated with `scripts/generate_p3_replay_corpus_traces.py`; real-ingest example with `scripts/generate_real_bucket_example.py`.
+- **Schema:** Pairs of files: `NAME_trace.json` (trace format per kernel/trace) and `NAME_expected.json` with at least `expected_replay_ok` (bool), optionally `expected_divergence_at_seq`, `expected_diagnostic`, `notes`. Field-style traces are TRACE-conformant **external-validity proxies**, not production logs; see [P3_REAL_TRACE_INGESTION.md](P3_REAL_TRACE_INGESTION.md).
 - **Discovery:** `scripts/replay_eval.py` globs `*_trace.json` in `--corpus-dir` and pairs with `NAME_expected.json` by base name (e.g. `foo_trap_trace.json` → base `foo_trap`).
-- **Checklist:** Add both `NAME_trace.json` and `NAME_expected.json`; naming convention: shared base name.
-- **Run manifest:** `run_manifest.replay_trap_count`, `run_manifest.corpus_dir`. See `bench/replay/README.md`.
+- **Checklist:** Add both `NAME_trace.json` and `NAME_expected.json`; naming convention: shared base name; extend `tests/test_replay_p3.py` for new traps if they change summary invariants.
+- **Eval output:** Summary includes `per_trace[]` with **`corpus_category`** (synthetic_trap, field_proxy, real_ingest, synthetic_pass), localization match flags, trace/diagnostic size fields, `corpus_space_summary`, optional `process_peak_rss_bytes`. With `--l1-twin`, summary includes **`l1_twin_summary`** (multi-seed aggregate statistics). Tables: `scripts/export_replay_corpus_table.py` (Table 1 + Table 1b with corpus categories and L1 twin summary); verify: `scripts/verify_p3_replay_summary.py`.
+- **Run manifest:** `run_manifest.replay_trap_count` (count of corpus rows with `expected_divergence_at_seq` in expected file), `run_manifest.corpus_dir`. See `bench/replay/README.md`.
 
 ## P6 — Red-team and confusable deputy
 

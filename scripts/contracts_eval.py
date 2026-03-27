@@ -10,6 +10,7 @@ datasets/runs/contracts_eval/eval.json. Usage:
 from __future__ import annotations
 
 import argparse
+from collections import defaultdict
 import hashlib
 import json
 import os
@@ -29,7 +30,7 @@ sys.path.insert(0, str(REPO / "impl" / "src"))
 
 from labtrust_portfolio.contracts import validate, apply_event_to_state, ALLOW
 
-SCRIPT_VERSION = "v0.2"
+SCRIPT_VERSION = "v0.3"
 
 
 def _bootstrap_percentile_ci(
@@ -89,6 +90,39 @@ def _accept_all(_state: dict, _event: dict) -> bool:
     return True
 
 
+def _occ_only_allows(state: dict, event: dict) -> bool:
+    """Baseline: OCC/version-style conflict check via per-key monotonic timestamps only (no ownership)."""
+    return _timestamp_only_allows(state, event)
+
+
+def _lease_only_allows(state: dict, event: dict) -> bool:
+    """
+    Baseline: lease admission proxy; reference corpus has no explicit lease fields, so temporal monotonicity only.
+    In a full lease implementation, we would check lease validity windows and renewal semantics;
+    here we approximate with temporal monotonicity as a proxy for lease-based temporal gating.
+    """
+    return _timestamp_only_allows(state, event)
+
+
+def _lock_only_allows(state: dict, event: dict) -> bool:
+    """
+    Baseline: mutex/lock-style writer-key exclusivity (ownership) without temporal check.
+    This approximates a distributed lock where only the lock holder may write;
+    we use ownership as the lock state proxy. A full lock implementation would include
+    lock acquisition/release semantics and timeout handling.
+    """
+    return _ownership_only_allows(state, event)
+
+
+def _naive_lww_allows(_state: dict, _event: dict) -> bool:
+    """
+    Baseline: naive last-write-wins (accept all writes; no validity gate).
+    This represents a system with no coordination checks beyond eventual consistency;
+    all writes are accepted regardless of ownership, temporal ordering, or conflict semantics.
+    """
+    return True
+
+
 def _infer_failure_class(sequence_name: str) -> str:
     """Infer failure class from sequence name for ablation breakdown."""
     s = sequence_name.lower()
@@ -104,13 +138,17 @@ def _infer_failure_class(sequence_name: str) -> str:
 
 
 def _run_corpus_with_policy(corpus_files: list, policy: str) -> tuple[list[dict], int]:
-    """Run corpus; policy in ('contract', 'timestamp_only', 'ownership_only', 'accept_all').
-    Returns (per_seq_results, total_denials)."""
+    """Run corpus; policy in contract, timestamp_only, ownership_only, accept_all, occ_only,
+    lease_only, lock_only, naive_lww. Returns (per_seq_results, total_denials)."""
     policy_fns = {
         "contract": lambda s, e: validate(s, e).verdict == ALLOW,
         "timestamp_only": _timestamp_only_allows,
         "ownership_only": _ownership_only_allows,
         "accept_all": _accept_all,
+        "occ_only": _occ_only_allows,
+        "lease_only": _lease_only_allows,
+        "lock_only": _lock_only_allows,
+        "naive_lww": _naive_lww_allows,
     }
     fn = policy_fns.get(policy)
     if not fn:
@@ -486,10 +524,14 @@ def main() -> int:
     if args.baseline:
         out_data["violations_would_apply_without_validator"] = total_denials_with_validator
 
-    # Baselines: timestamp_only, ownership_only, accept_all (keep per-seq results for ablation_by_class)
+    # Baselines and named comparators (keep per-seq results for ablation_by_class)
     ts_results, timestamp_only_denials = _run_corpus_with_policy(corpus_files, "timestamp_only")
     own_results, ownership_only_denials = _run_corpus_with_policy(corpus_files, "ownership_only")
     acc_results, accept_all_denials = _run_corpus_with_policy(corpus_files, "accept_all")
+    occ_results, occ_only_denials = _run_corpus_with_policy(corpus_files, "occ_only")
+    lease_results, lease_only_denials = _run_corpus_with_policy(corpus_files, "lease_only")
+    lock_results, lock_only_denials = _run_corpus_with_policy(corpus_files, "lock_only")
+    lww_results, naive_lww_denials = _run_corpus_with_policy(corpus_files, "naive_lww")
     out_data["baseline_timestamp_only_denials"] = timestamp_only_denials
     out_data["baseline_timestamp_only_missed"] = (
         total_denials_with_validator - timestamp_only_denials
@@ -500,6 +542,14 @@ def main() -> int:
     )
     out_data["baseline_accept_all_denials"] = accept_all_denials
     out_data["baseline_accept_all_missed"] = total_expected_denials
+    out_data["baseline_occ_only_denials"] = occ_only_denials
+    out_data["baseline_occ_only_missed"] = total_expected_denials - occ_only_denials
+    out_data["baseline_lease_only_denials"] = lease_only_denials
+    out_data["baseline_lease_only_missed"] = total_expected_denials - lease_only_denials
+    out_data["baseline_lock_only_denials"] = lock_only_denials
+    out_data["baseline_lock_only_missed"] = total_expected_denials - lock_only_denials
+    out_data["baseline_naive_lww_denials"] = naive_lww_denials
+    out_data["baseline_naive_lww_missed"] = total_expected_denials
 
     # Ablation: which failure classes slip through when disabling contract ingredients
     out_data["ablation"] = {
@@ -507,6 +557,10 @@ def main() -> int:
         "timestamp_only": {"violations_denied": timestamp_only_denials, "violations_missed": total_expected_denials - timestamp_only_denials},
         "ownership_only": {"violations_denied": ownership_only_denials, "violations_missed": total_expected_denials - ownership_only_denials},
         "accept_all": {"violations_denied": accept_all_denials, "violations_missed": total_expected_denials},
+        "occ_only": {"violations_denied": occ_only_denials, "violations_missed": total_expected_denials - occ_only_denials},
+        "lease_only": {"violations_denied": lease_only_denials, "violations_missed": total_expected_denials - lease_only_denials},
+        "lock_only": {"violations_denied": lock_only_denials, "violations_missed": total_expected_denials - lock_only_denials},
+        "naive_lww": {"violations_denied": naive_lww_denials, "violations_missed": total_expected_denials},
     }
 
     # Class-level ablation: per failure class, which policy denies what
@@ -520,28 +574,39 @@ def main() -> int:
     seq_to_ts_denials = {r["sequence"]: r["denials"] for r in ts_results}
     seq_to_own_denials = {r["sequence"]: r["denials"] for r in own_results}
     seq_to_acc_denials = {r["sequence"]: r["denials"] for r in acc_results}
+    seq_to_occ_denials = {r["sequence"]: r["denials"] for r in occ_results}
+    seq_to_lease_denials = {r["sequence"]: r["denials"] for r in lease_results}
+    seq_to_lock_denials = {r["sequence"]: r["denials"] for r in lock_results}
+    seq_to_lww_denials = {r["sequence"]: r["denials"] for r in lww_results}
+    policy_keys = (
+        "full_contract",
+        "timestamp_only",
+        "ownership_only",
+        "accept_all",
+        "occ_only",
+        "lease_only",
+        "lock_only",
+        "naive_lww",
+    )
     by_class: dict[str, dict[str, dict[str, int]]] = {}
     for seq_name, expected_den in seq_to_expected.items():
         fc = _infer_failure_class(seq_name)
         if fc not in by_class:
-            by_class[fc] = {
-                "full_contract": {"violations_denied": 0, "violations_missed": 0},
-                "timestamp_only": {"violations_denied": 0, "violations_missed": 0},
-                "ownership_only": {"violations_denied": 0, "violations_missed": 0},
-                "accept_all": {"violations_denied": 0, "violations_missed": 0},
-            }
-        c_den = seq_to_contract_denials.get(seq_name, 0)
-        t_den = seq_to_ts_denials.get(seq_name, 0)
-        o_den = seq_to_own_denials.get(seq_name, 0)
-        a_den = seq_to_acc_denials.get(seq_name, 0)
-        by_class[fc]["full_contract"]["violations_denied"] += c_den
-        by_class[fc]["full_contract"]["violations_missed"] += expected_den - c_den
-        by_class[fc]["timestamp_only"]["violations_denied"] += t_den
-        by_class[fc]["timestamp_only"]["violations_missed"] += expected_den - t_den
-        by_class[fc]["ownership_only"]["violations_denied"] += o_den
-        by_class[fc]["ownership_only"]["violations_missed"] += expected_den - o_den
-        by_class[fc]["accept_all"]["violations_denied"] += a_den
-        by_class[fc]["accept_all"]["violations_missed"] += expected_den - a_den
+            by_class[fc] = {pk: {"violations_denied": 0, "violations_missed": 0} for pk in policy_keys}
+        den_map = {
+            "full_contract": seq_to_contract_denials.get(seq_name, 0),
+            "timestamp_only": seq_to_ts_denials.get(seq_name, 0),
+            "ownership_only": seq_to_own_denials.get(seq_name, 0),
+            "accept_all": seq_to_acc_denials.get(seq_name, 0),
+            "occ_only": seq_to_occ_denials.get(seq_name, 0),
+            "lease_only": seq_to_lease_denials.get(seq_name, 0),
+            "lock_only": seq_to_lock_denials.get(seq_name, 0),
+            "naive_lww": seq_to_lww_denials.get(seq_name, 0),
+        }
+        for pk in policy_keys:
+            d = den_map[pk]
+            by_class[fc][pk]["violations_denied"] += d
+            by_class[fc][pk]["violations_missed"] += expected_den - d
     out_data["ablation_by_class"] = by_class
 
     # TP/FP/FN and precision/recall (per-event; expected_verdicts = ground truth)
@@ -575,6 +640,59 @@ def main() -> int:
         "recall": round(recall, 4),
         "f1": round(f1, 4),
     }
+
+    # Per inferred failure class (each event attributed to its sequence's class)
+    all_inferred_classes: set[str] = set()
+    for path in corpus_files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if "events" not in data or "expected_verdicts" not in data:
+            continue
+        all_inferred_classes.add(_infer_failure_class(path.stem))
+    class_tp: dict[str, int] = defaultdict(int)
+    class_fp: dict[str, int] = defaultdict(int)
+    class_fn: dict[str, int] = defaultdict(int)
+    for path in corpus_files:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if "events" not in data or "expected_verdicts" not in data:
+            continue
+        fc = _infer_failure_class(path.stem)
+        state = dict(data["initial_state"])
+        events = data["events"]
+        expected = data["expected_verdicts"]
+        for ev, exp in zip(events, expected):
+            verdict = validate(state, ev)
+            actual = "allow" if verdict.verdict == ALLOW else "deny"
+            if exp == "deny" and actual == "deny":
+                class_tp[fc] += 1
+            elif exp == "allow" and actual == "deny":
+                class_fp[fc] += 1
+            elif exp == "deny" and actual == "allow":
+                class_fn[fc] += 1
+            if actual == "allow":
+                state = apply_event_to_state(state, ev)
+    detection_by_class: dict[str, dict] = {}
+    for fc in sorted(all_inferred_classes):
+        ctp = class_tp[fc]
+        cfp = class_fp[fc]
+        cfn = class_fn[fc]
+        # No expected denials in this class: recall/F1 for "detect deny" are undefined; FP still matters.
+        if ctp == 0 and cfn == 0:
+            prec = None if cfp == 0 else 0.0
+            rec = None
+            f1c = None
+        else:
+            prec = ctp / (ctp + cfp) if (ctp + cfp) > 0 else 0.0
+            rec = ctp / (ctp + cfn) if (ctp + cfn) > 0 else 0.0
+            f1c = 2 * prec * rec / (prec + rec) if (prec + rec) > 0 else 0.0
+        detection_by_class[fc] = {
+            "true_positives": ctp,
+            "false_positives": cfp,
+            "false_negatives": cfn,
+            "precision": None if prec is None else round(prec, 4),
+            "recall": None if rec is None else round(rec, 4),
+            "f1": None if f1c is None else round(f1c, 4),
+        }
+    out_data["detection_metrics_by_class"] = detection_by_class
 
     # Latency percentiles from event-level samples (not per-sequence averages)
     latency_median_us = latency_p95_us = latency_p99_us = None
@@ -614,15 +732,55 @@ def main() -> int:
         "p99_ci95": latency_p99_ci95,
     }
 
-    # Excellence metrics (STANDARDS_OF_EXCELLENCE.md)
+    # Excellence metrics (STANDARDS_OF_EXCELLENCE.md) with statistical comparisons
     n_ok = sum(1 for r in results if r.get("detection_ok", False))
     detection_rate_pct = round(100.0 * n_ok / len(results), 1) if results else 0.0
     overhead_p99_us = latency_p99_us
-    out_data["excellence_metrics"] = {
+    
+    # Statistical comparisons vs key baselines
+    excellence_metrics = {
         "corpus_detection_rate_pct": detection_rate_pct,
         "overhead_p99_us": overhead_p99_us,
         "baseline_margin_denials": total_denials_with_validator - timestamp_only_denials,
     }
+    
+    # Add effect size and CI for key comparisons if we have per-class data
+    if detection_by_class:
+        # Compare full contract vs timestamp-only on split_brain (key differentiator)
+        split_brain_contract = detection_by_class.get("split_brain", {})
+        if split_brain_contract.get("true_positives", 0) > 0:
+            excellence_metrics["split_brain_detection_advantage"] = {
+                "contract_tp": split_brain_contract.get("true_positives"),
+                "contract_fp": split_brain_contract.get("false_positives"),
+                "contract_fn": split_brain_contract.get("false_negatives"),
+            }
+    
+    # Add per-class uncertainty if we have multiple sequences per class
+    if detection_by_class:
+        for fc, metrics in detection_by_class.items():
+            tp = metrics.get("true_positives", 0)
+            fp = metrics.get("false_positives", 0)
+            fn = metrics.get("false_negatives", 0)
+            total = tp + fp + fn
+            if total > 0:
+                # Wilson CI for detection rate (TP / (TP + FN))
+                tp_fn = tp + fn
+                if tp_fn > 0:
+                    detection_rate = tp / tp_fn
+                    # Approximate Wilson CI (simplified)
+                    z = 1.96  # 95% CI
+                    n = tp_fn
+                    p = detection_rate
+                    denominator = 1 + (z**2 / n)
+                    center = (p + (z**2 / (2 * n))) / denominator
+                    margin = (z / denominator) * ((p * (1 - p) / n + z**2 / (4 * n**2)) ** 0.5)
+                    excellence_metrics.setdefault("per_class_ci95", {})[fc] = {
+                        "detection_rate": round(detection_rate, 4),
+                        "ci95_lower": round(max(0.0, center - margin), 4),
+                        "ci95_upper": round(min(1.0, center + margin), 4),
+                    }
+    
+    out_data["excellence_metrics"] = excellence_metrics
     out_data["resource_and_cost"] = resource_and_cost
 
     if args.throughput:

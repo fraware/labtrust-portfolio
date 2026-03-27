@@ -1,0 +1,9 @@
+{
+  "description": "Delayed release and stale reassignment: Controller A releases key, but delayed message causes Controller B to attempt stale reassignment before release is processed",
+  "initial_state": {"ownership": {"t1": "controller_a"}, "_last_ts": {"t1": 1.0}},
+  "events": [
+    {"type": "task_end", "ts": 2.0, "actor": {"id": "controller_a"}, "payload": {"task_id": "t1", "name": "release", "writer": "controller_a"}},
+    {"type": "task_start", "ts": 1.5, "actor": {"id": "controller_b"}, "payload": {"task_id": "t1", "name": "stale_assign", "writer": "controller_b"}}
+  ],
+  "expected_verdicts": ["allow", "deny"]
+}

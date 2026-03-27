@@ -124,6 +124,72 @@ class TestReplayCorpus(unittest.TestCase):
         self.assertTrue(ok)
         self.assertEqual(diagnostics, [])
 
+    def test_corpus_long_horizon_trap(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_with_diagnostics
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace_path = corpus_dir / "long_horizon_trap_trace.json"
+        expected_path = corpus_dir / "long_horizon_trap_expected.json"
+        self.assertTrue(trace_path.exists())
+        self.assertTrue(expected_path.exists())
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        ok, diagnostics = replay_trace_with_diagnostics(trace)
+        self.assertEqual(ok, expected["expected_replay_ok"])
+        if not ok and diagnostics:
+            self.assertEqual(
+                diagnostics[0].seq,
+                expected.get("expected_divergence_at_seq"),
+            )
+
+    def test_corpus_mixed_failure_trap(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_with_diagnostics
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace_path = corpus_dir / "mixed_failure_trap_trace.json"
+        expected_path = corpus_dir / "mixed_failure_trap_expected.json"
+        self.assertTrue(trace_path.exists())
+        self.assertTrue(expected_path.exists())
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        ok, diagnostics = replay_trace_with_diagnostics(trace)
+        self.assertEqual(ok, expected["expected_replay_ok"])
+        if not ok and diagnostics:
+            self.assertEqual(
+                diagnostics[0].seq,
+                expected.get("expected_divergence_at_seq"),
+            )
+
+    def test_corpus_benign_perturbation_pass(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_with_diagnostics
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace_path = corpus_dir / "benign_perturbation_pass_trace.json"
+        expected_path = corpus_dir / "benign_perturbation_pass_expected.json"
+        self.assertTrue(trace_path.exists())
+        self.assertTrue(expected_path.exists())
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        ok, diagnostics = replay_trace_with_diagnostics(trace)
+        self.assertEqual(ok, expected["expected_replay_ok"])
+        self.assertTrue(ok)
+        self.assertEqual(diagnostics, [])
+
+    def test_corpus_field_style_pass_variant_b(self) -> None:
+        from labtrust_portfolio.replay import replay_trace_with_diagnostics
+
+        corpus_dir = repo_root() / "bench" / "replay" / "corpus"
+        trace_path = corpus_dir / "field_style_pass_variant_b_trace.json"
+        expected_path = corpus_dir / "field_style_pass_variant_b_expected.json"
+        self.assertTrue(trace_path.exists())
+        self.assertTrue(expected_path.exists())
+        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        expected = json.loads(expected_path.read_text(encoding="utf-8"))
+        ok, diagnostics = replay_trace_with_diagnostics(trace)
+        self.assertEqual(ok, expected["expected_replay_ok"])
+        self.assertTrue(ok)
+        self.assertEqual(diagnostics, [])
+
 
 class TestReplayBaselines(unittest.TestCase):
     """Baselines: apply-only (no hash) and final-hash-only."""
@@ -306,8 +372,13 @@ class TestReplayEvalIntegration(unittest.TestCase):
             self.assertIn("reorder_trap", names)
             self.assertIn("timestamp_reorder_trap", names)
             self.assertIn("hash_mismatch_trap", names)
+            self.assertIn("long_horizon_trap", names)
+            self.assertIn("mixed_failure_trap", names)
             per_names = {r["name"] for r in summary.get("per_trace", [])}
             self.assertIn("field_style_pass", per_names)
+            self.assertIn("benign_perturbation_pass", per_names)
+            self.assertIn("field_style_pass_variant_b", per_names)
+            self.assertIn("corpus_space_summary", summary)
             for r in corpus:
                 if r["name"] == "nondeterminism_trap":
                     self.assertEqual(r["divergence_at_seq"], 0)
@@ -315,6 +386,10 @@ class TestReplayEvalIntegration(unittest.TestCase):
                     self.assertEqual(r["divergence_at_seq"], 1)
                 elif r["name"] == "hash_mismatch_trap":
                     self.assertEqual(r["divergence_at_seq"], 1)
+                elif r["name"] == "long_horizon_trap":
+                    self.assertEqual(r["divergence_at_seq"], 20)
+                elif r["name"] == "mixed_failure_trap":
+                    self.assertEqual(r["divergence_at_seq"], 2)
 
 
 class TestReplayCLI(unittest.TestCase):

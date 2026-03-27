@@ -1,0 +1,77 @@
+{
+  "version": "0.1",
+  "run_id": "benign_perturb_pass_1",
+  "scenario_id": "benign_perturbation",
+  "seed": 3,
+  "start_time_utc": "2020-01-01T00:00:00Z",
+  "events": [
+    {
+      "seq": 0,
+      "ts": 0.0,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "sched"
+      },
+      "payload": {
+        "detail": "noop_0"
+      },
+      "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
+    },
+    {
+      "seq": 1,
+      "ts": 0.05,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "sched"
+      },
+      "payload": {
+        "detail": "noop_1"
+      },
+      "state_hash_after": "377dc505ccae89e85d6bc3907319bb5e0613fb1150859423ea348ba9b5b46d5e"
+    },
+    {
+      "seq": 2,
+      "ts": 0.1,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "sched"
+      },
+      "payload": {
+        "detail": "noop_2"
+      },
+      "state_hash_after": "c63e6c9527f60a0eb84ccdb128a36a65a2c08be612da961389815f94d3a32c63"
+    },
+    {
+      "seq": 3,
+      "ts": 0.15000000000000002,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t0",
+        "name": "core"
+      },
+      "state_hash_after": "1eca6dad0b33139b16d28b41fbe49ea043bb1125245c502e5e8ad973cbf8eb78"
+    },
+    {
+      "seq": 4,
+      "ts": 0.2,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t0",
+        "name": "core"
+      },
+      "state_hash_after": "ffd52c8ca3256f657285bdff20e792784b8d340f964d9d1655c05916628bac75"
+    }
+  ],
+  "final_state_hash": "ffd52c8ca3256f657285bdff20e792784b8d340f964d9d1655c05916628bac75"
+}

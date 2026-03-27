@@ -34,12 +34,15 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 
 | Metric | Description | Source / script |
 |--------|-------------|-----------------|
-| Corpus detection rate (%) | Fraction of corpus sequences with detection_ok true (exact per-event verdict match; target 100%). | eval.json; export_contracts_corpus_table. |
+| Corpus detection rate (%) | Fraction of corpus sequences (54+ including adversarial cases) with detection_ok true (exact per-event verdict match; target 100%). | eval.json; export_contracts_corpus_table. |
 | Overhead p99 (us) | Event-level 99th percentile time per write; latency_percentiles_us.p99 and p99_ci95 (bootstrap). | eval.json latency_percentiles_us. |
 | Throughput (events/sec) | With --scale-test: events_per_sec; with --scale-sweep: sweep_results per size. Report mean and stdev over runs. | scale_test.json; scale_sweep.json. |
-| Baseline margin | Violations denied with validator vs timestamp-only (count difference). Ablation by failure class in ablation_by_class. | eval.json (violations_denied_with_validator, baseline_timestamp_only_denials, ablation_by_class). |
+| Baseline margin | Violations denied with validator vs timestamp-only (count difference). Full comparator grid in `ablation` / `ablation_by_class` (occ_only, lease_only, lock_only, naive_lww, etc.). | eval.json (violations_denied_with_validator, baseline_timestamp_only_denials, ablation, ablation_by_class). |
+| Per-class detection | TP/FP/FN and precision/recall/F1 per inferred failure class (including control; null/n/a when undefined). Per-class uncertainty intervals (CI95) in excellence_metrics.per_class_ci95. | eval.json detection_metrics_by_class, excellence_metrics.per_class_ci95; export_contracts_corpus_table Table 3. |
+| Split-brain detection advantage | excellence_metrics.split_brain_detection_advantage (contract TP/FP/FN for split_brain class). | eval.json excellence_metrics. |
 | Resource and cost | wall_clock_sec, events_per_sec_overall, cost_proxy (events_per_dollar when LABTRUST_COST_PER_HOUR set). | eval.json resource_and_cost. |
-| Transport parity | Same canonical sequence, event-log vs LADS-shaped; parity_ok when verdict vectors match. | transport_parity.json (contracts_transport_parity.py). |
+| Async stress robustness | Detection correctness maintained under delay/skew/reorder stressors (delay means 0–10ms, clock skew 0–500ms, reorder probabilities 0–20%). | stress_results.json (contracts_async_stress.py; delay/skew/reorder sweeps). |
+| Transport parity | Multi-sequence check: `parity_ok_all`, `per_sequence[]`, and `parity_confidence` (matching_events, total_events_checked, parity_rate) for event-log vs LADS-shaped reference paths; identical verdict/reason vectors per sequence. | transport_parity.json (contracts_transport_parity.py; optional `--sequences`). |
 
 ### P2 — REP-CPS
 
@@ -52,6 +55,10 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 | Profile ablation | profile_ablation[]: no auth, no freshness, no rate limit, no robust agg, full profile; bias and failure per variant (Table 6). | summary.json profile_ablation; generated_tables.md Table 6. |
 | Latency/cost | wall_sec per policy, aggregation_compute_ms, policy_overhead_vs_centralized (Table 5). Figure 2: plot_rep_cps_latency.py. | summary.json latency_cost. |
 | Resilience envelope | safe_operating_region_n_compromised_max, failure_boundary_n_compromised (Table 7). | summary.json resilience_envelope. |
+| Scheduling-dependent outcome | rep_cps_tasks_mean vs naive_in_loop on rep_cps_scheduling_v0 (`scheduling_dependent_eval`). | summary.json scheduling_dependent_eval. |
+| Threat micro-evidence | Freshness/replay burst, sybil vs spoof rows, messaging_sim, dynamic series. | summary.json freshness_replay_evidence, sybil_vs_spoofing_evidence, messaging_sim, dynamic_aggregation_series. Exported tables in generated_tables.md include dedicated blocks for messaging_sim and dynamic_aggregation_series. |
+| Per-scenario breakdown | Aggregated metrics per scenario_id (separates non-scheduling parity from scheduling-dependent outcomes). | summary.json per_scenario; generated_tables.md per-scenario summary table. |
+| Comparison statistics | Paired comparison metrics (difference_mean, difference_ci95, paired_t_p_value, power_post_hoc) on non-scheduling scenarios. | summary.json excellence_metrics; generated_tables.md comparison statistics block. |
 
 ### P3 — Replay
 
@@ -64,7 +71,10 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 | Multi-seed variability | multi_seed_overhead.across_seeds_stdev_of_means_ms. | replay_eval summary.json. |
 | L1 stub pass | l1_stub_ok true when twin config valid. | summary.json. |
 | L1 twin pass | l1_twin_ok when --l1-twin. | summary.json (with --l1-twin). |
+| L1 twin multi-seed aggregate | l1_twin_summary with n_seeds, all_pass, mean_time_ms, stdev_time_ms, min/max_time_ms across all thin-slice seeds. | summary.json l1_twin_summary (with --l1-twin). |
 | Witness slices present | Top-level witness_slices length > 0 when divergence detected. | summary.json. |
+| Corpus space (aggregate) | Sum/mean of on-disk trace bytes and `state_hash_after` counts over corpus rows; optional diagnostic payload sum/mean. | summary.json `corpus_space_summary`; Table 1b from `export_replay_corpus_table.py`. |
+| Corpus categorization | corpus_category per trace (synthetic_trap, field_proxy, real_ingest, synthetic_pass) for explicit evidence lane separation. | summary.json per_trace[]; Table 1b from `export_replay_corpus_table.py`. |
 
 ### P4 — CPS-MAESTRO
 

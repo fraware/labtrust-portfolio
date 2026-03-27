@@ -86,3 +86,22 @@ def auth_hook(update: Dict[str, Any], allowed_agents: Optional[List[str]] = None
     if allowed_agents is None:
         return True
     return update.get("agent_id") in allowed_agents
+
+
+def sensitivity_spoof_duplicate_sender_update(
+    variable: str,
+    agent_id: str,
+    poison_value: float,
+    ts: float = 0.0,
+) -> Dict[str, Any]:
+    """
+    Harness: an additional update claiming an existing honest agent_id with a
+    poison value (impersonation / duplicate-sender stress). Used to separate
+    trimmed-mean robustness from naive mean under spoofing in eval scenarios.
+    """
+    return {
+        "variable": variable,
+        "value": poison_value,
+        "ts": ts,
+        "agent_id": agent_id,
+    }

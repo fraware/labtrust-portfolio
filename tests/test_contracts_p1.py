@@ -182,6 +182,21 @@ class TestContractsEvalIntegration(unittest.TestCase):
             # Detection metrics include F1
             self.assertIn("detection_metrics", data)
             self.assertIn("f1", data["detection_metrics"])
+            self.assertIn("detection_metrics_by_class", data)
+            self.assertIsInstance(data["detection_metrics_by_class"], dict)
+            self.assertGreater(len(data["detection_metrics_by_class"]), 0)
+            ab = data.get("ablation", {})
+            for key in (
+                "full_contract",
+                "timestamp_only",
+                "ownership_only",
+                "occ_only",
+                "lease_only",
+                "lock_only",
+                "accept_all",
+                "naive_lww",
+            ):
+                self.assertIn(key, ab, f"ablation must include {key}")
             # Run manifest includes script_version and corpus_fingerprint
             rm = data["run_manifest"]
             self.assertIn("script_version", rm)
@@ -267,3 +282,40 @@ class TestContractsScaleTest(unittest.TestCase):
             self.assertIn("time_per_write_us", data)
             self.assertIn("scale_test_events", data["run_manifest"])
             self.assertEqual(data["run_manifest"]["scale_test_events"], 1000)
+
+
+class TestP1AppendixTexExport(unittest.TestCase):
+    """export_p1_appendix_tex.py produces valid LaTeX from eval-shaped JSON."""
+
+    def test_export_appendix_tex_writes_longtable(self) -> None:
+        script = _repo_root() / "scripts" / "export_p1_appendix_tex.py"
+        with tempfile.TemporaryDirectory() as td:
+            td_path = Path(td)
+            eval_path = td_path / "eval.json"
+            eval_path.write_text(
+                json.dumps({
+                    "sequences": [
+                        {"sequence": "good_sequence", "detection_ok": True, "denials": 0},
+                        {"sequence": "split_brain_sequence", "detection_ok": True, "denials": 1},
+                    ],
+                    "run_manifest": {
+                        "script_version": "v0.test",
+                        "corpus_fingerprint": "abc123",
+                        "corpus_sequence_count": 2,
+                    },
+                }),
+                encoding="utf-8",
+            )
+            out_path = td_path / "out.tex"
+            proc = subprocess.run(
+                [sys.executable, str(script), "--eval", str(eval_path), "--out", str(out_path)],
+                cwd=str(_repo_root()),
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            self.assertEqual(proc.returncode, 0, (proc.stdout, proc.stderr))
+            tex = out_path.read_text(encoding="utf-8")
+            self.assertIn("\\begin{longtable}", tex)
+            self.assertIn("good\\_sequence", tex)
+            self.assertIn("v0.test", tex)

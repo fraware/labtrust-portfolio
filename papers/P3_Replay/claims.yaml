@@ -13,7 +13,7 @@ release_id: "replay_eval"
 
 claims:
   - id: "C1"
-    statement: "A CPS-aware trace format plus a determinism contract enables L0 replay with per-event verification and sequence-level localization of divergence (structured diagnostics), evaluated on a corpus of traps plus a field-style pass trace."
+    statement: "A CPS-aware trace format plus a determinism contract enables L0 replay with per-event verification and sequence-level localization of divergence (structured diagnostics), evaluated across explicit evidence lanes (synthetic traps, synthetic passes, field-proxy traces, and real-ingest example) with corpus-space and category-aware reporting."
     evidence:
       release_id: "replay_eval"
       artifact_paths:
@@ -23,8 +23,8 @@ claims:
         - "kernel/trace/REPLAY_LEVELS.v0.1.md"
         - "impl/src/labtrust_portfolio/replay.py"
         - "scripts/verify_p3_replay_summary.py"
-      table_ids: ["Table 1", "Table 2", "Table 3"]
-      figure_ids: ["Figure 0", "Figure 1"]
+      table_ids: ["Table 1", "Table 1b", "Table 2", "Table 3"]
+      figure_ids: ["Figure 0", "Figure 1", "Figure 2"]
       confidence: high
 
   - id: "C2"
@@ -34,30 +34,30 @@ claims:
       artifact_paths:
         - "datasets/runs/replay_eval/summary.json"
         - "impl/src/labtrust_portfolio/replay.py"
-      table_ids: ["Table 1", "Table 3"]
-      figure_ids: []
+      table_ids: ["Table 1", "Table 1b", "Table 3"]
+      figure_ids: ["Figure baseline-bars"]
       confidence: high
 
   - id: "C3"
-    statement: "Replay supports audit-style reconstruction of control-plane decisions: event-order replay with seq-level diagnostics (expected_hash vs got_hash); time-travel debugging is a supported use case but not empirically user-studied here."
+    statement: "Replay supports audit-style reconstruction of control-plane decisions: event-order replay with seq-level diagnostics (expected_hash vs got_hash), witness slices, and an L1 twin extension path summarized across multiple seeds."
     evidence:
       release_id: "replay_eval"
       artifact_paths:
         - "datasets/runs/replay_eval/summary.json"
         - "impl/src/labtrust_portfolio/replay.py"
-      table_ids: ["Table 1"]
-      figure_ids: []
+      table_ids: ["Table 1", "Table 1b", "Table L1 supplementary", "Table artifact-to-evidence"]
+      figure_ids: ["Figure 2"]
       confidence: medium
 
   - id: "C4"
-    statement: "The toolchain integrates with evidence bundles so replay outcomes are admissible evidence (MADS)."
+    statement: "The toolchain integrates with evidence bundles so replay outcomes are admissible machine-checkable evidence (MADS) rather than debugging-only output."
     evidence:
       release_id: "replay_eval"
       artifact_paths:
         - "kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json"
         - "impl/src/labtrust_portfolio/evidence.py"
-      table_ids: ["Table 1"]
+      table_ids: ["Table artifact-to-evidence"]
       figure_ids: []
       confidence: high
 
-# Table 1: corpus/fidelity. Table 2: overhead full L0. Table 3: baselines (summary baseline_overhead). Figure 1: plot_replay_overhead.py.
+# Table 1: corpus/fidelity lane summary. Table 1b: per-trace localization + corpus space + corpus_category (export_replay_corpus_table.py). Table 2: overhead full L0. Table 3: baselines (summary baseline_overhead). Figure 0: export_p3_replay_levels_figure.py (+ mmd from export_p3_replay_levels_diagram.py). Figure 1: plot_replay_overhead.py. Figure 2: export_p3_first_divergence_timeline.py. Supplementary visuals: plot_p3_baseline_bars.py, plot_p3_corpus_lanes.py. Bundle: export_p3_paper_figures.py.

@@ -4,7 +4,7 @@ This document defines portfolio-wide standards so all paper artifacts (DRAFTs, c
 
 ## Repro block
 
-- **Order:** List commands in this order: Figure 0, Table 1, Table 2, Figure 1, then any extra tables or figures.
+- **Order:** List commands in this order: Figure 0, Table 1, then any tightly coupled appendix table (e.g. P3 **Table 1b**), Table 2, Figure 1, then any extra tables or figures.
 - **Env:** State once at the top: "From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`."
 - **Minimal vs publishable:** Define both when relevant:
   - **Minimal run:** Fewer seeds (e.g. 3), one scenario; target under 20 min for repro.

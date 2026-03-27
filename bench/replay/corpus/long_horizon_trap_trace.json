@@ -1,0 +1,302 @@
+{
+  "version": "0.1",
+  "run_id": "long_horizon_trap_1",
+  "scenario_id": "long_horizon_trap",
+  "seed": 1,
+  "start_time_utc": "2020-01-01T00:00:00Z",
+  "events": [
+    {
+      "seq": 0,
+      "ts": 0.0,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "sched"
+      },
+      "payload": {
+        "detail": "warmup"
+      },
+      "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
+    },
+    {
+      "seq": 1,
+      "ts": 0.05,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "sched"
+      },
+      "payload": {
+        "detail": "warmup2"
+      },
+      "state_hash_after": "377dc505ccae89e85d6bc3907319bb5e0613fb1150859423ea348ba9b5b46d5e"
+    },
+    {
+      "seq": 2,
+      "ts": 0.1,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t0",
+        "name": "job0"
+      },
+      "state_hash_after": "24b1329e0107677485966cda7287c8ca957eaeab91a852bd82b226f6a51d8033"
+    },
+    {
+      "seq": 3,
+      "ts": 0.15000000000000002,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t0",
+        "name": "job0"
+      },
+      "state_hash_after": "5b162b6e620eb8a7c5f09ec8867fd196a9a2f5c7e2ffcaff09be3104cb1a708b"
+    },
+    {
+      "seq": 4,
+      "ts": 0.2,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t1",
+        "name": "job1"
+      },
+      "state_hash_after": "0472b04d283cf1d8b70afb391af845d194b12cd9ff4a6593858d3d4b5d1f24bc"
+    },
+    {
+      "seq": 5,
+      "ts": 0.25,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t1",
+        "name": "job1"
+      },
+      "state_hash_after": "71dde160e9e034843bb226a4b32dfd285308b94d12eca309717ed62c55ad82c2"
+    },
+    {
+      "seq": 6,
+      "ts": 0.30000000000000004,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t2",
+        "name": "job2"
+      },
+      "state_hash_after": "fcac375cb13ca3e1109e16aa087bebede47bf25c979157ac5a083176a5ec30b1"
+    },
+    {
+      "seq": 7,
+      "ts": 0.35000000000000003,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t2",
+        "name": "job2"
+      },
+      "state_hash_after": "9db6120d9cb1f40f8c7478b4f8a7734dd92507e6246f65aa2f3716d7487ce354"
+    },
+    {
+      "seq": 8,
+      "ts": 0.4,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t3",
+        "name": "job3"
+      },
+      "state_hash_after": "0b69d357adee8f785a0458e49e0b8402cb7dd83908112db7dd86cc383b53c705"
+    },
+    {
+      "seq": 9,
+      "ts": 0.45,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t3",
+        "name": "job3"
+      },
+      "state_hash_after": "5fde6dddd92677dc7e6868da5d16e9cf8a47bf286672eb265d470398a22f744d"
+    },
+    {
+      "seq": 10,
+      "ts": 0.5,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t4",
+        "name": "job4"
+      },
+      "state_hash_after": "57123722df611f94aa945b3b22db491f5f1fc0af77179a116f2daa5e93d70df6"
+    },
+    {
+      "seq": 11,
+      "ts": 0.55,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t4",
+        "name": "job4"
+      },
+      "state_hash_after": "6e4b9ba80aa26596ec976ecee595146a5c58e8af0c9b48bd53754371f0ea5d82"
+    },
+    {
+      "seq": 12,
+      "ts": 0.6000000000000001,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t5",
+        "name": "job5"
+      },
+      "state_hash_after": "941a71cdce64009c41c0c56dc2ab88cbab60c6ca317242d92af53492151f8b04"
+    },
+    {
+      "seq": 13,
+      "ts": 0.65,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t5",
+        "name": "job5"
+      },
+      "state_hash_after": "a66f317ee954b4af72d31f9090c7bd60d025f25b6f40c5d4431c54082a036bb2"
+    },
+    {
+      "seq": 14,
+      "ts": 0.7000000000000001,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t6",
+        "name": "job6"
+      },
+      "state_hash_after": "3dce0d986d11694845d3f6edc1932828b7b4417b072964df187808b46c7fe830"
+    },
+    {
+      "seq": 15,
+      "ts": 0.75,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t6",
+        "name": "job6"
+      },
+      "state_hash_after": "0f68c5d77d274ac9d5135813dc6b8889ed4ec4ac851917bccf2c51df2470b45a"
+    },
+    {
+      "seq": 16,
+      "ts": 0.8,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t7",
+        "name": "job7"
+      },
+      "state_hash_after": "65a1952716a5e04f1e67d6663f040787cffdd63d8c80cc3e7eaecc34588f1444"
+    },
+    {
+      "seq": 17,
+      "ts": 0.8500000000000001,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t7",
+        "name": "job7"
+      },
+      "state_hash_after": "6f4e9cd257198c49e7a4a1fe2db1554d4b51a1cafe2030dcc4aa07758b0a0e4b"
+    },
+    {
+      "seq": 18,
+      "ts": 0.9,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t8",
+        "name": "job8"
+      },
+      "state_hash_after": "936cbba3ad46fa9c2448d473dd295d7283cc1404fe542a606b029ce51c45adf2"
+    },
+    {
+      "seq": 19,
+      "ts": 0.9500000000000001,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t8",
+        "name": "job8"
+      },
+      "state_hash_after": "72045133cedd2ca21690e79d1ff19116207da09a21fe5d4bcfd0468aa1c6f437"
+    },
+    {
+      "seq": 20,
+      "ts": 1.0,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t_bad",
+        "name": "late"
+      },
+      "state_hash_after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "final_state_hash": "d7db6843d51b293c2853ccb676b33707ee7e007a3eb73a7321af807f494fc2c3"
+}

@@ -77,3 +77,15 @@ def list_scenario_ids() -> List[str]:
     if not d.exists():
         return []
     return [p.stem for p in d.glob("*.yaml")]
+
+
+def scenario_rep_cps_scheduling_dependent(scenario_id: str) -> bool:
+    """
+    True if scenario YAML sets rep_cps_scheduling_dependent (gate blocks scheduling).
+    False if scenario missing or flag absent.
+    """
+    try:
+        data = load_scenario(scenario_id)
+        return bool(data.get("rep_cps_scheduling_dependent"))
+    except (FileNotFoundError, ValueError, RuntimeError, OSError):
+        return False

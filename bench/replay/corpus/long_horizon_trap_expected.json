@@ -1,0 +1,5 @@
+{
+  "expected_replay_ok": false,
+  "expected_divergence_at_seq": 20,
+  "notes": "First per-event hash mismatch is intentionally late (stress localization index)."
+}

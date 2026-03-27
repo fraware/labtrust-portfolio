@@ -1,0 +1,52 @@
+{
+  "version": "0.1",
+  "run_id": "real_bucket_example_v0",
+  "scenario_id": "real_platform_example",
+  "seed": 999,
+  "start_time_utc": "2026-03-19T12:00:00.000000Z",
+  "events": [
+    {
+      "seq": 0,
+      "ts": 0.1,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "scheduler"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "task_0"
+      },
+      "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
+    },
+    {
+      "seq": 1,
+      "ts": 0.2,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "task_0",
+        "name": "task_0"
+      },
+      "state_hash_after": "a2a73db6488374350cdb0ad813a6f4d01b5c5ca14ace36e04cec92585d7148ba"
+    },
+    {
+      "seq": 2,
+      "ts": 0.3,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "task_0",
+        "name": "task_0"
+      },
+      "state_hash_after": "cc1a266aaa26ed61c01685afd09e8b414a6e6617ae23d657f9972a702ec53b5d"
+    }
+  ],
+  "final_state_hash": "cc1a266aaa26ed61c01685afd09e8b414a6e6617ae23d657f9972a702ec53b5d"
+}

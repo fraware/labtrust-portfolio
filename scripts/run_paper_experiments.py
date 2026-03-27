@@ -122,7 +122,13 @@ def p1(quick: bool) -> bool:
 
 def p2(quick: bool) -> bool:
     seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
-    scenarios = "toy_lab_v0" if quick else "toy_lab_v0,lab_profile_v0"
+    scenarios = (
+        "toy_lab_v0,rep_cps_scheduling_v0"
+        if quick
+        else "toy_lab_v0,lab_profile_v0,rep_cps_scheduling_v0"
+    )
+    # For publishable runs, use default drop_completion_prob (0.02) to keep runtime reasonable
+    # Drop sweep can be enabled explicitly via CLI if needed for deeper analysis
     return run(
         [
             sys.executable,
@@ -131,8 +137,11 @@ def p2(quick: bool) -> bool:
             "--scenarios", scenarios,
             "--seeds", seeds,
             "--delay-sweep", "0,0.05,0.1" if quick else "0,0.05,0.1,0.2",
+            "--gate-threshold-sweep", "1.5,2.0,2.5",
+            # Default drop_completion_prob=0.02 (single value) for backward compatibility
+            # Use --drop-sweep explicitly for broader fault coverage
         ],
-        "P2 REP-CPS delay sweep (toy_lab_v0)",
+        "P2 REP-CPS delay sweep (multi-scenario incl. rep_cps_scheduling_v0)",
         timeout=300,
     )
 

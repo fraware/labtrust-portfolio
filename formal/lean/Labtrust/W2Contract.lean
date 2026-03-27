@@ -42,4 +42,12 @@ theorem validate_congr (s1 s2 : State) (e1 e2 : Event)
     validate s1 e1 = validate s2 e2 := by
   rw [hs, he]
 
+/-
+  Invariant preservation (paper Proposition 5 sketch): for a simplified step relation
+  that applies an event only when validate returns allow, admitted prefixes preserve
+  per-key monotonicity of lastTs and consistency of owner with admitted writers.
+  Full statement and proof are left as future work in this wedge; the manuscript
+  gives an implementation-aligned proof sketch over the reference replay semantics.
+-/
+
 end Labtrust.W2

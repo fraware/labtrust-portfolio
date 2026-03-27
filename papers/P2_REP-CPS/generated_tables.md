@@ -1,17 +1,17 @@
 # Generated tables for P2 (P2_REP-CPS)
 
-**How to read:** Table 1 compares adapter policies; Table 2 aggregation under compromise; Table 3 baselines; Table 4 convergence (optional); Table 5 latency/cost; Table 6 profile ablation; Table 7 resilience envelope. Source: `datasets/runs/rep_cps_eval/summary.json`. Run manifest (seeds, scenario_ids, delay_fault_prob_sweep, script) in that file. Publishable default: 20 seeds.
+**How to read:** Table 1 compares adapter policies; Table 2 aggregation under compromise; Table 3 baselines; Table 4 convergence (optional); Table 5 latency/cost; Table 6 profile ablation; Table 7 resilience envelope; scheduling-dependent eval and threat-evidence blocks (when present) summarize `rep_cps_scheduling_v0` and micro-harness rows from summary.json. Source: `datasets/runs/rep_cps_eval/summary.json`. Run manifest (seeds, scenario_ids, delay_fault_prob_sweep, script) in that file. Publishable default: 20 seeds; scenarios include `rep_cps_scheduling_v0`.
 
 ## From rep_cps_eval.py and summary.json
 
-**Table 1 — Adapter comparison (source: summary.json).** REP-CPS vs Centralized vs naive-in-loop vs unsecured; 20 seeds (publishable default), scenarios toy_lab_v0, lab_profile_v0.
+**Table 1 — Adapter comparison (source: summary.json).** REP-CPS vs Centralized vs naive-in-loop vs unsecured; 20 seeds (publishable default), scenarios toy_lab_v0, lab_profile_v0, rep_cps_scheduling_v0.
 
 | Policy | tasks_completed_mean | tasks_stdev | aggregate_load (in-loop) |
 |--------|----------------------|-------------|---------------------------|
-| REP-CPS (trimmed, auth) | 4.4 | 0.57 | 0.32 |
-| Naive-in-loop (mean, auth) | 4.4 | 0.57 | 0.32 |
-| Unsecured (mean, no auth, compromised) | 4.4 | 0.57 | 5.16 |
-| Centralized | 4.4 | 0.57 | — |
+| REP-CPS (trimmed, auth) | 4.24 | 0.55 | 1.4 |
+| Naive-in-loop (mean, auth) | 2.93 | 2.13 | 1.4 |
+| Unsecured (mean, no auth, compromised) | 2.93 | 2.13 | 5.48 |
+| Centralized | 4.24 | 0.55 | — |
 
 
 **Table 2 — Aggregation under compromise (offline; source: summary.json aggregation_under_compromise).** Robust aggregation reduces observed compromise-induced bias relative to naive averaging.
@@ -49,20 +49,20 @@
 
 | Policy / metric | Mean (s) | p95 (s) | Overhead vs centralized (ms) |
 |------------------|----------|---------|-------------------------------|
-| REP-CPS | 0.1336 | 0.2214 | 2.62 |
-| Naive-in-loop | 0.1289 | 0.1836 | -2.12 |
-| Unsecured | 0.1312 | 0.1969 | 0.14 |
-| Centralized | 0.131 | 0.1996 | 0 |
+| REP-CPS | 0.1615 | 0.2961 | 3.29 |
+| Naive-in-loop | 0.1586 | 0.2917 | 0.34 |
+| Unsecured | 0.1582 | 0.2653 | -0.04 |
+| Centralized | 0.1582 | 0.2958 | 0 |
 
 | Aggregation compute | Mean (ms) | p95 (ms) | p99 (ms) |
-|----------------------|-----------+----------|----------|
-| aggregate() (trimmed_mean) | 0.0027 | 0.0034 | 0.0127 |
+|----------------------|-----------|----------|----------|
+| aggregate() (trimmed_mean) | 0.0029 | 0.0033 | 0.0169 |
 
 
 **Table 6 — Profile ablation (source: summary.json profile_ablation).** Each row disables one profile component; bias and aggregate vs honest-only.
 
 | Variant | Description | Bias | Aggregate | Failure |
-|---------|-------------|------|-----------+---------|
+|---------|-------------|------|-----------|---------|
 | no_auth | All agents accepted (no auth filter), trimmed | 3.2367 | 3.5567 | yes |
 | no_freshness | No freshness window (stale compromised accept | 3.2367 | 3.5567 | yes |
 | no_rate_limit | No rate limit (burst from one agent), auth, t | 7.2675 | 7.5875 | yes |
@@ -71,15 +71,126 @@
 | full_profile | Auth, trimmed_mean, rate_limit, freshness | 0.0 | 0.32 | no |
 
 
+**Scheduling-dependent scenario (source: summary.json scheduling_dependent_eval).** Task-level outcome when the safety gate blocks scheduling under duplicate-sender spoof stress (`rep_cps_scheduling_v0`).
+
+| Metric | Value |
+|--------|-------|
+| scenario_id | rep_cps_scheduling_v0 |
+| rep_cps_tasks_mean | 3.91 |
+| naive_in_loop_tasks_mean | 0.0 |
+| centralized_tasks_mean | 3.91 |
+| rep_beats_naive_tasks | True |
+
+
+**Threat evidence — freshness and replay burst (summary.json freshness_replay_evidence).** Micro-harness for max_age_sec and rate_limit (not a live replay engine).
+
+| Check | Value |
+|-------|-------|
+| stale_value_dropped_by_max_age | True |
+| mean_with_freshness_window | 0.3 |
+| rate_limit_reduces_replay_influence | True |
+
+
+**Threat evidence — sybil vs spoofing (summary.json sybil_vs_spoofing_evidence).** Sybil: many distinct fake agent ids; spoofing: duplicate sender id with poison value.
+
+| Metric | Value |
+|--------|-------|
+| sybil_robust_beats_naive | False |
+| spoof_robust_beats_naive | True |
+| spoof_naive_aggregate_exceeds_gate_2 | True |
+
+
+**Threat evidence — messaging simulation (summary.json messaging_sim).** Ordered delivery simulation: duplicate and reorder handling (synthetic message ordering only; not a deployed bus or ROS/OPC UA path).
+
+| Metric | Value |
+|--------|-------|
+| duplicate_delivery_mean | 0.3167 |
+| duplicate_delivery_trimmed_mean | 0.3 |
+| reordered_same_multiset_mean | 0.3167 |
+
+
+**Threat evidence — dynamic aggregation series (summary.json dynamic_aggregation_series).** Multi-tick synthetic series: growing sybil count per tick (offline).
+
+| Metric | Value |
+|--------|-------|
+| honest_only_trimmed_baseline | 0.325 |
+| max_trim_bias_drift_across_ticks | 5.125 |
+| trim_bias_drift_area | 14.125 |
+| trim_bias_persistence_ticks_gt_1 | 3.0 |
+| temporal_series_kind | offline_synthetic_harness |
+
+
+| Tick | n_compromised | trimmed_mean | naive_mean | bias_trim_vs_honest_only |
+|------|---------------|--------------|------------|--------------------------|
+| 0 | 0 | 0.325 | 0.325 | 0.0 |
+| 1 | 1 | 0.35 | 2.8833 | 0.025 |
+| 2 | 2 | 4.175 | 4.1625 | 3.85 |
+| 3 | 3 | 5.45 | 4.93 | 5.125 |
+| 4 | 3 | 5.45 | 4.93 | 5.125 |
+
+
+**Per-scenario summary (source: summary.json per_scenario).** Aggregated metrics per scenario across all delay/drop combinations.
+
+| Scenario | REP-CPS mean | REP stdev | Naive mean | Naive stdev | Unsecured mean | Centralized mean |
+|----------|-------------|-----------|------------|-------------|----------------|------------------|
+| toy_lab_v0 | 3.91 | 0.28 | 3.91 | 0.28 | 3.91 | 3.91 |
+| lab_profile_v0 | 4.89 | 0.32 | 4.89 | 0.32 | 4.89 | 4.89 |
+| rep_cps_scheduling_v0 | 3.91 | 0.28 | 0.0 | 0.0 | 0.0 | 3.91 |
+
+
+**Offline aggregation comparators (source: summary.json aggregation_variants).** Same honest+compromised multiset as Table 2; robust operators vs plain mean.
+
+| method | bias vs honest trimmed | beats_naive_mean |
+|--------|-------------------------|------------------|
+| trimmed_mean | 3.2367 | True |
+| median | 0.03 | True |
+| clipping | 3.874 | False |
+| median_of_means | 0.03 | True |
+
+
+**Offline comparator baselines (source: summary.json offline_comparator_baselines).** Includes honest-range clamp heuristic (oracle bounds strawman).
+
+| Metric | Value |
+|--------|-------|
+| bias_naive_mean | 3.874 |
+| honest_range_clamped_bias_vs_honest_trimmed | 0.014 |
+| honest_range_clamped_beats_naive_mean | True |
+| robust_statistical_comparators | trimmed_mean, median, clipping, median_of_means |
+| practical_heuristic_comparators | honest_range_clamped_mean |
+| selection_rationale | Comparators chosen to distinguish robust statistics from lightweight operational heuristics used in constrained CPS settings. |
+
+
+**Comparison statistics (source: summary.json excellence_metrics).** Paired comparison metrics for REP-CPS vs Centralized (non-scheduling scenarios only).
+
+| Metric | Value |
+|--------|-------|
+| difference_mean (REP-CPS - Centralized) | 0.0 |
+| difference_ci95_lower | 0.0 |
+| difference_ci95_upper | 0.0 |
+| difference_ci_width | 0.0 |
+| paired_t_p_value | 1.0 |
+| power_post_hoc | 0.0 |
+| alpha | 0.05 |
+
+
+**Gate-threshold sensitivity (source: summary.json gate_threshold_sweep_results).** Scheduling scenario sweep of `safety_gate_max_load`; shows where naive trips gate while REP-CPS remains admissible.
+
+| safety_gate_max_load | REP-CPS tasks_mean | naive_in_loop tasks_mean | unsecured tasks_mean | REP-CPS gate_deny_rate | unsecured gate_deny_rate | rep_beats_naive_tasks |
+|----------------------|--------------------|--------------------------|---------------------|------------------------|--------------------------|-----------------------|
+| 1.5 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
+| 2.0 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
+| 2.5 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
+
+
 **Safety-gate campaign (source: summary.json safety_gate_denial).** Pass/deny counts from adapter runs; denial when aggregate exceeds threshold.
 
 | Metric | Value |
 |--------|-------|
 | denial_trace_recorded | True |
-| pass_count_rep_cps | 160 |
+| pass_count_rep_cps | 240 |
 | deny_count_rep_cps | 0 |
-| deny_count_unsecured | 160 |
-| total_runs | 160 |
+| deny_count_unsecured | 240 |
+| total_runs | 240 |
 
 
 **Table 7 — Resilience envelope (source: summary.json resilience_envelope).** Safe operating region and failure boundary from compromise/magnitude/trim sweeps.
@@ -93,4 +204,4 @@
 | trim_sweep robust beats naive | True |
 
 
-Regenerate: `python scripts/rep_cps_eval.py --scenarios lab_profile_v0` (writes summary.json). Tables: `python scripts/export_rep_cps_tables.py`. Latency/cost: in summary.json latency_cost; Table 5. Resilience: summary.json resilience_envelope, magnitude_sweep, trim_fraction_sweep. For convergence: `python scripts/rep_cps_eval.py --aggregation-steps 5` then `python scripts/export_rep_cps_convergence_table.py`. See DRAFT.md repro block and RESULTS_PER_PAPER.md.
+Regenerate: `python scripts/rep_cps_eval.py` (default scenarios: toy_lab_v0, lab_profile_v0, rep_cps_scheduling_v0). Tables: `python scripts/export_rep_cps_tables.py`. Latency/cost: summary.json latency_cost; Table 5. Resilience: resilience_envelope, magnitude_sweep, trim_fraction_sweep. Threat micro-evidence: freshness_replay_evidence, sybil_vs_spoofing_evidence, messaging_sim, dynamic_aggregation_series. Convergence: `python scripts/rep_cps_eval.py --aggregation-steps 5` then `python scripts/export_rep_cps_convergence_table.py`. See DRAFT.md repro block and RESULTS_PER_PAPER.md.

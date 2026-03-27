@@ -52,6 +52,14 @@
         "coordination_messages": {
           "type": "integer",
           "minimum": 0
+        },
+        "tasks_completed_after_fault": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "steps_to_completion_after_first_fault": {
+          "type": ["integer", "null"],
+          "minimum": 0
         }
       }
     },

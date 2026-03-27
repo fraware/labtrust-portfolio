@@ -1,0 +1,114 @@
+{
+  "source": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\contracts_eval\\stress_results.json",
+  "profiles": {
+    "d=0,sk=0,ro=0": {
+      "total": 54,
+      "ok": 54
+    },
+    "d=0,sk=0,ro=0.1": {
+      "total": 54,
+      "ok": 46
+    },
+    "d=0,sk=0,ro=0.2": {
+      "total": 54,
+      "ok": 47
+    },
+    "d=0,sk=0.1,ro=0": {
+      "total": 54,
+      "ok": 53
+    },
+    "d=0,sk=0.1,ro=0.1": {
+      "total": 54,
+      "ok": 47
+    },
+    "d=0,sk=0.1,ro=0.2": {
+      "total": 54,
+      "ok": 45
+    },
+    "d=0,sk=0.5,ro=0": {
+      "total": 54,
+      "ok": 53
+    },
+    "d=0,sk=0.5,ro=0.1": {
+      "total": 54,
+      "ok": 47
+    },
+    "d=0,sk=0.5,ro=0.2": {
+      "total": 54,
+      "ok": 45
+    },
+    "d=0.001,sk=0,ro=0": {
+      "total": 54,
+      "ok": 35
+    },
+    "d=0.001,sk=0,ro=0.1": {
+      "total": 54,
+      "ok": 34
+    },
+    "d=0.001,sk=0,ro=0.2": {
+      "total": 54,
+      "ok": 33
+    },
+    "d=0.001,sk=0.1,ro=0": {
+      "total": 54,
+      "ok": 33
+    },
+    "d=0.001,sk=0.1,ro=0.1": {
+      "total": 54,
+      "ok": 35
+    },
+    "d=0.001,sk=0.1,ro=0.2": {
+      "total": 54,
+      "ok": 33
+    },
+    "d=0.001,sk=0.5,ro=0": {
+      "total": 54,
+      "ok": 36
+    },
+    "d=0.001,sk=0.5,ro=0.1": {
+      "total": 54,
+      "ok": 35
+    },
+    "d=0.001,sk=0.5,ro=0.2": {
+      "total": 54,
+      "ok": 32
+    },
+    "d=0.01,sk=0,ro=0": {
+      "total": 54,
+      "ok": 34
+    },
+    "d=0.01,sk=0,ro=0.1": {
+      "total": 54,
+      "ok": 34
+    },
+    "d=0.01,sk=0,ro=0.2": {
+      "total": 54,
+      "ok": 35
+    },
+    "d=0.01,sk=0.1,ro=0": {
+      "total": 54,
+      "ok": 35
+    },
+    "d=0.01,sk=0.1,ro=0.1": {
+      "total": 54,
+      "ok": 33
+    },
+    "d=0.01,sk=0.1,ro=0.2": {
+      "total": 54,
+      "ok": 36
+    },
+    "d=0.01,sk=0.5,ro=0": {
+      "total": 54,
+      "ok": 32
+    },
+    "d=0.01,sk=0.5,ro=0.1": {
+      "total": 54,
+      "ok": 35
+    },
+    "d=0.01,sk=0.5,ro=0.2": {
+      "total": 54,
+      "ok": 35
+    }
+  },
+  "total_profiled_runs": 1458
+}

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Generate paper artifacts: check eval outputs exist, run export scripts (tables),
-run Figure 0 and Figure 1 scripts, and write generated tables to
+run paper figure scripts, and write generated tables to
 papers/Px_*/generated_tables.md. Does not modify DRAFT.md.
+P3 uses scripts/export_p3_paper_figures.py to populate papers/P3_Replay/figures/.
 
 Usage (from repo root):
   PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/generate_paper_artifacts.py [--paper P0|P1|...|P8|all] [--skip-eval-check]
@@ -37,14 +38,18 @@ PAPER_CONFIG = {
     "P1": (
         "P1_Contracts",
         [RUNS / "contracts_eval" / "eval.json"],
-        [("export_contracts_corpus_table.py", [])],
+        [
+            ("export_contracts_corpus_table.py", []),
+            ("export_p1_appendix_tex.py", []),
+        ],
         "export_p1_contract_flow.py",
         "plot_contracts_scale.py",
     ),
     "P2": (
         "P2_REP-CPS",
         [RUNS / "rep_cps_eval" / "summary.json"],
-        [],  # Tables from summary.json manually or no dedicated export
+        # export_rep_cps_tables.py writes papers/P2_REP-CPS/generated_tables.md directly (no stdout table body)
+        [],
         "export_p2_rep_profile_diagram.py",
         "plot_rep_cps_summary.py",
     ),
@@ -190,24 +195,67 @@ def main() -> int:
             out_file.write_text("\n".join(table_lines) + "\n", encoding="utf-8")
             print(f"  Wrote {out_file.relative_to(REPO)}")
 
-        # 3. Figure 0
-        fig0_path = SCRIPTS / fig0
-        if fig0_path.exists():
-            ok, _ = run_capture([sys.executable, str(fig0_path)])
-            print(f"  Figure 0 ({fig0}): {'OK' if ok else 'FAILED'}")
+        # 3–4. Figures (P3: single bundle into papers/P3_Replay/figures/)
+        if pid == "P3":
+            pack = SCRIPTS / "export_p3_paper_figures.py"
+            if pack.exists():
+                okp, _ = run_capture([sys.executable, str(pack)])
+                print(
+                    f"  P3 paper figures (export_p3_paper_figures.py): "
+                    f"{'OK' if okp else 'FAILED'}"
+                )
+            else:
+                print("  P3: export_p3_paper_figures.py not found")
         else:
-            print(f"  Figure 0: {fig0} not found")
+            fig0_path = SCRIPTS / fig0
+            if fig0_path.exists():
+                ok, _ = run_capture([sys.executable, str(fig0_path)])
+                print(f"  Figure 0 ({fig0}): {'OK' if ok else 'FAILED'}")
+            else:
+                print(f"  Figure 0: {fig0} not found")
 
-        # 4. Figure 1 (P7 uses export_assurance_gsn with --out)
-        fig1_path = SCRIPTS / fig1
-        if fig1_path.exists():
-            cmd = [sys.executable, str(fig1_path)]
-            if pid == "P7" and "export_assurance_gsn" in fig1:
-                cmd.extend(["--out", str(FIGURES / "p7_gsn.mmd")])
-            ok, _ = run_capture(cmd)
-            print(f"  Figure 1 ({fig1}): {'OK' if ok else 'FAILED'}")
-        else:
-            print(f"  Figure 1: {fig1} not found")
+            fig1_path = SCRIPTS / fig1
+            if fig1_path.exists():
+                cmd = [sys.executable, str(fig1_path)]
+                if pid == "P7" and "export_assurance_gsn" in fig1:
+                    cmd.extend(["--out", str(FIGURES / "p7_gsn.mmd")])
+                ok, _ = run_capture(cmd)
+                print(f"  Figure 1 ({fig1}): {'OK' if ok else 'FAILED'}")
+            else:
+                print(f"  Figure 1: {fig1} not found")
+
+            if pid == "P1":
+                for extra in ("render_p1_flow_figure.py", "plot_p1_paper_figures.py"):
+                    ep = SCRIPTS / extra
+                    if ep.exists():
+                        okx, _ = run_capture([sys.executable, str(ep)])
+                        print(f"  P1 extra ({extra}): {'OK' if okx else 'FAILED'}")
+                    else:
+                        print(f"  P1 extra: {extra} not found")
+
+        if pid == "P2":
+            fig2_path = SCRIPTS / "plot_rep_cps_gate_threshold.py"
+            if fig2_path.exists():
+                ok2, _ = run_capture([sys.executable, str(fig2_path)])
+                print(f"  Figure 2 (plot_rep_cps_gate_threshold.py): {'OK' if ok2 else 'FAILED'}")
+            else:
+                print("  Figure 2: plot_rep_cps_gate_threshold.py not found")
+            fig3_path = SCRIPTS / "plot_rep_cps_dynamics.py"
+            if fig3_path.exists():
+                ok3, _ = run_capture([sys.executable, str(fig3_path)])
+                print(f"  Figure 3 (plot_rep_cps_dynamics.py): {'OK' if ok3 else 'FAILED'}")
+            else:
+                print("  Figure 3: plot_rep_cps_dynamics.py not found")
+            fig4_path = SCRIPTS / "plot_rep_cps_latency.py"
+            if fig4_path.exists():
+                ok4, _ = run_capture([sys.executable, str(fig4_path)])
+                print(f"  Figure 4 (plot_rep_cps_latency.py): {'OK' if ok4 else 'FAILED'}")
+            else:
+                print("  Figure 4: plot_rep_cps_latency.py not found")
+            exp = SCRIPTS / "export_rep_cps_tables.py"
+            if exp.exists() and (args.skip_eval_check or not missing):
+                okt, _ = run_capture([sys.executable, str(exp)])
+                print(f"  Tables (export_rep_cps_tables.py): {'OK' if okt else 'FAILED'}")
 
     print("\nDone. Paste from papers/Px_*/generated_tables.md into DRAFT.md as needed.")
     return 0

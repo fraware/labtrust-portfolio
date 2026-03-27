@@ -22,6 +22,8 @@ REQUIRED_TOP = (
     "overhead_stats",
     "success_criteria_met",
     "excellence_metrics",
+    "corpus_space_summary",
+    "per_trace",
 )
 REQUIRED_OVERHEAD = (
     "n_replays",
@@ -53,6 +55,31 @@ def main() -> int:
     if data.get("schema_version") != "p3_replay_eval_v0.2":
         print("Unexpected schema_version (expected p3_replay_eval_v0.2)", file=sys.stderr)
         return 1
+    css = data.get("corpus_space_summary") or {}
+    if not isinstance(css, dict) or not css.get("corpus_traces_n", 0) >= 1:
+        print(
+            "corpus_space_summary.corpus_traces_n must be >= 1",
+            file=sys.stderr,
+        )
+        return 1
+    pt0 = next((r for r in (data.get("per_trace") or []) if r.get("name") != "thin_slice"), None)
+    if pt0 is not None:
+        for k in ("trace_json_bytes", "state_hash_after_count", "corpus_category"):
+            if k not in pt0:
+                print(f"per_trace corpus row missing {k}", file=sys.stderr)
+                return 1
+    # If L1 twin was run, check for l1_twin_summary
+    if data.get("l1_twin_ok") is not None:
+        l1_summary = data.get("l1_twin_summary")
+        if l1_summary is None:
+            print("l1_twin_ok present but l1_twin_summary missing", file=sys.stderr)
+            return 1
+        if not isinstance(l1_summary, dict):
+            print("l1_twin_summary must be a dict", file=sys.stderr)
+            return 1
+        if "n_seeds" not in l1_summary or "all_pass" not in l1_summary:
+            print("l1_twin_summary missing required keys (n_seeds, all_pass)", file=sys.stderr)
+            return 1
     oh = data.get("overhead_stats") or {}
     for k in REQUIRED_OVERHEAD:
         if k not in oh:

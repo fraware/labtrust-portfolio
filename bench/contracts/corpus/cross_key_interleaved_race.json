@@ -1,0 +1,11 @@
+{
+  "description": "Cross-key interleaving race: two controllers race on different keys but with overlapping timestamps, testing validator's per-key isolation",
+  "initial_state": {"ownership": {}, "_last_ts": {}},
+  "events": [
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "controller_a"}, "payload": {"task_id": "key_1", "name": "task_a", "writer": "controller_a"}},
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "controller_b"}, "payload": {"task_id": "key_2", "name": "task_b", "writer": "controller_b"}},
+    {"type": "task_end", "ts": 2.0, "actor": {"id": "controller_a"}, "payload": {"task_id": "key_1", "name": "task_a", "writer": "controller_a"}},
+    {"type": "task_end", "ts": 2.0, "actor": {"id": "controller_b"}, "payload": {"task_id": "key_2", "name": "task_b", "writer": "controller_b"}}
+  ],
+  "expected_verdicts": ["allow", "allow", "allow", "allow"]
+}

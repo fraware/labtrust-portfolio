@@ -1,0 +1,93 @@
+{
+  "version": "0.1",
+  "run_id": "mixed_failure_trap_1",
+  "scenario_id": "mixed_failure_trap",
+  "seed": 2,
+  "start_time_utc": "2020-01-01T00:00:00Z",
+  "events": [
+    {
+      "seq": 0,
+      "ts": 0.0,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "sched"
+      },
+      "payload": {
+        "detail": "assign"
+      },
+      "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
+    },
+    {
+      "seq": 1,
+      "ts": 0.05,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t0",
+        "name": "mixed"
+      },
+      "state_hash_after": "bf6fa29a36c1bde587fd97e78ff10a1d0be8561813abab30f838d7944b3c3fe5"
+    },
+    {
+      "seq": 2,
+      "ts": 0.1,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t0",
+        "name": "mixed"
+      },
+      "state_hash_after": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "seq": 3,
+      "ts": 0.15000000000000002,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t1",
+        "name": "never_reached"
+      },
+      "state_hash_after": "5b0e148812ef5a4a37b16b7746692a9d58f40f80c69e11b7dcab8ce38cd3c9c9"
+    },
+    {
+      "seq": 4,
+      "ts": 0.2,
+      "type": "task_end",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t1",
+        "name": "never_reached"
+      },
+      "state_hash_after": "3132a37857dfb1e67260d8e65861737efd5c0dd2dbb3668c8ec1d0f7431f473c"
+    },
+    {
+      "seq": 5,
+      "ts": 0.25,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "a1"
+      },
+      "payload": {
+        "task_id": "t2",
+        "name": "latent"
+      },
+      "state_hash_after": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  ],
+  "final_state_hash": "2aa99f97626d46a77014f583e32512fcfd367b50972b2f2afa8e48caa3ab74a0"
+}

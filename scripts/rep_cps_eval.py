@@ -44,7 +44,9 @@ def run_adapter_comparison(
     seeds: list[int],
     out_dir: Path,
     delay_fault_prob: float = 0.05,
+    drop_completion_prob: float = 0.02,
     aggregation_steps: int = 1,
+    safety_gate_max_load: float = 2.0,
 ) -> list[dict]:
     """Run REPCPS (robust), REPCPS naive, REPCPS unsecured, and Centralized; return metrics."""
     from labtrust_portfolio.adapters.rep_cps_adapter import REPCPSAdapter
@@ -67,9 +69,10 @@ def run_adapter_comparison(
         cen_dir.mkdir(parents=True, exist_ok=True)
 
         fault_params = {
-            "drop_completion_prob": 0.02,
+            "drop_completion_prob": drop_completion_prob,
             "delay_fault_prob": delay_fault_prob,
             "aggregation_steps": aggregation_steps,
+            "safety_gate_max_load": safety_gate_max_load,
         }
 
         t0 = time.perf_counter()
@@ -105,6 +108,7 @@ def run_adapter_comparison(
         meta_unsec = rep_unsec_result.trace.get("metadata", {})
 
         row = {
+            "scenario_id": scenario_id,
             "seed": seed,
             "rep_cps_tasks_completed": m_rep.get("tasks_completed", 0),
             "rep_cps_naive_tasks_completed": m_naive.get("tasks_completed", 0),
@@ -116,6 +120,8 @@ def run_adapter_comparison(
             "rep_cps_safety_gate_ok": meta_rep.get("rep_cps_safety_gate_ok"),
             "rep_cps_unsecured_safety_gate_ok": meta_unsec.get("rep_cps_safety_gate_ok"),
             "delay_fault_prob": delay_fault_prob,
+            "drop_completion_prob": drop_completion_prob,
+            "safety_gate_max_load": safety_gate_max_load,
             "rep_cps_aggregation_steps": meta_rep.get("rep_cps_aggregation_steps"),
             "rep_cps_converged": meta_rep.get("rep_cps_converged"),
             "rep_cps_steps_to_convergence": meta_rep.get("rep_cps_steps_to_convergence"),
@@ -187,6 +193,190 @@ def run_aggregation_under_compromise() -> dict:
         "compromised_count": 2,
         "honest_count": 3,
     }
+
+
+def run_freshness_replay_evidence() -> dict:
+    """Explicit freshness (stale drop) and replay-burst (rate_limit) micro-evidence."""
+    from labtrust_portfolio.rep_cps import aggregate
+
+    stale_and_fresh = [
+        {"variable": "load", "value": 99.0, "ts": 0.0, "agent_id": "a1"},
+        {"variable": "load", "value": 0.3, "ts": 9.5, "agent_id": "a2"},
+    ]
+    no_window = aggregate("load", stale_and_fresh, method="mean")
+    with_window = aggregate(
+        "load",
+        stale_and_fresh,
+        method="mean",
+        max_age_sec=1.0,
+        current_ts=10.0,
+    )
+    burst = [
+        {"variable": "load", "value": float(i), "ts": i * 0.01, "agent_id": "a1"}
+        for i in range(5)
+    ]
+    burst_mean_all = aggregate("load", burst, method="mean")
+    burst_mean_rl = aggregate("load", burst, method="mean", rate_limit=1)
+    return {
+        "stale_value_dropped_by_max_age": with_window == 0.3 and no_window != with_window,
+        "mean_without_freshness_includes_stale": round(no_window, 4),
+        "mean_with_freshness_window": round(with_window, 4),
+        "replay_burst_mean_all_updates": round(burst_mean_all, 4),
+        "replay_burst_mean_rate_limit_one": round(burst_mean_rl, 4),
+        "rate_limit_reduces_replay_influence": burst_mean_rl != burst_mean_all,
+    }
+
+
+def run_sybil_vs_spoofing_evidence() -> dict:
+    """Separate sybil pressure (many fake ids) vs spoofing (duplicate honest id)."""
+    from labtrust_portfolio.rep_cps import (
+        aggregate,
+        compromised_updates,
+        sensitivity_spoof_duplicate_sender_update,
+    )
+
+    honest = [
+        {"variable": "load", "value": 0.3, "ts": 0.0, "agent_id": "a1"},
+        {"variable": "load", "value": 0.35, "ts": 0.0, "agent_id": "a2"},
+        {"variable": "load", "value": 0.32, "ts": 0.0, "agent_id": "a3"},
+    ]
+    agg_h = aggregate("load", honest, method="trimmed_mean", trim_fraction=0.25)
+    n_sybil = 4
+    sybil_combined = honest + compromised_updates(
+        "load", num_compromised=n_sybil, extreme_value=10.0, ts=0.0
+    )
+    sybil_trim = aggregate("load", sybil_combined, method="trimmed_mean", trim_fraction=0.25)
+    sybil_mean = aggregate("load", sybil_combined, method="mean")
+    spoof_combined = honest + [
+        sensitivity_spoof_duplicate_sender_update("load", "a1", poison_value=10.0, ts=0.0)
+    ]
+    spoof_trim = aggregate("load", spoof_combined, method="trimmed_mean", trim_fraction=0.25)
+    spoof_mean = aggregate("load", spoof_combined, method="mean")
+    return {
+        "sybil_n_distinct_fake_ids": n_sybil,
+        "sybil_bias_robust": round(abs(sybil_trim - agg_h), 4),
+        "sybil_bias_naive": round(abs(sybil_mean - agg_h), 4),
+        "sybil_robust_beats_naive": abs(sybil_trim - agg_h) < abs(sybil_mean - agg_h),
+        "spoof_impersonated_agent_id": "a1",
+        "spoof_bias_robust": round(abs(spoof_trim - agg_h), 4),
+        "spoof_bias_naive": round(abs(spoof_mean - agg_h), 4),
+        "spoof_robust_beats_naive": abs(spoof_trim - agg_h) < abs(spoof_mean - agg_h),
+        "spoof_naive_aggregate_exceeds_gate_2": spoof_mean > 2.0,
+        "spoof_trimmed_aggregate_at_or_below_gate_2": spoof_trim <= 2.0,
+    }
+
+
+def run_messaging_sim_slice() -> dict:
+    """Ordered delivery simulation into aggregate (duplicate / reorder; no live network)."""
+    from labtrust_portfolio.rep_cps import aggregate
+
+    honest = [
+        {"variable": "load", "value": 0.3, "ts": 0.0, "agent_id": "a1"},
+        {"variable": "load", "value": 0.35, "ts": 0.01, "agent_id": "a2"},
+    ]
+    duplicate_delivery = honest + [dict(honest[0])]
+    agg_dup_mean = aggregate("load", duplicate_delivery, method="mean")
+    agg_dup_trim = aggregate(
+        "load", duplicate_delivery, method="trimmed_mean", trim_fraction=0.25
+    )
+    reordered = [honest[1], honest[0]]
+    agg_order_mean = aggregate("load", reordered + [dict(honest[0])], method="mean")
+    return {
+        "duplicate_delivery_mean": round(agg_dup_mean, 4),
+        "duplicate_delivery_trimmed_mean": round(agg_dup_trim, 4),
+        "reordered_same_multiset_mean": round(agg_order_mean, 4),
+        "note": "Synthetic message ordering only; not a deployed bus or ROS/OPC UA path.",
+    }
+
+
+def run_dynamic_aggregation_series() -> dict:
+    """Multi-tick synthetic series: growing sybil count per tick (offline)."""
+    from labtrust_portfolio.rep_cps import aggregate, compromised_updates
+
+    honest = [
+        {"variable": "load", "value": 0.3, "ts": 0.0, "agent_id": "a1"},
+        {"variable": "load", "value": 0.35, "ts": 0.0, "agent_id": "a2"},
+    ]
+    base = aggregate("load", honest, method="trimmed_mean", trim_fraction=0.25)
+    steps_out = []
+    for t in range(5):
+        n_c = min(t, 3)
+        comp = compromised_updates("load", num_compromised=n_c, extreme_value=8.0, ts=float(t))
+        comb = honest + comp
+        steps_out.append({
+            "tick": t,
+            "n_compromised": n_c,
+            "trimmed_mean": round(
+                aggregate("load", comb, method="trimmed_mean", trim_fraction=0.25), 4
+            ),
+            "naive_mean": round(aggregate("load", comb, method="mean"), 4),
+            "bias_trim_vs_honest_only": round(
+                abs(
+                    aggregate("load", comb, method="trimmed_mean", trim_fraction=0.25)
+                    - base
+                ),
+                4,
+            ),
+        })
+    drifts = [s["bias_trim_vs_honest_only"] for s in steps_out]
+    naive_vals = [s["naive_mean"] for s in steps_out]
+    trim_vals = [s["trimmed_mean"] for s in steps_out]
+    drift_area = round(sum(drifts), 4) if drifts else 0.0
+    persistence_ticks = sum(1 for d in drifts if d > 1.0)
+    return {
+        "honest_only_trimmed_baseline": round(base, 4),
+        "steps": steps_out,
+        "max_trim_bias_drift_across_ticks": max(drifts) if drifts else 0.0,
+        "trim_bias_drift_area": drift_area,
+        "trim_bias_persistence_ticks_gt_1": persistence_ticks,
+        "naive_peak": max(naive_vals) if naive_vals else 0.0,
+        "trimmed_peak": max(trim_vals) if trim_vals else 0.0,
+        "temporal_series_kind": "offline_synthetic_harness",
+    }
+
+
+def run_gate_threshold_sweep(
+    seeds: list[int],
+    out_dir: Path,
+    thresholds: list[float],
+    delay_fault_prob: float,
+    drop_completion_prob: float,
+    aggregation_steps: int,
+) -> list[dict]:
+    """Sweep safety_gate_max_load for scheduling scenario and report effect slices."""
+    rows: list[dict] = []
+    for gate_threshold in thresholds:
+        gate_dir = out_dir / "gate_threshold_sweep" / f"gate_{gate_threshold}"
+        gate_dir.mkdir(parents=True, exist_ok=True)
+        adapter_rows = run_adapter_comparison(
+            "rep_cps_scheduling_v0",
+            seeds,
+            gate_dir,
+            delay_fault_prob=delay_fault_prob,
+            drop_completion_prob=drop_completion_prob,
+            aggregation_steps=aggregation_steps,
+            safety_gate_max_load=gate_threshold,
+        )
+        if not adapter_rows:
+            continue
+        rep_tasks = [r["rep_cps_tasks_completed"] for r in adapter_rows]
+        naive_tasks = [r["rep_cps_naive_tasks_completed"] for r in adapter_rows]
+        unsec_tasks = [r["rep_cps_unsecured_tasks_completed"] for r in adapter_rows]
+        rep_denies = sum(1 for r in adapter_rows if r.get("rep_cps_safety_gate_ok") is False)
+        unsec_denies = sum(1 for r in adapter_rows if r.get("rep_cps_unsecured_safety_gate_ok") is False)
+        rows.append(
+            {
+                "scenario_id": "rep_cps_scheduling_v0",
+                "safety_gate_max_load": gate_threshold,
+                "rep_cps_tasks_mean": round(statistics.mean(rep_tasks), 4),
+                "naive_in_loop_tasks_mean": round(statistics.mean(naive_tasks), 4),
+                "unsecured_tasks_mean": round(statistics.mean(unsec_tasks), 4),
+                "rep_cps_gate_deny_rate": round(rep_denies / len(adapter_rows), 4),
+                "unsecured_gate_deny_rate": round(unsec_denies / len(adapter_rows), 4),
+                "rep_beats_naive_tasks": statistics.mean(rep_tasks) > statistics.mean(naive_tasks),
+            }
+        )
+    return rows
 
 
 def run_rate_limit_windowing_check() -> dict:
@@ -359,14 +549,26 @@ def main() -> int:
     ap.add_argument(
         "--scenarios",
         type=str,
-        default="toy_lab_v0,lab_profile_v0",
-        help="Comma-separated scenario ids (publishable: toy_lab_v0,lab_profile_v0; use --scenario for single)",
+        default="toy_lab_v0,lab_profile_v0,rep_cps_scheduling_v0",
+        help="Comma-separated scenario ids (publishable includes rep_cps_scheduling_v0 for task-level gate stress)",
     )
     ap.add_argument(
         "--aggregation-steps",
         type=int,
         default=1,
         help="Multi-step aggregation (default 1; use 3 or 5 for convergence metric)",
+    )
+    ap.add_argument(
+        "--drop-sweep",
+        type=str,
+        default="0.02",
+        help="Comma-separated drop_completion_prob values (default: 0.02; use 0,0.01,0.02,0.05 for sweep)",
+    )
+    ap.add_argument(
+        "--gate-threshold-sweep",
+        type=str,
+        default="",
+        help="Comma-separated safety gate thresholds for rep_cps_scheduling_v0 (e.g. 1.5,2.0,2.5)",
     )
     args = ap.parse_args()
 
@@ -378,6 +580,12 @@ def main() -> int:
     delay_values = [float(x.strip()) for x in args.delay_sweep.split(",") if x.strip()]
     if not delay_values:
         delay_values = [0.05]
+    drop_values = [float(x.strip()) for x in args.drop_sweep.split(",") if x.strip()]
+    if not drop_values:
+        drop_values = [0.02]
+    gate_threshold_values = [
+        float(x.strip()) for x in args.gate_threshold_sweep.split(",") if x.strip()
+    ]
 
     aggregation_steps = getattr(args, "aggregation_steps", 1)
     summary = {
@@ -385,56 +593,127 @@ def main() -> int:
         "bottleneck_scenario": REP_CPS_BOTTLENECK_SCENARIO,
         "seeds": seeds,
         "delay_fault_prob_sweep": delay_values,
+        "drop_completion_prob_sweep": drop_values,
+        "gate_threshold_sweep": gate_threshold_values,
         "aggregation_steps": aggregation_steps,
         "run_manifest": {
             "seeds": seeds,
             "seed_count": len(seeds),
             "scenario_ids": scenarios,
             "delay_fault_prob_sweep": delay_values,
+            "drop_completion_prob_sweep": drop_values,
             "aggregation_steps_used": aggregation_steps,
+            "gate_threshold_sweep": gate_threshold_values,
             "script": "rep_cps_eval.py",
         },
     }
 
     summary["rate_limit_windowing"] = run_rate_limit_windowing_check()
+    summary["freshness_replay_evidence"] = run_freshness_replay_evidence()
+    summary["sybil_vs_spoofing_evidence"] = run_sybil_vs_spoofing_evidence()
+    summary["messaging_sim"] = run_messaging_sim_slice()
+    summary["dynamic_aggregation_series"] = run_dynamic_aggregation_series()
 
     all_adapter = []
     convergence_achieved = None
     if not args.skip_adapter:
         delay_sweep_results = []
+        per_scenario_summary = {}
         for scenario_id in scenarios:
+            per_scenario_summary[scenario_id] = {
+                "scenario_id": scenario_id,
+                "adapter_runs": [],
+                "rep_cps_tasks_mean": None,
+                "rep_cps_tasks_stdev": None,
+                "centralized_tasks_mean": None,
+                "centralized_tasks_stdev": None,
+            }
+            scenario_adapter = []
             for d in delay_values:
-                if len(scenarios) == 1 and len(delay_values) == 1:
-                    run_dir = args.out
-                else:
-                    run_dir = args.out / scenario_id / f"delay_{d}"
-                run_dir.mkdir(parents=True, exist_ok=True)
-                adapter_results = run_adapter_comparison(
-                    scenario_id, seeds, run_dir, delay_fault_prob=d,
-                    aggregation_steps=aggregation_steps,
+                for drop_p in drop_values:
+                    # Create nested directory structure: scenario/delay/drop
+                    if len(scenarios) == 1 and len(delay_values) == 1 and len(drop_values) == 1:
+                        run_dir = args.out
+                    elif len(delay_values) == 1 and len(drop_values) == 1:
+                        run_dir = args.out / scenario_id
+                    elif len(drop_values) == 1:
+                        run_dir = args.out / scenario_id / f"delay_{d}"
+                    else:
+                        run_dir = args.out / scenario_id / f"delay_{d}" / f"drop_{drop_p}"
+                    run_dir.mkdir(parents=True, exist_ok=True)
+                    adapter_results = run_adapter_comparison(
+                        scenario_id, seeds, run_dir, delay_fault_prob=d,
+                        drop_completion_prob=drop_p,
+                        aggregation_steps=aggregation_steps,
+                    )
+                    if convergence_achieved is None and aggregation_steps > 1 and adapter_results:
+                        convergence_achieved = adapter_results[0].get("rep_cps_converged")
+                    scenario_adapter.extend(adapter_results)
+                    tasks_rep = [r["rep_cps_tasks_completed"] for r in adapter_results]
+                    tasks_cen = [r["centralized_tasks_completed"] for r in adapter_results]
+                    stdev_rep = statistics.stdev(tasks_rep) if len(tasks_rep) > 1 else 0.0
+                    stdev_cen = statistics.stdev(tasks_cen) if len(tasks_cen) > 1 else 0.0
+                    mean_rep = statistics.mean(tasks_rep)
+                    mean_cen = statistics.mean(tasks_cen)
+                    n_r = len(tasks_rep)
+                    ci_rep = _ci95(mean_rep, stdev_rep, n_r) if n_r >= 2 else (mean_rep, mean_rep)
+                    ci_cen = _ci95(mean_cen, stdev_cen, len(tasks_cen)) if len(tasks_cen) >= 2 else (mean_cen, mean_cen)
+                    delay_sweep_results.append({
+                        "scenario_id": scenario_id,
+                        "delay_fault_prob": d,
+                        "drop_completion_prob": drop_p,
+                        "rep_cps_tasks_mean": mean_rep,
+                        "rep_cps_tasks_stdev": stdev_rep,
+                        "rep_cps_tasks_ci95": list(ci_rep),
+                        "centralized_tasks_mean": mean_cen,
+                        "centralized_tasks_stdev": stdev_cen,
+                        "centralized_tasks_ci95": list(ci_cen),
+                    })
+            # Per-scenario aggregates (across all delay/drop combinations)
+            if scenario_adapter:
+                tasks_rep_scenario = [r["rep_cps_tasks_completed"] for r in scenario_adapter]
+                tasks_naive_scenario = [r["rep_cps_naive_tasks_completed"] for r in scenario_adapter]
+                tasks_unsec_scenario = [r["rep_cps_unsecured_tasks_completed"] for r in scenario_adapter]
+                tasks_cen_scenario = [r["centralized_tasks_completed"] for r in scenario_adapter]
+                per_scenario_summary[scenario_id]["rep_cps_tasks_mean"] = statistics.mean(tasks_rep_scenario)
+                per_scenario_summary[scenario_id]["rep_cps_tasks_stdev"] = (
+                    statistics.stdev(tasks_rep_scenario) if len(tasks_rep_scenario) > 1 else 0.0
                 )
-                if convergence_achieved is None and aggregation_steps > 1 and adapter_results:
-                    convergence_achieved = adapter_results[0].get("rep_cps_converged")
-                tasks_rep = [r["rep_cps_tasks_completed"] for r in adapter_results]
-                tasks_cen = [r["centralized_tasks_completed"] for r in adapter_results]
-                stdev_rep = statistics.stdev(tasks_rep) if len(tasks_rep) > 1 else 0.0
-                stdev_cen = statistics.stdev(tasks_cen) if len(tasks_cen) > 1 else 0.0
-                mean_rep = statistics.mean(tasks_rep)
-                mean_cen = statistics.mean(tasks_cen)
-                n_r = len(tasks_rep)
-                ci_rep = _ci95(mean_rep, stdev_rep, n_r) if n_r >= 2 else (mean_rep, mean_rep)
-                ci_cen = _ci95(mean_cen, stdev_cen, len(tasks_cen)) if len(tasks_cen) >= 2 else (mean_cen, mean_cen)
-                delay_sweep_results.append({
-                    "scenario_id": scenario_id,
-                    "delay_fault_prob": d,
-                    "rep_cps_tasks_mean": mean_rep,
-                    "rep_cps_tasks_stdev": stdev_rep,
-                    "rep_cps_tasks_ci95": list(ci_rep),
-                    "centralized_tasks_mean": mean_cen,
-                    "centralized_tasks_ci95": list(ci_cen),
-                })
-                all_adapter.extend(adapter_results)
+                per_scenario_summary[scenario_id]["naive_in_loop_tasks_mean"] = statistics.mean(
+                    tasks_naive_scenario
+                )
+                per_scenario_summary[scenario_id]["naive_in_loop_tasks_stdev"] = (
+                    statistics.stdev(tasks_naive_scenario) if len(tasks_naive_scenario) > 1 else 0.0
+                )
+                per_scenario_summary[scenario_id]["unsecured_tasks_mean"] = statistics.mean(
+                    tasks_unsec_scenario
+                )
+                per_scenario_summary[scenario_id]["unsecured_tasks_stdev"] = (
+                    statistics.stdev(tasks_unsec_scenario) if len(tasks_unsec_scenario) > 1 else 0.0
+                )
+                per_scenario_summary[scenario_id]["centralized_tasks_mean"] = statistics.mean(tasks_cen_scenario)
+                per_scenario_summary[scenario_id]["centralized_tasks_stdev"] = (
+                    statistics.stdev(tasks_cen_scenario) if len(tasks_cen_scenario) > 1 else 0.0
+                )
+                n_ps = len(tasks_rep_scenario)
+                per_scenario_summary[scenario_id]["rep_cps_tasks_ci95"] = list(
+                    _ci95(
+                        statistics.mean(tasks_rep_scenario),
+                        statistics.stdev(tasks_rep_scenario) if n_ps > 1 else 0.0,
+                        n_ps,
+                    )
+                )
+                per_scenario_summary[scenario_id]["naive_in_loop_tasks_ci95"] = list(
+                    _ci95(
+                        statistics.mean(tasks_naive_scenario),
+                        statistics.stdev(tasks_naive_scenario) if n_ps > 1 else 0.0,
+                        n_ps,
+                    )
+                )
+                per_scenario_summary[scenario_id]["adapter_runs"] = scenario_adapter
+                all_adapter.extend(scenario_adapter)
         summary["delay_sweep"] = delay_sweep_results
+        summary["per_scenario"] = list(per_scenario_summary.values())
         summary["adapter_runs"] = (
             all_adapter[:len(seeds)] if all_adapter else []
         )
@@ -458,10 +737,24 @@ def main() -> int:
         summary["rep_cps_naive_tasks_completed_stdev"] = (
             statistics.stdev(tasks_naive) if len(tasks_naive) > 1 else 0.0
         )
+        summary["rep_cps_naive_tasks_completed_ci95"] = list(
+            _ci95(
+                statistics.mean(tasks_naive),
+                statistics.stdev(tasks_naive) if len(tasks_naive) > 1 else 0.0,
+                len(tasks_naive),
+            )
+        ) if len(tasks_naive) >= 2 else [statistics.mean(tasks_naive), statistics.mean(tasks_naive)]
         summary["rep_cps_unsecured_tasks_completed_mean"] = statistics.mean(tasks_unsec)
         summary["rep_cps_unsecured_tasks_completed_stdev"] = (
             statistics.stdev(tasks_unsec) if len(tasks_unsec) > 1 else 0.0
         )
+        summary["rep_cps_unsecured_tasks_completed_ci95"] = list(
+            _ci95(
+                statistics.mean(tasks_unsec),
+                statistics.stdev(tasks_unsec) if len(tasks_unsec) > 1 else 0.0,
+                len(tasks_unsec),
+            )
+        ) if len(tasks_unsec) >= 2 else [statistics.mean(tasks_unsec), statistics.mean(tasks_unsec)]
         aggs_naive = [
             r["rep_cps_naive_aggregate_load"] for r in all_adapter
             if r.get("rep_cps_naive_aggregate_load") is not None
@@ -553,12 +846,45 @@ def main() -> int:
     combined = honest + compromised
     agg_honest = aggregate("load", honest, method="trimmed_mean", trim_fraction=0.25)
     variants = []
+    bias_naive_offline = abs(
+        aggregate("load", combined, method="mean") - agg_honest
+    )
     for method in ("trimmed_mean", "median", "clipping", "median_of_means"):
         agg_with = aggregate("load", combined, method=method) if method != "trimmed_mean" else aggregate("load", combined, method="trimmed_mean", trim_fraction=0.25)
         bias = abs(agg_with - agg_honest)
         max_influence = (bias / k_compromised) if k_compromised else 0.0
-        variants.append({"method": method, "bias": round(bias, 4), "max_influence_per_compromised_agent": round(max_influence, 4)})
+        variants.append({
+            "method": method,
+            "bias": round(bias, 4),
+            "beats_naive_mean": bias < bias_naive_offline,
+            "max_influence_per_compromised_agent": round(max_influence, 4),
+        })
     summary["aggregation_variants"] = variants
+    lo_h = min(float(u["value"]) for u in honest)
+    hi_h = max(float(u["value"]) for u in honest)
+    clamped_vals = [max(lo_h, min(hi_h, float(u["value"]))) for u in combined]
+    agg_clamped = sum(clamped_vals) / len(clamped_vals)
+    bias_clamped = abs(agg_clamped - agg_honest)
+    summary["offline_comparator_baselines"] = {
+        "description": (
+            "Offline multiset identical to aggregation_under_compromise. "
+            "Robust statistics (median, clipping, median-of-means) vs plain mean; "
+            "honest_range_clamped_mean clamps each scalar to [min(honest), max(honest)] "
+            "before averaging (strawman heuristic; requires oracle bounds)."
+        ),
+        "bias_naive_mean": round(bias_naive_offline, 4),
+        "honest_range_clamped_mean_aggregate": round(agg_clamped, 4),
+        "honest_range_clamped_bias_vs_honest_trimmed": round(bias_clamped, 4),
+        "honest_range_clamped_beats_naive_mean": bias_clamped < bias_naive_offline,
+        "comparator_classes": {
+            "robust_statistical": ["trimmed_mean", "median", "clipping", "median_of_means"],
+            "practical_heuristic": ["honest_range_clamped_mean"],
+        },
+        "selection_rationale": (
+            "Comparators chosen to distinguish robust statistics from lightweight "
+            "operational heuristics used in constrained CPS settings."
+        ),
+    }
 
     sybil_sweep = []
     for n_comp in range(0, 9):
@@ -647,18 +973,87 @@ def main() -> int:
 
     robust_beats_naive = agg_compromise.get("bias_robust", 0) < agg_compromise.get("bias_naive", 0)
     if all_adapter:
-        adapter_parity = abs(summary["rep_cps_tasks_completed_mean"] - summary["centralized_tasks_completed_mean"]) < 1e-6
+        from labtrust_portfolio.scenario import scenario_rep_cps_scheduling_dependent
+
+        non_sched = [
+            r for r in all_adapter
+            if not scenario_rep_cps_scheduling_dependent(r["scenario_id"])
+        ]
+        sched_rows = [
+            r for r in all_adapter
+            if scenario_rep_cps_scheduling_dependent(r["scenario_id"])
+        ]
+        if non_sched:
+            mean_rep_ns = statistics.mean(
+                [r["rep_cps_tasks_completed"] for r in non_sched]
+            )
+            mean_cen_ns = statistics.mean(
+                [r["centralized_tasks_completed"] for r in non_sched]
+            )
+            adapter_parity = abs(mean_rep_ns - mean_cen_ns) < 1e-6
+        else:
+            adapter_parity = True
+
+        scheduling_demonstrates_task_divergence = None
+        if sched_rows:
+            mean_rep_s = statistics.mean(
+                [r["rep_cps_tasks_completed"] for r in sched_rows]
+            )
+            mean_naive_s = statistics.mean(
+                [r["rep_cps_naive_tasks_completed"] for r in sched_rows]
+            )
+            mean_cen_s = statistics.mean(
+                [r["centralized_tasks_completed"] for r in sched_rows]
+            )
+            scheduling_demonstrates_task_divergence = mean_rep_s > mean_naive_s + 1e-9
+            summary["scheduling_dependent_eval"] = {
+                "scenario_id": "rep_cps_scheduling_v0",
+                "rep_cps_tasks_mean": round(mean_rep_s, 4),
+                "naive_in_loop_tasks_mean": round(mean_naive_s, 4),
+                "centralized_tasks_mean": round(mean_cen_s, 4),
+                "rep_beats_naive_tasks": scheduling_demonstrates_task_divergence,
+                "note": (
+                    "Under duplicate-sender spoof stress, naive mean trips the safety gate "
+                    "and scheduling is withheld; trimmed mean stays below threshold."
+                ),
+            }
+        else:
+            summary["scheduling_dependent_eval"] = None
+
+        sched_ok = (
+            scheduling_demonstrates_task_divergence
+            if scheduling_demonstrates_task_divergence is not None
+            else True
+        )
+        trigger_met = adapter_parity and robust_beats_naive and sched_ok
         summary["success_criteria_met"] = {
             "adapter_parity": adapter_parity,
+            "adapter_parity_scope": (
+                "REP-CPS vs Centralized mean tasks on non-scheduling-dependent scenarios only"
+            ),
             "robust_beats_naive": robust_beats_naive,
-            "trigger_met": adapter_parity and robust_beats_naive,
+            "scheduling_scenario_task_divergence": scheduling_demonstrates_task_divergence,
+            "trigger_met": trigger_met,
         }
     else:
         summary["success_criteria_met"] = {
             "adapter_parity": None,
+            "adapter_parity_scope": None,
             "robust_beats_naive": robust_beats_naive,
+            "scheduling_scenario_task_divergence": None,
             "trigger_met": robust_beats_naive,
         }
+        summary["scheduling_dependent_eval"] = None
+
+    if gate_threshold_values and "rep_cps_scheduling_v0" in scenarios:
+        summary["gate_threshold_sweep_results"] = run_gate_threshold_sweep(
+            seeds=seeds,
+            out_dir=args.out,
+            thresholds=gate_threshold_values,
+            delay_fault_prob=delay_values[0],
+            drop_completion_prob=drop_values[0],
+            aggregation_steps=aggregation_steps,
+        )
 
     # Excellence metrics (STANDARDS_OF_EXCELLENCE.md) + comparison stats (REPORTING_STANDARD)
     agg = summary.get("aggregation_under_compromise", {})
@@ -681,16 +1076,28 @@ def main() -> int:
         "trigger_met": summary["success_criteria_met"].get("trigger_met"),
     }
     if all_adapter and len(tasks_rep) == len(tasks_cen) and len(tasks_rep) >= 2:
+        from labtrust_portfolio.scenario import scenario_rep_cps_scheduling_dependent
         from labtrust_portfolio.stats import (
             bootstrap_ci_difference,
             effect_size_mean_diff,
             paired_t_test,
             power_paired_t_test,
         )
-        diff_mean, cohens_d = effect_size_mean_diff(tasks_rep, tasks_cen)
-        diff_ci95 = bootstrap_ci_difference(tasks_rep, tasks_cen, seed=42)
-        t_stat, p_value, _ = paired_t_test(tasks_rep, tasks_cen)
-        power_post_hoc = power_paired_t_test(tasks_rep, tasks_cen, alpha=0.05)
+
+        pairs_rep = [
+            r["rep_cps_tasks_completed"] for r in all_adapter
+            if not scenario_rep_cps_scheduling_dependent(r["scenario_id"])
+        ]
+        pairs_cen = [
+            r["centralized_tasks_completed"] for r in all_adapter
+            if not scenario_rep_cps_scheduling_dependent(r["scenario_id"])
+        ]
+        use_rep = pairs_rep if len(pairs_rep) >= 2 else tasks_rep
+        use_cen = pairs_cen if len(pairs_cen) >= 2 else tasks_cen
+        diff_mean, cohens_d = effect_size_mean_diff(use_rep, use_cen)
+        diff_ci95 = bootstrap_ci_difference(use_rep, use_cen, seed=42)
+        t_stat, p_value, _ = paired_t_test(use_rep, use_cen)
+        power_post_hoc = power_paired_t_test(use_rep, use_cen, alpha=0.05)
         diff_ci_width = (diff_ci95[1] - diff_ci95[0]) if not (math.isnan(diff_ci95[0]) or math.isnan(diff_ci95[1])) else None
         summary["excellence_metrics"]["difference_mean"] = round(diff_mean, 4)
         summary["excellence_metrics"]["difference_ci95"] = [
@@ -708,7 +1115,10 @@ def main() -> int:
     if all_adapter:
         summary["n_sensitivity"] = {
             "seed_count_used": len(seeds),
-            "note": "Major conclusions (adapter parity, robust_beats_naive) do not rely on low-power comparisons; parity has zero mean difference. Run scripts/sensitivity_seed_sweep.py --eval rep_cps --ns 20,30 to verify CI/effect-size stability.",
+            "note": (
+                "Adapter parity is computed on non-scheduling-dependent runs only; scheduling scenario tests task divergence. "
+                "Run scripts/sensitivity_seed_sweep.py --eval rep_cps --ns 20,30 to verify CI/effect-size stability."
+            ),
         }
 
     out_summary = args.out / "summary.json"

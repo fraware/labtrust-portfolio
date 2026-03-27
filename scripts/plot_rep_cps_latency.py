@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
 Plot P2 REP-CPS: wall time (latency) by policy from rep_cps_eval summary.json.
-Output: docs/figures/p2_rep_cps_latency.png.
+Bars show the mean; upper whiskers extend to p95 (one-sided tail), not symmetric uncertainty.
+Output: docs/figures/p2_rep_cps_latency.png
 Usage: PYTHONPATH=impl/src python scripts/plot_rep_cps_latency.py [--summary path] [--out path]
 """
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
@@ -48,28 +50,45 @@ def main() -> int:
     if not any(valid):
         print("Error: no wall_sec_*_mean in latency_cost.")
         return 1
-    means = [m or 0 for m in means]
-    p95s = [p or 0 for p in p95s]
-    yerr = [p95s[i] - means[i] if p95s[i] and means[i] else 0 for i in range(4)]
+    means_f = [float(m) if m is not None else 0.0 for m in means]
+    p95s_f = [float(p) if p is not None else 0.0 for p in p95s]
+    # Asymmetric error: lower 0, upper (p95 - mean) — upper tail, not a CI.
+    err_lo = [0.0] * 4
+    err_hi = [max(0.0, p95s_f[i] - means_f[i]) for i in range(4)]
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     try:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(8.0, 4.5))
         x = range(len(policies))
-        ax.bar(x, means, yerr=yerr if any(e > 0 for e in yerr) else None, capsize=3)
-        ax.set_xticks(x)
-        ax.set_xticklabels(policies, rotation=15)
+        yerr = [err_lo, err_hi] if any(e > 0 for e in err_hi) else None
+        ax.bar(
+            x,
+            means_f,
+            yerr=yerr,
+            capsize=4,
+            color=["#1f77b4", "#ff7f0e", "#d62728", "#7f7f7f"],
+        )
+        ax.set_xticks(list(x))
+        ax.set_xticklabels(policies, rotation=15, ha="right")
         ax.set_ylabel("Wall time (s)")
-        ax.set_title("P2 REP-CPS: run latency by policy")
-        plt.tight_layout()
+        ax.set_title("P2 REP-CPS: run latency by policy (mean + upper tail to p95)")
+        fig.text(
+            0.5,
+            0.02,
+            "Whiskers: one-sided extent from mean to empirical p95 per policy (not a confidence interval).",
+            ha="center",
+            fontsize=8,
+            style="italic",
+        )
+        plt.tight_layout(rect=(0, 0.08, 1, 1))
         plt.savefig(args.out, dpi=150)
         plt.close()
         print(f"Wrote {args.out}")
     except ImportError:
-        out_data = {"policies": policies, "means": means, "p95s": p95s}
+        out_data = {"policies": policies, "means": means_f, "p95s": p95s_f}
         json_path = args.out.with_suffix(".json")
         json_path.write_text(json.dumps(out_data, indent=2) + "\n", encoding="utf-8")
         print(f"matplotlib not installed. Wrote {json_path} for external plotting.")

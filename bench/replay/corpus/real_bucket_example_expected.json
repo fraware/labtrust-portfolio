@@ -1,0 +1,6 @@
+{
+  "description": "Example real-ingest trace (template). For actual production traces, replace with redacted partner export or production log mapped to TRACE schema. This example demonstrates consistent replay (all events match).",
+  "expected_replay_ok": true,
+  "expected_divergence_at_seq": null,
+  "corpus_category": "real_ingest"
+}

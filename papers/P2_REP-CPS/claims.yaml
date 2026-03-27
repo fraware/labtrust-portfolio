@@ -1,14 +1,14 @@
 # P2 REP-CPS claim table (Draft conversion checklist 2.1)
-# Conditional paper; trigger not met in evaluated scenario. See docs/CONDITIONAL_TRIGGERS.md.
+# Conditional scope: see docs/CONDITIONAL_TRIGGERS.md (P2); scheduling-dependent outcomes on rep_cps_scheduling_v0.
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P2_REP-CPS"
-title: "REP-CPS: A Safety-Gated Profile for Authenticated Sensitivity Sharing in Cyber-Physical Coordination"
+title: "REP-CPS: Safety-Gated Sensitivity Sharing as a Profiled Informational Control Surface in Cyber-Physical Coordination"
 release_id: "rep_cps_eval"
 
 claims:
   - id: "C1"
-    statement: "A CPS-oriented sensitivity-sharing profile can make decentralized informational exchange deployable by specifying typed variables, freshness windows, rate limits, provenance, and authentication hooks."
+    statement: "A CPS-oriented sensitivity-sharing profile can make decentralized informational exchange deployable (within evaluated assumptions) by specifying typed variables, freshness windows, rate limits, provenance, and authentication hooks."
     evidence:
       release_id: "rep_cps_eval"
       confidence: "high"
@@ -16,40 +16,41 @@ claims:
         - "kernel/rep_cps/PROFILE_SPEC.v0.1.md"
         - "kernel/rep_cps/example_profile.v0.1.json"
         - "datasets/runs/rep_cps_eval/summary.json"
-      table_ids: ["Table 1", "Table 6"]
-      figure_ids: ["Figure 0"]
+        - "bench/maestro/scenarios/rep_cps_scheduling_v0.yaml"
+      table_ids: ["Table 1", "Table 5", "Table 6"]
+      figure_ids: ["Figure 0", "Figure 4"]
 
   - id: "C2"
-    statement: "In the evaluated attack harness, robust aggregation variants reduce compromise-induced bias relative to naive averaging."
+    statement: "In the evaluated attack harness, robust aggregation variants reduce compromise-induced bias relative to naive averaging; profile ablation shows admission controls matter, not only the estimator."
     evidence:
       release_id: "rep_cps_eval"
       confidence: "high"
       artifact_paths:
         - "datasets/runs/rep_cps_eval/summary.json"
         - "impl/src/labtrust_portfolio/rep_cps.py"
-      table_ids: ["Table 2", "Table 3", "Table 7"]
-      figure_ids: []
+      table_ids: ["Table 2", "Table 3", "Table 6", "Table 7"]
+      figure_ids: ["Figure 1", "Figure 3"]
 
   - id: "C3"
-    statement: "Protocol output is not directly actuating; it influences downstream decisions only through explicit safety-gate mediation compatible with the broader assurance envelope."
+    statement: "Protocol output is not directly actuating; it influences downstream decisions only through explicit safety-gate mediation compatible with the broader assurance envelope, with scoped task-level effect on the scheduling-dependent scenario."
     evidence:
       release_id: "rep_cps_eval"
       confidence: "high"
       artifact_paths:
         - "datasets/runs/rep_cps_eval/safety_gate_denial.json"
         - "impl/src/labtrust_portfolio/adapters/rep_cps_adapter.py"
-      table_ids: ["Table 1"]
-      figure_ids: []
+      table_ids: ["Table 1", "Table 6", "Scheduling-dependent scenario", "Safety-gate campaign"]
+      figure_ids: ["Figure 2"]
 
   - id: "C4"
-    statement: "The profile can be evaluated reproducibly through MAESTRO-compatible fault injection and compromised-agent suites."
+    statement: "The profile can be evaluated reproducibly through MAESTRO-compatible fault injection, compromised-agent and spoof harnesses, freshness/replay micro-evidence, messaging-order slices, and per-scenario plus gate-threshold sensitivity reporting."
     evidence:
       release_id: "rep_cps_eval"
       confidence: "high"
       artifact_paths:
         - "datasets/runs/rep_cps_eval/summary.json"
         - "scripts/rep_cps_eval.py"
-      table_ids: ["Table 1", "Table 2", "Table 3", "Table 5", "Table 6", "Table 7"]
-      figure_ids: ["Figure 1", "Figure 2"]
+      table_ids: ["Table 1", "Table 2", "Table 3", "Table 5", "Table 6", "Table 7", "Per-scenario summary", "Comparison statistics", "Gate-threshold sensitivity"]
+      figure_ids: ["Figure 1", "Figure 2", "Figure 3", "Figure 4"]
 
-# Tables from summary.json. Figure 1: plot_rep_cps_summary.py (tasks by policy). Figure 2: plot_rep_cps_latency.py (latency by policy). Safety-gate campaign in generated_tables.md.
+# summary.json keys: scheduling_dependent_eval, freshness_replay_evidence, sybil_vs_spoofing_evidence, messaging_sim, dynamic_aggregation_series. Safety-gate campaign in generated_tables.md.

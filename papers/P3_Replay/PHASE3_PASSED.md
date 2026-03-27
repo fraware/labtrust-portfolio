@@ -7,4 +7,4 @@ Submission-readiness checklist (docs/STATE_OF_THE_ART_CRITERIA.md section 3) ver
 - Variance: Run manifest (corpus, overhead_runs) in summary.json.
 - No kernel redefinition: Draft cites TRACE schema and REPLAY_LEVELS; does not redefine tiers or evidence bundle.
 - Overclaim: Replay levels L0/L1/L2 and nondeterminism detection stated; no claim to full determinism on hardware; L2 aspirational.
-- Repro block: Figure 0, Table 1, Table 2, Figure 1 each have exact script commands.
+- Repro block: Figure 0, Table 1, Table 1b, Table 2, Figure 1 each have exact script commands (`export_replay_corpus_table.py --out-md` for Table 1/1b).

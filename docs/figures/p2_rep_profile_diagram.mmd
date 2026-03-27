@@ -1,20 +1,44 @@
 %% P2 REP-CPS profile architecture (auto-generated)
-%% Agents -> aggregation -> safety gate -> actuation
+%% Decision-relevant informational state with explicit gate mediation.
 flowchart LR
-  subgraph agents[Agents]
-    A1[Agent 1]
-    A2[Agent 2]
+  subgraph agents [AgentSignals]
+    a1[Local state and telemetry]
+    a2["Sensitivity update x,v,a,t,n,pi"]
   end
-  subgraph agg[Aggregation]
-    R[Robust aggregate]
+  subgraph profile [REP_CPS_Profile]
+    p1[Type checks]
+    p2[Auth and provenance hook]
+    p3[Freshness window and replay filter]
+    p4[Per sender rate limit]
   end
-  subgraph gate[Safety gate]
-    G[MADS Tier / gate]
+  subgraph aggregate [AggregationFamily]
+    ag1[Trimmed mean or permitted variant]
+    ag2[Informational state s_hat]
   end
-  subgraph out[Output]
-    O[Actuation]
+  subgraph safety [SafetyGate]
+    g1["Policy gate G d,s_hat,z"]
+    g2[pass]
+    g3[deny with trace]
   end
-  A1 --> R
-  A2 --> R
-  R --> G
-  G -->|pass| O
+  subgraph downstream [OperationalPath]
+    d1[Scheduler or admission logic]
+    d2[Actuation]
+  end
+
+  a1 --> a2
+  a2 --> p1
+  p1 --> p2
+  p2 --> p3
+  p3 --> p4
+  p4 --> ag1
+  ag1 --> ag2
+  ag2 --> g1
+  g1 --> g2
+  g1 --> g3
+  g2 --> d1
+  d1 --> d2
+
+  spoof[Attack: duplicate sender spoof] --> p2
+  stale[Attack: stale or replay burst] --> p3
+  burst[Attack: burst influence] --> p4
+  byz[Attack: compromised extreme values] --> ag1

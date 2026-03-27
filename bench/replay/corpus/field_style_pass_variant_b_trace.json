@@ -1,0 +1,94 @@
+{
+  "version": "0.1",
+  "run_id": "field_style_pass_variant_b_v0",
+  "scenario_id": "field_style_lab_record_b",
+  "seed": 88,
+  "start_time_utc": "2020-01-01T00:00:00Z",
+  "events": [
+    {
+      "seq": 0,
+      "ts": 0.0,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "lab_orchestrator"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "prep:0"
+      },
+      "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
+    },
+    {
+      "seq": 1,
+      "ts": 0.05,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "lab_agent_2"
+      },
+      "payload": {
+        "task_id": "prep:0",
+        "name": "prep"
+      },
+      "state_hash_after": "bc840fff9b9c46e69738e13a8eb164334a61308641310e41c3d6fbe488bc5abe"
+    },
+    {
+      "seq": 2,
+      "ts": 0.1,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "instrument_b"
+      },
+      "payload": {
+        "task_id": "prep:0",
+        "name": "prep"
+      },
+      "state_hash_after": "379fadb555cb8c93be0c5e865f369779397f31cfba70ecdb3a98e98eca721c2c"
+    },
+    {
+      "seq": 3,
+      "ts": 0.15000000000000002,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "lab_orchestrator"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "measure:1"
+      },
+      "state_hash_after": "0ffa926f0c6c5c060a91f8cbd9152c305d818028fa555bd42d12f56ae5c7f4d9"
+    },
+    {
+      "seq": 4,
+      "ts": 0.2,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "lab_agent_2"
+      },
+      "payload": {
+        "task_id": "measure:1",
+        "name": "measure"
+      },
+      "state_hash_after": "2b6139747978f6419c3078ebcb080b06771126cd4dd8ec37968d8769ffea58d2"
+    },
+    {
+      "seq": 5,
+      "ts": 0.25,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "instrument_b"
+      },
+      "payload": {
+        "task_id": "measure:1",
+        "name": "measure"
+      },
+      "state_hash_after": "c7c9163b869e260714edcf78c8d3aec502dc4999780e5bb01174ccb94cc005c9"
+    }
+  ],
+  "final_state_hash": "c7c9163b869e260714edcf78c8d3aec502dc4999780e5bb01174ccb94cc005c9"
+}

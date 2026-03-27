@@ -1,0 +1,61 @@
+{
+  "source": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\contracts_eval\\eval.json",
+  "classes": [
+    "reorder",
+    "split_brain",
+    "stale_write",
+    "unknown_key"
+  ],
+  "policies": [
+    "full_contract",
+    "timestamp_only",
+    "ownership_only",
+    "occ_only",
+    "lease_only",
+    "lock_only",
+    "naive_lww",
+    "accept_all"
+  ],
+  "missed_matrix": [
+    [
+      0.0,
+      0.0,
+      8.0,
+      0.0,
+      0.0,
+      8.0,
+      8.0,
+      8.0
+    ],
+    [
+      0.0,
+      17.0,
+      0.0,
+      17.0,
+      17.0,
+      0.0,
+      17.0,
+      17.0
+    ],
+    [
+      0.0,
+      0.0,
+      7.0,
+      0.0,
+      0.0,
+      7.0,
+      7.0,
+      7.0
+    ],
+    [
+      0.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0,
+      2.0
+    ]
+  ]
+}

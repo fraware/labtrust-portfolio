@@ -49,6 +49,21 @@ Each corpus file is JSON with:
 - **events** (array): Event objects with `type`, `ts`, `actor`, `payload`. Types include `task_start`, `task_end`, `coordination_message`. Payload must include key (e.g. `task_id`) and writer when relevant.
 - **expected_verdicts** (array): One of `"allow"` or `"deny"` per event; length must equal `events.length`.
 
+## Ground-truth labeling and anti-circularity
+
+**Definition of labels.** For each sequence, `expected_verdicts[i]` is the **intended** allow/deny outcome for `events[i]` under the **declared** contract configuration in that file (`initial_state`, event shapes, and the reference validator semantics in `impl/.../contracts.py`). Labels are **not** outputs of an automated labeler trained on the validator.
+
+**Provenance.** Corpus authors should record how each file was authored:
+
+- **Manual:** scenario + verdicts written by hand from the contract rules.
+- **Script-generated:** produced by `scripts/generate_contract_corpus.py` or similar; the run should record a **reproducible seed** and generator version in the sequence `description` or in corpus governance metadata (see [CORPUS_EXPANSION.md](../../docs/CORPUS_EXPANSION.md)).
+
+**Anti-circularity.** The reference runner compares the validator’s per-event verdicts to `expected_verdicts`; it does **not** copy labels from `validate()` into the JSON at eval time. CI and `tests/test_contracts_p1.py` load each corpus file independently and assert agreement, catching accidental label drift.
+
+**Independent check.** Maintainers may run a **label–validator audit**: for every corpus file, recompute verdicts with the frozen validator and assert equality with `expected_verdicts` (the eval script and tests already enforce this on every run).
+
+**Ambiguity and exclusions.** If a scenario is underspecified under the current schema, either refine the contract declaration in the file or **exclude** the sequence from the benchmark until the expected verdict is unambiguous. Do not commit sequences with “best guess” labels without documenting the decision.
+
 ## Discovery rule
 
 The reference runner discovers all `*.json` files in the corpus directory via `sorted(corpus_dir.glob("*.json"))`. Generated sequences (e.g. from `scripts/generate_contract_corpus.py`) may be added with the same schema.

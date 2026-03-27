@@ -89,6 +89,90 @@ def _timing_stats(
     }
 
 
+def _diagnostic_payload_bytes_approx(diagnostics: list) -> int | None:
+    """Approximate UTF-8 JSON size of the first diagnostic (for space accounting)."""
+    if not diagnostics:
+        return None
+    d0 = diagnostics[0]
+    diag_obj = {
+        "seq": d0.seq,
+        "expected_hash": d0.expected_hash,
+        "got_hash": d0.got_hash,
+        "event_type": d0.event_type,
+        "root_cause_category": d0.root_cause_category,
+        "witness_slice": d0.witness_slice,
+    }
+    blob = json.dumps(
+        diag_obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return len(blob)
+
+
+def _state_hash_after_count(trace: dict) -> int:
+    return sum(1 for e in (trace.get("events") or []) if e.get("state_hash_after"))
+
+
+def _infer_corpus_category(trace_name: str, trace: dict) -> str:
+    """
+    Infer corpus category: synthetic_trap, field_proxy, real_ingest.
+    Naming convention: real_bucket_* -> real_ingest; field_style_* -> field_proxy;
+    *_trap -> synthetic_trap; else synthetic_pass.
+    """
+    if trace_name.startswith("real_bucket_"):
+        return "real_ingest"
+    if trace_name.startswith("field_style_"):
+        return "field_proxy"
+    if "_trap" in trace_name:
+        return "synthetic_trap"
+    if trace_name == "thin_slice":
+        return "synthetic_pass"
+    # Default for benign_perturbation_pass etc
+    return "synthetic_pass"
+
+
+def _corpus_space_summary(per_trace: list[dict]) -> dict:
+    """Aggregate trace/diagnostic sizes for corpus rows (excludes thin_slice)."""
+    corp = [r for r in per_trace if r.get("name") != "thin_slice"]
+    if not corp:
+        return {}
+    sizes = [int(r.get("trace_json_bytes") or 0) for r in corp]
+    hash_counts = [int(r.get("state_hash_after_count") or 0) for r in corp]
+    diags = [
+        int(r["diagnostic_payload_bytes_approx"])
+        for r in corp
+        if r.get("diagnostic_payload_bytes_approx") is not None
+    ]
+    out: dict = {
+        "corpus_traces_n": len(corp),
+        "trace_json_bytes_sum": int(sum(sizes)),
+        "trace_json_bytes_mean": round(sum(sizes) / len(sizes), 4),
+        "state_hash_after_count_sum": int(sum(hash_counts)),
+        "state_hash_after_count_mean": round(
+            sum(hash_counts) / len(hash_counts), 4
+        ),
+    }
+    if diags:
+        out["diagnostic_payload_bytes_approx_sum"] = int(sum(diags))
+        out["diagnostic_payload_bytes_approx_mean"] = round(
+            statistics.mean(diags), 4
+        )
+    return out
+
+
+def _peak_rss_bytes() -> int | None:
+    """Best-effort peak RSS for this process (platform-specific; None if unavailable)."""
+    try:
+        import resource
+
+        rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+        if sys.platform == "darwin":
+            return int(rss)
+        # Linux and most Unix: KiB
+        return int(rss) * 1024
+    except Exception:
+        return None
+
+
 def _paired_baseline_comparison(
     full_times: list[float],
     baseline_times: list[float],
@@ -212,6 +296,9 @@ def main() -> int:
     ok, diagnostics = replay_trace_with_diagnostics(thin_slice_trace)
     elapsed_ms = (time.perf_counter() - t0) * 1000
     trace = thin_slice_trace
+    thin_blob = json.dumps(
+        thin_slice_trace, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
     results.append(
         {
             "name": "thin_slice",
@@ -223,6 +310,14 @@ def main() -> int:
             "root_cause_category": diagnostics[0].root_cause_category if diagnostics else None,
             "replay_time_ms": round(elapsed_ms, 2),
             "event_count": len(trace.get("events", [])),
+            "trace_json_bytes": len(thin_blob),
+            "state_hash_after_count": _state_hash_after_count(thin_slice_trace),
+            "diagnostic_payload_bytes_approx": _diagnostic_payload_bytes_approx(
+                diagnostics
+            ),
+            "localization_matches_expected": ok,
+            "localization_ambiguous": len(diagnostics) > 1,
+            "corpus_category": "synthetic_pass",
         }
     )
 
@@ -233,12 +328,26 @@ def main() -> int:
     l1_twin_ok = False
     l1_twin_message = ""
     l1_twin_time_ms: float | None = None
+    l1_twin_multi_seed: list[dict] = []
     if thin_slice_trace is not None:
         l1_stub_ok, l1_stub_message = replay_l1_stub(thin_slice_trace, twin_config_path)
         if args.l1_twin:
+            # Primary seed L1 twin
             t_l1 = time.perf_counter()
             l1_twin_ok, l1_twin_message = replay_l1_twin(thin_slice_trace, twin_config_path)
             l1_twin_time_ms = round((time.perf_counter() - t_l1) * 1000, 4)
+            # Multi-seed L1 twin (for aggregate reporting)
+            for sd in seeds:
+                tr = thin_traces[sd]
+                t0 = time.perf_counter()
+                ok_twin, msg_twin = replay_l1_twin(tr, twin_config_path)
+                elapsed_twin = (time.perf_counter() - t0) * 1000
+                l1_twin_multi_seed.append({
+                    "seed": sd,
+                    "l1_twin_ok": ok_twin,
+                    "l1_twin_time_ms": round(elapsed_twin, 4),
+                    "l1_twin_message": msg_twin,
+                })
 
     bseed = None
     try:
@@ -348,7 +457,8 @@ def main() -> int:
         expected_path = args.corpus_dir / f"{trace_name}_expected.json"
         if not trace_path.exists():
             continue
-        trace = json.loads(trace_path.read_text(encoding="utf-8"))
+        trace_bytes_on_disk = trace_path.read_bytes()
+        trace = json.loads(trace_bytes_on_disk.decode("utf-8"))
         expected: dict = {}
         if expected_path.exists():
             expected = json.loads(expected_path.read_text(encoding="utf-8"))
@@ -369,11 +479,31 @@ def main() -> int:
             "expected_divergence_at_seq": expected.get("expected_divergence_at_seq"),
             "replay_time_ms": round(elapsed_ms, 2),
             "event_count": len(trace.get("events", [])),
+            "trace_json_bytes": len(trace_bytes_on_disk),
+            "state_hash_after_count": _state_hash_after_count(trace),
+            "diagnostic_payload_bytes_approx": _diagnostic_payload_bytes_approx(
+                diagnostics
+            ),
         }
+        exp_seq = expected.get("expected_divergence_at_seq")
+        if exp_seq is not None:
+            loc_ok = (
+                bool(diagnostics)
+                and diagnostics[0].seq == exp_seq
+            )
+            entry["localization_matches_expected"] = loc_ok
+            entry["localization_ambiguous"] = len(diagnostics) > 1
+        elif expected.get("expected_replay_ok") is True:
+            entry["localization_matches_expected"] = ok
+            entry["localization_ambiguous"] = False
+        else:
+            entry["localization_matches_expected"] = None
+            entry["localization_ambiguous"] = None
         if diagnostics:
             entry["witness_slice"] = getattr(
                 diagnostics[0], "witness_slice", []
             )
+        entry["corpus_category"] = _infer_corpus_category(trace_name, trace)
         results.append(entry)
 
     replay_level = "L0"
@@ -476,6 +606,25 @@ def main() -> int:
         else (float("nan"), float("nan"))
     )
 
+    # L1 twin aggregate summary (when multi-seed L1 twin was run)
+    l1_twin_summary: dict | None = None
+    if args.l1_twin and l1_twin_multi_seed:
+        twin_oks = [x["l1_twin_ok"] for x in l1_twin_multi_seed]
+        twin_times = [x["l1_twin_time_ms"] for x in l1_twin_multi_seed if x.get("l1_twin_time_ms") is not None]
+        l1_twin_summary = {
+            "n_seeds": len(l1_twin_multi_seed),
+            "seeds": [x["seed"] for x in l1_twin_multi_seed],
+            "all_pass": all(twin_oks),
+            "n_pass": sum(1 for ok in twin_oks if ok),
+            "per_seed": l1_twin_multi_seed,
+        }
+        if twin_times:
+            l1_twin_summary["mean_time_ms"] = round(statistics.mean(twin_times), 4)
+            l1_twin_summary["stdev_time_ms"] = round(statistics.stdev(twin_times), 4) if len(twin_times) > 1 else 0.0
+            if len(twin_times) >= 2:
+                l1_twin_summary["min_time_ms"] = round(min(twin_times), 4)
+                l1_twin_summary["max_time_ms"] = round(max(twin_times), 4)
+
     summary = {
         "replay_eval": True,
         "schema_version": "p3_replay_eval_v0.2",
@@ -503,6 +652,8 @@ def main() -> int:
         "l1_twin_message": l1_twin_message if args.l1_twin else None,
         "l1_twin_final_hash_match": l1_twin_ok if args.l1_twin else None,
         "l1_twin_replay_time_ms": l1_twin_time_ms,
+        "l1_twin_multi_seed": l1_twin_multi_seed if args.l1_twin and l1_twin_multi_seed else None,
+        "l1_twin_summary": l1_twin_summary,
         "overhead_stats": overhead_stats,
         "baseline_overhead": baseline_overhead if baseline_overhead else None,
         "multi_seed_overhead": multi_seed_summary,
@@ -514,6 +665,8 @@ def main() -> int:
             r for r in results if r["name"] != "thin_slice" and r["divergence_detected"]
         ],
         "per_trace": results,
+        "corpus_space_summary": _corpus_space_summary(results),
+        "process_peak_rss_bytes": _peak_rss_bytes(),
         "run_manifest": {
             "corpus_dir": str(args.corpus_dir),
             "replay_trap_count": len(corpus_expected),

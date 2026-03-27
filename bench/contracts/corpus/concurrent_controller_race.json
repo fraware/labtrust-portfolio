@@ -1,0 +1,10 @@
+{
+  "description": "Concurrent controller race: three controllers simultaneously attempt to claim the same key, testing split-brain detection under concurrent arrival",
+  "initial_state": {"ownership": {}, "_last_ts": {}},
+  "events": [
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "controller_1"}, "payload": {"task_id": "shared_key", "name": "claim", "writer": "controller_1"}},
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "controller_2"}, "payload": {"task_id": "shared_key", "name": "claim", "writer": "controller_2"}},
+    {"type": "task_start", "ts": 1.0, "actor": {"id": "controller_3"}, "payload": {"task_id": "shared_key", "name": "claim", "writer": "controller_3"}}
+  ],
+  "expected_verdicts": ["allow", "deny", "deny"]
+}

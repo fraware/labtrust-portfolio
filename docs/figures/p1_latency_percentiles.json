@@ -1,0 +1,21 @@
+{
+  "source": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\contracts_eval\\eval.json",
+  "latency_percentiles_us": {
+    "median": 4.6,
+    "p95": 11.8,
+    "p99": 84.5,
+    "event_level_n": 167,
+    "median_ci95": [
+      4.1,
+      5.4
+    ],
+    "p95_ci95": [
+      9.2,
+      27.2
+    ],
+    "p99_ci95": [
+      19.1,
+      141.9
+    ]
+  }
+}

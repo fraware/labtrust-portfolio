@@ -55,6 +55,7 @@ def run_thin_slice(
     delay_fault_prob: float = 0.0,
     calibration_invalid_prob: float = 0.0,
     max_retries_per_task: int = 0,
+    rep_cps_safety_gate_ok: Optional[bool] = None,
 ) -> Dict[str, Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -96,7 +97,17 @@ def run_thin_slice(
         events.append(TraceEvent(seq=seq, ts=ts, type=ev_type, actor_kind=actor_kind, actor_id=actor_id, payload=payload, state_hash_after=state_hash(state)))
         seq += 1
 
-    task_names = _task_list_for_scenario(sid)
+    sched_dep = False
+    try:
+        scenario_data = load_scenario(sid)
+        names = get_scenario_task_names(scenario_data)
+        task_names = names if names else list(DEFAULT_TASK_NAMES)
+        sched_dep = bool(scenario_data.get("rep_cps_scheduling_dependent"))
+    except (FileNotFoundError, ValueError, RuntimeError, OSError):
+        task_names = _task_list_for_scenario(sid)
+        sched_dep = False
+
+    block_schedule = sched_dep and rep_cps_safety_gate_ok is False
     max_retries = max(0, int(max_retries_per_task))
 
     for i, name in enumerate(task_names):
@@ -105,6 +116,15 @@ def run_thin_slice(
         task_done = False
         for attempt in range(max_retries + 1):
             emit("task_start", "agent", "agent_1", {"task_id": tid, "name": name})
+
+            if block_schedule:
+                emit(
+                    "fault_injected",
+                    "system",
+                    "fault_injector",
+                    {"fault": "scheduling_denied_rep_cps_gate", "task_id": tid},
+                )
+                break
 
             if delay_fault_prob > 0 and rng.random() < delay_fault_prob:
                 emit("fault_injected", "system", "fault_injector", {"fault": "delay", "task_id": tid})
@@ -132,6 +152,8 @@ def run_thin_slice(
         "delay_fault_prob": delay_fault_prob,
         "calibration_invalid_prob": calibration_invalid_prob,
         "max_retries_per_task": max_retries,
+        "rep_cps_scheduling_dependent": sched_dep,
+        "rep_cps_safety_gate_ok": rep_cps_safety_gate_ok,
     })
 
     trace_path = out_dir / "trace.json"

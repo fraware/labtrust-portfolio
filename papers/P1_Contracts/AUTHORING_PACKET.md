@@ -10,12 +10,12 @@ What does “coordination” mean in CPS when messaging is not authority—i.e.,
 
 ## 2) Scope anchors (lab reality)
 - Primary anchor is **resource graphs + device heterogeneity + recovery**, not only “large N.”
-- Must map cleanly to lab instrument substrates; explicitly include an interoperability hook to **OPC UA LADS** state machines. citeturn0search13turn0search16
+- Must map cleanly to lab instrument substrates; explicitly include an interoperability hook to **OPC UA LADS** state machines.
 
 ## 3) Claims
-- **C1:** Within a declared contract model, a trace-derived validator can detect and deny invalid writes corresponding to specified coordination failure classes (ownership conflicts, stale writes, reorder-sensitive violations).
+- **C1:** Within a declared contract model, a trace-derived validator can detect and deny invalid writes corresponding to specified coordination failure classes (ownership conflicts, stale writes, reorder-sensitive violations). The contribution is an explicit coordination-admission layer (keyed authority, temporal admissibility, reason-coded denial, trace-derivability), positioned against OCC/locking/transport-only idioms; see draft Section 3 “Why Coordination Contracts are not just OCC, locking, or transport policy.”
 - **C2:** Contract validation can be executed from event traces plus declared configuration alone, without privileged hidden state, enabling auditability and replay-based diagnosis.
-- **C3:** The contract model is transport-agnostic by construction (defined over event/state semantics above the messaging layer); the paper demonstrates this through a reference store and a LADS-shaped event mapping, not a full cross-transport deployment.
+- **C3:** The contract model is transport-agnostic by construction (defined over event/state semantics above the messaging layer); the paper demonstrates **boundary semantics** via reference store, LADS-shaped mapping, and multi-sequence **verdict-vector parity** between reference ingestion paths—not empirical equivalence of live transports.
 - **C4:** A reference implementation can enforce the contract with bounded per-write overhead on the evaluated workload.
 
 ## 4) Outline
@@ -39,10 +39,8 @@ What does “coordination” mean in CPS when messaging is not authority—i.e.,
   - false positives,
   - overhead (latency added per write validation),
   - convergence success.
-- Baselines:
-  - naive last-write-wins,
-  - lock-only,
-  - “eventual consistency without authority.”
+- Baselines / comparators (eval.json `ablation` and `ablation_by_class`):
+  - full contract vs timestamp-only vs ownership-only vs **occ_only** (version/timestamp proxy) vs **lease_only** (temporal proxy without lease fields in corpus) vs **lock_only** (ownership mutex proxy) vs accept-all vs **naive_lww**.
 - Stressors:
   - clock skew, delay, reorder, partial partitions.
 

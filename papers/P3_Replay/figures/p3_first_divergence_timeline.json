@@ -1,0 +1,16 @@
+{
+  "trace_name": "mixed_failure_trap",
+  "divergence_seq": 2,
+  "witness_seq_min": 0,
+  "witness_seq_max": 4,
+  "expected_hash": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "replayed_hash": "e31bb3d732138fd8ec33643505dbb572316404c9a255e8ef975f46deaa5180ab",
+  "event_types": [
+    "coordination_message",
+    "task_start",
+    "task_end",
+    "task_start",
+    "task_end",
+    "task_start"
+  ]
+}

@@ -1,0 +1,5 @@
+{
+  "expected_replay_ok": false,
+  "expected_divergence_at_seq": 2,
+  "notes": "Engine reports the first per-event mismatch; latent inconsistency may exist later in the file."
+}
