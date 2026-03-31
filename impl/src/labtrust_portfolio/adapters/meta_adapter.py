@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Optional, TYPE_CHECKING
 
 from ..thinslice import run_thin_slice
-from ..meta_controller import decide_switch, regime_switch_event
+from ..meta_controller import decide_switch_with_reason, regime_switch_event
 from .base import AdapterResult, run_adapter
 
 if TYPE_CHECKING:
@@ -53,21 +53,45 @@ class MetaAdapter:
         fault_count = len(fault_events)
         p95 = report.get("metrics", {}).get("task_latency_ms_p95", 0.0)
         fault_threshold = fault_params.get("fault_threshold", 1)
+        latency_threshold_ms = float(fault_params.get("latency_threshold_ms", 200.0))
+        contention_threshold = float(fault_params.get("contention_threshold", 1.5))
         hysteresis_consecutive = fault_params.get("hysteresis_consecutive", 1)
-        to_regime = decide_switch(
+        coord_msgs = float(report.get("metrics", {}).get("coordination_messages", 0.0))
+        tasks_completed = float(report.get("metrics", {}).get("tasks_completed", 0.0))
+        # Thin-slice proxy for contention: high coordination message pressure per completed task.
+        contention_index = coord_msgs / max(tasks_completed, 1.0)
+        to_regime, reason = decide_switch_with_reason(
             "centralized",
             fault_count,
             p95,
+            contention_index=contention_index,
             fault_threshold=fault_threshold,
+            latency_threshold_ms=latency_threshold_ms,
+            contention_threshold=contention_threshold,
             hysteresis_consecutive=hysteresis_consecutive,
         )
         events = list(trace.get("events", []))
-        if to_regime and fault_count > 0:
+        if to_regime:
             last = events[-1] if events else {}
             ts = last.get("ts", 0.0) + 0.01
             seq = last.get("seq", -1) + 1
+            criteria = {
+                "fault_count": int(fault_count),
+                "fault_threshold": int(fault_threshold),
+                "hysteresis_consecutive": int(hysteresis_consecutive),
+                "latency_p95_ms": float(p95),
+                "latency_threshold_ms": float(latency_threshold_ms),
+                "contention_index": float(contention_index),
+                "contention_threshold": float(contention_threshold),
+            }
             ev = regime_switch_event(
-                seq, ts, "centralized", to_regime, "fault_threshold", trace.get("final_state_hash", "")
+                seq,
+                ts,
+                "centralized",
+                to_regime,
+                reason or "unknown",
+                trace.get("final_state_hash", ""),
+                criteria=criteria,
             )
             events.append(ev)
             trace["events"] = events

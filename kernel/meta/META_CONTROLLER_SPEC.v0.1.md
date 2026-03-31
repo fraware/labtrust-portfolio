@@ -2,7 +2,7 @@
 
 ## Model
 
-- **State:** current_regime (e.g. "centralized", "blackboard", "fallback"), fault_count, latency_p95.
+- **State:** current_regime (e.g. "centralized", "blackboard", "fallback"), fault_count, latency_p95, contention_index.
 - **Actions:** switch_regime(to_regime). Meta-controller observes metrics and decides when to switch.
 - **Switching criteria:** Thresholds (e.g. fault_count > N, latency_p95 > M ms) or stability window; switch only when criteria met and safety conditions hold.
 
@@ -10,11 +10,12 @@
 
 The reference implementation (`impl/src/labtrust_portfolio/meta_controller.py`, `decide_switch`) uses a **threshold-based rule** with **hysteresis only on fault-based switching**:
 
-1. **Revert (no hysteresis):** If currently in fallback and `fault_count <= 0` and `latency_p95_ms < 0.5 * latency_threshold_ms`, switch back to centralized.
+1. **Revert (no hysteresis):** If currently in fallback and `fault_count <= 0` and `latency_p95_ms < 0.5 * latency_threshold_ms` and `contention_index < 0.5 * contention_threshold`, switch back to centralized.
 2. **Fault-based switch to fallback:** If `fault_count >= hysteresis_consecutive` and `fault_count > fault_threshold`, switch to fallback (thrash control: require consecutive fault observations).
 3. **Latency-based switch to fallback:** If `latency_p95_ms > latency_threshold_ms`, switch to fallback (no hysteresis; high latency alone can trigger fallback).
+4. **Contention-based switch to fallback:** If `contention_index > contention_threshold`, switch to fallback (no hysteresis).
 
-So revert and latency-based switch work even when `fault_count` is zero; hysteresis applies only to fault-count–driven switching. Regret-based or safety-bound-based switching (e.g. formal safety certificates) are out of scope for v0.1 and documented as future work.
+So revert, latency-based, and contention-based switches work even when `fault_count` is zero; hysteresis applies only to fault-count–driven switching. Regret-based or safety-bound-based switching (e.g. formal safety certificates) are out of scope for v0.1 and documented as future work.
 
 **Lemma (informal, thrashing bound).** With `hysteresis_consecutive = K` (K ≥ 1), the fault-based switch to fallback requires at least K consecutive fault observations. In a single run, the number of fault-driven regime switches is bounded by the structure of the run (at most one switch per “epoch” where fault_count reaches K and exceeds fault_threshold). So increasing K reduces thrashing (rapid toggling) when fault_count hovers near the threshold; empirical validation: run meta_eval with `--hysteresis 1`, `2`, `3` and compare `regime_switch_count_total` and collapse_count (see P8 DRAFT “Thrashing vs hysteresis” table).
 
@@ -28,8 +29,8 @@ PONRs (from MADS) are invariant across regimes: no regime change may violate PON
 
 ## Auditability
 
-Every regime change is logged: trace event type `regime_switch` with payload `from_regime`, `to_regime`, `reason` (e.g. "fault_threshold"). Replay can reconstruct regime history.
+Every regime change is logged: trace event type `regime_switch` with payload `from_regime`, `to_regime`, `reason` (e.g. "fault_threshold", "latency_threshold", "contention_threshold"), and measured criteria values used at decision time. Replay can reconstruct regime history.
 
 ## Trace events
 
-Event type `regime_switch`. Payload: `from_regime` (string), `to_regime` (string), `reason` (string). Actor: meta-controller. Enables audit and replay of mode changes.
+Event type `regime_switch`. Payload: `from_regime` (string), `to_regime` (string), `reason` (string), optional `criteria` object (e.g. fault_count, latency_p95_ms, contention_index and thresholds). Actor: meta-controller. Enables audit and replay of mode changes.
