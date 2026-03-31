@@ -12,11 +12,16 @@ from pathlib import Path
 from labtrust_portfolio.contracts import (
     validate,
     apply_event_to_state,
+    prepare_replay_state,
+    finalize_event_observation,
+    build_contract_config_from_trace,
+    load_evaluation_scope,
+    ContractVerdict,
     ALLOW,
-    DENY,
     REASON_REORDER,
     REASON_STALE_WRITE,
     REASON_SPLIT_BRAIN,
+    REASON_UNKNOWN_KEY,
 )
 
 
@@ -28,6 +33,24 @@ def _corpus_dir() -> Path:
     return _repo_root() / "bench" / "contracts" / "corpus"
 
 
+def _replay_trace_expect_match(data: dict, path_label: str = "") -> ContractVerdict:
+    state = prepare_replay_state(dict(data["initial_state"]))
+    cfg = build_contract_config_from_trace(data)
+    events = data["events"]
+    expected = data["expected_verdicts"]
+    assert len(events) == len(expected), f"{path_label}: events/verdicts length mismatch"
+    verdict = ContractVerdict(verdict=ALLOW, reason_codes=[])
+    for i, ev in enumerate(events):
+        verdict = validate(state, ev, cfg)
+        assert verdict.verdict == expected[i], (
+            f"{path_label} event {i}: expected {expected[i]}, got {verdict.verdict}"
+        )
+        if verdict.verdict == ALLOW:
+            state = apply_event_to_state(state, ev)
+        finalize_event_observation(state, ev)
+    return verdict
+
+
 def test_corpus_driver_each_file() -> None:
     """Load each corpus JSON; for each event validate and apply; assert verdicts match."""
     corpus_dir = _corpus_dir()
@@ -37,57 +60,29 @@ def test_corpus_driver_each_file() -> None:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
             continue
-        state = dict(data["initial_state"])
-        events = data["events"]
-        expected = data["expected_verdicts"]
-        assert len(events) == len(expected), f"{path.name}: events/verdicts length mismatch"
-        for i, ev in enumerate(events):
-            verdict = validate(state, ev)
-            assert verdict.verdict == expected[i], (
-                f"{path.name} event {i}: expected {expected[i]}, got {verdict.verdict}"
-            )
-            if verdict.verdict == ALLOW:
-                state = apply_event_to_state(state, ev)
+        _replay_trace_expect_match(data, path.name)
 
 
 def test_corpus_good_sequence() -> None:
     path = _corpus_dir() / "good_sequence.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    state = dict(data["initial_state"])
-    events = data["events"]
-    expected = data["expected_verdicts"]
-    for i, ev in enumerate(events):
-        verdict = validate(state, ev)
-        assert verdict.verdict == expected[i], f"event {i}: expected {expected[i]}, got {verdict.verdict}"
-        if verdict.verdict == ALLOW:
-            state = apply_event_to_state(state, ev)
+    _replay_trace_expect_match(data, "good_sequence")
 
 
 def test_corpus_split_brain() -> None:
     path = _corpus_dir() / "split_brain_sequence.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    state = dict(data["initial_state"])
     events = data["events"]
-    expected = data["expected_verdicts"]
-    for i, ev in enumerate(events):
-        verdict = validate(state, ev)
-        assert verdict.verdict == expected[i], f"event {i}: expected {expected[i]}, got {verdict.verdict}"
-        if verdict.verdict == ALLOW:
-            state = apply_event_to_state(state, ev)
+    verdict = _replay_trace_expect_match(data, "split_brain_sequence")
     assert REASON_SPLIT_BRAIN in verdict.reason_codes or not events
 
 
 def test_corpus_stale_write() -> None:
     path = _corpus_dir() / "stale_write_sequence.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    state = dict(data["initial_state"])
     events = data["events"]
     expected = data["expected_verdicts"]
-    for i, ev in enumerate(events):
-        verdict = validate(state, ev)
-        assert verdict.verdict == expected[i], f"event {i}: expected {expected[i]}, got {verdict.verdict}"
-        if verdict.verdict == ALLOW:
-            state = apply_event_to_state(state, ev)
+    verdict = _replay_trace_expect_match(data, "stale_write_sequence")
     if events and expected[0] == "deny":
         assert REASON_STALE_WRITE in verdict.reason_codes
 
@@ -95,17 +90,45 @@ def test_corpus_stale_write() -> None:
 def test_corpus_reorder() -> None:
     path = _corpus_dir() / "reorder_sequence.json"
     data = json.loads(path.read_text(encoding="utf-8"))
-    state = dict(data["initial_state"])
     events = data["events"]
     expected = data["expected_verdicts"]
-    for i, ev in enumerate(events):
-        verdict = validate(state, ev)
-        assert verdict.verdict == expected[i], f"event {i}: expected {expected[i]}, got {verdict.verdict}"
-        if verdict.verdict == ALLOW:
-            state = apply_event_to_state(state, ev)
+    verdict = _replay_trace_expect_match(data, "reorder_sequence")
     if events and expected[-1] == "deny":
         assert REASON_REORDER in verdict.reason_codes
         assert REASON_STALE_WRITE in verdict.reason_codes
+
+
+def test_non_gold_evaluation_scope_unknown_key_incident_trace() -> None:
+    """allowed_keys from evaluation_scope.json only (no gold); unknown_* not in registry."""
+    path = (
+        _repo_root()
+        / "datasets"
+        / "contracts_real"
+        / "incident_reconstructed"
+        / "trace_04.json"
+    )
+    if not path.exists():
+        return
+    scope_path = _repo_root() / "datasets" / "contracts_real" / "evaluation_scope.json"
+    scope = load_evaluation_scope(scope_path)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    cfg = build_contract_config_from_trace(
+        data,
+        family_id=data.get("scenario_family_id"),
+        evaluation_scope=scope,
+    )
+    assert "unknown_4" not in cfg.get("allowed_keys", ())
+    state = prepare_replay_state(dict(data["initial_state"]))
+    events = data["events"]
+    last_verdict = ContractVerdict(verdict=ALLOW, reason_codes=[])
+    for i, ev in enumerate(events):
+        last_verdict = validate(state, ev, cfg)
+        exp = data["expected_verdicts"][i]
+        assert last_verdict.verdict == exp, f"event {i}: expected {exp}, got {last_verdict.verdict}"
+        if last_verdict.verdict == ALLOW:
+            state = apply_event_to_state(state, ev)
+        finalize_event_observation(state, ev)
+    assert REASON_UNKNOWN_KEY in last_verdict.reason_codes
 
 
 def test_corpus_unsafe_lww() -> None:
@@ -113,14 +136,9 @@ def test_corpus_unsafe_lww() -> None:
     if not path.exists():
         return
     data = json.loads(path.read_text(encoding="utf-8"))
-    state = dict(data["initial_state"])
     events = data["events"]
     expected = data["expected_verdicts"]
-    for i, ev in enumerate(events):
-        verdict = validate(state, ev)
-        assert verdict.verdict == expected[i], f"event {i}: expected {expected[i]}, got {verdict.verdict}"
-        if verdict.verdict == ALLOW:
-            state = apply_event_to_state(state, ev)
+    verdict = _replay_trace_expect_match(data, "unsafe_lww_sequence")
     if events and expected[-1] == "deny":
         assert REASON_REORDER in verdict.reason_codes
         assert REASON_STALE_WRITE in verdict.reason_codes

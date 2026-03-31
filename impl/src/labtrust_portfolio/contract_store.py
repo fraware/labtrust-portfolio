@@ -7,7 +7,14 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple
 
-from .contracts import validate, apply_event_to_state, ContractVerdict, ALLOW
+from .contracts import (
+    validate,
+    apply_event_to_state,
+    finalize_event_observation,
+    prepare_replay_state,
+    ContractVerdict,
+    ALLOW,
+)
 
 
 class ContractEnforcingStore:
@@ -17,7 +24,7 @@ class ContractEnforcingStore:
     """
 
     def __init__(self, contract: Dict[str, Any] | None = None):
-        self._state: Dict[str, Any] = {"ownership": {}, "_last_ts": {}}
+        self._state: Dict[str, Any] = prepare_replay_state({"ownership": {}, "_last_ts": {}})
         self._contract = contract or {}
         self._history: List[Dict[str, Any]] = []
 
@@ -27,9 +34,11 @@ class ContractEnforcingStore:
         state is updated and applied is True.
         """
         verdict = validate(self._state, event, self._contract)
+        if verdict.verdict == ALLOW:
+            self._state = apply_event_to_state(self._state, event)
+        finalize_event_observation(self._state, event)
         if verdict.verdict != ALLOW:
             return (verdict, False)
-        self._state = apply_event_to_state(self._state, event)
         self._history.append(event)
         return (verdict, True)
 

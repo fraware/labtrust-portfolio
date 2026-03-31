@@ -47,12 +47,17 @@ def main() -> int:
     else:
         events = DEFAULT_EVENTS
 
-    from labtrust_portfolio.contracts import validate, apply_event_to_state
+    from labtrust_portfolio.contracts import (
+        validate,
+        apply_event_to_state,
+        prepare_replay_state,
+        finalize_event_observation,
+    )
 
-    state = {"ownership": {}, "_last_ts": {}}
+    state = prepare_replay_state({"ownership": {}, "_last_ts": {}})
     results = []
     for i, ev in enumerate(events):
-        v = validate(state, ev)
+        v = validate(state, ev, {})
         results.append({
             "seq": i,
             "type": ev.get("type"),
@@ -61,6 +66,7 @@ def main() -> int:
         })
         if v.verdict == "allow":
             state = apply_event_to_state(state, ev)
+        finalize_event_observation(state, ev)
 
     out_dir = args.out
     out_dir.mkdir(parents=True, exist_ok=True)

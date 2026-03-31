@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "dataset_id": "contracts_real_v1",
+  "purpose": "P1 contract evaluation: declared keyed resource IDs per trace family. Used only for allowed_keys; not derived from expected_verdicts, annotations, or failure_class labels.",
+  "authoring_note": "Positive allowlists match each family domain naming. incident_reconstructed registers line_buffer_* only; unknown_* ids used in traces are intentionally omitted as out-of-registry placeholders (scenario design), not inferred from gold labels.",
+  "family_declared_keys": {
+    "lab_orchestration_partner_like": [
+      "centrifuge_slot_1",
+      "centrifuge_slot_2",
+      "centrifuge_slot_3",
+      "centrifuge_slot_4",
+      "centrifuge_slot_5",
+      "centrifuge_slot_6"
+    ],
+    "simulator_documented_semantics": [
+      "sim_cell_1",
+      "sim_cell_2",
+      "sim_cell_3",
+      "sim_cell_4",
+      "sim_cell_5"
+    ],
+    "incident_reconstructed": [
+      "line_buffer_1",
+      "line_buffer_2",
+      "line_buffer_3",
+      "line_buffer_4",
+      "line_buffer_5",
+      "line_buffer_6",
+      "line_buffer_7"
+    ]
+  }
+}

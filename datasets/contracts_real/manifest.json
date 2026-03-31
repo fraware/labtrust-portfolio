@@ -1,0 +1,46 @@
+{
+  "dataset_id": "contracts_real_v1",
+  "evaluation_scope_file": "evaluation_scope.json",
+  "evaluation_scope_note": "Family-level declared resource key allowlists for P1 contract allowed_keys; used at evaluation time without reading expected_verdicts or annotation failure_class.",
+  "trace_families": [
+    {
+      "family_id": "lab_orchestration_partner_like",
+      "domain": "laboratory functional unit orchestration",
+      "trace_type": "partner_like_realistic_logs",
+      "trace_count": 30,
+      "shared_keyed_resources": true,
+      "controllers": [
+        "controller_a",
+        "controller_b"
+      ],
+      "includes_handover_behavior": true
+    },
+    {
+      "family_id": "simulator_documented_semantics",
+      "domain": "automation simulator",
+      "trace_type": "simulator_generated",
+      "trace_count": 30,
+      "shared_keyed_resources": true,
+      "controllers": [
+        "planner_1",
+        "planner_2"
+      ],
+      "includes_handover_behavior": true
+    },
+    {
+      "family_id": "incident_reconstructed",
+      "domain": "multi-controller automation cell",
+      "trace_type": "incident_reconstructed",
+      "trace_count": 30,
+      "shared_keyed_resources": true,
+      "controllers": [
+        "robot_r1",
+        "robot_r2"
+      ],
+      "includes_handover_behavior": true
+    }
+  ],
+  "totals": {
+    "trace_count": 90
+  }
+}

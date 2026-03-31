@@ -13,10 +13,17 @@ What does “coordination” mean in CPS when messaging is not authority—i.e.,
 - Must map cleanly to lab instrument substrates; explicitly include an interoperability hook to **OPC UA LADS** state machines.
 
 ## 3) Claims
-- **C1:** Within a declared contract model, a trace-derived validator can detect and deny invalid writes corresponding to specified coordination failure classes (ownership conflicts, stale writes, reorder-sensitive violations). The contribution is an explicit coordination-admission layer (keyed authority, temporal admissibility, reason-coded denial, trace-derivability), positioned against OCC/locking/transport-only idioms; see draft Section 3 “Why Coordination Contracts are not just OCC, locking, or transport policy.”
+- **C1:** A trace-derived coordination-admission layer can detect and deny coordination-invalid shared-state mutations that delivery-level correctness and simpler boundary policies miss, while remaining replayable and operationally lightweight.
 - **C2:** Contract validation can be executed from event traces plus declared configuration alone, without privileged hidden state, enabling auditability and replay-based diagnosis.
 - **C3:** The contract model is transport-agnostic by construction (defined over event/state semantics above the messaging layer); the paper demonstrates **boundary semantics** via reference store, LADS-shaped mapping, and multi-sequence **verdict-vector parity** between reference ingestion paths—not empirical equivalence of live transports.
 - **C4:** A reference implementation can enforce the contract with bounded per-write overhead on the evaluated workload.
+
+### Claim envelope checklist (must pass before any run)
+- [ ] Intro uses the exact C1 sentence above.
+- [ ] No claim implies consensus, full distributed correctness, or live transport equivalence.
+- [ ] No claim implies robustness under arbitrary perturbations.
+- [ ] No claim implies synthetic benchmark success predicts field success.
+- [ ] Stress and transport sections are framed as narrow characterization/sanity only unless upgraded.
 
 ## 4) Outline
 1. Motivation: “communication ≠ coordination” with concrete failure classes

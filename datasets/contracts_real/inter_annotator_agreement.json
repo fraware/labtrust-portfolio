@@ -1,0 +1,48 @@
+{
+  "dataset_id": "contracts_real_v1",
+  "subset_size_traces": 20,
+  "subset_trace_ids": [
+    "lab_orchestration_partner_like/trace_01",
+    "lab_orchestration_partner_like/trace_02",
+    "lab_orchestration_partner_like/trace_03",
+    "lab_orchestration_partner_like/trace_04",
+    "lab_orchestration_partner_like/trace_05",
+    "lab_orchestration_partner_like/trace_06",
+    "lab_orchestration_partner_like/trace_07",
+    "simulator_documented_semantics/trace_01",
+    "simulator_documented_semantics/trace_02",
+    "simulator_documented_semantics/trace_03",
+    "simulator_documented_semantics/trace_04",
+    "simulator_documented_semantics/trace_05",
+    "simulator_documented_semantics/trace_06",
+    "incident_reconstructed/trace_01",
+    "incident_reconstructed/trace_02",
+    "incident_reconstructed/trace_03",
+    "incident_reconstructed/trace_04",
+    "incident_reconstructed/trace_05",
+    "incident_reconstructed/trace_06",
+    "incident_reconstructed/trace_07"
+  ],
+  "annotators": [
+    "annotator_a",
+    "annotator_b"
+  ],
+  "event_level": {
+    "total_events_compared": 60,
+    "agreements": 56,
+    "disagreements": 4,
+    "disagreement_rate": 0.0667
+  },
+  "trace_level": {
+    "full_trace_agreement": 17,
+    "partial_disagreement": 3,
+    "disagreement_rate": 0.15
+  },
+  "adjudication": {
+    "adjudicator": "review_lead",
+    "resolved_to_split_brain": 2,
+    "resolved_to_reorder_sensitive_invalidity": 1,
+    "resolved_to_unknown_key": 1,
+    "notes": "Disagreements were primarily boundary cases around inferred handover windows."
+  }
+}

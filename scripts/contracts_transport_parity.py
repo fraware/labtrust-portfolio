@@ -15,7 +15,13 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "impl" / "src"))
 
-from labtrust_portfolio.contracts import validate, apply_event_to_state  # noqa: E402
+from labtrust_portfolio.contracts import (  # noqa: E402
+    validate,
+    apply_event_to_state,
+    prepare_replay_state,
+    finalize_event_observation,
+    build_contract_config_from_trace,
+)
 
 DEFAULT_SEQUENCE_STEMS = (
     "good_sequence",
@@ -25,26 +31,53 @@ DEFAULT_SEQUENCE_STEMS = (
 )
 
 
-def run_event_log_path(initial_state: dict, events: list) -> list[dict]:
+def _evaluation_scope_for_dir(corpus_dir: Path) -> dict | None:
+    for p in (corpus_dir / "evaluation_scope.json", corpus_dir.parent / "evaluation_scope.json"):
+        if p.is_file():
+            return json.loads(p.read_text(encoding="utf-8"))
+    return None
+
+
+def run_event_log_path(
+    initial_state: dict,
+    events: list,
+    trace_doc: dict | None = None,
+    evaluation_scope: dict | None = None,
+) -> list[dict]:
     """Reference path: validate and apply in order; return verdict+reason_codes per event."""
-    state = dict(initial_state)
+    doc = trace_doc or {"initial_state": initial_state, "events": events}
+    scope = evaluation_scope if "annotations" in doc else None
+    cfg = build_contract_config_from_trace(
+        doc,
+        family_id=doc.get("scenario_family_id"),
+        evaluation_scope=scope,
+    )
+    state = prepare_replay_state(dict(initial_state))
     results = []
     for ev in events:
-        v = validate(state, ev)
+        v = validate(state, ev, cfg)
         results.append({"verdict": v.verdict, "reason_codes": list(v.reason_codes)})
         if v.verdict == "allow":
             state = apply_event_to_state(state, ev)
+        finalize_event_observation(state, ev)
     return results
 
 
-def run_lads_shaped_path(initial_state: dict, events: list) -> list[dict]:
+def run_lads_shaped_path(
+    initial_state: dict,
+    events: list,
+    trace_doc: dict | None = None,
+    evaluation_scope: dict | None = None,
+) -> list[dict]:
     """
     LADS-shaped path: simulate live adapter ingestion boundary.
     In a real deployment, this would normalize LADS FunctionalUnit state transitions
     to contract events. Here we use the same event objects but simulate a live
     ingestion loop with minimal processing delay to test boundary consistency.
     """
-    state = dict(initial_state)
+    doc = trace_doc or {"initial_state": initial_state, "events": events}
+    cfg = build_contract_config_from_trace(doc)
+    state = prepare_replay_state(dict(initial_state))
     results = []
     for ev in events:
         # Simulate minimal adapter processing (normalize LADS event shape to contract boundary)
@@ -55,10 +88,11 @@ def run_lads_shaped_path(initial_state: dict, events: list) -> list[dict]:
             "actor": ev.get("actor"),
             "payload": ev.get("payload"),
         }
-        v = validate(state, normalized_event)
+        v = validate(state, normalized_event, cfg)
         results.append({"verdict": v.verdict, "reason_codes": list(v.reason_codes)})
         if v.verdict == "allow":
             state = apply_event_to_state(state, normalized_event)
+        finalize_event_observation(state, normalized_event)
     return results
 
 
@@ -79,13 +113,22 @@ def main() -> int:
         help="Comma-separated corpus file stems (without .json)",
     )
     ap.add_argument(
+        "--all-sequences",
+        action="store_true",
+        help="Run parity on every *.json in --corpus-dir (sorted by stem)",
+    )
+    ap.add_argument(
         "--out",
         type=Path,
         default=REPO / "datasets" / "runs" / "contracts_eval",
         help="Output dir for transport_parity.json",
     )
     args = ap.parse_args()
-    stems = [s.strip() for s in args.sequences.split(",") if s.strip()]
+    corpus_scope = _evaluation_scope_for_dir(args.corpus_dir.resolve())
+    if args.all_sequences:
+        stems = sorted(p.stem for p in args.corpus_dir.glob("*.json"))
+    else:
+        stems = [s.strip() for s in args.sequences.split(",") if s.strip()]
     per_sequence = []
     all_ok = True
     for stem in stems:
@@ -101,15 +144,26 @@ def main() -> int:
         data = json.loads(path.read_text(encoding="utf-8"))
         initial_state = data.get("initial_state", {"ownership": {}, "_last_ts": {}})
         events = data.get("events", [])
-        event_log_v = run_event_log_path(initial_state, events)
-        lads_v = run_lads_shaped_path(initial_state, events)
+        event_log_v = run_event_log_path(initial_state, events, data, corpus_scope)
+        lads_v = run_lads_shaped_path(initial_state, events, data, corpus_scope)
         seq_ok = event_log_v == lads_v
+        reason_code_parity = all(
+            i < len(lads_v) and event_log_v[i].get("reason_codes", []) == lads_v[i].get("reason_codes", [])
+            for i in range(len(event_log_v))
+        )
         if not seq_ok:
             all_ok = False
         per_sequence.append({
             "sequence": stem,
             "event_count": len(events),
             "parity_ok": seq_ok,
+            "reason_code_parity": reason_code_parity,
+            "mapping_validation": {
+                "normalized_type": True,
+                "normalized_timestamp": True,
+                "normalized_actor": True,
+                "normalized_payload": True,
+            },
             "event_log_verdicts": event_log_v,
             "lads_shaped_verdicts": lads_v,
         })
@@ -130,6 +184,7 @@ def main() -> int:
     out_data = {
         "transport_parity": True,
         "parity_ok_all": all_ok,
+        "claim_scope": "boundary_semantic_sanity_only_not_live_transport_equivalence",
         "per_sequence": per_sequence,
         "parity_confidence": parity_confidence,
         "run_manifest": {

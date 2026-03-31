@@ -32,6 +32,23 @@
 \newcommand{\allow}{\texttt{allow}}
 \newcommand{\deny}{\texttt{deny}}
 \newcommand{\nongoals}{This paper does not claim Byzantine tolerance, partition-safe consensus, or live cross-transport deployment equivalence.}
+\newcommand{\CorpusSeqCount}{54}
+\newcommand{\BenchmarkTP}{37}
+\newcommand{\BenchmarkFP}{0}
+\newcommand{\BenchmarkFN}{0}
+\newcommand{\BenchmarkPrecision}{1.00}
+\newcommand{\BenchmarkRecall}{1.00}
+\newcommand{\BenchmarkFOne}{1.00}
+\newcommand{\LatencyMedian}{4.6}
+\newcommand{\LatencyP95}{11.8}
+\newcommand{\LatencyP99}{84.5}
+\newcommand{\LatencyMedianCILo}{4.1}
+\newcommand{\LatencyMedianCIHi}{5.4}
+\newcommand{\LatencyP95CILo}{9.2}
+\newcommand{\LatencyP95CIHi}{27.2}
+\newcommand{\LatencyP99CILo}{19.1}
+\newcommand{\LatencyP99CIHi}{141.9}
+\newcommand{\LatencySampleN}{167}
 
 \title{\textbf{Coordination Contracts: Trace-Derived Admission for Shared CPS State}}
 \author{Anonymous authors\\
@@ -42,7 +59,7 @@
 \maketitle
 
 \begin{abstract}
-In cyber-physical systems (CPS), correct messaging does not imply correct coordination. A workflow may deliver every packet and still admit split-brain ownership conflicts, stale writes, reorder-sensitive violations, or out-of-scope updates to shared state. We present \emph{Coordination Contracts}, a portable coordination-admission semantics for shared keyed state that combines keyed authority, temporal admissibility, reason-coded denials, and trace-derivability at the write boundary. The key design constraint is \emph{trace-derivability}: verdicts must be reproducible from event traces plus declared configuration alone, without privileged hidden state. On the current benchmark artifact (54-sequence challenge corpus), the full contract matches the expected per-event verdict vector on all sequences and achieves event-level precision/recall/F1 of 1.0 (TP=37, FP=0, FN=0). Comparator decomposition shows that temporal-only proxies miss split-brain failures, while authority-only proxies miss stale and reorder-sensitive failures; the full contract improves over timestamp-only baselines by 13 denied violations. Validation overhead remains bounded in this trace-driven single-process setting, with event-level median/p95/p99 latency of 4.6/11.8/84.5~$\mu$s and bootstrap confidence intervals reported in the artifact. We also demonstrate transport-boundary semantic parity across event-log and LADS-shaped ingestion paths for canonical sequences. Optional async stress sweeps characterize sensitivity to delay, skew, and reorder; they support robustness discussion but do not replace the headline corpus verdict. \nongoals
+In cyber-physical systems (CPS), correct messaging does not imply correct coordination. A workflow may deliver every packet and still admit split-brain ownership conflicts, stale writes, reorder-sensitive violations, or out-of-scope updates to shared state. We present \emph{Coordination Contracts}, a portable coordination-admission semantics for shared keyed state that combines keyed authority, temporal admissibility, reason-coded denials, and trace-derivability at the write boundary. The target claim is intentionally narrow: \emph{a trace-derived coordination-admission layer can detect and deny coordination-invalid shared-state mutations that delivery-level correctness and simpler boundary policies miss, while remaining replayable and operationally lightweight}. The key design constraint is \emph{trace-derivability}: verdicts must be reproducible from event traces plus declared configuration alone, without privileged hidden state. We report benchmark and replay evidence against stronger boundary baselines, with bounded per-event overhead and explicit reason-coded denial diagnostics. Boundary transport parity is reported only as a semantic sanity check. \nongoals
 \end{abstract}
 
 \section{Introduction}
@@ -52,16 +69,19 @@ Communication is not coordination. In CPS orchestration, the correctness-critica
 \paragraph{Motivating vignette.}
 Controller A releases a functional unit after finishing a task. Controller B, operating on stale assignment state, issues a new write on the same key. Transport delivery succeeds. Coordination still fails unless a shared-state admission layer denies the write. Coordination Contracts make this failure explicit at the write boundary with reason codes (e.g., \texttt{split\_brain}, \texttt{stale\_write}) before state mutation.
 
-This paper proposes Coordination Contracts as a reusable coordination-admission layer above transport and below application policy. The model defines typed state, keyed authority, temporal admissibility, and transition validity. A pure validator consumes replay state and event fields and returns \allow/\deny with reason codes. \nongoals We instead claim something narrower and, we argue, practically valuable: a portable semantics layer that makes shared-state mutation auditable, replayable, and denyable under explicit authority and time rules.
+This paper proposes Coordination Contracts as a reusable coordination-admission layer above transport and below application policy. The model defines typed state, keyed authority, temporal admissibility, and transition validity. A pure validator consumes replay state and event fields and returns \allow/\deny with reason codes.
+
+\subsection*{Claim envelope}
+The paper is scoped to one target claim: \emph{a trace-derived coordination-admission layer can detect and deny coordination-invalid shared-state mutations that delivery-level correctness and simpler boundary policies miss, while remaining replayable and operationally lightweight}. \nongoals We further exclude claims about robustness under arbitrary perturbations and any implication that synthetic benchmark success predicts field success.
 
 \paragraph{Why now.}
 Regulated CPS programs increasingly require post-incident traceability, evidence-preserving change control, and cross-team interoperability between heterogeneous controllers. A trace-derived admission layer is useful in this setting because it yields replayable enforcement decisions with explicit denial reasons, even when messaging succeeds.
 
-The paper makes four claims:
+The paper makes four bounded supporting claims for the target envelope:
 \begin{enumerate}[leftmargin=1.5em]
-\item A trace-derived validator can detect and deny the specified coordination failure classes on the benchmark corpus.
+\item A trace-derived validator can detect and deny the specified coordination failure classes on benchmark and real/quasi-real replay traces.
 \item Validation is reproducible from traces plus declared configuration without privileged hidden state.
-\item The model is transport-agnostic by construction at the event/state boundary; parity is shown for reference ingestion paths.
+\item The model is transport-agnostic by construction at the event/state boundary; parity is reported only for normalized boundary-event semantics.
 \item Per-write validation overhead is bounded on the evaluated workload.
 \end{enumerate}
 
@@ -93,7 +113,7 @@ In the evaluated artifact, temporal ordering is reflected in per-event timestamp
 \paragraph{Assumptions.}
 Identity fields in traces are treated as truthful in this artifact. Validation occurs before mutation. The evaluated harness is trace-driven and single-process. We make no live deployment guarantees under Byzantine actors, network partitions, or arbitrary runtime interleavings beyond those reflected in the benchmark and auxiliary stress artifacts.
 
-\section{Contract model and validator semantics}
+\section{System model and contract semantics}
 
 \begin{definition}[Contract state]
 For each key $k$, contract state stores typed value $v_k$, owner $o_k$, temporal summary $\tau_k$, and optional lease metadata $\ell_k$.
@@ -121,12 +141,12 @@ Let state evolve by applying only events with verdict \allow. Then ownership con
 \end{proposition}
 
 \noindent\emph{Scope note.}
-The determinism property is aligned with the Lean formalization in \texttt{formal/lean/*/W2Contract.lean} (validator interface and trace-shaped reasoning); admitted-prefix invariants are presented as a proof sketch here and are not claimed as a complete mechanized proof of live distributed execution.
+The determinism property is aligned with the Lean formalization in \texttt{formal/lean/*/W2Contract.lean}. This revision includes mechanized admitted-prefix lemmas (\texttt{denied\_no\_state\_change}, \texttt{admitted\_preserves\_owner}, \texttt{admitted\_preserves\_lastTs}) and a replay reproducibility theorem (\texttt{replay\_reproducibility}) under explicit assumptions that normalized events and reconstructed replay state are equal across conforming implementations. The scope remains boundary replay semantics rather than full live distributed execution.
 
 \paragraph{Worked example.}
 Suppose the admitted prefix already records owner \texttt{controller\_a} for key \texttt{t1}. A candidate \texttt{task\_start} from \texttt{controller\_b} on \texttt{t1} yields verdict \deny{} with reason \texttt{split\_brain} because authority and ownership predicates fail. State is unchanged. If instead the candidate is a stale \texttt{task\_end} whose timestamp violates monotonicity, the verdict is \deny{} with \texttt{stale\_write} (or related temporal reason codes in the artifact). This makes coordination failure explicit before application of the write.
 
-\section{Reference implementation and interoperability boundary}
+\section{Enforcement boundary and replay model}
 
 The reference system separates a pure validator from a contract-enforcing store. Writes are applied only on \allow.
 
@@ -149,7 +169,10 @@ The transport claim is boundary scoped: if two ingestion paths induce identical 
 
 For OPC UA LADS-shaped interoperability, functional units or device-facing keys map to contract keys; controlling agents map to writers; LADS-compatible edges map to admissible transitions. The contract does not replace the LADS information model; it adds a portable admission check for writes alongside it.
 
-\section{Experimental methodology}
+\section{Real/quasi-real trace corpus and benchmark governance}
+
+\subsection{Trace families and governance}
+Evaluation now includes both the benchmark challenge corpus and three non-synthetic families in \texttt{datasets/contracts\_real/} (\texttt{lab\_orchestration\_partner\_like}, \texttt{simulator\_documented\_semantics}, \texttt{incident\_reconstructed}), with 90 total traces in this revision. Family metadata, source type (quasi-real/simulator/reconstructed), and review ownership are declared in \texttt{datasets/contracts\_real/DATASET\_GOVERNANCE.md}. Annotation rules, ambiguity handling, and adjudication are declared in \texttt{datasets/contracts\_real/ANNOTATION\_PROTOCOL.md}, with inter-annotator agreement reported for a 20-trace subset in \texttt{datasets/contracts\_real/inter\_annotator\_agreement.json}.
 
 \subsection{Benchmark corpus and metrics}
 
@@ -198,19 +221,19 @@ OCC/lease/lock entries are benchmark proxies tied to available event fields; the
 
 \section{Results}
 
-We organize results around the following questions: (RQ1) Does the full contract match ground truth on the benchmark? (RQ2) How do weaker comparators fail structurally? (RQ3) How do detection metrics decompose by inferred failure class? (RQ4) What is validation overhead in the evaluated harness? (RQ5) What does transport-boundary parity show? (RQ6) What does the async stress run characterize?
+We organize results around the following questions: (RQ1) Does the full contract match ground truth on benchmark and quasi-real replay traces? (RQ2) How do stronger boundary baselines fail structurally? (RQ3) How do detection metrics decompose by failure class? (RQ4) What is validation overhead in the evaluated harness? (RQ5) What does a serious operational case study show beyond benchmark tables? (RQ6) What does transport-boundary parity show as a narrow sanity check? (RQ7) What does the async stress run characterize as profile-specific sensitivity?
 
 \subsection{RQ1: Exact match on the benchmark}
 
 \begin{table}[t]
 \centering
-\caption{Core benchmark summary from \texttt{eval.json}. Exact match is measured over the full per-event verdict vector for each sequence.}
+\caption{Core benchmark summary from \texttt{eval.json}. Exact match is measured over the full per-event verdict vector for each sequence in the frozen run.}
 \label{tab:summary}
 \begin{tabular}{lccccccc}
 \toprule
 Corpus & Seq. & Exact match & TP & FP & FN & Precision & Recall/F1 \\
 \midrule
-Tiered contracts corpus & 54 & 54/54 & 37 & 0 & 0 & 1.00 & 1.00 / 1.00 \\
+Tiered contracts corpus & \CorpusSeqCount{} & \CorpusSeqCount{}/\CorpusSeqCount{} & \BenchmarkTP{} & \BenchmarkFP{} & \BenchmarkFN{} & \BenchmarkPrecision{} & \BenchmarkRecall{} / \BenchmarkFOne{} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -308,7 +331,7 @@ For \texttt{unknown\_key}, the wide interval reflects a small sample regime rath
 
 \subsection{RQ4: Overhead and scale}
 
-Event-level latency is bounded in this evaluated setting: median 4.6~$\mu$s, p95 11.8~$\mu$s, p99 84.5~$\mu$s, with bootstrap confidence intervals of [4.1, 5.4], [9.2, 27.2], and [19.1, 141.9]~$\mu$s respectively.
+Event-level latency is bounded in this evaluated setting: median \LatencyMedian{}~$\mu$s, p95 \LatencyP95{}~$\mu$s, p99 \LatencyP99{}~$\mu$s, with bootstrap confidence intervals [\LatencyMedianCILo{}, \LatencyMedianCIHi{}], [\LatencyP95CILo{}, \LatencyP95CIHi{}], and [\LatencyP99CILo{}, \LatencyP99CIHi{}]~$\mu$s, respectively.
 
 \begin{figure}[t]
 \centering
@@ -317,7 +340,7 @@ Event-level latency is bounded in this evaluated setting: median 4.6~$\mu$s, p95
 }{
   \fbox{\parbox[c][1.8in][c]{0.88\linewidth}{\centering Placeholder: run \texttt{python scripts/plot\_p1\_paper\_figures.py}.}}
 }
-\caption{Event-level latency percentiles with bootstrap 95\% CIs (single-process trace replay; \texttt{latency\_percentiles\_us} in \texttt{eval.json}).}
+\caption{Event-level latency percentiles with bootstrap 95\% CIs from \texttt{eval.json} (\texttt{latency\_percentiles\_us}); single-process trace replay with event-level sample size $n=\LatencySampleN$.}
 \label{fig:latency}
 \end{figure}
 
@@ -332,15 +355,18 @@ Event-level latency is bounded in this evaluated setting: median 4.6~$\mu$s, p95
   (replace with \texttt{docs/figures/p1\_scale\_throughput.png}).
   }}
 }
-\caption{Scale-throughput curve from the current P1 scale-test artifact. This figure is interpretive only: it characterizes the reference implementation in the evaluated single-process setting and should not be read as a deployment-wide performance guarantee.}
+\caption{Scale-throughput curve from the frozen P1 scale artifact. This figure is interpretive only: it characterizes the reference implementation in the evaluated single-process setting and should not be read as a deployment-wide performance guarantee.}
 \label{fig:scale}
 \end{figure}
 
-\subsection{RQ5: Transport-boundary parity}
+\subsection{RQ5: Operational case study}
+A full case-study package is provided in \texttt{papers/P1\_Contracts/CASE\_STUDY\_LAB\_HANDOVER.md}. The scenario covers a split-brain handover race and a timing-sensitive stale write in a laboratory functional-unit workflow over shared keyed state. The key observation is that delivery correctness alone accepts all delivered writes, while the full contract denies coordination-invalid mutations with reason-coded evidence (\texttt{split\_brain}, \texttt{stale\_write}, \texttt{reorder\_violation}). The strongest practical baseline denies the obvious owner mismatch but still misses one timing-sensitive invalidity.
+
+\subsection{RQ6: Transport-boundary parity}
 
 \begin{table}[t]
 \centering
-\caption{Boundary parity on canonical sequences from \texttt{transport\_parity.json}. `yes' denotes identical verdict vectors across the compared ingestion paths.}
+\caption{Boundary parity on canonical sequences from \texttt{transport\_parity.json}. `yes' denotes identical verdict vectors across the compared ingestion paths after boundary-event normalization.}
 \label{tab:parity}
 \begin{tabular}{lcc}
 \toprule
@@ -356,7 +382,7 @@ Sequence & Event count & Parity \\
 
 All canonical parity checks pass (\texttt{parity\_ok\_all=true}; parity rate 1.0 over 6/6 checked events). This supports boundary semantic consistency only; it is not a claim of end-to-end transport equivalence across full runtime stacks.
 
-\subsection{RQ6: Async stress characterization}
+\subsection{RQ7: Async stress characterization}
 
 The artifact includes an async stress runner that sweeps delay, clock-skew, and reorder profiles. We treat this as robustness characterization, not as a substitute for the primary corpus evaluation. Figure~\ref{fig:stress} summarizes detection retention by profile when \texttt{stress\_results.json} is present; the main correctness claim remains anchored in RQ1. Sensitivity is dominated by profile-induced reordering and timestamp perturbation rather than by pure delay in isolation.
 
@@ -367,7 +393,7 @@ The artifact includes an async stress runner that sweeps delay, clock-skew, and 
 }{
   \fbox{\parbox[c][1.5in][c]{0.92\linewidth}{\centering Placeholder: run \texttt{contracts\_async\_stress.py} then \texttt{plot\_p1\_paper\_figures.py}.}}
 }
-\caption{Async stress: fraction of runs with \texttt{detection\_ok} true, by stress profile (see \texttt{stress\_results.json}). Interpret as sensitivity analysis, not field deployment.}
+\caption{Async stress: fraction of runs with \texttt{detection\_ok} true by stress profile (from \texttt{stress\_results.json}). Interpret as sensitivity analysis, not field deployment evidence.}
 \label{fig:stress}
 \end{figure}
 
@@ -386,6 +412,8 @@ This replayability matters especially in regulated or safety-relevant workflows.
 \item \textbf{Identity trust in trace fields:} Byzantine identity spoofing out of scope.
 \item \textbf{Boundary-level transport claim:} parity is boundary semantics, not live-system equivalence.
 \item \textbf{Comparator scope:} OCC/lease/lock are reference proxies in this corpus model.
+\item \textbf{No arbitrary perturbation robustness claim:} stress sweeps are interpreted as profile-specific sensitivity only.
+\item \textbf{No synthetic-to-field implication:} synthetic or quasi-real success does not establish deployment-level field success.
 \item \textbf{Stress interpretation scope:} async stress outputs characterize sensitivity under delay/skew/reorder profiles, but they do not substitute for multi-process or networked deployment evidence.
 \item \textbf{Canonical non-goals:} \nongoals
 \end{itemize}

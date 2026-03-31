@@ -6,7 +6,21 @@ from pathlib import Path
 from typing import Tuple
 
 from .conformance import check_conformance
-from .contracts import validate, apply_event_to_state, ALLOW
+from .contracts import (
+    validate,
+    apply_event_to_state,
+    prepare_replay_state,
+    finalize_event_observation,
+    build_contract_config_from_trace,
+    ALLOW,
+)
+
+
+def _contracts_real_evaluation_scope() -> dict | None:
+    p = Path(__file__).resolve().parents[3] / "datasets" / "contracts_real" / "evaluation_scope.json"
+    if not p.is_file():
+        return None
+    return json.loads(p.read_text(encoding="utf-8"))
 
 
 def check_contracts_on_trace(trace_path: Path) -> Tuple[bool, str | None]:
@@ -20,12 +34,23 @@ def check_contracts_on_trace(trace_path: Path) -> Tuple[bool, str | None]:
         trace = json.loads(trace_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError) as e:
         return (False, str(e))
-    state = {"ownership": {}, "_last_ts": {}}
+    init = trace.get("initial_state") or {"ownership": {}, "_last_ts": {}}
+    state = prepare_replay_state(dict(init))
+    ev_scope = (
+        _contracts_real_evaluation_scope() if "annotations" in trace else None
+    )
+    cfg = build_contract_config_from_trace(
+        trace,
+        family_id=trace.get("scenario_family_id"),
+        evaluation_scope=ev_scope,
+    )
     for ev in trace.get("events", []):
-        verdict = validate(state, ev)
+        verdict = validate(state, ev, cfg)
+        if verdict.verdict == ALLOW:
+            state = apply_event_to_state(state, ev)
+        finalize_event_observation(state, ev)
         if verdict.verdict != ALLOW:
             return (False, "contract denial at event: " + str(verdict.reason_codes))
-        state = apply_event_to_state(state, ev)
     return (True, None)
 
 

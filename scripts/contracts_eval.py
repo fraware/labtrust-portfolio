@@ -4,6 +4,7 @@ P1 Contracts evaluation: run validator (and apply_event_to_state) on corpus
 sequences; record detection/denial and overhead. Writes to
 datasets/runs/contracts_eval/eval.json. Usage:
   PYTHONPATH=impl/src python scripts/contracts_eval.py [--out DIR]
+  PYTHONPATH=impl/src python scripts/contracts_eval.py --corpus DIR [--corpus-recursive]
   PYTHONPATH=impl/src python scripts/contracts_eval.py --throughput [--scale N]
   PYTHONPATH=impl/src python scripts/contracts_eval.py --scale-test [--scale-events 100000]
 """
@@ -28,9 +29,59 @@ except ImportError:
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "impl" / "src"))
 
-from labtrust_portfolio.contracts import validate, apply_event_to_state, ALLOW
+from labtrust_portfolio.contracts import (
+    validate,
+    apply_event_to_state,
+    prepare_replay_state,
+    finalize_event_observation,
+    build_contract_config_from_trace,
+    ALLOW,
+)
 
-SCRIPT_VERSION = "v0.3"
+SCRIPT_VERSION = "v0.5"
+
+
+def _load_evaluation_scope(corpus_root: Path) -> dict | None:
+    p = corpus_root / "evaluation_scope.json"
+    if not p.is_file():
+        return None
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def _family_id_for_trace(corpus_root: Path, path: Path, data: dict) -> str | None:
+    fid = data.get("scenario_family_id")
+    if fid:
+        return str(fid)
+    try:
+        rel = path.resolve().relative_to(corpus_root.resolve())
+        if len(rel.parts) >= 2:
+            return rel.parts[0]
+    except ValueError:
+        pass
+    return None
+
+
+def _contract_config_for_corpus_file(
+    corpus_root: Path,
+    path: Path,
+    data: dict,
+    evaluation_scope: dict | None,
+) -> dict:
+    has_ann = "annotations" in data
+    if not has_ann:
+        return build_contract_config_from_trace(data)
+    fid = _family_id_for_trace(corpus_root, path, data)
+    return build_contract_config_from_trace(
+        data, family_id=fid, evaluation_scope=evaluation_scope
+    )
+
+
+def _sequence_label(corpus_root: Path, path: Path) -> str:
+    """Stable id for a trace file; use relative path when corpus has subdirs."""
+    try:
+        return path.resolve().relative_to(corpus_root.resolve()).with_suffix("").as_posix()
+    except ValueError:
+        return path.stem
 
 
 def _bootstrap_percentile_ci(
@@ -90,28 +141,111 @@ def _accept_all(_state: dict, _event: dict) -> bool:
     return True
 
 
+def _event_key(event: dict) -> str | None:
+    payload = event.get("payload", {})
+    return payload.get("task_id") or payload.get("key")
+
+
+def _event_writer(event: dict) -> str:
+    payload = event.get("payload", {})
+    return payload.get("writer") or event.get("actor", {}).get("id", "agent_1")
+
+
 def _occ_only_allows(state: dict, event: dict) -> bool:
-    """Baseline: OCC/version-style conflict check via per-key monotonic timestamps only (no ownership)."""
-    return _timestamp_only_allows(state, event)
+    """B1: explicit versioned OCC boundary with last-seen version check."""
+    key = _event_key(event)
+    if not key:
+        return False
+    key_versions = state.setdefault("_occ_version", {})
+    read_versions = state.setdefault("_occ_read_version", {})
+    current = key_versions.get(key, 0)
+    seen = event.get("payload", {}).get("read_version", read_versions.get(key, current))
+    if seen != current:
+        return False
+    return event.get("ts", 0.0) >= state.get("_last_ts", {}).get(key, -1.0)
 
 
 def _lease_only_allows(state: dict, event: dict) -> bool:
-    """
-    Baseline: lease admission proxy; reference corpus has no explicit lease fields, so temporal monotonicity only.
-    In a full lease implementation, we would check lease validity windows and renewal semantics;
-    here we approximate with temporal monotonicity as a proxy for lease-based temporal gating.
-    """
-    return _timestamp_only_allows(state, event)
+    """B2: lease owner with expiry/renewal and explicit handover path."""
+    key = _event_key(event)
+    if not key:
+        return False
+    writer = _event_writer(event)
+    ts = event.get("ts", 0.0)
+    lease_state = state.setdefault("_lease", {})
+    lease = lease_state.get(key)
+    if lease is None:
+        lease_state[key] = {"owner": writer, "start": ts, "expiry": ts + 1.0}
+        return True
+    if lease["owner"] == writer:
+        lease["expiry"] = max(lease["expiry"], ts + 1.0)  # renewal
+        return ts <= lease["expiry"]
+    if ts > lease["expiry"]:  # handover after expiry
+        lease_state[key] = {"owner": writer, "start": ts, "expiry": ts + 1.0}
+        return True
+    return False
 
 
 def _lock_only_allows(state: dict, event: dict) -> bool:
-    """
-    Baseline: mutex/lock-style writer-key exclusivity (ownership) without temporal check.
-    This approximates a distributed lock where only the lock holder may write;
-    we use ownership as the lock state proxy. A full lock implementation would include
-    lock acquisition/release semantics and timeout handling.
-    """
-    return _ownership_only_allows(state, event)
+    """B3: explicit lock lifecycle with acquire/release/transfer semantics."""
+    key = _event_key(event)
+    if not key:
+        return False
+    writer = _event_writer(event)
+    lock_state = state.setdefault("_lock", {})
+    owner = lock_state.get(key)
+    event_type = event.get("type", "")
+    if owner is None:
+        lock_state[key] = writer  # acquire
+        return True
+    if owner == writer:
+        if event_type == "task_end":
+            lock_state.pop(key, None)  # release on end
+        return True
+    return False
+
+
+def _state_machine_only_allows(state: dict, event: dict) -> bool:
+    """B4: local transition guard only, no authority model."""
+    key = _event_key(event)
+    if not key:
+        return False
+    sm = state.setdefault("_sm", {})
+    current = sm.get(key, "idle")
+    event_type = event.get("type", "")
+    allowed = {
+        "idle": {"task_start"},
+        "running": {"task_end"},
+    }
+    if event_type not in allowed.get(current, set()):
+        return False
+    sm[key] = "running" if event_type == "task_start" else "idle"
+    return True
+
+
+def _practical_heuristic_allows(state: dict, event: dict) -> bool:
+    """B5: ownership + monotonicity + handover metadata, without reason-code semantics."""
+    key = _event_key(event)
+    if not key:
+        return False
+    writer = _event_writer(event)
+    ts = event.get("ts", 0.0)
+    ownership = state.setdefault("ownership", {})
+    last_ts = state.setdefault("_last_ts", {})
+    handover = state.setdefault("_handover_token", {})
+    owner = ownership.get(key)
+    if ts < last_ts.get(key, -1.0):
+        return False
+    token = event.get("payload", {}).get("handover_token")
+    if owner is None or owner == writer:
+        ownership[key] = writer
+        last_ts[key] = ts
+        return True
+    if token and handover.get(key) == token:
+        ownership[key] = writer
+        last_ts[key] = ts
+        return True
+    return False
 
 
 def _naive_lww_allows(_state: dict, _event: dict) -> bool:
@@ -137,9 +271,10 @@ def _infer_failure_class(sequence_name: str) -> str:
     return "control"
 
 
-def _run_corpus_with_policy(corpus_files: list, policy: str) -> tuple[list[dict], int]:
-    """Run corpus; policy in contract, timestamp_only, ownership_only, accept_all, occ_only,
-    lease_only, lock_only, naive_lww. Returns (per_seq_results, total_denials)."""
+def _run_corpus_with_policy(
+    corpus_files: list, policy: str, corpus_root: Path
+) -> tuple[list[dict], dict]:
+    """Run corpus for one policy and return per-seq results + aggregate metrics."""
     policy_fns = {
         "contract": lambda s, e: validate(s, e).verdict == ALLOW,
         "timestamp_only": _timestamp_only_allows,
@@ -148,32 +283,84 @@ def _run_corpus_with_policy(corpus_files: list, policy: str) -> tuple[list[dict]
         "occ_only": _occ_only_allows,
         "lease_only": _lease_only_allows,
         "lock_only": _lock_only_allows,
+        "state_machine_only": _state_machine_only_allows,
+        "practical_heuristic": _practical_heuristic_allows,
         "naive_lww": _naive_lww_allows,
     }
     fn = policy_fns.get(policy)
     if not fn:
-        return [], 0
+        return [], {}
     results = []
+    tp = fp = fn_count = 0
     total_denials = 0
+    denied_valid_events = 0
+    baseline_latency_us: list[float] = []
+    class_misses: dict[str, int] = defaultdict(int)
     for path in corpus_files:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
             continue
-        state = dict(data["initial_state"])
+        seq_label = _sequence_label(corpus_root, path)
+        state = prepare_replay_state(dict(data["initial_state"]))
         events = data["events"]
         expected = data["expected_verdicts"]
         allows = 0
         denials = 0
-        for ev in events:
+        seq_tp = seq_fp = seq_fn = 0
+        for i, ev in enumerate(events):
+            t0 = time.perf_counter()
             ok = fn(state, ev)
+            baseline_latency_us.append((time.perf_counter() - t0) * 1e6)
+            exp = expected[i]
             if ok:
                 allows += 1
                 state = apply_event_to_state(state, ev)
             else:
                 denials += 1
+            finalize_event_observation(state, ev)
+            actual = "allow" if ok else "deny"
+            if exp == "deny" and actual == "deny":
+                tp += 1
+                seq_tp += 1
+            elif exp == "allow" and actual == "deny":
+                fp += 1
+                seq_fp += 1
+                denied_valid_events += 1
+            elif exp == "deny" and actual == "allow":
+                fn_count += 1
+                seq_fn += 1
+                class_misses[_infer_failure_class(seq_label)] += 1
         total_denials += denials
-        results.append({"sequence": path.stem, "allows": allows, "denials": denials})
-    return results, total_denials
+        results.append(
+            {
+                "sequence": seq_label,
+                "allows": allows,
+                "denials": denials,
+                "tp": seq_tp,
+                "fp": seq_fp,
+                "fn": seq_fn,
+                "detection_ok": seq_fn == 0 and seq_fp == 0,
+            }
+        )
+    precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    recall = tp / (tp + fn_count) if (tp + fn_count) > 0 else 0.0
+    f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+    aggregate = {
+        "total_denials": total_denials,
+        "tp": tp,
+        "fp": fp,
+        "fn": fn_count,
+        "precision": round(precision, 4),
+        "recall": round(recall, 4),
+        "f1": round(f1, 4),
+        "false_denials_on_valid_traces": denied_valid_events,
+        "per_class_misses": dict(class_misses),
+        "exact_match_rate": round(
+            sum(1 for r in results if r["detection_ok"]) / len(results), 4
+        ) if results else 0.0,
+        "runtime_overhead_us_mean": round(statistics.mean(baseline_latency_us), 4) if baseline_latency_us else 0.0,
+    }
+    return results, aggregate
 
 
 def main() -> int:
@@ -189,6 +376,11 @@ def main() -> int:
         type=Path,
         default=REPO / "bench" / "contracts" / "corpus",
         help="Corpus directory",
+    )
+    ap.add_argument(
+        "--corpus-recursive",
+        action="store_true",
+        help="Include **/*.json under corpus (e.g. per-family subdirs in datasets/contracts_real)",
     )
     ap.add_argument(
         "--throughput",
@@ -247,7 +439,7 @@ def main() -> int:
             total_events_per_run = n * 2
             runs_data = []
             for _ in range(runs_per_size):
-                state = {"ownership": {}, "_last_ts": {}}
+                state = prepare_replay_state({"ownership": {}, "_last_ts": {}})
                 t0 = time.perf_counter()
                 denials = 0
                 for i in range(n):
@@ -259,22 +451,24 @@ def main() -> int:
                         "actor": {"id": f"agent_{i % 3}"},
                         "payload": {"task_id": task_id, "name": "a", "writer": f"agent_{i % 3}"},
                     }
-                    verdict = validate(state, ev_start)
+                    verdict = validate(state, ev_start, {})
                     if verdict.verdict == ALLOW:
                         state = apply_event_to_state(state, ev_start)
                     else:
                         denials += 1
+                    finalize_event_observation(state, ev_start)
                     ev_end = {
                         "type": "task_end",
                         "ts": ts + 0.005,
                         "actor": {"id": "agent_1"},
                         "payload": {"task_id": task_id, "name": "a", "writer": "agent_1"},
                     }
-                    verdict = validate(state, ev_end)
+                    verdict = validate(state, ev_end, {})
                     if verdict.verdict == ALLOW:
                         state = apply_event_to_state(state, ev_end)
                     else:
                         denials += 1
+                    finalize_event_observation(state, ev_end)
                 elapsed = time.perf_counter() - t0
                 events_per_sec = total_events_per_run / elapsed if elapsed > 0 else 0
                 time_per_write_us = elapsed * 1e6 / total_events_per_run if total_events_per_run else 0
@@ -316,7 +510,7 @@ def main() -> int:
         total_events_per_run = n * 2
         runs_data = []
         for _ in range(args.scale_test_runs):
-            state = {"ownership": {}, "_last_ts": {}}
+            state = prepare_replay_state({"ownership": {}, "_last_ts": {}})
             t0 = time.perf_counter()
             denials = 0
             for i in range(n):
@@ -328,22 +522,24 @@ def main() -> int:
                     "actor": {"id": f"agent_{i % 3}"},
                     "payload": {"task_id": task_id, "name": "a", "writer": f"agent_{i % 3}"},
                 }
-                verdict = validate(state, ev_start)
+                verdict = validate(state, ev_start, {})
                 if verdict.verdict == ALLOW:
                     state = apply_event_to_state(state, ev_start)
                 else:
                     denials += 1
+                finalize_event_observation(state, ev_start)
                 ev_end = {
                     "type": "task_end",
                     "ts": ts + 0.005,
                     "actor": {"id": "agent_1"},
                     "payload": {"task_id": task_id, "name": "a", "writer": "agent_1"},
                 }
-                verdict = validate(state, ev_end)
+                verdict = validate(state, ev_end, {})
                 if verdict.verdict == ALLOW:
                     state = apply_event_to_state(state, ev_end)
                 else:
                     denials += 1
+                finalize_event_observation(state, ev_end)
             elapsed = time.perf_counter() - t0
             events_per_sec = total_events_per_run / elapsed if elapsed > 0 else 0
             time_per_write_us = elapsed * 1e6 / total_events_per_run if total_events_per_run else 0
@@ -405,16 +601,28 @@ def main() -> int:
         print(json.dumps(scale_result, indent=2))
         return 0
 
-    corpus_files = sorted(args.corpus.glob("*.json"))
+    corpus_root = args.corpus.resolve()
+    if args.corpus_recursive:
+        corpus_files = sorted(p for p in corpus_root.rglob("*.json") if p.is_file())
+    else:
+        corpus_files = sorted(corpus_root.glob("*.json"))
+    corpus_eval_scope = _load_evaluation_scope(corpus_root)
     results = []
     total_denials_with_validator = 0
     event_level_latencies_us: list[float] = []
+    normalization_lat_us: list[float] = []
+    validation_lat_us: list[float] = []
+    state_update_lat_us: list[float] = []
     wall_clock_start = time.perf_counter()
     for path in corpus_files:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
             continue
-        state = dict(data["initial_state"])
+        seq_label = _sequence_label(corpus_root, path)
+        state = prepare_replay_state(dict(data["initial_state"]))
+        contract_cfg = _contract_config_for_corpus_file(
+            corpus_root, path, data, corpus_eval_scope
+        )
         events = data["events"]
         expected = data["expected_verdicts"]
         allows = 0
@@ -422,25 +630,37 @@ def main() -> int:
         actual_verdicts: list[str] = []
         seq_latencies_us: list[float] = []
         for i, ev in enumerate(events):
+            tn0 = time.perf_counter()
+            normalized_ev = {
+                "type": ev.get("type"),
+                "ts": ev.get("ts"),
+                "actor": ev.get("actor"),
+                "payload": ev.get("payload"),
+            }
+            normalization_lat_us.append((time.perf_counter() - tn0) * 1e6)
             t0 = time.perf_counter()
-            verdict = validate(state, ev)
+            verdict = validate(state, normalized_ev, contract_cfg)
             elapsed_us = (time.perf_counter() - t0) * 1e6
+            validation_lat_us.append(elapsed_us)
             seq_latencies_us.append(elapsed_us)
             event_level_latencies_us.append(elapsed_us)
             actual = "allow" if verdict.verdict == ALLOW else "deny"
             actual_verdicts.append(actual)
             if verdict.verdict == ALLOW:
                 allows += 1
-                state = apply_event_to_state(state, ev)
+                tu0 = time.perf_counter()
+                state = apply_event_to_state(state, normalized_ev)
+                state_update_lat_us.append((time.perf_counter() - tu0) * 1e6)
             else:
                 denials += 1
+            finalize_event_observation(state, normalized_ev)
         n = len(events)
         total_denials_with_validator += denials
         detection_ok = actual_verdicts == expected
         total_time_us = sum(seq_latencies_us)
         results.append(
             {
-                "sequence": path.stem,
+                "sequence": seq_label,
                 "events": n,
                 "allows": allows,
                 "denials": denials,
@@ -496,16 +716,17 @@ def main() -> int:
         },
     }
 
-    corpus_fingerprint = hashlib.sha256(
-        "".join(
-            sorted(
-                path.read_text(encoding="utf-8")
-                for path in corpus_files
-                if path.suffix == ".json"
-            )
-        ).encode("utf-8")
-    ).hexdigest()[:16]
+    _fp_parts = sorted(
+        path.read_text(encoding="utf-8")
+        for path in corpus_files
+        if path.suffix == ".json"
+    )
+    _scope_fp = corpus_root / "evaluation_scope.json"
+    if _scope_fp.is_file():
+        _fp_parts.append(_scope_fp.read_text(encoding="utf-8"))
+    corpus_fingerprint = hashlib.sha256("".join(_fp_parts).encode("utf-8")).hexdigest()[:16]
 
+    scope_path = corpus_root / "evaluation_scope.json"
     out_data = {
         "corpus_eval": True,
         "sequences": results,
@@ -513,9 +734,19 @@ def main() -> int:
             "corpus_sequences": corpus_sequences,
             "corpus_sequence_count": len(corpus_sequences),
             "corpus_dir": str(args.corpus),
+            "corpus_recursive": args.corpus_recursive,
             "script": "contracts_eval.py",
             "script_version": SCRIPT_VERSION,
             "corpus_fingerprint": corpus_fingerprint,
+            "allowed_keys_policy": (
+                "non_gold_family_allowlist"
+                if corpus_eval_scope is not None
+                else "synthetic_union_no_annotations"
+            ),
+            "evaluation_scope_path": str(scope_path) if corpus_eval_scope is not None else None,
+            "evaluation_scope_schema_version": (
+                corpus_eval_scope.get("schema_version") if corpus_eval_scope else None
+            ),
         },
     }
     out_data["violations_denied_with_validator"] = total_denials_with_validator
@@ -525,13 +756,26 @@ def main() -> int:
         out_data["violations_would_apply_without_validator"] = total_denials_with_validator
 
     # Baselines and named comparators (keep per-seq results for ablation_by_class)
-    ts_results, timestamp_only_denials = _run_corpus_with_policy(corpus_files, "timestamp_only")
-    own_results, ownership_only_denials = _run_corpus_with_policy(corpus_files, "ownership_only")
-    acc_results, accept_all_denials = _run_corpus_with_policy(corpus_files, "accept_all")
-    occ_results, occ_only_denials = _run_corpus_with_policy(corpus_files, "occ_only")
-    lease_results, lease_only_denials = _run_corpus_with_policy(corpus_files, "lease_only")
-    lock_results, lock_only_denials = _run_corpus_with_policy(corpus_files, "lock_only")
-    lww_results, naive_lww_denials = _run_corpus_with_policy(corpus_files, "naive_lww")
+    ts_results, ts_metrics = _run_corpus_with_policy(corpus_files, "timestamp_only", corpus_root)
+    own_results, own_metrics = _run_corpus_with_policy(corpus_files, "ownership_only", corpus_root)
+    acc_results, acc_metrics = _run_corpus_with_policy(corpus_files, "accept_all", corpus_root)
+    occ_results, occ_metrics = _run_corpus_with_policy(corpus_files, "occ_only", corpus_root)
+    lease_results, lease_metrics = _run_corpus_with_policy(corpus_files, "lease_only", corpus_root)
+    lock_results, lock_metrics = _run_corpus_with_policy(corpus_files, "lock_only", corpus_root)
+    sm_results, sm_metrics = _run_corpus_with_policy(corpus_files, "state_machine_only", corpus_root)
+    heuristic_results, heuristic_metrics = _run_corpus_with_policy(
+        corpus_files, "practical_heuristic", corpus_root
+    )
+    lww_results, lww_metrics = _run_corpus_with_policy(corpus_files, "naive_lww", corpus_root)
+    timestamp_only_denials = ts_metrics.get("total_denials", 0)
+    ownership_only_denials = own_metrics.get("total_denials", 0)
+    accept_all_denials = acc_metrics.get("total_denials", 0)
+    occ_only_denials = occ_metrics.get("total_denials", 0)
+    lease_only_denials = lease_metrics.get("total_denials", 0)
+    lock_only_denials = lock_metrics.get("total_denials", 0)
+    state_machine_only_denials = sm_metrics.get("total_denials", 0)
+    practical_heuristic_denials = heuristic_metrics.get("total_denials", 0)
+    naive_lww_denials = lww_metrics.get("total_denials", 0)
     out_data["baseline_timestamp_only_denials"] = timestamp_only_denials
     out_data["baseline_timestamp_only_missed"] = (
         total_denials_with_validator - timestamp_only_denials
@@ -548,6 +792,10 @@ def main() -> int:
     out_data["baseline_lease_only_missed"] = total_expected_denials - lease_only_denials
     out_data["baseline_lock_only_denials"] = lock_only_denials
     out_data["baseline_lock_only_missed"] = total_expected_denials - lock_only_denials
+    out_data["baseline_state_machine_only_denials"] = state_machine_only_denials
+    out_data["baseline_state_machine_only_missed"] = total_expected_denials - state_machine_only_denials
+    out_data["baseline_practical_heuristic_denials"] = practical_heuristic_denials
+    out_data["baseline_practical_heuristic_missed"] = total_expected_denials - practical_heuristic_denials
     out_data["baseline_naive_lww_denials"] = naive_lww_denials
     out_data["baseline_naive_lww_missed"] = total_expected_denials
 
@@ -560,7 +808,16 @@ def main() -> int:
         "occ_only": {"violations_denied": occ_only_denials, "violations_missed": total_expected_denials - occ_only_denials},
         "lease_only": {"violations_denied": lease_only_denials, "violations_missed": total_expected_denials - lease_only_denials},
         "lock_only": {"violations_denied": lock_only_denials, "violations_missed": total_expected_denials - lock_only_denials},
+        "state_machine_only": {"violations_denied": state_machine_only_denials, "violations_missed": total_expected_denials - state_machine_only_denials},
+        "practical_heuristic": {"violations_denied": practical_heuristic_denials, "violations_missed": total_expected_denials - practical_heuristic_denials},
         "naive_lww": {"violations_denied": naive_lww_denials, "violations_missed": total_expected_denials},
+    }
+    out_data["strong_baselines"] = {
+        "b1_occ_versioned": occ_metrics,
+        "b2_lease_expiry_renewal": lease_metrics,
+        "b3_lock_lifecycle": lock_metrics,
+        "b4_state_machine_only": sm_metrics,
+        "b5_practical_heuristic": heuristic_metrics,
     }
 
     # Class-level ablation: per failure class, which policy denies what
@@ -569,7 +826,9 @@ def main() -> int:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "expected_verdicts" not in data:
             continue
-        seq_to_expected[path.stem] = sum(1 for e in data["expected_verdicts"] if e == "deny")
+        seq_to_expected[_sequence_label(corpus_root, path)] = sum(
+            1 for e in data["expected_verdicts"] if e == "deny"
+        )
     seq_to_contract_denials = {r["sequence"]: r["denials"] for r in results}
     seq_to_ts_denials = {r["sequence"]: r["denials"] for r in ts_results}
     seq_to_own_denials = {r["sequence"]: r["denials"] for r in own_results}
@@ -577,6 +836,8 @@ def main() -> int:
     seq_to_occ_denials = {r["sequence"]: r["denials"] for r in occ_results}
     seq_to_lease_denials = {r["sequence"]: r["denials"] for r in lease_results}
     seq_to_lock_denials = {r["sequence"]: r["denials"] for r in lock_results}
+    seq_to_sm_denials = {r["sequence"]: r["denials"] for r in sm_results}
+    seq_to_heuristic_denials = {r["sequence"]: r["denials"] for r in heuristic_results}
     seq_to_lww_denials = {r["sequence"]: r["denials"] for r in lww_results}
     policy_keys = (
         "full_contract",
@@ -586,6 +847,8 @@ def main() -> int:
         "occ_only",
         "lease_only",
         "lock_only",
+        "state_machine_only",
+        "practical_heuristic",
         "naive_lww",
     )
     by_class: dict[str, dict[str, dict[str, int]]] = {}
@@ -601,6 +864,8 @@ def main() -> int:
             "occ_only": seq_to_occ_denials.get(seq_name, 0),
             "lease_only": seq_to_lease_denials.get(seq_name, 0),
             "lock_only": seq_to_lock_denials.get(seq_name, 0),
+            "state_machine_only": seq_to_sm_denials.get(seq_name, 0),
+            "practical_heuristic": seq_to_heuristic_denials.get(seq_name, 0),
             "naive_lww": seq_to_lww_denials.get(seq_name, 0),
         }
         for pk in policy_keys:
@@ -615,11 +880,14 @@ def main() -> int:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
             continue
-        state = dict(data["initial_state"])
+        state = prepare_replay_state(dict(data["initial_state"]))
+        contract_cfg = _contract_config_for_corpus_file(
+            corpus_root, path, data, corpus_eval_scope
+        )
         events = data["events"]
         expected = data["expected_verdicts"]
         for ev, exp in zip(events, expected):
-            verdict = validate(state, ev)
+            verdict = validate(state, ev, contract_cfg)
             actual = "allow" if verdict.verdict == ALLOW else "deny"
             if exp == "deny" and actual == "deny":
                 tp += 1
@@ -629,6 +897,7 @@ def main() -> int:
                 fn += 1
             if actual == "allow":
                 state = apply_event_to_state(state, ev)
+            finalize_event_observation(state, ev)
     precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
     recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
@@ -647,7 +916,7 @@ def main() -> int:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
             continue
-        all_inferred_classes.add(_infer_failure_class(path.stem))
+        all_inferred_classes.add(_infer_failure_class(_sequence_label(corpus_root, path)))
     class_tp: dict[str, int] = defaultdict(int)
     class_fp: dict[str, int] = defaultdict(int)
     class_fn: dict[str, int] = defaultdict(int)
@@ -655,12 +924,15 @@ def main() -> int:
         data = json.loads(path.read_text(encoding="utf-8"))
         if "events" not in data or "expected_verdicts" not in data:
             continue
-        fc = _infer_failure_class(path.stem)
-        state = dict(data["initial_state"])
+        fc = _infer_failure_class(_sequence_label(corpus_root, path))
+        state = prepare_replay_state(dict(data["initial_state"]))
+        contract_cfg = _contract_config_for_corpus_file(
+            corpus_root, path, data, corpus_eval_scope
+        )
         events = data["events"]
         expected = data["expected_verdicts"]
         for ev, exp in zip(events, expected):
-            verdict = validate(state, ev)
+            verdict = validate(state, ev, contract_cfg)
             actual = "allow" if verdict.verdict == ALLOW else "deny"
             if exp == "deny" and actual == "deny":
                 class_tp[fc] += 1
@@ -670,6 +942,7 @@ def main() -> int:
                 class_fn[fc] += 1
             if actual == "allow":
                 state = apply_event_to_state(state, ev)
+            finalize_event_observation(state, ev)
     detection_by_class: dict[str, dict] = {}
     for fc in sorted(all_inferred_classes):
         ctp = class_tp[fc]
@@ -730,6 +1003,11 @@ def main() -> int:
         "median_ci95": latency_median_ci95,
         "p95_ci95": latency_p95_ci95,
         "p99_ci95": latency_p99_ci95,
+    }
+    out_data["overhead_breakdown_us"] = {
+        "normalization_mean_us": round(statistics.mean(normalization_lat_us), 4) if normalization_lat_us else 0.0,
+        "validation_mean_us": round(statistics.mean(validation_lat_us), 4) if validation_lat_us else 0.0,
+        "state_update_mean_us": round(statistics.mean(state_update_lat_us), 4) if state_update_lat_us else 0.0,
     }
 
     # Excellence metrics (STANDARDS_OF_EXCELLENCE.md) with statistical comparisons
@@ -801,14 +1079,14 @@ def main() -> int:
             total_events_per_run = events_per_pass * args.scale
             rates = []
             for _ in range(args.throughput_runs):
-                state = {"ownership": {}, "_last_ts": {}}
                 t0 = time.perf_counter()
                 for _ in range(args.scale):
-                    state = {"ownership": {}, "_last_ts": {}}
+                    state = prepare_replay_state({"ownership": {}, "_last_ts": {}})
                     for ev in all_events:
-                        verdict = validate(state, ev)
+                        verdict = validate(state, ev, {})
                         if verdict.verdict == ALLOW:
                             state = apply_event_to_state(state, ev)
+                        finalize_event_observation(state, ev)
                 elapsed = time.perf_counter() - t0
                 rate = total_events_per_run / elapsed if elapsed > 0 else 0
                 rates.append(rate)

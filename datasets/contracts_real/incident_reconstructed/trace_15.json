@@ -1,0 +1,67 @@
+{
+  "description": "Incident-inspired reconstructed handover traces from shared production buffer ownership.",
+  "initial_state": {
+    "ownership": {
+      "line_buffer_2": "robot_r1"
+    },
+    "_last_ts": {
+      "line_buffer_2": 3090.0
+    }
+  },
+  "events": [
+    {
+      "type": "task_end",
+      "ts": 3090.4,
+      "actor": {
+        "id": "robot_r1"
+      },
+      "payload": {
+        "task_id": "line_buffer_2",
+        "name": "orchestration",
+        "writer": "robot_r1"
+      }
+    },
+    {
+      "type": "task_start",
+      "ts": 3090.9,
+      "actor": {
+        "id": "robot_r2"
+      },
+      "payload": {
+        "task_id": "line_buffer_2",
+        "name": "orchestration",
+        "writer": "robot_r2"
+      }
+    },
+    {
+      "type": "task_end",
+      "ts": 3091.1,
+      "actor": {
+        "id": "robot_r2"
+      },
+      "payload": {
+        "task_id": "line_buffer_2",
+        "name": "orchestration",
+        "writer": "robot_r2"
+      }
+    }
+  ],
+  "expected_verdicts": [
+    "allow",
+    "deny",
+    "deny"
+  ],
+  "annotations": [
+    {
+      "event_idx": 1,
+      "admissible": false,
+      "failure_class": "split_brain"
+    },
+    {
+      "event_idx": 2,
+      "admissible": false,
+      "failure_class": "split_brain"
+    }
+  ],
+  "scenario_family_id": "incident_reconstructed"
+}

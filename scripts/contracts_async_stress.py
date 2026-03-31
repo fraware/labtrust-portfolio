@@ -25,7 +25,13 @@ from typing import Any
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "impl" / "src"))
 
-from labtrust_portfolio.contracts import ALLOW, apply_event_to_state, validate
+from labtrust_portfolio.contracts import (
+    ALLOW,
+    apply_event_to_state,
+    validate,
+    prepare_replay_state,
+    finalize_event_observation,
+)
 
 SCRIPT_VERSION = "v0.1"
 
@@ -43,7 +49,7 @@ class AsyncEventScheduler:
         reorder_prob: float = 0.0,
         seed: int | None = None,
     ):
-        self.state = dict(initial_state)
+        self.state = prepare_replay_state(dict(initial_state))
         self.events = events
         self.delay_mean = delay_mean
         self.delay_stdev = delay_stdev
@@ -77,7 +83,7 @@ class AsyncEventScheduler:
         skewed_event = self._apply_skew(event, actor_id)
 
         t0 = time.perf_counter()
-        verdict = validate(self.state, skewed_event)
+        verdict = validate(self.state, skewed_event, {})
         elapsed_us = (time.perf_counter() - t0) * 1e6
         self.latencies_us.append(elapsed_us)
 
@@ -92,6 +98,7 @@ class AsyncEventScheduler:
 
         if verdict.verdict == ALLOW:
             self.state = apply_event_to_state(self.state, skewed_event)
+        finalize_event_observation(self.state, skewed_event)
 
         return result
 
@@ -112,6 +119,17 @@ class AsyncEventScheduler:
         results.sort(key=lambda r: r["index"])
         self.verdicts = results
         return {"verdicts": results, "latencies_us": self.latencies_us, "final_state": self.state}
+
+
+def _classify_profile_effect(delay: float, skew: float, reorder_prob: float) -> tuple[str, bool, str]:
+    """Return (dominant_failure_class, semantically_expected, interpretation)."""
+    if reorder_prob >= 0.2:
+        return ("reorder_sensitive_invalidity", True, "High reorder perturbs temporal predicates; divergence is expected.")
+    if skew >= 0.5:
+        return ("stale_write", True, "Large clock skew perturbs timestamp admissibility; divergence is expected.")
+    if delay > 0 and reorder_prob == 0 and skew == 0:
+        return ("none", False, "Pure delay should preserve semantics under boundary replay.")
+    return ("mixed", True, "Combined perturbations can alter replay-sensitive predicates.")
 
 
 async def run_stress_sweep(
@@ -189,6 +207,17 @@ async def run_stress_sweep(
                                 "mean_us": mean_us,
                                 "p95_us": p95_us,
                                 "p99_us": p99_us,
+                            },
+                            "profile_semantics": {
+                                "perturbed_dimensions": {
+                                    "event_timestamps": skew > 0,
+                                    "delivery_order": reorder_prob > 0,
+                                    "processing_order": reorder_prob > 0,
+                                    "replay_state_assumptions": False,
+                                },
+                                "dominant_failure_class": _classify_profile_effect(delay, skew, reorder_prob)[0],
+                                "semantically_expected_divergence": _classify_profile_effect(delay, skew, reorder_prob)[1],
+                                "interpretation": _classify_profile_effect(delay, skew, reorder_prob)[2],
                             },
                         }
                     )

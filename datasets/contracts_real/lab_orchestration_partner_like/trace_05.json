@@ -1,0 +1,67 @@
+{
+  "description": "Lab orchestration handover with split-brain pressure and optional reorder.",
+  "initial_state": {
+    "ownership": {
+      "centrifuge_slot_6": "controller_a"
+    },
+    "_last_ts": {
+      "centrifuge_slot_6": 1050.0
+    }
+  },
+  "events": [
+    {
+      "type": "task_end",
+      "ts": 1051.0,
+      "actor": {
+        "id": "controller_a"
+      },
+      "payload": {
+        "task_id": "centrifuge_slot_6",
+        "name": "orchestration",
+        "writer": "controller_a"
+      }
+    },
+    {
+      "type": "task_start",
+      "ts": 1052.0,
+      "actor": {
+        "id": "controller_b"
+      },
+      "payload": {
+        "task_id": "centrifuge_slot_6",
+        "name": "orchestration",
+        "writer": "controller_b"
+      }
+    },
+    {
+      "type": "task_end",
+      "ts": 1052.5,
+      "actor": {
+        "id": "controller_a"
+      },
+      "payload": {
+        "task_id": "centrifuge_slot_6",
+        "name": "orchestration",
+        "writer": "controller_a"
+      }
+    }
+  ],
+  "expected_verdicts": [
+    "allow",
+    "deny",
+    "deny"
+  ],
+  "annotations": [
+    {
+      "event_idx": 1,
+      "admissible": false,
+      "failure_class": "split_brain"
+    },
+    {
+      "event_idx": 2,
+      "admissible": false,
+      "failure_class": "split_brain"
+    }
+  ],
+  "scenario_family_id": "lab_orchestration_partner_like"
+}

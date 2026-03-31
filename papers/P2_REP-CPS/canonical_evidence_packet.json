@@ -1,0 +1,480 @@
+{
+  "schema_version": "1.0",
+  "paper_id": "P2_REP-CPS",
+  "canonical_run": {
+    "output_directory": "datasets/runs/rep_cps_eval",
+    "run_id_field": null,
+    "note": "No explicit run_id in summary.json; directory path is canonical."
+  },
+  "provenance": {
+    "git_commit_at_generation": "c2f291a38b97055d7555b5aa1f8097b54dbce2fa",
+    "summary_json": {
+      "path": "datasets/runs/rep_cps_eval/summary.json",
+      "sha256": "0e4be7aa849093198f795cd983df483c2bed99ef1a8b4a8079dd6dd82788a7f3",
+      "mtime_iso": "2026-03-27T10:37:41.748305"
+    },
+    "safety_gate_denial_json": {
+      "path": "datasets/runs/rep_cps_eval/safety_gate_denial.json",
+      "sha256": "3954fd6cfc5a5a1c10fd50aac9368c9b06b2f00d935b34be604fb4c71ada40ef",
+      "mtime_iso": "2026-03-27T10:37:37.449356"
+    },
+    "generated_tables_md": {
+      "path": "papers/P2_REP-CPS/generated_tables.md",
+      "sha256": "13016e31d90f30a424b608165a454769c78dd44b86d3ba5256fd46c7fe1ad0d8",
+      "mtime_iso": "2026-03-27T10:37:50.817591"
+    }
+  },
+  "reproducer_command": "python scripts/rep_cps_eval.py --scenarios toy_lab_v0,lab_profile_v0,rep_cps_scheduling_v0 --delay-sweep 0,0.05,0.1,0.2 --drop-sweep 0.02 --gate-threshold-sweep 1.5,2.0,2.5",
+  "environment": {
+    "labtrust_kernel_dir": "kernel",
+    "pythonpath_impl_src": "impl/src",
+    "note": "Set LABTRUST_KERNEL_DIR and PYTHONPATH per DRAFT.md / docs/figures/README_P2_figures.md"
+  },
+  "run_manifest": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "seed_count": 20,
+    "scenario_ids": [
+      "toy_lab_v0",
+      "lab_profile_v0",
+      "rep_cps_scheduling_v0"
+    ],
+    "delay_fault_prob_sweep": [
+      0.0,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "drop_completion_prob_sweep": [
+      0.02
+    ],
+    "aggregation_steps_used": 1,
+    "gate_threshold_sweep": [],
+    "script": "rep_cps_eval.py"
+  },
+  "top_level_sweep_keys": {
+    "scenario_ids": [
+      "toy_lab_v0",
+      "lab_profile_v0",
+      "rep_cps_scheduling_v0"
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "delay_fault_prob_sweep": [
+      0.0,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "drop_completion_prob_sweep": [
+      0.02
+    ],
+    "gate_threshold_sweep": [],
+    "aggregation_steps": 1
+  },
+  "latency_cost": {
+    "wall_sec_rep_cps_mean": 0.1173,
+    "wall_sec_rep_cps_p95": 0.1882,
+    "wall_sec_naive_mean": 0.1178,
+    "wall_sec_naive_p95": 0.1959,
+    "wall_sec_unsecured_mean": 0.1201,
+    "wall_sec_unsecured_p95": 0.1995,
+    "wall_sec_centralized_mean": 0.1174,
+    "wall_sec_centralized_p95": 0.1769,
+    "policy_overhead_vs_centralized_ms_rep_cps": -0.08,
+    "policy_overhead_vs_centralized_ms_naive": 0.41,
+    "policy_overhead_vs_centralized_ms_unsecured": 2.7,
+    "aggregation_compute_ms_mean": 0.0016,
+    "aggregation_compute_ms_p95": 0.0018,
+    "aggregation_compute_ms_p99": 0.0116,
+    "aggregation_compute_n_samples": 100
+  },
+  "per_scenario": [
+    {
+      "scenario_id": "toy_lab_v0",
+      "rep_cps_tasks_mean": 3.9125,
+      "rep_cps_tasks_stdev": 0.28434913465623,
+      "naive_in_loop_tasks_mean": 3.9125,
+      "naive_in_loop_tasks_stdev": 0.28434913465623,
+      "unsecured_tasks_mean": 3.9125,
+      "unsecured_tasks_stdev": 0.28434913465623,
+      "centralized_tasks_mean": 3.9125,
+      "centralized_tasks_stdev": 0.28434913465623
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "rep_cps_tasks_mean": 4.8875,
+      "rep_cps_tasks_stdev": 0.31797420482911637,
+      "naive_in_loop_tasks_mean": 4.8875,
+      "naive_in_loop_tasks_stdev": 0.31797420482911637,
+      "unsecured_tasks_mean": 4.8875,
+      "unsecured_tasks_stdev": 0.31797420482911637,
+      "centralized_tasks_mean": 4.8875,
+      "centralized_tasks_stdev": 0.31797420482911637
+    },
+    {
+      "scenario_id": "rep_cps_scheduling_v0",
+      "rep_cps_tasks_mean": 3.9125,
+      "rep_cps_tasks_stdev": 0.28434913465623,
+      "naive_in_loop_tasks_mean": 0,
+      "naive_in_loop_tasks_stdev": 0.0,
+      "unsecured_tasks_mean": 0,
+      "unsecured_tasks_stdev": 0.0,
+      "centralized_tasks_mean": 3.9125,
+      "centralized_tasks_stdev": 0.28434913465623
+    }
+  ],
+  "global_adapter_means": {
+    "rep_cps_tasks_completed_mean": 4.2375,
+    "rep_cps_tasks_completed_stdev": 0.5468146634378303,
+    "centralized_tasks_completed_mean": 4.2375,
+    "centralized_tasks_completed_stdev": 0.5468146634378303,
+    "rep_cps_naive_tasks_completed_mean": 2.933333333333333,
+    "rep_cps_naive_tasks_completed_stdev": 2.1306032042468632,
+    "rep_cps_unsecured_tasks_completed_mean": 2.933333333333333,
+    "rep_cps_unsecured_tasks_completed_stdev": 2.1306032042468632,
+    "rep_cps_naive_aggregate_load_mean": 1.4000000000000001,
+    "rep_cps_unsecured_aggregate_load_mean": 5.484999999999999
+  },
+  "scheduling_dependent_eval": {
+    "scenario_id": "rep_cps_scheduling_v0",
+    "rep_cps_tasks_mean": 3.9125,
+    "naive_in_loop_tasks_mean": 0,
+    "centralized_tasks_mean": 3.9125,
+    "rep_beats_naive_tasks": true,
+    "note": "Under duplicate-sender spoof stress, naive mean trips the safety gate and scheduling is withheld; trimmed mean stays below threshold."
+  },
+  "scheduling_scenario_gate_counts": {
+    "adapter_run_count": 80,
+    "rep_cps_safety_gate_pass_count": 80,
+    "rep_cps_safety_gate_deny_count": 0,
+    "unsecured_safety_gate_pass_count": 0,
+    "unsecured_safety_gate_deny_count": 80,
+    "safety_gate_max_load_values_observed": [
+      2.0
+    ]
+  },
+  "gate_threshold_sweep_results": null,
+  "aggregation_under_compromise": {
+    "honest_only_aggregate": 0.32,
+    "with_compromise_robust_aggregate": 3.5566666666666666,
+    "with_compromise_naive_aggregate": 4.194,
+    "unsecured_aggregate": 4.194,
+    "bias_robust": 3.236666666666667,
+    "bias_naive": 3.874,
+    "compromised_count": 2,
+    "honest_count": 3
+  },
+  "profile_ablation": [
+    {
+      "variant": "no_auth",
+      "description": "All agents accepted (no auth filter), trimmed_mean",
+      "bias": 3.2367,
+      "aggregate": 3.5567,
+      "failure": true
+    },
+    {
+      "variant": "no_freshness",
+      "description": "No freshness window (stale compromised accepted), trimmed_mean",
+      "bias": 3.2367,
+      "aggregate": 3.5567,
+      "failure": true
+    },
+    {
+      "variant": "no_rate_limit",
+      "description": "No rate limit (burst from one agent), auth, trimmed_mean",
+      "bias": 7.2675,
+      "aggregate": 7.5875,
+      "failure": true
+    },
+    {
+      "variant": "no_robust_aggregation",
+      "description": "Mean (no robust agg), all agents",
+      "bias": 3.874,
+      "aggregate": 4.194,
+      "failure": true
+    },
+    {
+      "variant": "no_safety_gate",
+      "description": "Safety gate bypass (N/A in current eval)",
+      "bias": null,
+      "aggregate": null,
+      "failure": null
+    },
+    {
+      "variant": "full_profile",
+      "description": "Auth, trimmed_mean, rate_limit, freshness",
+      "bias": 0.0,
+      "aggregate": 0.32,
+      "failure": false
+    }
+  ],
+  "aggregation_variants": [
+    {
+      "method": "trimmed_mean",
+      "bias": 3.2367,
+      "beats_naive_mean": true,
+      "max_influence_per_compromised_agent": 1.6183
+    },
+    {
+      "method": "median",
+      "bias": 0.03,
+      "beats_naive_mean": true,
+      "max_influence_per_compromised_agent": 0.015
+    },
+    {
+      "method": "clipping",
+      "bias": 3.874,
+      "beats_naive_mean": false,
+      "max_influence_per_compromised_agent": 1.937
+    },
+    {
+      "method": "median_of_means",
+      "bias": 0.03,
+      "beats_naive_mean": true,
+      "max_influence_per_compromised_agent": 0.015
+    }
+  ],
+  "offline_comparator_baselines": {
+    "description": "Offline multiset identical to aggregation_under_compromise. Robust statistics (median, clipping, median-of-means) vs plain mean; honest_range_clamped_mean clamps each scalar to [min(honest), max(honest)] before averaging (strawman heuristic; requires oracle bounds).",
+    "bias_naive_mean": 3.874,
+    "honest_range_clamped_mean_aggregate": 0.334,
+    "honest_range_clamped_bias_vs_honest_trimmed": 0.014,
+    "honest_range_clamped_beats_naive_mean": true,
+    "comparator_classes": {
+      "robust_statistical": [
+        "trimmed_mean",
+        "median",
+        "clipping",
+        "median_of_means"
+      ],
+      "practical_heuristic": [
+        "honest_range_clamped_mean"
+      ]
+    },
+    "selection_rationale": "Comparators chosen to distinguish robust statistics from lightweight operational heuristics used in constrained CPS settings."
+  },
+  "comparator_exact_recompute": {
+    "honest_trimmed_baseline": 0.32,
+    "naive_mean_aggregate": 4.194,
+    "naive_mean_bias_vs_honest_trimmed": 3.874,
+    "trimmed_mean": {
+      "aggregate": 3.5566666666666666,
+      "bias_vs_honest_trimmed": 3.236666666666667,
+      "beats_naive_mean": true
+    },
+    "median": {
+      "aggregate": 0.35,
+      "bias_vs_honest_trimmed": 0.02999999999999997,
+      "beats_naive_mean": true
+    },
+    "clipping": {
+      "aggregate": 4.194,
+      "bias_vs_honest_trimmed": 3.874,
+      "beats_naive_mean": false
+    },
+    "median_of_means": {
+      "aggregate": 0.35,
+      "bias_vs_honest_trimmed": 0.02999999999999997,
+      "beats_naive_mean": true
+    }
+  },
+  "resilience_envelope": {
+    "bias_threshold": 1.0,
+    "safe_operating_region_n_compromised_max": 1,
+    "failure_boundary_n_compromised": 3,
+    "magnitude_sweep_robust_beats_naive": true,
+    "trim_sweep_robust_beats_naive": true,
+    "summary": "Robust methods outperform naive in tested sweeps; failure boundary documented when robust no longer beats naive or bias exceeds threshold."
+  },
+  "freshness_replay_evidence": {
+    "stale_value_dropped_by_max_age": true,
+    "mean_without_freshness_includes_stale": 49.65,
+    "mean_with_freshness_window": 0.3,
+    "replay_honest_reference_mean": 0.325,
+    "replay_burst_mean_all_updates": 6.775,
+    "replay_burst_mean_rate_limit_one": 3.55,
+    "replay_error_vs_honest_all_updates": 6.45,
+    "replay_error_vs_honest_rate_limit_one": 3.225,
+    "rate_limit_reduces_replay_influence": true
+  },
+  "sybil_vs_spoofing_evidence": {
+    "sybil_n_distinct_fake_ids": 2,
+    "sybil_bias_robust": 3.2367,
+    "sybil_bias_naive": 3.874,
+    "sybil_robust_beats_naive": true,
+    "spoof_impersonated_agent_id": "a1",
+    "spoof_bias_robust": 0.015,
+    "spoof_bias_naive": 2.4225,
+    "spoof_robust_beats_naive": true,
+    "spoof_naive_aggregate_exceeds_gate_2": true,
+    "spoof_trimmed_aggregate_at_or_below_gate_2": true,
+    "note": "Sybil count k=2 aligns with aggregation_under_compromise; larger k can invert trimmed_vs_mean bias when outliers are a majority of distinct values."
+  },
+  "dynamic_aggregation_series": {
+    "honest_only_trimmed_baseline": 0.32,
+    "steps": [
+      {
+        "tick": 0,
+        "n_compromised": 0,
+        "trimmed_mean": 0.32,
+        "naive_mean": 0.3233,
+        "bias_trim_vs_honest_only": 0.0,
+        "robust_beats_naive": true
+      },
+      {
+        "tick": 1,
+        "n_compromised": 1,
+        "trimmed_mean": 0.335,
+        "naive_mean": 2.2425,
+        "bias_trim_vs_honest_only": 0.015,
+        "robust_beats_naive": true
+      },
+      {
+        "tick": 2,
+        "n_compromised": 2,
+        "trimmed_mean": 2.89,
+        "naive_mean": 3.394,
+        "bias_trim_vs_honest_only": 2.57,
+        "robust_beats_naive": true
+      },
+      {
+        "tick": 3,
+        "n_compromised": 2,
+        "trimmed_mean": 2.89,
+        "naive_mean": 3.394,
+        "bias_trim_vs_honest_only": 2.57,
+        "robust_beats_naive": true
+      },
+      {
+        "tick": 4,
+        "n_compromised": 2,
+        "trimmed_mean": 2.89,
+        "naive_mean": 3.394,
+        "bias_trim_vs_honest_only": 2.57,
+        "robust_beats_naive": true
+      }
+    ],
+    "max_trim_bias_drift_across_ticks": 2.57,
+    "trim_bias_drift_area": 7.725,
+    "trim_bias_persistence_ticks_gt_1": 3,
+    "naive_peak": 3.394,
+    "trimmed_peak": 2.89,
+    "temporal_series_kind": "offline_synthetic_harness"
+  },
+  "messaging_sim": {
+    "duplicate_delivery_mean": 0.3167,
+    "duplicate_delivery_trimmed_mean": 0.3,
+    "reordered_same_multiset_mean": 0.3167,
+    "note": "Synthetic message ordering only; not a deployed bus or ROS/OPC UA path."
+  },
+  "safety_gate_denial": {
+    "safety_gate_integration": true,
+    "claim": "REP output cannot directly trigger actuation; must pass through policy check.",
+    "example": "When aggregate load exceeds threshold (e.g. under unsecured/compromised), rep_cps_safety_gate_ok is false and system does not actuate.",
+    "denial_trace_recorded": true,
+    "safety_gate_campaign": {
+      "pass_count_rep_cps": 240,
+      "deny_count_rep_cps": 0,
+      "deny_count_unsecured": 240,
+      "total_runs": 240
+    }
+  },
+  "excellence_metrics": {
+    "influence_bound_max_per_compromised": 1.6183,
+    "bias_reduction_pct": 16.45,
+    "safety_gate_integration": true,
+    "trigger_met": true,
+    "difference_mean": 0.0,
+    "difference_ci95": [
+      0.0,
+      0.0
+    ],
+    "difference_ci_width": 0.0,
+    "paired_t_p_value": 1.0,
+    "power_post_hoc": 0.0,
+    "alpha": 0.05
+  },
+  "success_criteria_met": {
+    "adapter_parity": true,
+    "adapter_parity_scope": "REP-CPS vs Centralized mean tasks on non-scheduling-dependent scenarios only",
+    "robust_beats_naive": true,
+    "scheduling_scenario_task_divergence": true,
+    "trigger_met": true
+  },
+  "default_in_loop_aggregation": {
+    "method": "trimmed_mean",
+    "source": "REPCPSAdapter default aggregation_method"
+  },
+  "figure_pipeline": {
+    "source_summary_default": "datasets/runs/rep_cps_eval/summary.json",
+    "scripts": {
+      "figure_0_mermaid": "scripts/export_p2_rep_profile_diagram.py",
+      "tasks_figures": "scripts/plot_rep_cps_summary.py",
+      "gate_threshold_figure": "scripts/plot_rep_cps_gate_threshold.py",
+      "dynamics_figure": "scripts/plot_rep_cps_dynamics.py",
+      "latency_figure": "scripts/plot_rep_cps_latency.py",
+      "tables": "scripts/export_rep_cps_tables.py"
+    },
+    "default_outputs": {
+      "p2_rep_profile_diagram_mmd": "docs/figures/p2_rep_profile_diagram.mmd",
+      "p2_rep_cps_tasks_png": "docs/figures/p2_rep_cps_tasks.png",
+      "p2_rep_cps_tasks_per_scenario_png": "docs/figures/p2_rep_cps_tasks_per_scenario.png",
+      "p2_rep_cps_gate_threshold_png": "docs/figures/p2_rep_cps_gate_threshold.png",
+      "p2_rep_cps_dynamics_png": "docs/figures/p2_rep_cps_dynamics.png",
+      "p2_rep_cps_latency_png": "docs/figures/p2_rep_cps_latency.png"
+    }
+  },
+  "rounding_policy_recommended": {
+    "tasks_means_stdev": "2 decimal places",
+    "wall_time_seconds": "4 decimal places",
+    "aggregation_compute_ms": "4 decimal places",
+    "bias_and_aggregates": "3 decimal places in main text; full precision in this packet",
+    "deny_rates": "3 decimal places or exact 0/1 when binary"
+  },
+  "notes": {
+    "bias_reduction_pct": "excellence_metrics.bias_reduction_pct = round(100*(bias_naive-bias_robust)/bias_naive, 2) when bias_naive>0 (see scripts/rep_cps_eval.py)",
+    "no_auth_vs_no_freshness_equality": "Expected from harness construction; see run_profile_ablation in scripts/rep_cps_eval.py",
+    "gate_threshold_sweep_naive_deny_rate": "Not serialized in gate_threshold_sweep_results; derive from raw adapter runs if needed"
+  }
+}

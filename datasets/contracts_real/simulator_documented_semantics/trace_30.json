@@ -1,0 +1,67 @@
+{
+  "description": "Simulator-derived multi-controller workflow with stale and ownership conflicts.",
+  "initial_state": {
+    "ownership": {
+      "sim_cell_1": "planner_1"
+    },
+    "_last_ts": {
+      "sim_cell_1": 2240.0
+    }
+  },
+  "events": [
+    {
+      "type": "task_end",
+      "ts": 2240.5,
+      "actor": {
+        "id": "planner_1"
+      },
+      "payload": {
+        "task_id": "sim_cell_1",
+        "name": "orchestration",
+        "writer": "planner_1"
+      }
+    },
+    {
+      "type": "task_start",
+      "ts": 2239.8,
+      "actor": {
+        "id": "planner_1"
+      },
+      "payload": {
+        "task_id": "sim_cell_1",
+        "name": "orchestration",
+        "writer": "planner_1"
+      }
+    },
+    {
+      "type": "task_start",
+      "ts": 2241.0,
+      "actor": {
+        "id": "planner_2"
+      },
+      "payload": {
+        "task_id": "sim_cell_1",
+        "name": "orchestration",
+        "writer": "planner_2"
+      }
+    }
+  ],
+  "expected_verdicts": [
+    "allow",
+    "deny",
+    "deny"
+  ],
+  "annotations": [
+    {
+      "event_idx": 1,
+      "admissible": false,
+      "failure_class": "stale_write"
+    },
+    {
+      "event_idx": 2,
+      "admissible": false,
+      "failure_class": "split_brain"
+    }
+  ],
+  "scenario_family_id": "simulator_documented_semantics"
+}

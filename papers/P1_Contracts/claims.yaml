@@ -8,13 +8,13 @@ release_id: "contracts_eval"
 
 claims:
   - id: "C1"
-    statement: "Within a declared contract model, a trace-derived validator can detect and deny invalid writes corresponding to specified coordination failure classes (ownership conflicts, stale writes, reorder-sensitive violations) with high precision and recall across a 54+ sequence challenge corpus, including adversarial cases (cross-key interleaving, delayed release/reassignment, concurrent controller races). Async stress runs are additional robustness characterization under delay/skew/reorder profiles. The contribution is composition-level: keyed authority, temporal admissibility, reason-coded denial, and trace-derivability at the coordination boundary."
+    statement: "A trace-derived coordination-admission layer can detect and deny coordination-invalid shared-state mutations that delivery-level correctness and simpler boundary policies miss, while remaining replayable and operationally lightweight."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:
         - "datasets/runs/contracts_eval/eval.json"
-        - "datasets/runs/contracts_eval/stress_results.json"
-        - "bench/contracts/corpus/"
+        - "datasets/runs/contracts_eval_real/eval.json"
+        - "datasets/contracts_real/"
         - "impl/src/labtrust_portfolio/contracts.py"
       table_ids: ["tab:summary", "tab:comparators", "tab:classmetrics", "tab:classci"]
       figure_ids: ["fig:flow", "fig:heatmap"]
@@ -34,7 +34,7 @@ claims:
 
   # C3: design claim; no full cross-transport deployment in this version
   - id: "C3"
-    statement: "The contract model is transport-agnostic by construction (defined over event/state semantics above the messaging layer); the paper demonstrates boundary semantics through a reference store, LADS-shaped mapping, and multi-sequence parity of verdict vectors under identical boundary events, not empirical equivalence of live transports."
+    statement: "The transport claim is boundary scoped only: if two ingestion paths induce identical boundary event/state semantics, they must produce identical verdict vectors; this is not a claim of live transport equivalence."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:
@@ -45,15 +45,15 @@ claims:
       confidence: medium
 
   - id: "C4"
-    statement: "A reference implementation can enforce the contract with bounded per-write overhead on the evaluated workload, with latency percentiles (median, p95, p99) and bootstrap CIs reported at the event level. Async stress outputs provide additional profile-stratified latency and correctness characterization under delay/skew/reorder settings."
+    statement: "Operational overhead remains bounded in replay: latency and runtime breakdowns are reported for normalization, validation, and state-update phases over synthetic and real/quasi-real traces."
     evidence:
       release_id: "contracts_eval"
       artifact_paths:
         - "datasets/runs/contracts_eval/eval.json"
+        - "datasets/runs/contracts_eval_real/eval.json"
         - "datasets/runs/contracts_eval/scale_test.json"
-        - "datasets/runs/contracts_eval/stress_results.json"
       table_ids: ["tab:summary"]
-      figure_ids: ["fig:latency", "fig:scale", "fig:stress"]
+      figure_ids: ["fig:latency", "fig:scale"]
       confidence: high
 
 # Table 1: export_contracts_corpus_table.py. Table 2: policy comparison (in DRAFT from eval.json). Figure 1: plot_contracts_scale.py.

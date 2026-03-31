@@ -49,14 +49,14 @@
 
 | Policy / metric | Mean (s) | p95 (s) | Overhead vs centralized (ms) |
 |------------------|----------|---------|-------------------------------|
-| REP-CPS | 0.1615 | 0.2961 | 3.29 |
-| Naive-in-loop | 0.1586 | 0.2917 | 0.34 |
-| Unsecured | 0.1582 | 0.2653 | -0.04 |
-| Centralized | 0.1582 | 0.2958 | 0 |
+| REP-CPS | 0.1173 | 0.1882 | -0.08 |
+| Naive-in-loop | 0.1178 | 0.1959 | 0.41 |
+| Unsecured | 0.1201 | 0.1995 | 2.7 |
+| Centralized | 0.1174 | 0.1769 | 0 |
 
 | Aggregation compute | Mean (ms) | p95 (ms) | p99 (ms) |
 |----------------------|-----------|----------|----------|
-| aggregate() (trimmed_mean) | 0.0029 | 0.0033 | 0.0169 |
+| aggregate() (trimmed_mean) | 0.0016 | 0.0018 | 0.0116 |
 
 
 **Table 6 — Profile ablation (source: summary.json profile_ablation).** Each row disables one profile component; bias and aggregate vs honest-only.
@@ -95,7 +95,7 @@
 
 | Metric | Value |
 |--------|-------|
-| sybil_robust_beats_naive | False |
+| sybil_robust_beats_naive | True |
 | spoof_robust_beats_naive | True |
 | spoof_naive_aggregate_exceeds_gate_2 | True |
 
@@ -113,20 +113,20 @@
 
 | Metric | Value |
 |--------|-------|
-| honest_only_trimmed_baseline | 0.325 |
-| max_trim_bias_drift_across_ticks | 5.125 |
-| trim_bias_drift_area | 14.125 |
+| honest_only_trimmed_baseline | 0.32 |
+| max_trim_bias_drift_across_ticks | 2.57 |
+| trim_bias_drift_area | 7.725 |
 | trim_bias_persistence_ticks_gt_1 | 3.0 |
 | temporal_series_kind | offline_synthetic_harness |
 
 
 | Tick | n_compromised | trimmed_mean | naive_mean | bias_trim_vs_honest_only |
 |------|---------------|--------------|------------|--------------------------|
-| 0 | 0 | 0.325 | 0.325 | 0.0 |
-| 1 | 1 | 0.35 | 2.8833 | 0.025 |
-| 2 | 2 | 4.175 | 4.1625 | 3.85 |
-| 3 | 3 | 5.45 | 4.93 | 5.125 |
-| 4 | 3 | 5.45 | 4.93 | 5.125 |
+| 0 | 0 | 0.32 | 0.3233 | 0.0 |
+| 1 | 1 | 0.335 | 2.2425 | 0.015 |
+| 2 | 2 | 2.89 | 3.394 | 2.57 |
+| 3 | 2 | 2.89 | 3.394 | 2.57 |
+| 4 | 2 | 2.89 | 3.394 | 2.57 |
 
 
 **Per-scenario summary (source: summary.json per_scenario).** Aggregated metrics per scenario across all delay/drop combinations.
@@ -171,15 +171,6 @@
 | paired_t_p_value | 1.0 |
 | power_post_hoc | 0.0 |
 | alpha | 0.05 |
-
-
-**Gate-threshold sensitivity (source: summary.json gate_threshold_sweep_results).** Scheduling scenario sweep of `safety_gate_max_load`; shows where naive trips gate while REP-CPS remains admissible.
-
-| safety_gate_max_load | REP-CPS tasks_mean | naive_in_loop tasks_mean | unsecured tasks_mean | REP-CPS gate_deny_rate | unsecured gate_deny_rate | rep_beats_naive_tasks |
-|----------------------|--------------------|--------------------------|---------------------|------------------------|--------------------------|-----------------------|
-| 1.5 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
-| 2.0 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
-| 2.5 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
 
 
 **Safety-gate campaign (source: summary.json safety_gate_denial).** Pass/deny counts from adapter runs; denial when aggregate exceeds threshold.
