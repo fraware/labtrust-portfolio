@@ -20,7 +20,15 @@ if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO_ROOT / "kernel")
 
 META_EVAL_SCENARIO_DEFAULT = "regime_stress_v0"
-ALLOWED_META_SCENARIOS = frozenset({"regime_stress_v0", "regime_stress_v1"})
+ALLOWED_META_SCENARIOS = frozenset(
+    {
+        "regime_stress_v0",
+        "regime_stress_v1",
+        "lab_profile_v0",
+        "warehouse_v0",
+        "traffic_v0",
+    }
+)
 SCHEMA_VERSION = "p8_meta_eval_v0.2"
 # Collapse proxy: tasks_completed below this (no safety claim)
 DEFAULT_COLLAPSE_THRESHOLD = 2
@@ -81,6 +89,18 @@ def main() -> int:
         type=int,
         default=1,
         help="Require N consecutive fault observations before switch (thrash control; default 1)",
+    )
+    ap.add_argument(
+        "--latency-threshold-ms",
+        type=float,
+        default=200.0,
+        help="Latency trigger threshold for switch criteria",
+    )
+    ap.add_argument(
+        "--contention-threshold",
+        type=float,
+        default=1.5,
+        help="Contention trigger threshold for switch criteria",
     )
     ap.add_argument(
         "--non-vacuous",
@@ -193,6 +213,8 @@ def main() -> int:
         "delay_fault_prob": 0.0,
         "fault_threshold": args.fault_threshold,
         "hysteresis_consecutive": args.hysteresis,
+        "latency_threshold_ms": args.latency_threshold_ms,
+        "contention_threshold": args.contention_threshold,
     }
     threshold = args.collapse_threshold
 
@@ -345,6 +367,8 @@ def main() -> int:
             "collapse_threshold": threshold,
             "fault_threshold": args.fault_threshold,
             "hysteresis_consecutive": args.hysteresis,
+            "latency_threshold_ms": args.latency_threshold_ms,
+            "contention_threshold": args.contention_threshold,
             "script": "meta_eval.py",
             "schema_version": SCHEMA_VERSION,
             "non_vacuous": getattr(args, "non_vacuous", False),

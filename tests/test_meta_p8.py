@@ -40,12 +40,37 @@ class TestMetaController(unittest.TestCase):
         )
         self.assertEqual(out, "fallback")
 
+    def test_decide_switch_to_fallback_when_contention_exceeds_threshold(self) -> None:
+        out = self.mc.decide_switch(
+            "centralized",
+            fault_count=0,
+            latency_p95_ms=80.0,
+            contention_index=2.0,
+            fault_threshold=2,
+            latency_threshold_ms=200.0,
+            contention_threshold=1.5,
+        )
+        self.assertEqual(out, "fallback")
+
     def test_decide_switch_no_switch_when_below_thresholds(self) -> None:
         out = self.mc.decide_switch(
             "centralized", fault_count=1, latency_p95_ms=100.0,
             fault_threshold=2, latency_threshold_ms=200.0,
         )
         self.assertIsNone(out)
+
+    def test_decide_switch_with_reason_returns_latency_reason(self) -> None:
+        to_regime, reason = self.mc.decide_switch_with_reason(
+            "centralized",
+            fault_count=0,
+            latency_p95_ms=250.0,
+            contention_index=0.0,
+            fault_threshold=2,
+            latency_threshold_ms=200.0,
+            contention_threshold=1.5,
+        )
+        self.assertEqual(to_regime, "fallback")
+        self.assertEqual(reason, "latency_threshold")
 
     def test_decide_switch_revert_to_centralized_when_in_fallback_and_low(self) -> None:
         out = self.mc.decide_switch(
@@ -72,6 +97,19 @@ class TestMetaController(unittest.TestCase):
         self.assertEqual(ev["payload"]["to_regime"], "fallback")
         self.assertEqual(ev["payload"]["reason"], "fault_threshold")
         self.assertEqual(ev["actor"]["id"], "meta_controller")
+
+    def test_regime_switch_event_can_include_criteria_payload(self) -> None:
+        ev = self.mc.regime_switch_event(
+            seq=2,
+            ts=2.0,
+            from_regime="centralized",
+            to_regime="fallback",
+            reason="latency_threshold",
+            state_hash_after="def",
+            criteria={"latency_p95_ms": 250.0, "latency_threshold_ms": 200.0},
+        )
+        self.assertIn("criteria", ev["payload"])
+        self.assertEqual(ev["payload"]["criteria"]["latency_p95_ms"], 250.0)
 
 
 class TestMetaEvalIntegration(unittest.TestCase):
@@ -308,4 +346,55 @@ class TestMetaEvalIntegration(unittest.TestCase):
             self.assertTrue(
                 data["meta_reduces_collapse"],
                 "Meta collapse count must be <= fixed collapse count",
+            )
+
+    def test_meta_eval_switch_reason_can_be_latency_trigger(self) -> None:
+        """Low latency threshold should produce latency_threshold regime_switch reason."""
+        env = os.environ.copy()
+        pypath = str(repo_root() / "impl" / "src")
+        script = repo_root() / "scripts" / "meta_eval.py"
+        with tempfile.TemporaryDirectory() as td:
+            out_dir = Path(td) / "meta_eval_latency_reason"
+            out_dir.mkdir(parents=True)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "--out",
+                    str(out_dir),
+                    "--seeds",
+                    "1,2",
+                    "--fault-threshold",
+                    "999",
+                    "--latency-threshold-ms",
+                    "30",
+                ],
+                cwd=str(repo_root()),
+                env={**env, "PYTHONPATH": pypath},
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            self.assertEqual(proc.returncode, 0, (proc.stdout, proc.stderr))
+            reasons = []
+            for seed in (1, 2):
+                trace_path = out_dir / "meta" / f"seed_{seed}" / "trace.json"
+                self.assertTrue(trace_path.exists(), f"meta seed trace must exist for seed {seed}")
+                trace = json.loads(trace_path.read_text(encoding="utf-8"))
+                switch_events = [
+                    e for e in trace.get("events", []) if e.get("type") == "regime_switch"
+                ]
+                reasons.extend(
+                    (e.get("payload", {}) or {}).get("reason")
+                    for e in switch_events
+                )
+            self.assertGreaterEqual(
+                len(reasons),
+                1,
+                "expected at least one regime_switch event across seeds",
+            )
+            self.assertIn(
+                "latency_threshold",
+                reasons,
+                f"Expected latency_threshold reason in regime_switch events, got: {reasons}",
             )

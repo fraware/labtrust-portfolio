@@ -15,9 +15,13 @@ claims:
       confidence: "medium"  # spec + impl; single scenario; conditional on non-vacuous trigger
       artifact_paths:
         - "datasets/runs/meta_eval/comparison.json"
+        - "datasets/runs/meta_eval/robustness_campaign/campaign_summary.json"
+        - "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/latency_sensitive/comparison.json"
+        - "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/contention_sensitive/comparison.json"
         - "kernel/meta/META_CONTROLLER_SPEC.v0.1.md"
         - "impl/src/labtrust_portfolio/meta_controller.py"
-      table_ids: ["Table 1"]
+        - "impl/src/labtrust_portfolio/adapters/meta_adapter.py"
+      table_ids: ["Table 1", "Table 3"]
       figure_ids: ["Figure 0", "Figure 1"]
 
   - id: "C2"
@@ -28,7 +32,8 @@ claims:
       artifact_paths:
         - "impl/src/labtrust_portfolio/adapters/meta_adapter.py"
         - "kernel/trace/TRACE.v0.1.schema.json"
-      table_ids: ["Table 1"]
+        - "datasets/runs/meta_eval/robustness_campaign/campaign_summary.json"
+      table_ids: ["Table 1", "Table 3"]
       figure_ids: []
 
   - id: "C3"
@@ -41,7 +46,10 @@ claims:
         - "datasets/runs/meta_eval/collapse_sweep.json"
         - "datasets/runs/meta_eval/scenario_regime_stress_v1/comparison.json"
         - "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep.json"
-      table_ids: ["Table 1", "Table 2"]
+        - "datasets/runs/meta_eval/robustness_campaign/campaign_summary.json"
+        - "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/comparison.json"
+        - "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/baseline_non_vacuous/comparison.json"
+      table_ids: ["Table 1", "Table 2", "Table 3"]
       figure_ids: ["Figure 1"]
 
 # Table 1/2: export_meta_tables. Figure 1: plot_meta_collapse. Collapse sweep for non-vacuous trigger.

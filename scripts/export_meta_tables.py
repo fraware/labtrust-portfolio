@@ -129,6 +129,49 @@ def table2(data: dict) -> list[str]:
     return lines
 
 
+def campaign_table(campaign: dict) -> list[str]:
+    """Produce markdown for robustness campaign matrix summary."""
+    runs = campaign.get("runs") or []
+    if not runs:
+        return []
+    lines = [
+        "# Table 3 - Robustness campaign matrix (C1-C3)",
+        "",
+        "Source: robustness campaign summary JSON (multi-scenario stress matrix).",
+        "",
+        "| run_id | scenario_id | profile | drop_completion_prob | fixed_collapse_count | meta_collapse_count | non_worse | strict | no_safety_regression | switch_total | switch_reasons |",
+        "|--------|-------------|---------|----------------------|----------------------|---------------------|-----------|--------|----------------------|--------------|----------------|",
+    ]
+    for row in runs:
+        reasons = row.get("switch_reasons") or {}
+        reasons_txt = ", ".join(f"{k}:{v}" for k, v in sorted(reasons.items())) if reasons else "-"
+        lines.append(
+            "| "
+            f"{row.get('run_id', '-')} | "
+            f"{row.get('scenario_id', '-')} | "
+            f"{row.get('profile', '-')} | "
+            f"{_fmt(row.get('drop_completion_prob'))} | "
+            f"{_fmt(row.get('fixed_collapse_count'))} | "
+            f"{_fmt(row.get('meta_collapse_count'))} | "
+            f"{_fmt(row.get('meta_non_worse_collapse'))} | "
+            f"{_fmt(row.get('meta_strictly_reduces_collapse'))} | "
+            f"{_fmt(row.get('no_safety_regression'))} | "
+            f"{_fmt(row.get('regime_switch_count_total'))} | "
+            f"{reasons_txt} |"
+        )
+    lines.append("")
+    claim_support = campaign.get("claim_support") or {}
+    if claim_support:
+        lines.append("## Campaign claim-support summary")
+        lines.append("")
+        for claim_id in ("C1", "C2", "C3"):
+            payload = claim_support.get(claim_id)
+            if payload is not None:
+                lines.append(f"- **{claim_id}:** `{payload}`")
+        lines.append("")
+    return lines
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description="Export P8 meta_eval comparison.json as markdown tables"
@@ -151,6 +194,12 @@ def main() -> int:
         action="store_true",
         help="Also print per-seed Table 2",
     )
+    ap.add_argument(
+        "--campaign",
+        type=Path,
+        default=None,
+        help="Optional robustness campaign summary JSON; print Table 3 matrix",
+    )
     args = ap.parse_args()
     path = args.comparison or args.comparison_path or DEFAULT_COMPARISON
     if not path.is_file():
@@ -163,6 +212,13 @@ def main() -> int:
         print(line)
     if args.table2:
         for line in table2(data):
+            print(line)
+    if args.campaign is not None:
+        if not args.campaign.is_file():
+            print(f"File not found: {args.campaign}", file=sys.stderr)
+            return 1
+        campaign_data = json.loads(args.campaign.read_text(encoding="utf-8"))
+        for line in campaign_table(campaign_data):
             print(line)
     return 0
 
