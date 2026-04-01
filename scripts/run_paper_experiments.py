@@ -248,7 +248,7 @@ def p5(quick: bool) -> bool:
 
 
 def p6(quick: bool) -> bool:
-    # Red-team + confusable + adapter latency + denial-stats + baseline (tool-level and args-unsafe)
+    # Red-team + confusable + adapter + denial-stats + latency decomposition + baselines (tool, args, benign) + adaptive suite
     # Publishable: 3 scenarios, 20 seeds. Real-LLM (Table 1b): run manually with --real-llm (requires .env API keys)
     scenarios = "toy_lab_v0" if quick else "toy_lab_v0,lab_profile_v0,warehouse_v0"
     adapter_seeds = "7" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
@@ -258,14 +258,15 @@ def p6(quick: bool) -> bool:
         "--out", str(RUNS / "llm_eval"),
         "--run-adapter",
         "--denial-stats",
+        "--latency-decomposition",
         "--run-baseline",
         "--adapter-scenarios", scenarios,
         "--adapter-seeds", adapter_seeds,
     ]
     if not run(
         cmd,
-        "P6 LLM red-team + adapter + denial-stats + baseline (tool-level)",
-        timeout=300 if not quick else 180,
+        "P6 LLM red-team + adapter + denial-stats + latency decomposition + baseline (tool-level)",
+        timeout=360 if not quick else 180,
     ):
         return False
     if not quick:
@@ -284,6 +285,31 @@ def p6(quick: bool) -> bool:
             timeout=120,
         ):
             return False
+        cmd_benign = [
+            sys.executable,
+            str(REPO / "scripts" / "llm_redteam_eval.py"),
+            "--out", str(RUNS / "llm_eval"),
+            "--run-baseline",
+            "--baseline-plan", "benign",
+            "--baseline-scenarios", scenarios,
+            "--baseline-seeds", adapter_seeds,
+        ]
+        if not run(
+            cmd_benign,
+            "P6 baseline (benign false-positive study)",
+            timeout=120,
+        ):
+            return False
+        if not run(
+            [
+                sys.executable,
+                str(REPO / "scripts" / "p6_adaptive_suite_run.py"),
+                "--out-dir", str(RUNS / "llm_eval"),
+            ],
+            "P6 adaptive suite (indirect injection corpus)",
+            timeout=60,
+        ):
+            return False
     return True
 
 
@@ -296,6 +322,19 @@ def p7(quick: bool) -> bool:
         ],
         "P7 Assurance mapping + review",
         timeout=180,
+    )
+    if not ok:
+        return False
+    robust_seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10"
+    ok = run(
+        [
+            sys.executable,
+            str(REPO / "scripts" / "run_assurance_robust_eval.py"),
+            "--out", str(RUNS / "assurance_eval"),
+            "--seeds", robust_seeds,
+        ],
+        "P7 Robust assurance matrix",
+        timeout=600 if not quick else 240,
     )
     if not ok:
         return False

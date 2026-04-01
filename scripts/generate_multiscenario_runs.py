@@ -66,6 +66,15 @@ def main() -> int:
         metavar="N",
         help="Inclusive upper seed (with --seed-min).",
     )
+    ap.add_argument(
+        "--profile",
+        choices=("all", "real_world", "core"),
+        default="all",
+        help=(
+            "all: every scenario YAML; real_world: deployment-shaped (no toy_lab); "
+            "core: legacy five scenarios only"
+        ),
+    )
     args = ap.parse_args()
 
     if (args.seed_min is None) ^ (args.seed_max is None):
@@ -94,6 +103,23 @@ def main() -> int:
         "warehouse_v0",
         "traffic_v0",
         "regime_stress_v0",
+        "regime_stress_v1",
+        "rep_cps_scheduling_v0",
+    ]
+    core_list = [
+        "toy_lab_v0",
+        "lab_profile_v0",
+        "warehouse_v0",
+        "traffic_v0",
+        "regime_stress_v0",
+    ]
+    real_world_list = [
+        "lab_profile_v0",
+        "warehouse_v0",
+        "traffic_v0",
+        "regime_stress_v0",
+        "regime_stress_v1",
+        "rep_cps_scheduling_v0",
     ]
     if args.scenarios:
         scenario_ids = [
@@ -111,6 +137,10 @@ def main() -> int:
                     file=sys.stderr,
                 )
                 return 1
+    elif args.profile == "real_world":
+        scenario_ids = real_world_list
+    elif args.profile == "core":
+        scenario_ids = core_list
     else:
         scenario_ids = list_scenario_ids()
         if not scenario_ids:

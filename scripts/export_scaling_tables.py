@@ -20,7 +20,7 @@ DEFAULT_RESULTS = (
 
 def _fmt(x: float | int | str | None) -> str:
     if x is None:
-        return "—"
+        return "-"
     if isinstance(x, (int, float)):
         return f"{x:.2f}" if isinstance(x, float) else str(x)
     return str(x)
@@ -36,7 +36,7 @@ def table1(data: dict) -> list[str]:
         "|-------------------|--------|--------|--------------|------------------|"
         "-------------------|---------------|-------------|"
     )
-    lines = ["# Table 1 — Held-out results", "", h1, h2]
+    lines = ["# Table 1 - Held-out results", "", h1, h2]
     for r in data.get("held_out_results", []):
         row = (
             f"| {r.get('held_out_scenario', '')} | {r.get('train_n', '')} | "
@@ -53,7 +53,7 @@ def table1(data: dict) -> list[str]:
 def table2(data: dict) -> list[str]:
     """Produce markdown lines for Table 2 (baselines summary with CI)."""
     lines = [
-        "# Table 2 — Baselines (MAE and 95% CI)",
+        "# Table 2 - Baselines (MAE and 95% CI)",
         "",
         "| Baseline | MAE | CI95 lower | CI95 upper |",
         "|----------|-----|------------|------------|",
@@ -70,9 +70,11 @@ def table2(data: dict) -> list[str]:
     hi_f = data.get("overall_feat_baseline_mae_ci95_upper")
     lines.append(f"| Num-tasks mean | {_fmt(mae_f)} | {_fmt(lo_f)} | {_fmt(hi_f)} |")
     mae_r = data.get("overall_regression_mae")
+    lo_r = data.get("overall_regression_mae_ci95_lower")
+    hi_r = data.get("overall_regression_mae_ci95_upper")
     if mae_r is not None:
         lines.append(
-            f"| Regression (num_tasks, num_faults) | {_fmt(mae_r)} | — | — |"
+            f"| Regression (compact features) | {_fmt(mae_r)} | {_fmt(lo_r)} | {_fmt(hi_r)} |"
         )
     else:
         reason = data.get("regression_skipped_reason", "train_n < k or singular")

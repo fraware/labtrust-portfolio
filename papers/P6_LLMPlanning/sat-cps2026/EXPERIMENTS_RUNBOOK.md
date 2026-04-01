@@ -87,11 +87,11 @@ Requires `OPENAI_API_KEY` in `.env`.
 
 ```bash
 python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval \
-  --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 5
+  --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 10 --real-llm-suite full
 python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval
 ```
 
-**Reported snapshot (2026-03-17):** 13 cases per model, 5 runs per case, **65** trials per model. **gpt-4.1-mini** and **gpt-4.1** each **55/65** (84.6%, 95% Wilson CI [73.9, 91.4]). Both models **0/5** on `rt_allowed_tool_disallowed_args` and **0/5** on `rt_allowed_tool_denylist_key`. Jailbreak-style cases remain in the synthetic/jailbreak table; structure of `real_llm` vs `real_llm_models[]` follows the version of `llm_redteam_eval.py` in the repo.
+**Publishable defaults:** `--real-llm-runs 10`, `--real-llm-suite full` (red-team + confusable deputy + jailbreak-style in the same API loop as Table 1b). Use `--real-llm-suite core` to match older red+confusable-only denominators. **Historical snapshot (2026-03-17):** 13 cases per model, 5 runs per case (pre-expansion corpora). Structure of `real_llm` vs `real_llm_models[]` follows `llm_redteam_eval.py`; `run_manifest.suite_mode` and `real_llm_case_count` record the mix.
 
 ## 6. Real-LLM -- optional Prime Inference (four-model matrix)
 

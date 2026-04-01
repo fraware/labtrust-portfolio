@@ -11,9 +11,10 @@ claims:
     statement: "Coordination tax and error amplification are predictable from a compact CPS task feature set."
     evidence:
       release_id: "scaling_eval"
-      confidence: "high"  # P5_SCALING_SPEC, scaling.py, heldout_results; 20 seeds, multi-scenario
+      confidence: "high"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
+        - "datasets/runs/scaling_eval_family/heldout_results.json"
         - "docs/P5_SCALING_SPEC.md"
         - "impl/src/labtrust_portfolio/scaling.py"
       table_ids: ["Table 1", "Table 2"]
@@ -23,9 +24,10 @@ claims:
     statement: "The predictors generalize out-of-sample across scenario families and beat trivial baselines."
     evidence:
       release_id: "scaling_eval"
-      confidence: "medium"  # Table 1/2; conditional on trigger_met and beat_per_scenario_baseline
+      confidence: "high"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
+        - "datasets/runs/scaling_eval_family/heldout_results.json"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 1"]
 
@@ -33,7 +35,7 @@ claims:
     statement: "The model supports architecture selection decisions with calibrated uncertainty."
     evidence:
       release_id: "scaling_eval"
-      confidence: "high"  # 95% CI in heldout_results; scaling_recommend.py
+      confidence: "high"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
         - "scripts/scaling_recommend.py"
@@ -41,3 +43,5 @@ claims:
       figure_ids: []
 
 # Table 1/2: export_scaling_tables.py. Figure 1: plot_scaling_mae.py. Baseline hierarchy: global mean, per-scenario mean, feature, regression.
+# Protocol: generate_multiscenario_runs.py --seeds 12+ --fault-mix; scaling_heldout_eval.py; optional --holdout-mode family --no-secondary -> scaling_eval_family/.
+# C1: secondary_targets (coordination_tax_proxy, error_amplification_proxy) in heldout_results.json; C2: family OOS in scaling_eval_family/; C3: mean_regression_pi_coverage_95, regression MAE CI.

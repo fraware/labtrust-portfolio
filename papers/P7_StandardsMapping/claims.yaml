@@ -15,6 +15,7 @@ claims:
         - "profiles/lab/v0.1/assurance_pack_instantiation.json"
         - "kernel/assurance_pack/ASSURANCE_PACK.v0.1.schema.json"
         - "datasets/runs/assurance_eval/results.json"
+        - "datasets/runs/assurance_eval/robust_results.json"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 0", "Figure 1"]
       confidence: high
@@ -26,21 +27,26 @@ claims:
       artifact_paths:
         - "scripts/check_assurance_mapping.py"
         - "scripts/audit_bundle.py"
+        - "scripts/run_assurance_robust_eval.py"
         - "datasets/runs/assurance_eval/results.json"
+        - "datasets/runs/assurance_eval/robust_results.json"
         - "docs/PART11_AUDIT_TRAIL_ALIGNMENT.md"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: []
       confidence: high
 
   - id: "C3"
-    statement: "One worked example (lab profile) demonstrates audit completeness and replayability."
+    statement: "Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions."
     evidence:
       release_id: "assurance_eval"
       artifact_paths:
         - "datasets/runs/assurance_eval/results.json"
+        - "datasets/runs/assurance_eval/robust_results.json"
         - "scripts/run_assurance_eval.py"
+        - "scripts/run_assurance_robust_eval.py"
         - "scripts/audit_bundle.py"
         - "docs/P7_REVIEW_CHECKLIST.md"
+        - "docs/P7_ROBUST_EXPERIMENT_PLAN.md"
       table_ids: ["Table 1", "Table 2"]
       figure_ids: ["Figure 1"]
       confidence: medium

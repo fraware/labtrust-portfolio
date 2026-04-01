@@ -6,7 +6,9 @@
 
 **Minimal run (under 20 min):** `python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval` then `python scripts/export_p7_mapping_flow.py` then `python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/results.json` then `python scripts/export_assurance_gsn.py --out docs/figures/p7_gsn.mmd`.
 
-**Publishable run:** run_manifest and results in `datasets/runs/assurance_eval/results.json` (mapping_check_ok, ponr_coverage_ok, per_profile).
+**Robust run (state-of-the-art):** `python scripts/run_assurance_robust_eval.py --out datasets/runs/assurance_eval --seeds 1,2,3,4,5,6,7,8,9,10` (writes `robust_results.json` with 200-run matrix by default). Protocol and success criteria: `docs/P7_ROBUST_EXPERIMENT_PLAN.md`.
+
+**Publishable run:** run_manifest and results in `datasets/runs/assurance_eval/results.json` (mapping_check_ok, ponr_coverage_ok, per_profile), plus robustness appendix in `datasets/runs/assurance_eval/robust_results.json` (scenario x fault-regime x seed matrix).
 
 - **Figure 0:** `python scripts/export_p7_mapping_flow.py` (output `docs/figures/p7_mapping_flow.mmd`). Render Mermaid to PNG for camera-ready.
 - **Table 1:** `python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval`, then `python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/results.json` (mapping and review summary).
@@ -50,13 +52,13 @@ Script `scripts/check_assurance_mapping.py`: (1) Validates the lab instantiation
 
 Controls: C-001 (PONR gate requires Tier 2 conformance), C-002 (disposition in trace and bundle). Diagram: hazard H-001 → controls C-001, C-002 → evidence types trace, evidence_bundle.
 
-**Review checklist:** `docs/P7_REVIEW_CHECKLIST.md` gives an independent reviewer steps. Script `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>]` produces a machine-readable outcome. When `--scenario-id` is set, PONR events use kernel PONR task names (same as conformance Tier 3); when `--scenario-id` is omitted, PONR events use a heuristic (not kernel PONR task names). Scripted review is partial and does not constitute a full safety-case proof. Output includes evidence_bundle_ok, trace_ok, ponr_events, controls_covered, ponr_coverage (required_task_names, found_in_trace, ratio), control_coverage_ratio.
+**Review checklist:** `docs/P7_REVIEW_CHECKLIST.md` gives an independent reviewer steps. Script `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>]` produces a machine-readable outcome. PONR coverage uses kernel task names for known scenario IDs; when scenario support is missing, the script reports supported scenario IDs and returns no PONR coverage ratio for that case. Scripted review is partial and does not constitute a full safety-case proof. Output includes evidence_bundle_ok, trace_ok, ponr_events, controls_covered, ponr_coverage (required_task_names, found_in_trace, ratio), control_coverage_ratio.
 
 **Table 1 — Mapping and review results.** Source: `results.json`. Run `python scripts/run_assurance_eval.py`; regenerate tables with `python scripts/export_assurance_tables.py`.
 
 | mapping_check_ok | ponr_coverage_ok | review_exit_ok | ponr_events_count | ponr_coverage_ratio | control_coverage_ratio |
 |------------------|------------------|----------------|-------------------|---------------------|-------------------------|
-| yes | yes | yes | 4 | 1.00 | 1.00 |
+| yes | yes | yes | 0 | 1.00 | 1.00 |
 
 **Table 2 — Per-scenario review (kernel PONR).** Eval runs review for toy_lab_v0 and lab_profile_v0; lab_profile_v0 requires disposition_commit (kernel PONR task). Source: results.json key `reviews`. Units: ponr_coverage_ratio, control_coverage_ratio (ratio); exit_ok (yes/no). Run_manifest in results.json. Regenerate with export_assurance_tables.py.
 
@@ -69,7 +71,7 @@ Controls: C-001 (PONR gate requires Tier 2 conformance), C-002 (disposition in t
 
 **Key results.** (1) Mapping: mapping_check_ok (results.mapping_check.ok), ponr_coverage_ok from results.json. For submission tables, use a run where results.json has mapping_check_ok and ponr_coverage_ok true. The run used for tables (datasets/runs/assurance_eval/results.json) has mapping_check.ok and mapping_check.ponr_coverage_ok true. (2) Per-profile: lab_v0.1, warehouse_v0.1, medical_v0.1 in results.per_profile (reusable across domains); each profile has review outcome and optional PONR coverage. (3) Review: run review with --scenario-id toy_lab_v0 and --scenario-id lab_profile_v0 so PONR coverage uses kernel task names; review_exit_ok, ponr_coverage_ratio, control_coverage_ratio per scenario in results.reviews and Table 2. (4) No certification claim (translation layer only). Numbers from results.json. Regenerate with `python scripts/run_assurance_eval.py` and `python scripts/export_assurance_tables.py`. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
 
-**Results summary (excellence metrics).** From results.json: **mapping completeness** (mapping_check_ok; all hazards have control_ids, all controls have evidence_artifact_types); **PONR coverage ratio** (ponr_coverage_ratio from reviews; target 1.0 for lab profile); **review pass** (review_exit_ok, evidence_bundle_ok, trace_ok). No certification claim: this mapping is a translation layer only; see Limitations and [STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md) (P7). Submission tables use the lab instantiation; results.json per_profile contains lab_v0.1, warehouse_v0.1, and medical_v0.1 for cross-domain reuse.
+**Results summary (excellence metrics).** From results.json and robust_results.json: **mapping completeness** (mapping_check_ok; all hazards have control_ids, all controls have evidence_artifact_types), **review pass** (review_exit_ok, evidence_bundle_ok, trace_ok), and **robustness aggregate** (review_pass_rate, evidence_bundle_ok_rate, trace_ok_rate, control_coverage_ratio_mean, real_world_proxy.review_pass_rate). No certification claim: this mapping is a translation layer only; see Limitations and [STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md) (P7). Submission tables use the lab instantiation; robust appendix uses scenario x fault-regime x seed matrix from robust_results.json.
 
 ## 7. Comparison to other assurance and safety-case frameworks
 
@@ -113,6 +115,5 @@ No certification. No compliance claim with 21 CFR Part 11 or OECD GLP; we supply
 |-------|---------------------|
 | C1 Traceable mapping | Assurance pack schema, hazard→control→evidence table, lab instantiation (with optional ponr_ids) |
 | C2 Mechanically checkable | check_assurance_mapping.py (schema + completeness + PONR coverage), review_assurance_run.py |
-| C3 Worked example | Lab profile instantiation, results.json, review checklist outcome |
-| C4 Quantitative coverage | ponr_coverage_ratio, control_coverage_ratio in review output; Table 1 |
+| C3 Worked examples under stress | Lab + warehouse + traffic scenario evidence, robust_results.json, review checklist outcome |
 | No certification | Non-claims section; Limitations |

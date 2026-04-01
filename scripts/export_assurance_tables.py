@@ -47,7 +47,8 @@ def table1(data: dict) -> list[str]:
     row = (
         f"| {_fmt(mc.get('ok'))} | {_fmt(mc.get('ponr_coverage_ok'))} | "
         f"{_fmt(rev.get('exit_ok'))} | {n_events} | "
-        f"{_fmt(ponr.get('ratio'))} | {_fmt(rev.get('control_coverage_ratio'))} |"
+        f"{_fmt(ponr.get('ratio'))} | "
+        f"{_fmt(rev.get('control_coverage_ratio'))} |"
     )
     lines.append(row)
     lines.append("")
@@ -59,19 +60,52 @@ def table2_reviews(data: dict) -> list[str]:
     reviews = data.get("reviews") or {}
     if not reviews:
         return []
-    h1 = "| scenario_id | exit_ok | ponr_coverage_ratio | control_coverage_ratio |"
-    h2 = "|-------------|---------|---------------------|-------------------------|"
+    h1 = (
+        "| scenario_id | exit_ok | ponr_coverage_ratio | "
+        "control_coverage_ratio |"
+    )
+    h2 = (
+        "|-------------|---------|---------------------|"
+        "-------------------------|"
+    )
     lines = ["# Table 2 - Per-scenario review (kernel PONR)", "", h1, h2]
     for sid in sorted(reviews.keys()):
         rev = reviews[sid] or {}
         pc = rev.get("ponr_coverage") or {}
         row = (
             f"| {sid} | {_fmt(rev.get('exit_ok'))} | "
-            f"{_fmt(pc.get('ratio'))} | {_fmt(rev.get('control_coverage_ratio'))} |"
+            f"{_fmt(pc.get('ratio'))} | "
+            f"{_fmt(rev.get('control_coverage_ratio'))} |"
         )
         lines.append(row)
     lines.append("")
     return lines
+
+
+def table3_robustness(data: dict) -> list[str]:
+    """Produce markdown lines for Table 3 (robustness aggregate)."""
+    agg = data.get("aggregate") or {}
+    if not agg:
+        return []
+    h1 = (
+        "| review_pass_rate | evidence_bundle_ok_rate | trace_ok_rate | "
+        "ponr_coverage_ratio_mean | control_coverage_ratio_mean | "
+        "latency_p95_ms_median |"
+    )
+    h2 = (
+        "|------------------|-------------------------|---------------|"
+        "--------------------------|-----------------------------|"
+        "----------------------|"
+    )
+    row = (
+        f"| {_fmt(agg.get('review_pass_rate'))} | "
+        f"{_fmt(agg.get('evidence_bundle_ok_rate'))} | "
+        f"{_fmt(agg.get('trace_ok_rate'))} | "
+        f"{_fmt(agg.get('ponr_coverage_ratio_mean'))} | "
+        f"{_fmt(agg.get('control_coverage_ratio_mean'))} | "
+        f"{_fmt(agg.get('latency_p95_ms_median'))} |"
+    )
+    return ["# Table 3 - Robustness aggregate", "", h1, h2, row, ""]
 
 
 def main() -> int:
@@ -87,7 +121,7 @@ def main() -> int:
         print("Run run_assurance_eval.py then re-run this script.")
         return 1
     data = json.loads(args.results.read_text(encoding="utf-8"))
-    out = table1(data) + table2_reviews(data)
+    out = table1(data) + table2_reviews(data) + table3_robustness(data)
     print("\n".join(out))
     return 0
 

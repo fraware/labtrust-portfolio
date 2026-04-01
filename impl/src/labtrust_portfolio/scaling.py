@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-from .scenario import load_scenario, get_scenario_task_names
+from .scenario import get_scenario_family, get_scenario_task_names, load_scenario
 
 
 def extract_features_from_scenario(scenario_id: str) -> Dict[str, Any]:
@@ -74,6 +74,29 @@ def extract_response_from_report(report: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def enrich_row_derived_metrics(row: Dict[str, Any]) -> None:
+    """
+    In-place: coordination_tax_proxy (messages per completed task) and
+    error_amplification_proxy (p95 latency per task slot) for P5 narrative and secondary targets.
+    """
+    resp = row.get("response") or {}
+    tc = int(resp.get("tasks_completed", 0) or 0)
+    tc_denom = max(1, tc)
+    cm = int(resp.get("coordination_messages", 0) or 0)
+    p95 = float(resp.get("task_latency_ms_p95", 0) or 0.0)
+    nt = max(1, int(row.get("num_tasks", 0) or 0))
+    row["coordination_tax_proxy"] = float(cm) / float(tc_denom)
+    row["error_amplification_proxy"] = p95 / float(nt)
+
+
+def scenario_family_for_id(scenario_id: str) -> str:
+    """Taxonomy family from scenario YAML (lab, warehouse, traffic, ...); 'unknown' if missing."""
+    try:
+        return get_scenario_family(load_scenario(scenario_id))
+    except (FileNotFoundError, ValueError, RuntimeError, OSError):
+        return "unknown"
+
+
 # Collapse threshold: tasks_completed below this or recovery_ok False counts as collapse.
 COLLAPSE_TASKS_THRESHOLD = 2
 
@@ -101,6 +124,10 @@ def build_dataset_from_runs(runs_dir: Path) -> List[Dict[str, Any]]:
         feats["collapse"] = (
             tc < COLLAPSE_TASKS_THRESHOLD or not recovery_ok
         )
+        feats["scenario_family"] = scenario_family_for_id(scenario_id)
+        enrich_row_derived_metrics(feats)
+        feats["response"]["coordination_tax_proxy"] = feats["coordination_tax_proxy"]
+        feats["response"]["error_amplification_proxy"] = feats["error_amplification_proxy"]
         rows.append(feats)
     return rows
 

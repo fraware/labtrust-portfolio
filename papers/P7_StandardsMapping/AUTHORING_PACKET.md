@@ -10,12 +10,12 @@ How do we translate the portfolio’s executable artifacts (gates, traces, evide
 
 ## 2) Scope anchors
 - UL 4600 is safety-case oriented; IEC 62443 is lifecycle security for industrial control; neither implies “certification by mapping.”
-- Regulated lab expectations emphasize secure audit trails and lifecycle/data-flow discipline (e.g., 21 CFR Part 11 audit trails; OECD GLP data integrity). citeturn1search0turn1search1
+- Regulated lab expectations emphasize secure audit trails and lifecycle/data-flow discipline (e.g., 21 CFR Part 11 audit trails; OECD GLP data integrity).
 
 ## 3) Claims
 - **C1:** A structured “assurance pack” template enables traceable mapping: hazards → controls/invariants → evidence artifacts → audit traces.
 - **C2:** The mapping is mechanically checkable (artifact presence + trace reconstruction), not narrative.
-- **C3:** One worked example (lab profile) demonstrates audit completeness and replayability.
+- **C3:** Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions.
 
 ## 4) Outline
 1. Why standards mappings often fail (template theater)
@@ -30,12 +30,17 @@ How do we translate the portfolio’s executable artifacts (gates, traces, evide
   - verify evidence bundle,
   - reconstruct PONR causal chains,
   - map denials/allows to hazards and controls.
+- Execute robust matrix (scenario x fault-regime x seed) with
+  `scripts/run_assurance_robust_eval.py`, and report aggregate pass-rate,
+  evidence/trace validity rates, and real-world proxy performance.
 
 ## 6) Artifact checklist
 - `kernel/assurance_pack/ASSURANCE_PACK.v0.1.schema.json`
 - hazard log template + invariant registry template
-- worked instantiation using `profiles/lab/v0.1/`
+- worked instantiations using `profiles/lab/v0.1/`,
+  `profiles/warehouse/v0.1/`, and `profiles/medical_v0.1/`
 - checker that validates mapping completeness
+- robust eval artifact `datasets/runs/assurance_eval/robust_results.json`
 
 ## 7) Kill criteria
 - **K1:** mapping cannot be made mechanical; becomes prose.

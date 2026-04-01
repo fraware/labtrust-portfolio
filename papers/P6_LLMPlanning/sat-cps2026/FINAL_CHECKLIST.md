@@ -5,7 +5,7 @@ Paper is ready for submission only when all items are true.
 ## Narrative and venue fit
 
 - [ ] **Title** reads as CPS security / runtime enforcement for tool invocation (not a generic LLM leaderboard paper).
-- [ ] **Abstract** states the synthetic primary result (9/9 red-team, 4/4 confusable, 2/2 jailbreak-style in the released suite) and the **canonical OpenAI real-LLM** numbers: **gpt-4.1-mini and gpt-4.1 each 55/65** (84.6%, Wilson **[73.9, 91.4]**; 5 runs/case, 13 cases/model, 2026-03-17), including explicit mention of **0/5** on path-traversal and denylist-key cases.
+- [ ] **Abstract** states the synthetic primary result (15/15 red-team, 6/6 confusable, 4/4 jailbreak-style in the released suite) and the cited **OpenAI real-LLM** numbers with exact denominator from run_manifest (latest checked-in snapshot: gpt-4.1-mini and gpt-4.1 each 250/250, Wilson [98.5, 100.0], N=10 runs/case, 25 cases/model).
 - [ ] If the abstract mentions **Prime Inference** or four models, it **labels the run separately** (N=3, 39 trials/model, different output dir) and does not imply the same experiment as OpenAI N=5.
 - [ ] **Introduction** places the trust boundary early: planner output is untrusted until the firewall admits it.
 - [ ] **Threat model** lists assets, adversarial leverage, trust assumptions, non-goals, and includes the summary table.

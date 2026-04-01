@@ -73,7 +73,7 @@ export PYTHONPATH=/path/to/labtrust-portfolio/impl/src
 
 ## 4. P5 pipeline on Prime
 
-**Generate runs** (writes under `--out`, default `datasets/runs/multiscenario_runs`):
+**Generate runs** (writes under `--out`, default `datasets/runs/multiscenario_runs`). Default `--profile all` includes every scenario YAML under `bench/maestro/scenarios/` (seven ids as of this doc, including `regime_stress_v1` and `rep_cps_scheduling_v0`). Use `--profile real_world` to omit `toy_lab_v0`.
 
 ```bash
 cd /path/to/labtrust-portfolio
@@ -92,16 +92,22 @@ python scripts/generate_multiscenario_runs.py --out datasets/runs/multiscenario_
   --scenarios toy_lab_v0,lab_profile_v0 --fault-mix --seed-min 11 --seed-max 20
 # Worker C: other scenarios, seeds 1–20
 python scripts/generate_multiscenario_runs.py --out datasets/runs/multiscenario_runs \
-  --scenarios warehouse_v0,traffic_v0,regime_stress_v0 --fault-mix --seeds 20
+  --scenarios warehouse_v0,traffic_v0,regime_stress_v0,regime_stress_v1,rep_cps_scheduling_v0 --fault-mix --seeds 20
 ```
 
-When all shards finish, run held-out eval **once**:
+When all shards finish, run held-out eval **once** (and optionally a second pass for leave-one-family-out):
 
 ```bash
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
   python scripts/scaling_heldout_eval.py \
   --runs-dir datasets/runs/multiscenario_runs \
   --out datasets/runs/scaling_eval
+# Optional stricter OOS by taxonomy family (lab / warehouse / traffic):
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
+  python scripts/scaling_heldout_eval.py \
+  --runs-dir datasets/runs/multiscenario_runs \
+  --out datasets/runs/scaling_eval_family \
+  --holdout-mode family --no-secondary
 python scripts/export_scaling_tables.py --results datasets/runs/scaling_eval/heldout_results.json
 python scripts/plot_scaling_mae.py --results datasets/runs/scaling_eval/heldout_results.json
 ```

@@ -43,7 +43,7 @@ def main() -> int:
     lines = [
         "# Validator-layer attribution",
         "",
-        "Per-case attribution: which layer(s) caused denial (allow_list_only, safe_args_only, both, admitted).",
+        "Per-case attribution: which layer(s) caused denial (allow_list_only, safe_args_only, ponr_gate_only, both, admitted).",
         "",
         "## Red-team cases (Table 1)",
         "",
@@ -58,7 +58,12 @@ def main() -> int:
     dbl = red.get("denial_by_layer", {})
     lines.extend([
         "",
-        "**Denial by layer (red-team):** " + ", ".join(f"{k}: {dbl.get(k, 0)}" for k in ["allow_list_only", "safe_args_only", "both", "admitted"]) + ".",
+        "**Denial by layer (red-team):** "
+        + ", ".join(
+            f"{k}: {dbl.get(k, 0)}"
+            for k in ["allow_list_only", "safe_args_only", "ponr_gate_only", "both", "admitted"]
+        )
+        + ".",
         "",
         "## Confusable deputy (Table 1)",
         "",
@@ -77,7 +82,14 @@ def main() -> int:
             )
         dbl_c = conf.get("denial_by_layer", {})
         lines.append("")
-        lines.append("**Denial by layer (confusable deputy):** " + ", ".join(f"{k}: {dbl_c.get(k, 0)}" for k in ["allow_list_only", "safe_args_only", "both", "admitted"]) + ".")
+        lines.append(
+            "**Denial by layer (confusable deputy):** "
+            + ", ".join(
+                f"{k}: {dbl_c.get(k, 0)}"
+                for k in ["allow_list_only", "safe_args_only", "ponr_gate_only", "both", "admitted"]
+            )
+            + "."
+        )
         lines.append("")
     jb = red.get("jailbreak_style", {})
     if jb.get("cases"):
@@ -94,7 +106,14 @@ def main() -> int:
             )
         dbl_j = jb.get("denial_by_layer", {})
         lines.append("")
-        lines.append("**Denial by layer (jailbreak):** " + ", ".join(f"{k}: {dbl_j.get(k, 0)}" for k in ["allow_list_only", "safe_args_only", "both", "admitted"]) + ".")
+        lines.append(
+            "**Denial by layer (jailbreak):** "
+            + ", ".join(
+                f"{k}: {dbl_j.get(k, 0)}"
+                for k in ["allow_list_only", "safe_args_only", "ponr_gate_only", "both", "admitted"]
+            )
+            + "."
+        )
     lines.append("")
     text = "\n".join(lines)
     if args.out:

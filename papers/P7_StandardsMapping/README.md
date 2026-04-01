@@ -1,3 +1,39 @@
 # P7 — Standards Mapping (Assurance Pack)
 
-P7 provides a traceable assurance argument: structured assurance pack (hazards, controls, evidence_map), schema validation, mapping completeness, and scripted review (PONR coverage, control coverage). **Three profiles:** lab v0.1, warehouse v0.1, medical v0.1; run_assurance_eval runs review with each. Standards mapping table (assurance-pack elements to ISO 62304 / ISO 26262-6): [docs/P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md). Auditor feedback protocol: [docs/P7_AUDITOR_FEEDBACK_PROTOCOL.md](../docs/P7_AUDITOR_FEEDBACK_PROTOCOL.md). No certification claim. Draft and claims: [DRAFT.md](DRAFT.md), [claims.yaml](claims.yaml). Tables and figures: [VISUALS_PER_PAPER.md](../docs/VISUALS_PER_PAPER.md), [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Outline: [AUTHORING_PACKET.md](AUTHORING_PACKET.md). To run with other papers: `python scripts/run_paper_experiments.py --paper P7`. Key results (mapping, PONR coverage, per-profile review) are in Section 6 of DRAFT and in [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
+P7 provides a traceable assurance argument with a structured assurance pack
+(`hazards`, `controls`, `evidence_map`), schema validation, mapping
+completeness checks, and scripted review (`PONR` coverage where applicable and
+control coverage).
+
+Current repository state includes:
+
+- **Baseline eval:** `scripts/run_assurance_eval.py` writes
+  `datasets/runs/assurance_eval/results.json`.
+- **Robust eval matrix:** `scripts/run_assurance_robust_eval.py` writes
+  `datasets/runs/assurance_eval/robust_results.json` across scenario x
+  fault-regime x seed.
+- **Paper runner integration:** `scripts/run_paper_experiments.py --paper P7`
+  executes baseline and robust eval.
+
+Profiles and domains:
+
+- `profiles/lab/v0.1/assurance_pack_instantiation.json`
+- `profiles/warehouse/v0.1/assurance_pack_instantiation.json`
+- `profiles/medical_v0.1/assurance_pack_instantiation.json`
+
+Standards mapping and audit docs:
+
+- Standards mapping table:
+  [docs/P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md)
+- Auditor feedback protocol:
+  [docs/P7_AUDITOR_FEEDBACK_PROTOCOL.md](../docs/P7_AUDITOR_FEEDBACK_PROTOCOL.md)
+- Robust experiment protocol:
+  [docs/P7_ROBUST_EXPERIMENT_PLAN.md](../docs/P7_ROBUST_EXPERIMENT_PLAN.md)
+
+Paper files:
+
+- Draft: `papers/P7_StandardsMapping/DRAFT.md`
+- Claims: `papers/P7_StandardsMapping/claims.yaml`
+- Outline packet: `papers/P7_StandardsMapping/AUTHORING_PACKET.md`
+
+No certification claim is made; P7 is a translation and audit-support layer.

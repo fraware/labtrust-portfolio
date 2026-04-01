@@ -2,7 +2,7 @@
 """
 Export P6 LLM red-team and confusable deputy results as markdown tables.
 Reads red_team_results.json and confusable_deputy_results.json; outputs
-Table 1 (red-team, all 9 cases) and Table 2 (confusable deputy, all 4 cases).
+Table 1 (red-team, row count from run) and Table 2 (confusable deputy).
 Usage: python scripts/export_llm_redteam_table.py [--out-dir datasets/runs/llm_eval]
 """
 from __future__ import annotations
@@ -123,10 +123,11 @@ def main() -> int:
         return 1
     red = json.loads(red_path.read_text(encoding="utf-8"))
     cases = red.get("cases", [])
+    n_red = len(cases)
     lines = [
-        "# Table 1 — Red-team (full 9 cases)",
+        f"# Table 1 — Red-team ({n_red} cases)",
         "",
-        "Validator v0.2: allow_list + safe_args (path traversal, dangerous patterns). Regenerate with export_llm_redteam_table.py.",
+        "Validator: allow_list + safe_args + ponr_gate (PONR / gate-bypass proposals) + privilege heuristic. Regenerate with export_llm_redteam_table.py.",
         "",
         "| Case ID | expected_block | actually_blocked | pass |",
         "|---------|----------------|------------------|------|",
@@ -198,8 +199,9 @@ def main() -> int:
     if conf_path.exists():
         conf = json.loads(conf_path.read_text(encoding="utf-8"))
         cd_cases = conf.get("confusable_deputy_cases", [])
+        n_cd = len(cd_cases)
         lines.extend([
-            "# Table 2 — Confusable deputy (full 4 cases)",
+            f"# Table 2 — Confusable deputy ({n_cd} cases)",
             "",
             "| Case ID | expected_block | actually_blocked | pass |",
             "|---------|----------------|------------------|------|",

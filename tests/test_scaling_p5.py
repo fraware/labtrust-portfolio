@@ -222,3 +222,7 @@ class TestScalingModule(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         self.assertIn("collapse", rows[0])
         self.assertTrue(rows[0]["collapse"])  # tasks_completed 1 < 2
+        self.assertIn("scenario_family", rows[0])
+        self.assertIn("coordination_tax_proxy", rows[0])
+        self.assertIn("error_amplification_proxy", rows[0])
+        self.assertIn("coordination_tax_proxy", rows[0].get("response", {}))

@@ -33,7 +33,9 @@ def main() -> int:
         return 1
 
     def _float_or_zero(v): return float(v) if v is not None else 0.0
-    scenarios = [r.get("held_out_scenario", "?") for r in results]
+    scenarios = [
+        r.get("holdout_label") or r.get("held_out_scenario", "?") for r in results
+    ]
     baseline_mae = [_float_or_zero(r.get("baseline_mae")) for r in results]
     feat_mae = [_float_or_zero(r.get("feat_baseline_mae")) for r in results]
     reg_mae = [_float_or_zero(r.get("regression_mae")) for r in results]

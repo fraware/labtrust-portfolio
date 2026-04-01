@@ -14,7 +14,7 @@
 
 
 
-(1) **CPS security problem.** Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g. path traversal), and execution without validation undermines safety and auditability. (2) **Mechanism.** We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (safe_args), and deterministic capture of proposed invocations. (3) **Synthetic result.** The validator blocks all released synthetic unsafe cases and admits the released safe cases (9 red-team, 4 confusable deputy, 2 jailbreak-style). (4) **Real-LLM result (OpenAI, canonical).** With 5 runs per case and 13 cases per model (65 trials per model; 2026-03-17), gpt-4.1-mini and gpt-4.1 each achieve 55/65 (84.6%, 95% Wilson CI [73.9, 91.4]). Both models score 0/5 on the path-traversal and denylist-key argument-level cases in that run. Multi-model summaries and disagreement matrices are recorded in red_team_results.json. (5) **Optional cross-provider matrix.** A separate four-model run on Prime Inference (N=3, 39 trials per model; 2026-03-18) is documented in EXPERIMENTS_RUNBOOK.md for reviewers who want a second provider surface; denominators and models differ from the OpenAI canonical run and must not be merged without relabeling. (6) **Adapter and latency.** The security layer adds bounded measured overhead; denial traces are recorded for replay and audit; optional latency decomposition (validation vs capture) is available in adapter_latency.json when --latency-decomposition is used. (7) **Baseline.** Tool-level benchmark: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level benchmark (safe_args ablation): gated denies, weak and ungated allow. Benign suite: gated should admit safe steps while preserving the adversarial separation in the other baselines. (8) **Bounded claim.** We claim containment of the released unsafe cases and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
+(1) **CPS security problem.** Tool invocation in cyber-physical control planes is a trust boundary: planner output can request unsafe tools or arguments (e.g. path traversal), and execution without validation undermines safety and auditability. (2) **Mechanism.** We describe a runtime enforcement architecture for CPS tool invocation: typed plans, tool allow-listing, argument validation (`safe_args` + `ponr_gate`), and deterministic capture of proposed invocations. (3) **Synthetic result.** The validator blocks all released synthetic unsafe cases and admits the released safe cases (15 red-team, 6 confusable deputy, 4 jailbreak-style). (4) **Real-LLM result (OpenAI, current repo snapshot).** With full-suite mode and N=10 runs per case, 25 cases per model (250 trials per model), gpt-4.1-mini and gpt-4.1 each achieve 250/250 (100.0%, 95% Wilson CI [98.5, 100.0]). Multi-model summaries and disagreement matrices are recorded in red_team_results.json. (5) **Optional cross-provider matrix.** A separate four-model run on Prime Inference is documented in EXPERIMENTS_RUNBOOK.md; denominators and models differ from the OpenAI run and must not be merged without relabeling. (6) **Adapter and latency.** The security layer adds bounded measured overhead; denial traces are recorded for replay and audit; optional latency decomposition (validation vs capture) is available in adapter_latency.json when --latency-decomposition is used. (7) **Baseline.** Tool-level benchmark: gated and weak both deny the injected disallowed tool; ungated allows. Argument-level benchmark (safe_args ablation): gated denies, weak and ungated allow. Benign suite: gated should admit safe steps while preserving the adversarial separation in the other baselines. (8) **Bounded claim.** We claim containment of the released unsafe cases and auditability; we do not claim elimination of prompt injection or full coverage of adversarial inputs.
 
 
 
@@ -118,7 +118,7 @@ Typed plans: schema with steps (seq, tool, args, validators). Validator stack: a
 
 
 
-Synthetic evidence isolates validator correctness from model-generation variability. The full synthetic table (9 red-team, 4 confusable deputy, 2 jailbreak-style) is the primary validator evidence: all unsafe cases blocked, all safe cases admitted. Source: red_team_results.json, confusable_deputy_results.json; export_llm_redteam_table.py.
+Synthetic evidence isolates validator correctness from model-generation variability. The full synthetic table (15 red-team, 6 confusable deputy, 4 jailbreak-style) is the primary validator evidence: all unsafe cases blocked, all safe cases admitted. Source: red_team_results.json, confusable_deputy_results.json; export_llm_redteam_table.py.
 
 
 
@@ -130,7 +130,7 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 
-**Canonical OpenAI run (Table 1b).** Reported (2026-03-17): 5 runs per case, 13 cases per model (65 trials per model). Models gpt-4.1-mini and gpt-4.1 each score 55/65 (84.6%, 95% Wilson CI [73.9, 91.4]). Both score 0/5 on rt_allowed_tool_disallowed_args (path traversal) and 0/5 on rt_allowed_tool_denylist_key. Command: `llm_redteam_eval.py --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 5`. Output: red_team_results.json (real_llm_models[], cross_model_summary when multiple models).
+**Canonical OpenAI run (Table 1b, current repo snapshot).** Reported: full-suite mode, 10 runs per case, 25 cases per model (250 trials per model). Models gpt-4.1-mini and gpt-4.1 each score 250/250 (100.0%, 95% Wilson CI [98.5, 100.0]). Command: `llm_redteam_eval.py --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 10 --real-llm-suite full`. Output: red_team_results.json (real_llm_models[], cross_model_summary when multiple models).
 
 
 
@@ -138,7 +138,7 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 
-**Failure case as first-class result.** The 0/5 path-traversal and 0/5 denylist-key outcomes under OpenAI are the most security-informative rows: they separate canonical validator correctness (the validator blocks the step when present) from model behavior (the model did not emit the unsafe form in those runs). Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. We report this result explicitly; no apology or hiding.
+**Failure case as first-class result.** Any future argument-level misses or parse failures must be reported explicitly with denominator and suite mode. Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls. Keep failure reporting first-class when runs are refreshed.
 
 
 

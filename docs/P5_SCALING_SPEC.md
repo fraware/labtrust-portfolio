@@ -18,7 +18,16 @@ Resource graph structure and deadline tightness can be added in v0.2 from scenar
 - **coordination_messages:** From MAESTRO report.
 - **task_latency_ms_p95:** Tail latency.
 
+**Derived proxies (per row, in `build_dataset_from_runs`):** `coordination_tax_proxy` = coordination_messages / max(1, tasks_completed); `error_amplification_proxy` = task_latency_ms_p95 / max(1, num_tasks). Copied into `response` for regression targets. **scenario_family** comes from scenario YAML `family` (lab, warehouse, traffic).
+
 **Collapse:** Collapse is derived from MAESTRO report fields (no new trace schema). Definition: (a) `tasks_completed < threshold` (default 2), or (b) `recovery_ok is False` from report.faults. The dataset builder adds a boolean `collapse` per row. Per-scenario collapse rate is the fraction of runs in that scenario with collapse=True. Current traces may not have explicit failure/recovery events; collapse is therefore a derived proxy. Richer failure/recovery semantics (e.g. MTTR) are future work.
+
+## Held-out protocols
+
+- **Leave-one-scenario-out (default):** `scripts/scaling_heldout_eval.py --holdout-mode scenario` — one scenario_id held out per fold.
+- **Leave-one-family-out:** `--holdout-mode family` — hold out all runs whose scenario YAML `family` matches (stricter cross-domain test; some folds may omit regression if train_n is small).
+- **Secondary targets:** coordination_tax_proxy and error_amplification_proxy (see `secondary_targets` in heldout_results.json); `--no-secondary` to skip.
+- **Calibration (exploratory):** `mean_regression_pi_coverage_95` — fraction of test points inside train-residual 95% intervals per fold, averaged.
 
 ## Out-of-sample kill criteria
 
