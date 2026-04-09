@@ -1,0 +1,115 @@
+% =============================================================================
+% Frozen submission-run metrics for P1 (contracts_real_v1, fingerprint 0d6cd1defe6b0e33)
+% Source: datasets/runs/p1_submission_freeze_extract/*.json
+% Generated for manuscript inclusion: \input{frozen_submission_metrics} after preamble macros.
+%
+% Latency note: Values below match the recomputed bundle (submission_run_summary.json)
+% from the same scoring path as detection metrics. If an earlier draft used different
+% microsecond means (e.g. 11.0 / 3.45), that reflects a different timing sample or
+% harness; replace \FullLatency* / \BFiveLatency* consistently with this block.
+% =============================================================================
+
+% ------------------------------------------------------------------
+% Additional frozen metrics for decomposition / significance / support
+% ------------------------------------------------------------------
+
+% Class supports (gold deny events with annotation in that class; single-label)
+\newcommand{\SuppSplitBrain}{133}
+\newcommand{\SuppStaleWrite}{15}
+\newcommand{\SuppReorder}{10}
+\newcommand{\SuppUnknownKey}{7}
+
+% Full contract per-class counts (TP/FN on gold deny events in class)
+\newcommand{\FullSplitTP}{133}
+\newcommand{\FullSplitFN}{0}
+\newcommand{\FullStaleTP}{15}
+\newcommand{\FullStaleFN}{0}
+\newcommand{\FullReorderTP}{10}
+\newcommand{\FullReorderFN}{0}
+\newcommand{\FullUnknownTP}{7}
+\newcommand{\FullUnknownFN}{0}
+
+% B5 per-class counts
+\newcommand{\BFiveSplitTP}{113}
+\newcommand{\BFiveSplitFN}{20}
+\newcommand{\BFiveStaleTP}{15}
+\newcommand{\BFiveStaleFN}{0}
+\newcommand{\BFiveReorderTP}{0}
+\newcommand{\BFiveReorderFN}{10}
+\newcommand{\BFiveUnknownTP}{0}
+\newcommand{\BFiveUnknownFN}{7}
+
+% Family-level B5 (directory id lab_orchestration_partner_like; paper name partner_derived)
+\newcommand{\BFiveLabExact}{0/30}
+\newcommand{\BFiveLabTP}{30}
+\newcommand{\BFiveLabFN}{30}
+\newcommand{\BFiveLabRecall}{0.5}
+\newcommand{\BFiveLabFOne}{0.6667}
+
+\newcommand{\BFiveSimExact}{30/30}
+\newcommand{\BFiveSimTP}{45}
+\newcommand{\BFiveSimFN}{0}
+\newcommand{\BFiveSimRecall}{1.0}
+\newcommand{\BFiveSimFOne}{1.0}
+
+\newcommand{\BFiveIncExact}{23/30}
+\newcommand{\BFiveIncTP}{53}
+\newcommand{\BFiveIncFN}{7}
+\newcommand{\BFiveIncRecall}{0.8833}
+\newcommand{\BFiveIncFOne}{0.9381}
+
+% Ablations (same replay discipline; see Appendix / ablation_metrics.json for semantics)
+\newcommand{\NoScopeExact}{83/90}
+\newcommand{\NoScopeTP}{158}
+\newcommand{\NoScopeFN}{7}
+\newcommand{\NoScopeSplitRecall}{1.0}
+\newcommand{\NoScopeReorderRecall}{1.0}
+\newcommand{\NoScopeUnknownRecall}{0.0}
+\newcommand{\NoScopeP95}{12.15}
+
+\newcommand{\NoObsExact}{75/90}
+\newcommand{\NoObsTP}{150}
+\newcommand{\NoObsFN}{15}
+\newcommand{\NoObsSplitRecall}{1.0}
+\newcommand{\NoObsReorderRecall}{1.0}
+\newcommand{\NoObsUnknownRecall}{1.0}
+\newcommand{\NoObsP95}{12.41}
+
+\newcommand{\NoHandoverExact}{0/90}
+\newcommand{\NoHandoverTP}{32}
+\newcommand{\NoHandoverFN}{133}
+\newcommand{\NoHandoverSplitRecall}{0.0}
+\newcommand{\NoHandoverReorderRecall}{1.0}
+\newcommand{\NoHandoverUnknownRecall}{1.0}
+\newcommand{\NoHandoverP95}{11.23}
+
+\newcommand{\NoTransitionExact}{90/90}
+\newcommand{\NoTransitionTP}{165}
+\newcommand{\NoTransitionFN}{0}
+\newcommand{\NoTransitionSplitRecall}{1.0}
+\newcommand{\NoTransitionReorderRecall}{1.0}
+\newcommand{\NoTransitionUnknownRecall}{1.0}
+\newcommand{\NoTransitionP95}{12.04}
+
+% Paired significance (Full vs B5, all 270 scored events)
+\newcommand{\McNemarN01}{37}
+\newcommand{\McNemarN10}{0}
+% Exact two-sided McNemar binomial test on 37 discordant pairs (37 vs 0): p = 2^{-36}
+\newcommand{\McNemarPValue}{$1.46\times 10^{-11}$}
+
+% Freeze / anti-leakage (eval.json mtime hash from export; re-run updates timestamp)
+\newcommand{\FreezeTimestamp}{2026-04-09T09:22:15Z}
+\newcommand{\ManifestHash}{8fc32bd534007dfc}
+
+% ------------------------------------------------------------------
+% Optional: override headline latency macros to match frozen bundle
+% (comment out if you keep an externally calibrated timing table)
+% ------------------------------------------------------------------
+% \renewcommand{\FullLatencyMean}{5.0}
+% \renewcommand{\FullLatencyP50}{3.55}
+% \renewcommand{\FullLatencyP95}{10.155}
+% \renewcommand{\FullLatencyP99}{22.69}
+% \renewcommand{\BFiveLatencyMean}{2.78}
+% \renewcommand{\BFiveLatencyP50}{2.4}
+% \renewcommand{\BFiveLatencyP95}{4.5}
+% \renewcommand{\BFiveLatencyP99}{7.74}

@@ -1,0 +1,25 @@
+% Appendix F: paste inside \begin{verbatim}...\end{verbatim} or use \lstinputlisting
+% Paths are relative to repository root; adjust OUT for your machine.
+
+\begin{verbatim}
+# Environment (repository root)
+python -m venv .venv
+# Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+
+python -m pip install --upgrade pip
+python -m pip install -e .
+
+# Evaluation + frozen bundle (set OUT to your run directory)
+set OUT=datasets/runs/p1_submission_freeze_extract
+set PYTHONPATH=impl/src
+
+python scripts/contracts_eval.py --corpus datasets/contracts_real --corpus-recursive --out %OUT%\contracts_eval_real
+python scripts/p1_quasi_real_paper_bundle.py --corpus datasets/contracts_real --out %OUT%
+python scripts/export_p1_submission_freeze_bundle.py --corpus datasets/contracts_real --out %OUT%
+
+# Verify fingerprint in %OUT%\contracts_eval_real\eval.json:
+#   run_manifest.corpus_fingerprint == "0d6cd1defe6b0e33"
+#   run_manifest.corpus_sequence_count == 90
+#   run_manifest.allowed_keys_policy == "non_gold_family_allowlist"
+\end{verbatim}
