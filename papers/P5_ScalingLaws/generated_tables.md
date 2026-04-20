@@ -4,59 +4,79 @@
 
 | Held-out | train_n | test_n | global_mae | oracle_ps_mae | adm_train_ps_mae | regime_train_mae | feat_mae | reg_mae | mean_actual |
 |----------|--------|--------|------------|---------------|------------------|------------------|---------|---------|-------------|
-| lab_profile_v0 | 3600 | 720 | 1.40 | 0.11 | 1.40 | 1.40 | 1.40 | 0.12 | 4.94 |
-| regime_stress_v0 | 3600 | 720 | 0.28 | 0.10 | 0.28 | 0.28 | 0.10 | 0.10 | 3.95 |
-| regime_stress_v1 | 3600 | 720 | 0.28 | 0.10 | 0.28 | 0.28 | 0.10 | 0.10 | 3.95 |
-| rep_cps_scheduling_v0 | 3600 | 720 | 0.28 | 0.10 | 0.28 | 0.28 | 0.10 | 0.10 | 3.95 |
-| traffic_v0 | 3600 | 720 | 0.99 | 0.07 | 0.99 | 0.99 | 0.07 | 0.08 | 2.96 |
-| warehouse_v0 | 3600 | 720 | 0.99 | 0.07 | 0.99 | 0.99 | 0.07 | 0.08 | 2.96 |
+| lab_profile_v0 | 6000 | 1200 | 1.38 | 0.25 | 1.38 | 1.38 | 1.38 | 1.94 | 4.85 |
+| regime_stress_v0 | 6000 | 1200 | 0.36 | 0.21 | 0.36 | 0.36 | 0.21 | 0.21 | 3.88 |
+| regime_stress_v1 | 6000 | 1200 | 0.36 | 0.21 | 0.36 | 0.36 | 0.21 | 0.21 | 3.88 |
+| rep_cps_scheduling_v0 | 6000 | 1200 | 0.36 | 0.21 | 0.36 | 0.36 | 0.21 | 0.38 | 3.88 |
+| traffic_v0 | 6000 | 1200 | 0.97 | 0.17 | 0.97 | 0.97 | 0.17 | 0.16 | 2.91 |
+| warehouse_v0 | 6000 | 1200 | 0.97 | 0.17 | 0.97 | 0.97 | 0.17 | 0.16 | 2.91 |
 
 # Table 2 — Baseline hierarchy (admissible vs oracle)
 
 | Class | Baseline | MAE | CI95 lower | CI95 upper |
 |-------|----------|-----|------------|------------|
-| Admissible | Global mean | 0.70 | 0.34 | 1.06 |
-| Admissible | Per-scenario train-only | 0.70 | - | - |
-| Admissible | Regime train mean | 0.70 | - | - |
-| Admissible | Agent-count train mean | 0.70 | - | - |
-| Admissible | Num-tasks bucket | 0.31 | -0.08 | 0.70 |
-| Admissible | Regression (P5 features) | 0.10 | 0.08 | 0.11 |
-| Oracle | Per-scenario (includes test) | 0.10 | - | - |
+| Admissible | Global mean | 0.74 | 0.42 | 1.05 |
+| Admissible | Per-scenario train-only | 0.74 | - | - |
+| Admissible | Regime train mean | 0.74 | - | - |
+| Admissible | Agent-count train mean | 0.74 | - | - |
+| Admissible | Num-tasks bucket | 0.39 | 0.03 | 0.74 |
+| Admissible | Regression (P5 features) | 0.51 | -0.01 | 1.03 |
+| Oracle | Per-scenario (includes test) | 0.20 | - | - |
 
-**Trigger (admissible):** `trigger_met` = True
+**Trigger (admissible):** `trigger_met` = False
 
 # Table 3 — Regime selection / recommendation
 
-| regime_match_rate | 0.01 |
-| mean_regret_tasks_completed | 0.05 |
-| regret_p95 | 0.00 |
-| Brier collapse (LOFO rows) | 0.00 |
+| regime_match_rate | 0.0285 |
+| mean_regret_tasks_completed | 0.1049 |
+| regret_p95 | 1.0000 |
+| Brier collapse (LOFO rows) | 0.0030 |
 
 # Table 4 — Family- and agent-held-out generalization
 
 | Protocol | regression_mae | trigger_met |
 |----------|----------------|-------------|
-| Leave-one-family-out | 0.08 | True |
-| Leave-one-agent-count-out | 0.10 | False |
+| Leave-one-family-out | 0.52 | True |
+| Leave-one-agent-count-out | 0.22 | False |
 
 # Table 5 — Feature ablation (mean MAE by feature set)
 
 | Features | mean MAE |
 |----------|---------|
-| ['num_tasks'] | 0.10 |
-| ['num_faults'] | 1.08 |
-| ['num_tasks', 'num_faults', 'tool_density', 'agent_count', 'regime_id', 'hierarchy_depth', 'fan_out', 'queue_contention_index', 'shared_state_contention'] | 0.10 |
+| ['num_tasks'] | 0.20 |
+| ['num_faults'] | 1.09 |
+| ['num_tasks', 'num_faults', 'tool_density', 'agent_count', 'regime_id', 'hierarchy_depth', 'fan_out', 'queue_contention_index', 'shared_state_contention'] | 0.51 |
 
 # Table 6 — Calibration / uncertainty
 
-| mean_regression_pi_coverage_95 | 0.95 |
+| mean_regression_pi_coverage_95 | 0.77 |
 | paired_t_p_value (global vs feat fold MAE) | 0.07 |
 
 # Table 7 — Sensitivity vs seed cap
 
 | max_seed | regression_mae | trigger_met |
 |----------|----------------|-------------|
-| 10 | 0.12 | True |
-| 20 | 0.11 | True |
-| 30 | 0.10 | True |
+| 10 | 0.55 | False |
+| 20 | 0.54 | False |
+| 30 | 0.51 | False |
+
+# Table 8 — Regime x agent-count scaling summary (title grounding)
+
+| family | regime | low->high agents | delta_tasks_completed_% | delta_coordination_tax_% | delta_p95_latency_% |
+|--------|--------|------------------|-------------------------|--------------------------|---------------------|
+| lab | blackboard | 1->8 | 1.13 | 670.58 | -9.90 |
+| lab | centralized | 1->8 | -0.30 | 1386.10 | 9.10 |
+| lab | decentralized | 1->8 | -1.12 | 702.12 | 21.26 |
+| lab | hierarchical | 1->8 | -0.50 | 1094.27 | 17.57 |
+| lab | market | 1->8 | 0.92 | 672.05 | -9.46 |
+| traffic | blackboard | 1->8 | 1.16 | 664.62 | -4.06 |
+| traffic | centralized | 1->8 | 0.00 | 1386.61 | 33.22 |
+| traffic | decentralized | 1->8 | -3.41 | 734.68 | 21.28 |
+| traffic | hierarchical | 1->8 | 0.57 | 1079.20 | 29.45 |
+| traffic | market | 1->8 | 1.16 | 664.62 | -4.06 |
+| warehouse | blackboard | 1->8 | 1.16 | 664.62 | -4.06 |
+| warehouse | centralized | 1->8 | 0.00 | 1386.61 | 33.22 |
+| warehouse | decentralized | 1->8 | -3.41 | 734.68 | 21.28 |
+| warehouse | hierarchical | 1->8 | 0.57 | 1079.20 | 29.45 |
+| warehouse | market | 1->8 | 1.16 | 664.62 | -4.06 |
 

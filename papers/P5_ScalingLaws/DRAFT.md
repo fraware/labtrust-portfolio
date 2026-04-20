@@ -1,47 +1,40 @@
 ﻿# When More Agents Hurt: held-out prediction and coordination scaling in CPS
 
 **Paper ID:** `P5_ScalingLaws`  
-**Status:** conditional, evidence-backed on frozen artifacts; publishable path uses the **rich coordination grid** below.
+**Status:** conditional — primary OOS trigger is **not** met on scenario holdout for the current publishable freeze; family holdout **does** trigger. Claims must follow `claims.yaml` and the JSON paths below.
 
 ## Abstract-style summary
 
-This study evaluates whether compact predictors can anticipate coordination outcomes in MAESTRO CPS thin-slice runs when coordination regime and agent count vary. The **default publishable** sweep (`run_paper_experiments.py --paper P5`, non-`--quick`) uses six `real_world` scenario ids, **five** coordination regimes (`blackboard`, `centralized`, `decentralized`, `hierarchical`, `market`), **four** agent-count levels (1, 2, 4, 8), **two** fault labels (`no_drop`, `drop_005`) to bound runtime, and 30 seeds — **7200** thin-slice rows before held-out evaluation. Evaluation distinguishes admissible train-only baselines from oracle analysis baselines to prevent leakage.
+We stress MAESTRO thin-slice runs across **six** `real_world` scenario ids, **five** coordination regimes, **four** agent-count levels (1, 2, 4, 8), and **two** fault labels (`no_drop`, `drop_005`), with **30** seeds (**7200** rows). Features combine scenario YAML fields with trace metadata (`agent_count`, `regime_id`, contention proxies, etc.). Linear predictors use **ridge-stabilized** normal equations when the default P5 feature vector has six or more columns (`impl/src/labtrust_portfolio/scaling.py`).
 
-On the **latest rich-grid run** (terminal log / `heldout_results.json` from that run), **primary `tasks_completed` triggers are not met** on leave-one-scenario-out: `overall_regression_mae` is dominated by a single pathological fold (`rep_cps_scheduling_v0`, regression MAE ~13) while the num-tasks-only ablation stays near ~0.20 MAE, so `trigger_met = false` and `negative_result = true`. **Ridge-style stabilization** is now applied in `scaling._ols_fit` for long P5 feature vectors (`len(feature_cols) >= 6`); **re-run** `python scripts/run_paper_experiments.py --paper P5` after pulling to regenerate frozen JSON and tables with stabilized OLS.
+**Frozen snapshot (eval manifest commit `d2532be`):**
 
-Family holdout uses strict protocol semantics: if any fold cannot fit regression (`regression_mae = null`), then `overall_regression_mae = null`, `trigger_met = false` (e.g. missing fold `lab` in the same run log). Regime holdout in that log beats global/regime/agent baselines but **fails** the admissible trigger because regression does not beat the **num-tasks bucket** baseline (`beat_feature_baseline_out_of_sample = false`).
+- **Leave-one-scenario-out (`tasks_completed`):** `overall_regression_mae` **0.5105**, `overall_feat_baseline_mae` **0.3899**, `overall_baseline_mae` **0.7367**, `mean_regression_pi_coverage_95` **0.771**, `overall_collapse_rate` **0.00292**, **`trigger_met` false** (regression does not beat the num-tasks bucket baseline). The hardest single fold remains **`lab_profile_v0`** (high regression MAE vs other scenarios; see Table 1).
+- **Leave-one-family-out:** `overall_regression_mae` **0.5185**, **`trigger_met` true** (beats global, num-tasks bucket, and regime train-mean baselines on this protocol).
+- **Leave-one-regime-out:** `overall_regression_mae` **0.2370**, **`trigger_met` false** (fails vs num-tasks bucket).
+- **Leave-one-agent-count-out / leave-one-fault-setting-out:** `overall_regression_mae` **0.2157** / **0.2264**, **`trigger_met` false** in both cases.
+- **Sensitivity (scenario LOO, seed caps 10 / 20 / 30):** regression MAE **0.5528 → 0.5351 → 0.5105**; **`trigger_met` false** at every cap.
+- **Recommendation eval:** regime match rate **0.0285**, mean regret **0.1049**, collapse Brier **0.0030** (sparse collapse signal).
+
+**Title grounding:** Table 8 and `datasets/runs/scaling_summary/regime_agent_summary.json` give explicit **1→8** agent deltas by family × regime (e.g. decentralized **traffic** / **warehouse**: about **−3.4%** mean `tasks_completed` with large coordination-tax increases; **centralized** shows near-flat throughput with very large coordination-tax growth).
 
 ## Reproducibility
 
-From repo root:
-
 `PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experiments.py --paper P5`
 
-Outputs include:
+Then refresh markdown tables:
 
-- `datasets/runs/scaling_eval/heldout_results.json`
-- `datasets/runs/scaling_eval_family/heldout_results.json`
-- `datasets/runs/scaling_eval_regime/heldout_results.json`
-- `datasets/runs/scaling_eval_agent_count/heldout_results.json`
-- `datasets/runs/scaling_eval_fault/heldout_results.json`
-- `datasets/runs/scaling_summary/regime_agent_summary.json` (track with `git add -f` if your clone ignores `datasets/runs/**`)
-- `datasets/runs/sensitivity_sweep/scaling_sensitivity.json`
-- `datasets/runs/scaling_recommend/recommendation_eval.json`
-- `papers/P5_ScalingLaws/generated_tables.md`
-- `docs/figures/p5_fig0_pipeline.png` … `p5_fig5_sensitivity.png`
+`PYTHONPATH=impl/src python scripts/export_scaling_tables.py --results datasets/runs/scaling_eval/heldout_results.json --family-results datasets/runs/scaling_eval_family/heldout_results.json --agent-results datasets/runs/scaling_eval_agent_count/heldout_results.json --recommend-results datasets/runs/scaling_recommend/recommendation_eval.json --sensitivity-results datasets/runs/sensitivity_sweep/scaling_sensitivity.json --regime-agent-summary datasets/runs/scaling_summary/regime_agent_summary.json --out papers/P5_ScalingLaws/generated_tables.md`
 
-## Main evidence highlights (rich grid; align to your frozen JSON after re-run)
+`PYTHONPATH=impl/src python scripts/export_scaling_regime_agent_summary.py --runs-dir datasets/runs/multiscenario_runs --out-json datasets/runs/scaling_summary/regime_agent_summary.json --out-md papers/P5_ScalingLaws/regime_agent_summary.md`
 
-- **Design:** 7200 rows; regimes × {1,2,4,8} agents; `no_drop` / `drop_005`; `overall_collapse_rate` on scenario holdout ≈ **0.0029** (nonzero in log).
-- **Scenario LOO (`tasks_completed`):** `overall_regression_mae` ≈ **2.34**, `overall_feat_baseline_mae` ≈ **0.39**, `trigger_met` **false** — see per-fold table for `rep_cps_scheduling_v0` vs other scenarios.
-- **Family LOO:** `overall_regression_mae` **null**, `regression_skipped_reason` cites missing regression on fold `lab`, `trigger_met` **false**.
-- **Regime LOO:** `overall_regression_mae` ≈ **0.23**, `trigger_met` **false** (fails vs num-tasks bucket).
-- **Regime × agent summary:** cite **Table 8** / `scaling_summary/regime_agent_summary.json` for title-level deltas (throughput vs coordination tax when scaling agents).
+If `datasets/runs/**` is ignored, track the summary with `git add -f datasets/runs/scaling_summary/regime_agent_summary.json`.
 
-## Limits and honest scope
+## Main tables
 
-- Primary OLS on the full feature vector can **fail the admissible trigger** on the rich grid until ridge-stabilized artifacts are re-frozen; interpret older drafts that assumed a smaller grid with care.
-- Recommendation metrics remain exploratory (low regime match rate in logs).
-- Collapse remains sparse but **nonzero** in the rich-grid scenario holdout log; still not a strong collapse-risk paper without a dedicated stress slice.
+All numerical tables for the manuscript body should be copied from **`papers/P5_ScalingLaws/generated_tables.md`** (Tables 1–8) so the draft cannot drift from the exporter.
 
-This paper should claim **disciplined leakage-aware evaluation**, **explicit coordination scaling tables**, and **transparent negative / null trigger results** where the data demand it — not an unconditional “we beat all baselines” story on every protocol.
+## Limits
+
+- Do not claim universal `trigger_met` across holdout modes on this freeze.
+- Recommendation and collapse metrics are weakly informative; the paper is strongest on **coordination tax / scaling** plus **evaluation hygiene**.

@@ -1,39 +1,37 @@
-﻿# P5 Scaling Laws claim table (synchronized to frozen artifacts)
+﻿# P5 Scaling Laws claim table (synchronized to frozen artifacts, rich grid)
 
 paper_id: "P5_ScalingLaws"
 title: "When More Agents Hurt: Coordination scaling in MAESTRO CPS scenarios"
-release_id: "scaling_eval"
+release_id: "scaling_eval_rich_grid_7200"
 
 claims:
   - id: "C1"
     statement: >
-      Coordination behavior is a reproducible function of scenario structure,
-      agent count, and coordination regime in MAESTRO thin-slice CPS runs, and
-      scaling deltas directly show where adding agents increases coordination
-      tax and can reduce throughput.
+      Coordination load and throughput vary systematically with scenario family,
+      coordination regime, and agent count in MAESTRO thin-slice runs; frozen
+      regime×agent summaries quantify coordination-tax growth and throughput
+      deltas (including 1→8 agent scaling).
     evidence:
-      release_id: "scaling_eval"
+      release_id: "scaling_eval_rich_grid_7200"
       confidence: "high"
       artifact_paths:
-        - "datasets/runs/scaling_eval/heldout_results.json"
         - "datasets/runs/scaling_summary/regime_agent_summary.json"
         - "datasets/runs/multiscenario_runs/"
         - "impl/src/labtrust_portfolio/thinslice.py"
         - "impl/src/labtrust_portfolio/coordination_profile.py"
-      table_ids: ["Table 1", "Table 5", "Table 8"]
+      table_ids: ["Table 8"]
       figure_ids: ["Figure 2", "Figure 3", "Figure 4"]
 
   - id: "C2"
     statement: >
-      Held-out evaluation is leakage-aware: admissible vs oracle baselines are
-      separated, and strict family-holdout rules null protocol-level regression
-      when any fold cannot fit. On the rich coordination grid, primary
-      tasks_completed trigger_met may be false on scenario or regime holdouts
-      (e.g. ill-conditioned OLS on a rare scenario fold, or regression not
-      beating the num-tasks bucket baseline); ridge stabilization in P5 OLS
-      and re-frozen JSON should be cited for the latest numbers.
+      Held-out evaluation enforces admissible train-only baselines versus oracle
+      analysis baselines, strict null handling when any fold cannot fit
+      regression, and ridge-stabilized linear OLS for the default P5 feature
+      vector. On the current 7200-row publishable grid, leave-one-family-out
+      meets trigger_met for tasks_completed; leave-one-scenario-out and other
+      protocols do not (primarily failing vs the num-tasks bucket baseline).
     evidence:
-      release_id: "scaling_eval"
+      release_id: "scaling_eval_rich_grid_7200"
       confidence: "medium"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
@@ -41,17 +39,18 @@ claims:
         - "datasets/runs/scaling_eval_regime/heldout_results.json"
         - "datasets/runs/scaling_eval_agent_count/heldout_results.json"
         - "datasets/runs/scaling_eval_fault/heldout_results.json"
-      table_ids: ["Table 1", "Table 2", "Table 4", "Table 7"]
+        - "impl/src/labtrust_portfolio/scaling.py"
+        - "scripts/scaling_heldout_eval.py"
+      table_ids: ["Table 1", "Table 2", "Table 4", "Table 5", "Table 7"]
       figure_ids: ["Figure 1", "Figure 5"]
 
   - id: "C3"
     statement: >
-      A regime recommendation artifact is available (counterfactual scoring with
-      uncertainty and unsafe-region flags), but recommendation selection accuracy
-      is currently weak and should be reported as exploratory rather than strong
-      decision superiority.
+      Regime recommendation and collapse-scoring artifacts exist, but regime
+      match rate is low and collapse Brier is small-scale; treat architecture
+      selection as exploratory, not as proven superiority over hindsight.
     evidence:
-      release_id: "scaling_eval"
+      release_id: "scaling_eval_rich_grid_7200"
       confidence: "low"
       artifact_paths:
         - "datasets/runs/scaling_recommend/recommendation_eval.json"
