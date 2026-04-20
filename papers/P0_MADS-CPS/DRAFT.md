@@ -1,6 +1,6 @@
 # MADS-CPS: A Machine-Checkable Minimum Assurance Bar for Agentic Cyber-Physical Workflows
 
-**Draft (v0.2). Paper ID: P0_MADS-CPS.**
+**Manuscript draft (v0.2). Paper ID: P0_MADS-CPS.** Evaluation artifacts use **MAESTRO_REPORT schema v0.2** (`kernel/eval/MAESTRO_REPORT.v0.2.schema.json`) for `maestro_report.json` validation in Tier 1.
 
 **Central claim.** A minimum assurance bar for agentic CPS can be defined in terms of machine-checkable evidence obligations and conformance predicates, independently of the internal decision policy, and can be verified by third parties under both full and restricted audit modes.
 
@@ -72,7 +72,7 @@ We propose a normative framework that constrains interfaces and evidence, not in
 
 ### 4.2 Artifacts
 
-Required artifacts for a run are: (i) trace, (ii) evaluation report (e.g. MAESTRO report), (iii) evidence bundle, (iv) release manifest. Each has a versioned schema; artifact presence and schema validity are the first-layer predicates.
+Required artifacts for a run are: (i) trace (`TRACE.v0.1`), (ii) evaluation report (`maestro_report.json`, **MAESTRO_REPORT v0.2**), (iii) evidence bundle (`EVIDENCE_BUNDLE.v0.1`), (iv) release manifest (`RELEASE_MANIFEST.v0.1`). Each has a versioned schema; artifact presence and schema validity are the first-layer predicates.
 
 ### 4.3 Evidence bundle and admissibility
 
@@ -82,7 +82,7 @@ Required artifacts for a run are: (i) trace, (ii) evaluation report (e.g. MAESTR
 
 **Definition 3 (Conformance tier).** *Conformance tiers* form a monotone hierarchy of machine-checkable predicates.
 
-- **Tier 1:** All required artifacts are present and validate against the kernel schemas.
+- **Tier 1:** All required artifacts are present and validate against the kernel schemas (including `maestro_report.json` against **MAESTRO_REPORT v0.2**).
 - **Tier 2:** Tier 1 plus replay succeeds (state hashes match) and the evidence bundle reports schema_validation_ok and replay_ok (where replay is required by verification mode). This is the default bar for admissible evidence.
 - **Tier 3:** Tier 2 plus PONR coverage: for each PONR-aligned task required by the scenario, the trace contains at least one corresponding task_end event.
 
@@ -130,7 +130,7 @@ We instantiate MADS-CPS in a robot-centric autonomous laboratory profile. The th
 - **E1 (Conformance corpus):** A challenge set of positive and negative run directories (missing artifact, schema-invalid artifact, hash mismatch, replay mismatch, missing PONR event, etc.). The checker is run on each; we report expected vs observed tier and agreement.
 - **E2 (Restricted auditability):** Which predicates remain checkable under full vs redacted trace and under different verification modes (full, evaluator, regulator, public/redacted). We report a verification-mode admissibility matrix.
 - **E3 (Replay link):** An independent verifier recomputes the evaluation report from the trace. We run over multiple seeds and report match rate and variance (e.g. tasks_completed, p95 latency) with 95% CIs. The verifier is implemented as a distinct path (standalone script or subprocess) that does not depend on the producer pipeline.
-- **E4 (Algorithm-independence):** At least two internally different coordination/planning methods (e.g. centralized adapter and REP-CPS or retry-heavy adapter) emit the same interface-level artifacts. We run the same conformance checker on both and show that conformance depends on artifacts and envelope, not controller identity.
+- **E4 (Algorithm-independence):** At least two internally different coordination/planning methods (centralized and rep_cps adapters) emit the same interface-level artifacts. We run the same conformance checker on both and show that conformance depends on artifacts and envelope, not controller identity.
 
 **Metrics.** Tier 1/2/3 pass/fail; checker agreement on challenge set; admissibility matrix (predicate × mode); replay match rate and latency variance; conformance rate per adapter/scenario.
 
@@ -188,6 +188,6 @@ We introduced MADS-CPS, a machine-checkable minimum assurance bar for agentic CP
 - **Figure 3 (redaction preservation/loss):** `python scripts/export_p0_redaction_figure.py` (output `docs/figures/p0_redaction_figure.mmd`).
 - **Per-seed E3 markdown (supporting Table 3):** `python scripts/export_e3_table.py`. Run manifest: `datasets/runs/e3_summary.json` (`run_manifest`); release bundle: `datasets/releases/p0_e3_release/release_manifest.json`.
 
-**Kernel and schema paths (for artifact reviewers).** Boundary, envelope, and definitions: `kernel/mads/NORMATIVE.v0.1.md`, `kernel/mads/VERIFICATION_MODES.v0.1.md`, `kernel/mads/PONR_ENFORCEMENT.v0.1.md`. Trace schema: `kernel/trace/TRACE.v0.1.schema.json`. Evidence bundle schema: `kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json`. Release manifest schema: `kernel/policy/RELEASE_MANIFEST.v0.1.schema.json`. Lab profile: `profiles/lab/v0.1/`.
+**Kernel and schema paths (for artifact reviewers).** Boundary, envelope, and definitions: `kernel/mads/NORMATIVE.v0.1.md`, `kernel/mads/VERIFICATION_MODES.v0.1.md`, `kernel/mads/PONR_ENFORCEMENT.v0.1.md`. Trace schema: `kernel/trace/TRACE.v0.1.schema.json`. MAESTRO report schema: `kernel/eval/MAESTRO_REPORT.v0.2.schema.json`. Evidence bundle schema: `kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json`. Release manifest schema: `kernel/policy/RELEASE_MANIFEST.v0.1.schema.json`. Lab profile: `profiles/lab/v0.1/`. Frozen E3 release bundle: `datasets/releases/p0_e3_release/` (includes `conformance.json` when produced via `produce_p0_e3_release.py`).
 
-**Claims and backing.** C1 (controller-independence): Backed by kernel NORMATIVE and VERIFICATION_MODES; E4 (two adapters, same checker); Table 1, Table 3. C2 (machine-checkable tiers): Backed by conformance checker and E1 corpus; Table 1, Table 2, Figure 1, Figure 2. C3 (admissibility): Backed by evidence bundle schema, E2 redaction and Table 2, E3 replay link; Figure 3. C4 (PONR-gated release): Backed by PONR_ENFORCEMENT and release gate in code; Table 2 documents what remains checkable under redaction.
+**Claims and backing.** C1 (controller-independence): Backed by kernel NORMATIVE and VERIFICATION_MODES; E4 (two adapters, same checker); Table 1, Table 3. C2 (machine-checkable tiers): Backed by conformance checker (including MAESTRO_REPORT v0.2 validation), E1 corpus, and `conformance.json` in the frozen release; Table 1, Table 2, Figure 1, Figure 2. C3 (admissibility): Backed by evidence bundle schema, MAESTRO trace-to-report linkage, E2 redaction and Table 2, E3 replay link; Figure 3. C4 (PONR-gated release): Backed by PONR_ENFORCEMENT and release gate in code; Table 2 documents what remains checkable under redaction.

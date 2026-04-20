@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "run_id": "run_feef4debc8",
+  "run_id": "run_82685c9e25",
   "scenario_id": "toy_lab_v0",
   "seed": 1,
-  "start_time_utc": "2026-04-20T05:51:23.151238Z",
+  "start_time_utc": "2026-04-20T06:23:57.812432Z",
   "events": [
     {
       "seq": 0,
@@ -14,7 +14,7 @@
         "id": "scheduler"
       },
       "payload": {
-        "_redacted_ref": "9ff59c91cf6af5c4b8b9f1537739f6d4f6a1c4b94b6e2354223b471919b191b8"
+        "_redacted_ref": "48fe5d9f4e517f098f4827958a942ef7b3fb75f0c1710ab9647e0ab6083817cb"
       },
       "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
     },
@@ -53,7 +53,7 @@
         "id": "scheduler"
       },
       "payload": {
-        "_redacted_ref": "0055c3b96d147e928bbe70f9fa379dcfc6a6d52b71e1042e644b6b7bc0cfbf1f"
+        "_redacted_ref": "9a2e61f5780edf01f0da319692f37a972520cb598e64aacc7bc9957e696c8a51"
       },
       "state_hash_after": "5a9477e5978c0c24864e01b2cc2e69fcefe663c78a339846e4c2857c3e81605c"
     },
@@ -92,7 +92,7 @@
         "id": "scheduler"
       },
       "payload": {
-        "_redacted_ref": "b771812c8fe7f5a1840f75e4942aad0d132fab40d5cf95d181cf603917c8b637"
+        "_redacted_ref": "36a8b6c5a2e305f8cee429f542c4eb1be2e8224081c0c6116a130602e5e0644b"
       },
       "state_hash_after": "1206209b42d875d68a2c6b8cf50ac80bb63988e9a4248e16d051fea386b6070d"
     },
@@ -131,7 +131,7 @@
         "id": "scheduler"
       },
       "payload": {
-        "_redacted_ref": "a3d03a5759ff3e8eeffa80fa9b9d997baa5399f21b179dce853ab0b963c7fee3"
+        "_redacted_ref": "8fe5cde0323fb452c29242ec9683996119163ebf794cdc12b145257685bb94a4"
       },
       "state_hash_after": "9333ad6003f3d687c0c40444fcc63711588ff94c9cd5ce0c250624c3d04856de"
     },
@@ -196,6 +196,23 @@
     "constraint_guard_trigger_prob": 0.0,
     "sensor_stale_prob": 0.0,
     "shutdown_after_first_fault": false,
-    "deadline_miss_prob": 0.0
+    "deadline_miss_prob": 0.0,
+    "fault_setting_label": "unknown",
+    "agent_count": 1,
+    "coordination_regime": "centralized",
+    "coordination_topology": "centralized",
+    "hierarchy_depth": 2,
+    "fan_out": 1,
+    "handoff_factor": 1,
+    "shared_state_contention": 0.25,
+    "deadline_tightness": 1.0,
+    "critical_path_length": 4,
+    "branching_factor": 1.0,
+    "queue_contention_index": 0.25,
+    "regime_fault_interaction": 0.0,
+    "regime_id": 0,
+    "effective_drop_completion_prob": 0.0,
+    "latency_stress_multiplier": 1.0,
+    "drop_stress_multiplier": 1.0
   }
 }

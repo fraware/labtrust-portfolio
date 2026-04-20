@@ -65,8 +65,7 @@ def main() -> int:
         obs = f"Tier {m.get('observed_tier', '—')} {'PASS' if m.get('observed_pass') else 'FAIL'}"
         agree = "yes" if m.get("agreement", False) else "no"
         fault = m.get("fault_injected") or m.get("description") or ""
-        if len(fault) > 48:
-            fault = fault[:45] + "..."
+        fault = fault.replace("|", "\\|")
         lines.append(f"| {m['case_id']} | {fault} | {exp} | {obs} | {agree} |")
     lines.append("")
     for line in lines:

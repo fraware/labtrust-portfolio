@@ -38,21 +38,23 @@ What must exist—controls, telemetry, evidence admissibility, and conformance t
 Appendix: reproduction and artifact references
 
 ## 6) Experiment plan (E1–E4)
-- **E1 (Conformance corpus):** Challenge set of run dirs (missing artifact, schema-invalid, hash mismatch, replay mismatch, missing PONR event, etc.); checker run on each; Table 1 (case ID, fault injected, expected tier, observed tier, agreement).
+- **E1 (Conformance corpus):** Challenge set of run dirs (missing artifact, schema-invalid, hash mismatch, replay mismatch, missing PONR event, etc.); checker run on each; Table 1 (case ID, fault injected, expected tier, observed tier, agreement). Tier 1 includes schema validation of `maestro_report.json` against **MAESTRO_REPORT v0.2** (see kernel).
 - **E2 (Restricted auditability):** Verification-mode admissibility matrix: predicate x full / evaluator / regulator / public-redacted; Table 2.
-- **E3 (Replay link):** Independent verifier (standalone script or subprocess) recomputes report from trace; multiple seeds; match rate and variance; part of Table 3.
-- **E4 (Algorithm-independence):** At least two adapters (e.g. centralized, REP-CPS or retry-heavy) emit same artifact interface; same checker; conformance by scenario/controller; Table 3.
+- **E3 (Replay link):** Independent verifier recomputes the evaluation report from the trace; for publishable evidence use **`--standalone-verifier`** (separate process) with **20 seeds** and scenarios **`toy_lab_v0,lab_profile_v0`**; match rate and variance feed Table 3 and per-seed export.
+- **E4 (Algorithm-independence):** At least two adapters (centralized, rep_cps) emit the same artifact interface; same checker; conformance by scenario/controller; Table 3.
 
 Reporting rules: repeated trials where stochasticity exists; explicit variance reporting; all runs produce admissible evidence bundles.
 
 ## 7) Artifact checklist (must ship)
+- `kernel/trace/TRACE.v0.1.schema.json`
+- `kernel/eval/MAESTRO_REPORT.v0.2.schema.json` (Tier 1 validation for `maestro_report.json`)
 - `kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json`
 - `kernel/policy/RELEASE_MANIFEST.v0.1.schema.json`
 - `kernel/mads/VERIFICATION_MODES.v0.1.md` (restricted verification posture)
 - `profiles/lab/v0.1/` (PONRs, fault model, minimal telemetry fields)
-- Reference thin-slice pipeline producing: TRACE, MAESTRO_REPORT, EvidenceBundle, ReleaseManifest
-- Conformance checker: Tier pass/fail computed from artifacts
-- E1 corpus builder and Table 1 export; E2 matrix (4 columns); E3/E4 scripts and Table 3
+- Reference thin-slice pipeline producing: trace, MAESTRO report, evidence bundle, release manifest
+- Conformance checker: Tier pass/fail computed from artifacts; frozen release includes `datasets/releases/p0_e3_release/conformance.json` when produced via the release script
+- E1 corpus (`corpus_manifest.json`) and Table 1 export; E2 matrix (4 columns); E3/E4 scripts and Table 3
 
 ## 8) Kill criteria (stop or re-scope hard)
 - **K0 (admissibility):** If any "admissibility" condition cannot be computed from logged fields (trace + evidence bundle + release manifest), it must be demoted to **non-normative** (document only). Conformance checker and gatekeeper must only use mechanically checkable predicates from artifacts.

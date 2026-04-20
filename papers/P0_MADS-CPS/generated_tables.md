@@ -1,5 +1,9 @@
 # Generated tables for P0 (P0_MADS-CPS)
 
+Regenerate from repo root (`PYTHONPATH=impl/src`, `LABTRUST_KERNEL_DIR=kernel`): `python scripts/generate_paper_artifacts.py --paper P0`.
+
+Tier 1 includes `maestro_report.json` validation against `kernel/eval/MAESTRO_REPORT.v0.2.schema.json`.
+
 ## From export_e1_corpus_table.py
 
 ## Table 1 — E1 conformance corpus
@@ -12,8 +16,8 @@
 | schema_invalid | schema-invalid artifact (trace) | Tier 1 FAIL | Tier 1 FAIL | yes |
 | hash_mismatch | hash mismatch (state_hash_after corrupted) | Tier 2 FAIL | Tier 2 FAIL | yes |
 | replay_mismatch | evidence_bundle.verification.replay_ok=false | Tier 2 FAIL | Tier 2 FAIL | yes |
-| missing_ponr | missing PONR event (lab_profile_v0 requires d... | Tier 3 FAIL | Tier 3 FAIL | yes |
-| stale_release_manifest | stale/incomplete release manifest (missing re... | Tier 1 FAIL | Tier 1 FAIL | yes |
+| missing_ponr | missing PONR event (lab_profile_v0 requires disposition_commit) | Tier 3 FAIL | Tier 3 FAIL | yes |
+| stale_release_manifest | stale/incomplete release manifest (missing release_id) | Tier 1 FAIL | Tier 1 FAIL | yes |
 
 ## From export_e2_admissibility_matrix.py
 

@@ -8,7 +8,7 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 ## P0 — MADS-CPS (machine-checkable minimum assurance bar)
 
-**What it measures:** E1 conformance corpus (challenge set with injected faults; checker agreement). E2 restricted auditability (4-col verification-mode admissibility matrix). E3 replay link (independent verifier; optional --standalone-verifier). E4 algorithm-independence (two adapters, same artifact interface).
+**What it measures:** E1 conformance corpus (challenge set with injected faults; checker agreement; Tier 1 validates `maestro_report.json` against MAESTRO_REPORT v0.2). E2 restricted auditability (4-col verification-mode admissibility matrix). E3 replay link (independent verifier; **`--standalone-verifier`** recommended for publishable runs). E4 algorithm-independence (two adapters, same artifact interface).
 
 **Result locations:**
 - `datasets/runs/p0_conformance_corpus/` — E1 corpus (case_* dirs, corpus_manifest.json)
@@ -237,7 +237,7 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 | Paper | One-line result |
 |-------|------------------|
-| P0 | E1 conformance corpus (build_p0_conformance_corpus, export_e1_corpus_table); E2 4-col admissibility matrix; E3 replay link (optional --standalone-verifier); E4 multi-adapter (run_p0_e4_multi_adapter, export_p0_table3); Table 1/2/3, Figures 1–3; verify_maestro_from_trace.py; repro in DRAFT Appendix. |
+| P0 | E1 conformance corpus (build_p0_conformance_corpus, export_e1_corpus_table); E2 4-col admissibility matrix; E3 replay link (`produce_p0_e3_release` / `replay_link_e3` with `--standalone-verifier` for publishable evidence); E4 multi-adapter (run_p0_e4_multi_adapter, export_p0_table3); Table 1/2/3, Figures 1–3; MAESTRO_REPORT v0.2; repro in DRAFT Appendix. |
 | P1 | Contract validator: corpus detection_ok; scale_test/scale_sweep; gatekeeper check_contracts; instrument state machine; P1_TRACE_DERIVABILITY.md; export_contracts_corpus_table + export_p1_appendix_tex; render_p1_flow_figure; plot_p1_paper_figures; submission lock at papers/P1_Contracts/SUBMISSION_LOCK.md. |
 | P2 | REP-CPS profile; scoped adapter parity; rep_cps_scheduling_v0 + scheduling_dependent_eval; delay_fault_prob sweep, optional drop_completion_prob sweep; per_scenario summaries; excellence_metrics with comparison statistics; freshness/spoof/messaging_sim/dynamic_series; offline comparator baselines; Tables 1–7 (includes per-scenario summary, comparison statistics, messaging_sim and dynamic_aggregation_series blocks); robust bias offline; conditional scope per CONDITIONAL_TRIGGERS. Figures: summary (Figure 1), gate-threshold (Figure 2), dynamics (Figure 3), latency (Figure 4). Optional convergence (Table 4) when --aggregation-steps > 1. |
 | P3 | schema_version; baseline_overhead; multi_seed_overhead; corpus_outcome_wilson_ci95; corpus_space_summary; per_trace localization + space fields; empirical p95/p99 + bootstrap CIs; verify_p3_replay_summary; field_style_pass; plot_replay_overhead (optional error bars); L1 stub + L1 twin; export_replay_corpus_table (Table 1b); L2 design subsection. |

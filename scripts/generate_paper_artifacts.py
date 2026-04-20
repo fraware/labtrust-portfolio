@@ -186,6 +186,17 @@ def main() -> int:
 
         # 2. Run export scripts, write to generated_tables.md (skip if missing and not --skip-eval-check)
         table_lines = [f"# Generated tables for {pid} ({folder})", ""]
+        if pid == "P0":
+            _p0_repro = (
+                "Regenerate from repo root (`PYTHONPATH=impl/src`, "
+                "`LABTRUST_KERNEL_DIR=kernel`): "
+                "`python scripts/generate_paper_artifacts.py --paper P0`."
+            )
+            _p0_maestro = (
+                "Tier 1 includes `maestro_report.json` validation against "
+                "`kernel/eval/MAESTRO_REPORT.v0.2.schema.json`."
+            )
+            table_lines.extend([_p0_repro, "", _p0_maestro, ""])
         any_export = False
         run_exports = args.skip_eval_check or not missing
         for script_name, script_args in export_cmds:

@@ -24,6 +24,7 @@ claims:
     evidence:
       release_id: "p0_e3_release"
       artifact_paths:
+        - "kernel/eval/MAESTRO_REPORT.v0.2.schema.json"
         - "datasets/releases/p0_e3_release/evidence_bundle.json"
         - "datasets/releases/p0_e3_release/conformance.json"
         - "impl/src/labtrust_portfolio/conformance.py"
@@ -36,6 +37,7 @@ claims:
       release_id: "p0_e3_release"
       artifact_paths:
         - "kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json"
+        - "kernel/eval/MAESTRO_REPORT.v0.2.schema.json"
         - "datasets/releases/p0_e3_release/evidence_bundle.json"
         - "datasets/runs/e2_redaction_demo/evidence_bundle_redacted.json"
         - "datasets/releases/p0_e3_release/trace.json"
@@ -54,5 +56,5 @@ claims:
       table_ids: ["Table 1", "Table 2"]
       figure_ids: []
 
-# E1: conformance corpus (Table 1); E2: admissibility matrix (Table 2); E3: replay link; E4: algorithm-independence (Table 3).
-# Reproduction commands and file paths: see Appendix in DRAFT.md.
+# E1: conformance corpus (Table 1); E2: admissibility matrix (Table 2); E3: replay link (standalone verifier); E4: algorithm-independence (Table 3).
+# Reproduction: papers/P0_MADS-CPS/DRAFT.md (Reproducibility + Appendix). E3 publishable path uses produce_p0_e3_release.py / replay_link_e3.py with --standalone-verifier.
