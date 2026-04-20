@@ -51,15 +51,15 @@ Per-trace divergence detection, localization vs expected (when declared), ambigu
 - n_seeds: 5
 - all_pass: true
 - n_pass: 5
-- mean_time_ms: 0.4403
-- stdev_time_ms: 0.0094
-- min_time_ms: 0.4287
-- max_time_ms: 0.4542
+- mean_time_ms: 0.3878
+- stdev_time_ms: 0.0138
+- min_time_ms: 0.3744
+- max_time_ms: 0.4063
 
 ### L1 twin on real_ingest traces (second evaluation family)
 
 | Trace | L0 replay_ok | L1 twin_ok | L1 time (ms) |
 |-------|--------------|------------|--------------|
-| real_bucket_example | true | true | 0.3262 |
-| real_bucket_toy_lab_session | true | true | 0.4532 |
+| real_bucket_example | true | true | 0.2408 |
+| real_bucket_toy_lab_session | true | true | 0.3871 |
 - real_ingest_all_pass: true

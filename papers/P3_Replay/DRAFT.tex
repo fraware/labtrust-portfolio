@@ -53,7 +53,7 @@
 \maketitle
 
 \begin{abstract}
-Replayability is a missing assurance primitive for agentic cyber-physical systems (CPS). Logs are insufficient for independent replay verification: they may record what happened, but not whether the same trace re-executes to the same control-plane state or where hidden divergence first appears. We present a replay framework organized into replay levels \Lzero/\Lone/\Ltwo, with a concrete, evaluated \Lzero{} contract for per-event verification and first-divergence localization. The goal is intentionally narrower than whole-process record/replay: we target independently checkable control-plane evidence under declared trace semantics, not full-process or hardware determinism. Traces carry sequence number, time, event type, actor, payload, and state-hash commitments; replay re-applies events, recomputes state, and emits structured diagnostics when replayed and committed hashes differ. We evaluate over explicit evidence lanes: synthetic traps, synthetic passes, field-proxy traces, and a real-ingest example. On the evaluated corpus, expected pass/fail outcomes are met and seq-labeled traps localize at the expected event. Replay outputs are integrated into evidence bundles for audit-style use. On the publishable run (20 replays of the primary thin-slice trace), full \Lzero{} replay has mean overhead 0.3495\,ms, empirical p95 0.6911\,ms, and empirical p99 0.7821\,ms; the paired full-vs-apply-only mean difference is 0.3251\,ms (95\% bootstrap CI [0.2613, 0.3989]\,ms). We do not claim fleet-scale determinism, hardware equivalence, or physics replay. The contribution is a contract-bounded CPS evidence path: replay levels, a CPS-aware trace contract, sequence-level nondeterminism localization, structured diagnostics, and bounded verification overhead against explicit baselines.
+Replayability is a missing assurance primitive for agentic cyber-physical systems (CPS). Logs are insufficient for independent replay verification: they may record what happened, but not whether the same trace re-executes to the same control-plane state or where hidden divergence first appears. We present a replay framework organized into replay levels \Lzero/\Lone/\Ltwo, with a concrete, evaluated \Lzero{} contract for per-event verification and first-divergence localization. The goal is intentionally narrower than whole-process record/replay: we target independently checkable control-plane evidence under declared trace semantics, not full-process or hardware determinism. Traces carry sequence number, time, event type, actor, payload, and state-hash commitments; replay re-applies events, recomputes state, and emits structured diagnostics when replayed and committed hashes differ. We evaluate over explicit evidence lanes: synthetic traps, synthetic passes, field-proxy traces, and two real-ingest lanes (template plus redacted workflow export). On the evaluated corpus, expected pass/fail outcomes are met and seq-labeled traps localize at the expected event. Replay outputs are integrated into evidence bundles for audit-style use. On the publishable run (20 replays of the primary thin-slice trace), full \Lzero{} replay has mean overhead 0.0984\,ms, empirical p95 0.1055\,ms, and empirical p99 0.124\,ms; the paired full-vs-apply-only mean difference is 0.0901\,ms (95\% bootstrap CI [0.0879, 0.0935]\,ms). We do not claim fleet-scale determinism, hardware equivalence, or physics replay. The contribution is a contract-bounded CPS evidence path: replay levels, a CPS-aware trace contract, sequence-level nondeterminism localization, structured diagnostics, and bounded verification overhead against explicit baselines.
 \end{abstract}
 
 \section{Introduction}
@@ -409,7 +409,7 @@ Claim link: this subsection supports the cost component of C2 and the deployabil
 \toprule
 $n_{\text{replays}}$ & mean (ms) & stdev (ms) & p95 (ms) & p99 (ms) \\
 \midrule
-20 & 0.3495 & 0.1680 & 0.6911 & 0.7821 \\
+20 & 0.0984 & 0.0075 & 0.1055 & 0.124 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -419,7 +419,7 @@ For the intended use case --- control-plane audit and evidence generation --- th
 \subsection{Baselines and incremental verification cost}
 
 Question: what does structured verification add versus weaker alternatives?  
-Answer: full \Lzero{} is measurably slower than apply-only and final-hash-only, with paired full-vs-apply-only difference mean 0.3251\,ms (95\% bootstrap CI [0.2613, 0.3989]).  
+Answer: full \Lzero{} is measurably slower than apply-only and final-hash-only, with paired full-vs-apply-only difference mean 0.0901\,ms (95\% bootstrap CI [0.0879, 0.0935]).  
 Why it matters: this quantifies the price of admissible evidence (per-event commitments and witness diagnostics), not merely replay speed.
 Claim link: this subsection is direct evidence for C2.
 
@@ -431,9 +431,9 @@ Claim link: this subsection is direct evidence for C2.
 \toprule
 Variant & mean time (ms) & Approx.\ added cost vs apply-only (ms) & Interpretation \\
 \midrule
-Apply-only, no hash & 0.0244 & 0.0000 & Lower bound; no verification, no audit \\
-Final-hash-only & 0.0783 & 0.0539 & End-state verification only; no per-event localization \\
-Full \Lzero{} replay & 0.3495 & 0.3251 & Per-event checks and structured diagnostics \\
+Apply-only, no hash & 0.0082 & 0.0000 & Lower bound; no verification, no audit \\
+Final-hash-only & 0.0154 & 0.0072 & End-state verification only; no per-event localization \\
+Full \Lzero{} replay & 0.0984 & 0.0901 & Per-event checks and structured diagnostics \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -561,7 +561,7 @@ We assume a trusted replay engine and transition semantics for the declared \Lze
 
 \section{Conclusion}
 
-This paper presents a replay framework for agentic CPS built around replay levels and a concrete \Lzero{} contract. The central contribution is not full record/replay, but a reusable assurance mechanism: sequence-level detection and localization of control-plane divergence relative to declared trace semantics, exported as independently checkable evidence artifacts. The evaluated artifact combines a CPS-aware trace format, replay engine, structured diagnostics, explicit baselines, lane-separated corpus reporting, and evidence-bundle integration. On the evaluated corpus, expected outcomes are met and seq-labeled trap divergences localize at the expected event. On the primary thin-slice trace, full \Lzero{} replay remains sub-millisecond, with 0.3495\,ms mean overhead and empirical p99 below 1\,ms. This is sufficient to make replay practical as routine control-plane assurance infrastructure while remaining explicit about open scope: hardware determinism, physics replay, and production-scale deployment.
+This paper presents a replay framework for agentic CPS built around replay levels and a concrete \Lzero{} contract. The central contribution is not full record/replay, but a reusable assurance mechanism: sequence-level detection and localization of control-plane divergence relative to declared trace semantics, exported as independently checkable evidence artifacts. The evaluated artifact combines a CPS-aware trace format, replay engine, structured diagnostics, explicit baselines, lane-separated corpus reporting, and evidence-bundle integration. On the evaluated corpus, expected outcomes are met and seq-labeled trap divergences localize at the expected event. On the primary thin-slice trace, full \Lzero{} replay remains sub-millisecond, with 0.0984\,ms mean overhead and empirical p99 0.124\,ms. This is sufficient to make replay practical as routine control-plane assurance infrastructure while remaining explicit about open scope: hardware determinism, physics replay, and production-scale deployment.
 
 \appendix
 

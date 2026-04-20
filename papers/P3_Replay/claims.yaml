@@ -5,7 +5,7 @@
 # Claim hierarchy (state-of-the-art framing):
 # - Primary: contract-bounded L0 replay detects and localizes divergence (traps + stats).
 # - Secondary: evidence-bundle integration for admissible replay outcomes.
-# - Supporting (medium confidence): audit/time-travel style reconstruction from diagnostics.
+# - L1: control-plane twin contract; multi-seed + real_ingest families when --l1-twin is run (not physics replay).
 
 paper_id: "P3_Replay"
 title: "Replay Levels and Nondeterminism Detection for Agentic CPS"
@@ -13,12 +13,13 @@ release_id: "replay_eval"
 
 claims:
   - id: "C1"
-    statement: "A CPS-aware trace format plus a determinism contract enables L0 replay with per-event verification and sequence-level localization of divergence (structured diagnostics), evaluated across explicit evidence lanes (synthetic traps, synthetic passes, field-proxy traces, and real-ingest example) with corpus-space and category-aware reporting."
+    statement: "A CPS-aware trace format plus a determinism contract enables L0 replay with per-event verification and sequence-level localization of divergence (structured diagnostics), evaluated across explicit evidence lanes (synthetic traps, synthetic passes, field-proxy traces, and two real-ingest lanes) with corpus-space and category-aware reporting."
     evidence:
       release_id: "replay_eval"
       artifact_paths:
         - "datasets/runs/replay_eval/summary.json"
         - "bench/replay/corpus/"
+        - "bench/replay/corpus/REAL_BUCKET_TOY_LAB_SESSION.md"
         - "kernel/trace/TRACE.v0.1.schema.json"
         - "kernel/trace/REPLAY_LEVELS.v0.1.md"
         - "impl/src/labtrust_portfolio/replay.py"
@@ -28,24 +29,25 @@ claims:
       confidence: high
 
   - id: "C2"
-    statement: "Hidden nondeterminism is detectable: same trace not equal to same control-plane behavior triggers structured diagnostics; baselines (apply-only, final-hash-only) quantify the incremental cost of full L0 verification."
+    statement: "Hidden nondeterminism is detectable: same trace not equal to same control-plane behavior triggers structured diagnostics; baselines (apply-only, final-hash-only) quantify the incremental cost of full L0 verification; overhead_curve reports multi-prefix replay cost vs event count."
     evidence:
       release_id: "replay_eval"
       artifact_paths:
         - "datasets/runs/replay_eval/summary.json"
         - "impl/src/labtrust_portfolio/replay.py"
       table_ids: ["Table 1", "Table 1b", "Table 3"]
-      figure_ids: ["Figure baseline-bars"]
+      figure_ids: ["Figure 1", "Figure baseline-bars"]
       confidence: high
 
   - id: "C3"
-    statement: "Replay supports audit-style reconstruction of control-plane decisions: event-order replay with seq-level diagnostics (expected_hash vs got_hash), witness slices, and an L1 twin extension path summarized across multiple seeds."
+    statement: "Replay supports audit-style reconstruction of control-plane decisions: event-order replay with seq-level diagnostics (expected_hash vs got_hash), witness slices, and an L1 twin contract summarized across thin-slice seeds and passing real_ingest traces (control-plane twin, not physics replay)."
     evidence:
       release_id: "replay_eval"
       artifact_paths:
         - "datasets/runs/replay_eval/summary.json"
         - "impl/src/labtrust_portfolio/replay.py"
-      table_ids: ["Table 1", "Table 1b", "Table L1 supplementary", "Table artifact-to-evidence"]
+        - "papers/P3_Replay/l1_twin_evidence.md"
+      table_ids: ["Table 1", "Table 1b", "generated_tables L1 section", "Table artifact-to-evidence"]
       figure_ids: ["Figure 2"]
       confidence: medium
 
@@ -60,4 +62,6 @@ claims:
       figure_ids: []
       confidence: high
 
-# Table 1: corpus/fidelity lane summary. Table 1b: per-trace localization + corpus space + corpus_category (export_replay_corpus_table.py). Table 2: overhead full L0. Table 3: baselines (summary baseline_overhead). Figure 0: export_p3_replay_levels_figure.py (+ mmd from export_p3_replay_levels_diagram.py). Figure 1: plot_replay_overhead.py. Figure 2: export_p3_first_divergence_timeline.py. Supplementary visuals: plot_p3_baseline_bars.py, plot_p3_corpus_lanes.py. Bundle: export_p3_paper_figures.py.
+# Table 1: corpus/fidelity. Table 1b: localization + corpus space + corpus_category.
+# Table 2: overhead_stats. Table 3: baseline_overhead. L1: l1_twin_summary + real_ingest_traces in summary.json / generated_tables.md.
+# Figures: export_p3_paper_figures.py bundle. Verify: verify_p3_replay_summary.py --strict-curve (>=2 overhead_curve points).

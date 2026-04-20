@@ -29,3 +29,11 @@ pdflatex -interaction=nonstopmode -halt-on-error -output-directory papers/P3_Rep
 ```
 
 Figures under `papers/P3_Replay/figures/` must exist (see `scripts/export_p3_paper_figures.py`).
+
+## CI
+
+GitHub Actions job **`p3-paper-latex`** (see `.github/workflows/ci.yml`) compiles `papers/P3_Replay/DRAFT.tex` twice on Ubuntu with `texlive-latex-extra`. Local builds may produce `DRAFT.pdf`, `DRAFT.aux`, `DRAFT.log`, etc.; those artifacts are listed in `papers/P3_Replay/.gitignore` and should not be committed.
+
+## Syncing numbers
+
+After changing `summary.json`, regenerate tables and figures, then align **abstract and tables in `DRAFT.tex`** with `overhead_stats`, `baseline_overhead`, and `l1_twin_summary` from the summary file.

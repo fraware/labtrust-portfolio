@@ -2,52 +2,52 @@
   "overhead_curve": [
     {
       "event_count": 3,
-      "p95_replay_ms": 0.0337,
-      "p95_replay_stdev_ms": 0.0046,
-      "p95_replay_ci95_lower_ms": 0.0284,
-      "p95_replay_ci95_upper_ms": 0.0477
+      "p95_replay_ms": 0.0344,
+      "p95_replay_stdev_ms": 0.0035,
+      "p95_replay_ci95_lower_ms": 0.0247,
+      "p95_replay_ci95_upper_ms": 0.0358
     },
     {
       "event_count": 5,
-      "p95_replay_ms": 0.0521,
-      "p95_replay_stdev_ms": 0.0108,
-      "p95_replay_ci95_lower_ms": 0.0444,
-      "p95_replay_ci95_upper_ms": 0.0916
+      "p95_replay_ms": 0.0519,
+      "p95_replay_stdev_ms": 0.0121,
+      "p95_replay_ci95_lower_ms": 0.0436,
+      "p95_replay_ci95_upper_ms": 0.0903
     },
     {
       "event_count": 7,
-      "p95_replay_ms": 0.0828,
-      "p95_replay_stdev_ms": 0.0208,
-      "p95_replay_ci95_lower_ms": 0.0708,
-      "p95_replay_ci95_upper_ms": 0.1485
+      "p95_replay_ms": 0.0954,
+      "p95_replay_stdev_ms": 0.0157,
+      "p95_replay_ci95_lower_ms": 0.0555,
+      "p95_replay_ci95_upper_ms": 0.0977
     },
     {
       "event_count": 9,
-      "p95_replay_ms": 0.0854,
-      "p95_replay_stdev_ms": 0.0089,
-      "p95_replay_ci95_lower_ms": 0.0772,
-      "p95_replay_ci95_upper_ms": 0.1143
+      "p95_replay_ms": 0.0698,
+      "p95_replay_stdev_ms": 0.0081,
+      "p95_replay_ci95_lower_ms": 0.0657,
+      "p95_replay_ci95_upper_ms": 0.1014
     },
     {
       "event_count": 11,
-      "p95_replay_ms": 0.1332,
-      "p95_replay_stdev_ms": 0.0256,
-      "p95_replay_ci95_lower_ms": 0.0969,
-      "p95_replay_ci95_upper_ms": 0.2057
+      "p95_replay_ms": 0.0895,
+      "p95_replay_stdev_ms": 0.0075,
+      "p95_replay_ci95_lower_ms": 0.0826,
+      "p95_replay_ci95_upper_ms": 0.1143
     },
     {
       "event_count": 12,
-      "p95_replay_ms": 0.1236,
-      "p95_replay_stdev_ms": 0.0071,
-      "p95_replay_ci95_lower_ms": 0.1047,
-      "p95_replay_ci95_upper_ms": 0.1246
+      "p95_replay_ms": 0.108,
+      "p95_replay_stdev_ms": 0.0092,
+      "p95_replay_ci95_lower_ms": 0.0937,
+      "p95_replay_ci95_upper_ms": 0.1257
     },
     {
       "event_count": 13,
-      "p95_replay_ms": 0.184,
-      "p95_replay_stdev_ms": 0.0317,
-      "p95_replay_ci95_lower_ms": 0.1344,
-      "p95_replay_ci95_upper_ms": 0.2181
+      "p95_replay_ms": 0.1054,
+      "p95_replay_stdev_ms": 0.0046,
+      "p95_replay_ci95_lower_ms": 0.0968,
+      "p95_replay_ci95_upper_ms": 0.114
     }
   ]
 }

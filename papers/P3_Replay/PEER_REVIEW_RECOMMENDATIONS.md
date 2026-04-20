@@ -1,5 +1,21 @@
 # P3 Peer Review Recommendations
 
+## Status after freeze (2026-04-19)
+
+The following peer-review upgrades are **addressed in the current artifact set and draft**:
+
+- **§1 / §4 — Assurance framing:** Abstract and introduction emphasize control-plane **assurance evidence** and independently checkable replay (not “a replay tool”).
+- **§2 — Motivating vignette:** `DRAFT.tex` includes a motivating failure paragraph in the introduction.
+- **§3 — Novelty box:** Contribution table and related-work positioning distinguish full RR, log-only, and this work (replay levels + TRACE + commitments + localization + bundles).
+- **§4 — Lane-separated evaluation:** Corpus uses `corpus_category`; **two** `real_ingest` lanes (`real_bucket_example`, `real_bucket_toy_lab_session`) with ingestion note; Table 1b reports space metrics.
+- **§4 — L1:** `l1_twin_summary` includes multi-seed thin-slice stats **and** `real_ingest_traces`; `l1_twin_evidence.md` documents cross-family evidence.
+- **§4 — Overhead curve:** Multi-prefix `overhead_curve`; Figure 1 is not a single-point pseudo-curve for typical thin-slice lengths.
+- **§5 — First-divergence figure:** `p3_first_divergence_timeline.png` + spec in `LOCALIZATION_FIGURE_SPEC.md`.
+
+**Still optional / future work** (not required for this freeze): production-scale ingest at volume, user studies, heavier formal proofs, full physics twin (explicitly out of scope for L1 in this paper).
+
+---
+
 This memo is tailored to `papers/P3_Replay/DRAFT.tex` and focuses on how to make the paper more interesting, more defensible, and more competitive for peer review.
 
 ## Executive view

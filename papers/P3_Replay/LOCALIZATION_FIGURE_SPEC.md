@@ -36,9 +36,14 @@ Make first-divergence localization visually obvious in under 10 seconds for revi
 
 ## Script integration
 
-- Exported by `python scripts/export_p3_first_divergence_timeline.py`.
+- Exported by `python scripts/export_p3_first_divergence_timeline.py` (also invoked from `scripts/export_p3_paper_figures.py`).
 - Default asset path: `papers/P3_Replay/figures/p3_first_divergence_timeline.png` with sidecar JSON metadata.
-- The figure is now wired into `papers/P3_Replay/DRAFT.tex` via `\IfFileExists{figures/p3_first_divergence_timeline.png}{...}`.
+- The figure is wired into `papers/P3_Replay/DRAFT.tex` via `\IfFileExists{figures/p3_first_divergence_timeline.png}{...}`.
+- **Data source:** use a trap row from the **committed** `datasets/runs/replay_eval/summary.json` after the publishable `replay_eval.py` run so the figure matches frozen paper numbers.
+
+## Related: overhead curve (Figure 1)
+
+Multi-prefix **overhead** (p95 vs event count) is separate from this figure; it comes from `overhead_curve` in the same summary and `plot_replay_overhead.py`. Regenerate both after `replay_eval.py --overhead-curve`.
 
 ## Caption guidance
 
