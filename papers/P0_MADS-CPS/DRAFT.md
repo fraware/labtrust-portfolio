@@ -6,6 +6,22 @@
 
 ---
 
+## Reproducibility (tables and figures)
+
+From repository root, set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. On PowerShell: `$env:PYTHONPATH="impl/src"; $env:LABTRUST_KERNEL_DIR="kernel"`. JSON summaries include `run_manifest` (seeds, scenarios, fault flags, script name, optional `version` commit hash when `git` is available).
+
+- **Figure 1 (assurance pipeline):** `python scripts/export_p0_assurance_pipeline.py` (writes `docs/figures/p0_assurance_pipeline.mmd`; optional PNG/PDF via `python scripts/render_p0_mermaid_figures.py` if Mermaid CLI is installed).
+- **Table 1 (E1 conformance corpus):** `python scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus`, then `python scripts/export_e1_corpus_table.py --corpus datasets/runs/p0_conformance_corpus`.
+- **Table 2 (E2 verification-mode admissibility matrix):** `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo`, then `python scripts/export_e2_admissibility_matrix.py`.
+- **Table 3 (E3 + E4 replay-link and controller-independence):** `python scripts/produce_p0_e3_release.py --runs 20 --scenarios toy_lab_v0,lab_profile_v0` (writes `datasets/runs/e3_summary.json`, `datasets/runs/p0_e3_variance.json`, and `datasets/releases/p0_e3_release/`). For E3 with the verifier in a **separate process**, run `python scripts/replay_link_e3.py --runs 20 --scenarios toy_lab_v0,lab_profile_v0 --standalone-verifier --out datasets/runs/e3_summary.json` after the thin-slice directories exist (or instead of the embedded verifier path if regenerating summary only). **E4:** `python scripts/run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0 --out datasets/runs/p0_e4_summary.json`. Then `python scripts/export_p0_table3.py --e3 datasets/runs/e3_summary.json --e4 datasets/runs/p0_e4_summary.json`.
+- **Figure 2 (tier lattice):** `python scripts/export_p0_tier_lattice.py` (writes `docs/figures/p0_tier_lattice.mmd`).
+- **Figure 3 (redaction preservation / loss):** `python scripts/export_p0_redaction_figure.py` (writes `docs/figures/p0_redaction_figure.mmd`).
+- **E3 latency plot (optional if cited):** `python scripts/plot_e3_latency.py --summary datasets/runs/e3_summary.json --out docs/figures/p0_e3_latency.png`.
+
+**Regenerate `papers/P0_MADS-CPS/generated_tables.md`:** `python scripts/generate_paper_artifacts.py --paper P0` once the artifact paths above exist (or `... --skip-eval-check` to emit partial tables when regenerating piecemeal).
+
+---
+
 ## Abstract
 
 Agentic cyber-physical systems (CPS) increasingly couple planning, tool use, sensing, and actuation in workflows where failures are systemic rather than model-local. Existing risk and assurance frameworks provide important guidance, but they do not by themselves specify a minimal set of machine-checkable evidence obligations by which a third party can determine whether a concrete agentic CPS run is admissible for audit, replay, and release under operational constraints. We introduce MADS-CPS, a normative minimum assurance bar for agentic CPS workflows. MADS-CPS defines (i) a declared assurance envelope, (ii) conformance tiers based on artifact presence, schema validity, replay status, and point-of-no-return (PONR) coverage, (iii) verification modes that support restricted auditability through structured redaction, and (iv) fail-closed release gating for irreversible or authoritative transitions. The framework is intentionally agnostic to the internal coordination or planning algorithm: conformance is defined over interfaces and evidence rather than internal optimization. We instantiate MADS-CPS in a robot-centric autonomous laboratory profile and evaluate it through a thin-slice implementation comprising a trace, an evaluation report, an evidence bundle, and a release manifest. Across a conformance challenge set, structured redaction experiments, and replay-link tests, we show that the proposed tiers are mechanically decidable under a declared envelope and that restricted auditability preserves a useful subset of admissibility checks while exposing the limits of replay under redaction. We do not claim certification or regulatory compliance; rather, we provide a concrete, reproducible assurance substrate that makes such assessments more disciplined, auditable, and toolable.
@@ -128,7 +144,7 @@ We instantiate MADS-CPS in a robot-centric autonomous laboratory profile. The th
 
 **E3 — Replay link.** An independent verifier recomputes the evaluation report from the trace over multiple seeds. The verifier can be run as a separate process (`verify_maestro_from_trace.py`) so that the producer and verifier are distinct code paths. Table 3 (with E4) reports replay match rate, latency mean and 95% CI, and conformance rate per scenario and per controller. Use `replay_link_e3.py --standalone-verifier` to use the standalone verifier.
 
-**E4 — Algorithm-independence.** Two adapters (centralized, rep_cps) produce the same artifact interface for the same scenario. The same conformance checker is run on each; conformance outcome aligns with artifacts and declared envelope, not with which adapter produced the run. Results are combined in Table 3. Run `run_p0_e4_multi_adapter.py` and `export_p0_table3.py`.
+**E4 — Algorithm-independence.** Two adapters (centralized, rep_cps) produce the same artifact interface for the same scenario. The same conformance checker is run on each; conformance outcome aligns with artifacts and declared envelope, not with which adapter produced the run. Results for `toy_lab_v0` and `lab_profile_v0` are combined in Table 3. Run `run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0` and `export_p0_table3.py`.
 
 **Figures.** Figure 1 is the assurance pipeline (trace to report to evidence bundle to conformance check to release); `export_p0_assurance_pipeline.py`. Figure 2 is the tier lattice (what each tier adds); `export_p0_tier_lattice.py`. Figure 3 summarizes what is preserved vs lost under redaction; `export_p0_redaction_figure.py`.
 
@@ -159,20 +175,18 @@ We introduced MADS-CPS, a machine-checkable minimum assurance bar for agentic CP
 
 ## Appendix: Reproduction and artifact references
 
-**Artifact contents.** The artifact contains the schema set, reference implementation, conformance checker, and reproduction scripts. Exact commands and file paths are given below for replicability.
-
-**Reproducibility (minimal run, under 20 min).** From repo root, set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. Then: run the E1 corpus script to build the conformance challenge set and Table 1; run E2 redaction demo and export the admissibility matrix (Table 2); run E3 (and E4 if integrated) to produce replay-link and conformance-by-controller results (Table 3); run the pipeline export script for Figure 1, the tier-lattice script for Figure 2, and the redaction diagram for Figure 3. Conformance check: `labtrust_portfolio check-conformance <run_dir>`.
+**Artifact contents.** The artifact contains the schema set, reference implementation, conformance checker, and reproduction scripts. **Authoritative one-liner commands** for every table and figure are in the **Reproducibility** section at the top of this draft; the list below adds paths, optional steps, and reviewer-oriented pointers.
 
 **Scripts and outputs.** From repo root with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`:
 
-- **Figure 1 (assurance pipeline):** `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`). Render Mermaid to PNG for camera-ready.
+- **Figure 1 (assurance pipeline):** `python scripts/export_p0_assurance_pipeline.py` (output `docs/figures/p0_assurance_pipeline.mmd`). Camera-ready: `python scripts/render_p0_mermaid_figures.py` when Mermaid CLI is available.
 - **Table 1 (conformance challenge set):** `python scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus`, then `python scripts/export_e1_corpus_table.py --corpus datasets/runs/p0_conformance_corpus`.
 - **Table 2 (verification-mode admissibility matrix):** `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo`, then `python scripts/export_e2_admissibility_matrix.py`.
-- **Table 3 (replay-link and conformance by scenario/controller):** E4: `python scripts/run_p0_e4_multi_adapter.py --seeds 10`, then `python scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json`. E3: `python scripts/produce_p0_e3_release.py --runs 20`, then `python scripts/export_p0_table3.py --e3 datasets/runs/e3_summary.json` to merge.
-- **E3 independent verifier:** Standalone script `scripts/verify_maestro_from_trace.py TRACE.json [OUTPUT.json]`. Use `python scripts/replay_link_e3.py --standalone-verifier --runs N` to run E3 with verifier as separate process.
+- **Table 3 (replay-link and conformance by scenario/controller):** E3 at publishable scale uses **20 seeds** per scenario on `toy_lab_v0` and `lab_profile_v0` via `produce_p0_e3_release.py` / `replay_link_e3.py` as in the top repro block. E4 uses **20 seeds** per controller per scenario via `run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0`, then `python scripts/export_p0_table3.py --e3 datasets/runs/e3_summary.json --e4 datasets/runs/p0_e4_summary.json`.
+- **E3 independent verifier:** `scripts/verify_maestro_from_trace.py TRACE.json [OUTPUT.json]`. Use `replay_link_e3.py --standalone-verifier` so the verifier runs as a separate process.
 - **Figure 2 (tier lattice):** `python scripts/export_p0_tier_lattice.py` (output `docs/figures/p0_tier_lattice.mmd`).
 - **Figure 3 (redaction preservation/loss):** `python scripts/export_p0_redaction_figure.py` (output `docs/figures/p0_redaction_figure.mmd`).
-- **Per-seed E3 table:** `python scripts/export_e3_table.py`; include in appendix or supplement. Run manifest (seeds, scenario_id) is in e3_summary.json and release_manifest.json.
+- **Per-seed E3 markdown (supporting Table 3):** `python scripts/export_e3_table.py`. Run manifest: `datasets/runs/e3_summary.json` (`run_manifest`); release bundle: `datasets/releases/p0_e3_release/release_manifest.json`.
 
 **Kernel and schema paths (for artifact reviewers).** Boundary, envelope, and definitions: `kernel/mads/NORMATIVE.v0.1.md`, `kernel/mads/VERIFICATION_MODES.v0.1.md`, `kernel/mads/PONR_ENFORCEMENT.v0.1.md`. Trace schema: `kernel/trace/TRACE.v0.1.schema.json`. Evidence bundle schema: `kernel/mads/EVIDENCE_BUNDLE.v0.1.schema.json`. Release manifest schema: `kernel/policy/RELEASE_MANIFEST.v0.1.schema.json`. Lab profile: `profiles/lab/v0.1/`.
 

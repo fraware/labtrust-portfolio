@@ -55,7 +55,7 @@ def main() -> int:
 
     # Print Table 1 (Markdown)
     lines = [
-        "## Table 1 — Conformance challenge set (E1)",
+        "## Table 1 — E1 conformance corpus",
         "",
         "| Case ID | Fault injected | Expected outcome | Observed outcome | Agreement |",
         "|---------|-----------------|------------------|------------------|-----------|",

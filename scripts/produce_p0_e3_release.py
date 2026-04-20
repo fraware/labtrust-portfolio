@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Produce E3 runs and release one to datasets/releases/p0_e3_release.
-Runs replay_link_e3.py (10 seeds by default; --scenarios for multi-scenario), then release-dataset for first scenario seed_1.
+Runs replay_link_e3.py (default 20 seeds; --scenarios for multi-scenario), then release-dataset for first scenario seed_1.
 Usage (from repo root):
   PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/produce_p0_e3_release.py
 """

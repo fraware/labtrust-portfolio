@@ -16,8 +16,10 @@ REPO = Path(__file__).resolve().parents[1]
 
 
 def _align_maestro_to_schema(maestro_path: Path) -> None:
-    """Remove metrics keys not in MAESTRO_REPORT schema so validation passes."""
+    """Keep only MAESTRO_REPORT.v0.1 fields and allowed metric keys (strip adapter extras)."""
     data = json.loads(maestro_path.read_text(encoding="utf-8"))
+    allowed_top = {"version", "run_id", "scenario_id", "metrics", "faults", "notes"}
+    data = {k: v for k, v in data.items() if k in allowed_top}
     metrics = data.get("metrics", {})
     allowed = {"tasks_completed", "task_latency_ms_p50", "task_latency_ms_p95", "task_latency_ms_p99", "coordination_messages"}
     data["metrics"] = {k: v for k, v in metrics.items() if k in allowed}

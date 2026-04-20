@@ -10,7 +10,7 @@ from __future__ import annotations
 
 def main() -> int:
     lines = [
-        "## Table 2 — Verification-mode admissibility matrix (E2)",
+        "## Table 2 — E2 admissibility matrix",
         "",
         "| Predicate | Full mode | Evaluator mode | Regulator mode | Public/redacted mode |",
         "|-----------|-----------|----------------|----------------|----------------------|",

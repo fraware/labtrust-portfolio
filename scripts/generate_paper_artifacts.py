@@ -30,10 +30,20 @@ FIGURES = REPO / "docs" / "figures"
 PAPER_CONFIG = {
     "P0": (
         "P0_MADS-CPS",
-        [RUNS / "e3_summary.json", RUNS / "e2_redaction_demo" / "trace_redacted.json"],
-        [("export_e3_table.py", []), ("export_e2_admissibility_matrix.py", [])],
+        [
+            RUNS / "e3_summary.json",
+            RUNS / "p0_e4_summary.json",
+            RUNS / "p0_conformance_corpus" / "corpus_manifest.json",
+            RUNS / "e2_redaction_demo" / "trace_redacted.json",
+        ],
+        [
+            ("export_e1_corpus_table.py", []),
+            ("export_e2_admissibility_matrix.py", []),
+            ("export_e3_table.py", []),
+            ("export_p0_table3.py", []),
+        ],
         "export_p0_assurance_pipeline.py",
-        "plot_e3_latency.py",
+        "export_p0_tier_lattice.py",
     ),
     "P1": (
         "P1_Contracts",
@@ -105,6 +115,8 @@ def env() -> dict:
     e = os.environ.copy()
     e.setdefault("LABTRUST_KERNEL_DIR", str(REPO / "kernel"))
     e.setdefault("PYTHONPATH", str(REPO / "impl" / "src"))
+    # Child scripts print UTF-8 table titles (em dash, etc.); required on Windows.
+    e.setdefault("PYTHONIOENCODING", "utf-8")
     return e
 
 
@@ -118,6 +130,8 @@ def run_capture(cmd: list[str], timeout: int = 120) -> tuple[bool, str]:
             timeout=timeout,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
         out = (r.stdout or "") + (r.stderr or "")
         return r.returncode == 0, out
@@ -223,6 +237,15 @@ def main() -> int:
                 print(f"  Figure 1 ({fig1}): {'OK' if ok else 'FAILED'}")
             else:
                 print(f"  Figure 1: {fig1} not found")
+
+            if pid == "P0":
+                for extra in ("export_p0_redaction_figure.py", "plot_e3_latency.py"):
+                    ep = SCRIPTS / extra
+                    if ep.exists():
+                        okx, _ = run_capture([sys.executable, str(ep)])
+                        print(f"  P0 extra ({extra}): {'OK' if okx else 'FAILED'}")
+                    else:
+                        print(f"  P0 extra: {extra} not found")
 
             if pid == "P1":
                 for extra in ("render_p1_flow_figure.py", "plot_p1_paper_figures.py"):

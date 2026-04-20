@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-from .conformance import check_conformance
+from .conformance import check_conformance, write_conformance_artifact
 from .gatekeeper import allow_release
 from .hashing import sha256_file
 from .schema import validate
@@ -74,6 +74,8 @@ def release_dataset(
         dst = release_dir / name
         shutil.copy2(src, dst)
         new_artifacts.append(dst)
+    conformance_path = write_conformance_artifact(release_dir)
+    new_artifacts.append(conformance_path)
     kernel_version = existing.get("kernel_version", "0.1")
     manifest = build_release_manifest(
         release_id, kernel_version, new_artifacts

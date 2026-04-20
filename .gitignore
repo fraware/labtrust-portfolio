@@ -7,3 +7,13 @@ datasets/runs/**
 datasets/releases/**
 !datasets/runs/.gitkeep
 !datasets/releases/.gitkeep
+# P0 manuscript evidence (publishable corpus, E2 demo, summaries, E3 release bundle)
+!datasets/runs/p0_conformance_corpus/
+!datasets/runs/p0_conformance_corpus/**
+!datasets/runs/e2_redaction_demo/
+!datasets/runs/e2_redaction_demo/**
+!datasets/runs/e3_summary.json
+!datasets/runs/p0_e3_variance.json
+!datasets/runs/p0_e4_summary.json
+!datasets/releases/p0_e3_release/
+!datasets/releases/p0_e3_release/**

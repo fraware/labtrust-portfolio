@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Export E3 summary as a markdown table for the draft. Reads datasets/runs/e3_summary.json
-and prints a Table 1 (per-seed rows + summary). Usage (from repo root):
+Export E3 summary as markdown (per-seed detail; manuscript summary is Table 3).
+Reads datasets/runs/e3_summary.json. Usage (from repo root):
   python scripts/export_e3_table.py
   python scripts/export_e3_table.py --summary path/to/e3_summary.json
 """
@@ -59,9 +59,9 @@ def main() -> int:
     if per_scenario:
         n = data.get("runs", 0)
         lines = [
-            "# Table 1 — E3 replay-link. tasks_completed, p95_latency_ms (ms), match per seed; N seeds (run_manifest in e3_summary.json).",
+            "## E3 replay-link - per-seed detail (supporting Table 3)",
             "",
-            "# E3 Replay link (multi-scenario)",
+            "Per-seed rows for trace-to-report replay check; aggregate replay match and latency CIs appear in **Table 3**. Full manifest: `datasets/runs/e3_summary.json` (`run_manifest`).",
             "",
         ]
         for block in per_scenario:
@@ -104,7 +104,9 @@ def main() -> int:
 
     n = data.get("runs", len(per_run))
     lines = [
-        "# Table 1 — E3 replay-link. tasks_completed, p95_latency_ms (ms), match per seed; N seeds (run_manifest in e3_summary.json).",
+        "## E3 replay-link - per-seed detail (supporting Table 3)",
+        "",
+        "Per-seed rows; see **Table 3** for manuscript summary. Manifest: `e3_summary.json`.",
         "",
         "| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |",
         "|------|----------------|----------------------|----------------|-------|",

@@ -1,0 +1,82 @@
+[
+  {
+    "case_id": "valid_toy",
+    "fault_injected": "none",
+    "expected_tier": 3,
+    "expected_pass": true,
+    "description": "Valid run (toy_lab_v0); no PONR in scope (checker reports Tier 3 when no PONR tasks).",
+    "observed_tier": 3,
+    "observed_pass": true,
+    "agreement": true
+  },
+  {
+    "case_id": "valid_lab",
+    "fault_injected": "none",
+    "expected_tier": 3,
+    "expected_pass": true,
+    "description": "Valid run (lab_profile_v0) with PONR coverage.",
+    "observed_tier": 3,
+    "observed_pass": true,
+    "agreement": true
+  },
+  {
+    "case_id": "missing_artifact",
+    "fault_injected": "missing artifact (maestro_report.json)",
+    "expected_tier": 1,
+    "expected_pass": false,
+    "description": "Required artifact removed.",
+    "observed_tier": 1,
+    "observed_pass": false,
+    "agreement": true
+  },
+  {
+    "case_id": "schema_invalid",
+    "fault_injected": "schema-invalid artifact (trace)",
+    "expected_tier": 1,
+    "expected_pass": false,
+    "description": "Trace contains field not in schema.",
+    "observed_tier": 1,
+    "observed_pass": false,
+    "agreement": true
+  },
+  {
+    "case_id": "hash_mismatch",
+    "fault_injected": "hash mismatch (state_hash_after corrupted)",
+    "expected_tier": 2,
+    "expected_pass": false,
+    "description": "Replay fails due to state hash mismatch.",
+    "observed_tier": 2,
+    "observed_pass": false,
+    "agreement": true
+  },
+  {
+    "case_id": "replay_mismatch",
+    "fault_injected": "evidence_bundle.verification.replay_ok=false",
+    "expected_tier": 2,
+    "expected_pass": false,
+    "description": "Bundle reports replay not ok.",
+    "observed_tier": 2,
+    "observed_pass": false,
+    "agreement": true
+  },
+  {
+    "case_id": "missing_ponr",
+    "fault_injected": "missing PONR event (lab_profile_v0 requires disposition_commit)",
+    "expected_tier": 3,
+    "expected_pass": false,
+    "description": "Scenario requires PONR task_end; trace lacks it.",
+    "observed_tier": 3,
+    "observed_pass": false,
+    "agreement": true
+  },
+  {
+    "case_id": "stale_release_manifest",
+    "fault_injected": "stale/incomplete release manifest (missing release_id)",
+    "expected_tier": 1,
+    "expected_pass": false,
+    "description": "Release manifest missing required field.",
+    "observed_tier": 1,
+    "observed_pass": false,
+    "agreement": true
+  }
+]

@@ -76,7 +76,7 @@ def main() -> int:
     if not scenarios:
         print("Error: no p95_latency_ms values in summary.")
         return 1
-    ax.boxplot(values, labels=scenarios)
+    ax.boxplot(values, tick_labels=scenarios)
     ax.set_ylabel("p95 latency (ms)")
     ax.set_xlabel("Scenario")
     ax.set_title("E3 p95 latency distribution per scenario")

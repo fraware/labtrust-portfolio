@@ -1,0 +1,18 @@
+{
+  "version": "0.1",
+  "run_id": "run_98ad7f0716",
+  "scenario_id": "toy_lab_v0",
+  "metrics": {
+    "tasks_completed": 4,
+    "task_latency_ms_p50": 7.982202898938631,
+    "task_latency_ms_p95": 12.932016691310647,
+    "task_latency_ms_p99": 13.099081806800337,
+    "coordination_messages": 4
+  },
+  "faults": {
+    "fault_injected": false,
+    "fault_events": [],
+    "recovery_ok": true
+  },
+  "notes": "Thin-slice MAESTRO report; semantics will expand in v0.2+"
+}

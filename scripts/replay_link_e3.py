@@ -168,6 +168,7 @@ def main() -> int:
         "scenario_ids": scenario_ids,
         "fault_settings": {"drop_completion_prob": 0.0, "delay_fault_prob": 0.0},
         "script": "replay_link_e3.py",
+        "standalone_verifier": bool(args.standalone_verifier),
     }
     if os.environ.get("GIT_SHA"):
         run_manifest["version"] = os.environ.get("GIT_SHA")

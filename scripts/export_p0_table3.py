@@ -19,31 +19,19 @@ def main() -> int:
     import argparse
     ap = argparse.ArgumentParser(description="Export P0 Table 3 (replay-link and conformance by scenario/controller)")
     ap.add_argument("--e4", type=Path, default=DEFAULT_E4, help="E4 summary JSON")
-    ap.add_argument("--e3", type=Path, default=None, help="Optional E3 summary JSON to merge")
+    ap.add_argument("--e3", type=Path, default=DEFAULT_E3, help="E3 summary JSON to merge (default datasets/runs/e3_summary.json)")
     args = ap.parse_args()
 
-    rows = []
-    if args.e4.exists():
-        e4 = json.loads(args.e4.read_text(encoding="utf-8"))
-        for r in e4.get("per_adapter", []):
-            ci = r.get("p95_latency_ms_ci_95", [0, 0])
-            ci_str = f"{r.get('p95_latency_ms_mean', 0):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]" if len(ci) == 2 else "—"
-            rows.append({
-                "scenario": r.get("scenario", "—"),
-                "controller": r.get("controller", "—"),
-                "seeds": len(r.get("seeds", [])),
-                "replay_match_rate": r.get("replay_match_rate", 0),
-                "latency_mean_ci": ci_str,
-                "conformance_rate": r.get("conformance_rate", 0),
-            })
-    if args.e3 and Path(args.e3).exists():
-        e3 = json.loads(Path(args.e3).read_text(encoding="utf-8"))
+    e3_rows: list[dict] = []
+    e4_rows: list[dict] = []
+    if args.e3.exists():
+        e3 = json.loads(args.e3.read_text(encoding="utf-8"))
         per = e3.get("per_scenario", [e3])
         for p in per if isinstance(per, list) else [per]:
             scenario = p.get("scenario_id", e3.get("scenarios", ["—"])[0] if isinstance(e3.get("scenarios"), list) else "—")
             ci = p.get("p95_latency_ms_ci_95", [0, 0])
             ci_str = f"{p.get('p95_latency_ms_mean', 0):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]" if len(ci) == 2 else "—"
-            rows.append({
+            e3_rows.append({
                 "scenario": scenario,
                 "controller": "thinslice",
                 "seeds": e3.get("runs", 0),
@@ -51,16 +39,32 @@ def main() -> int:
                 "latency_mean_ci": ci_str,
                 "conformance_rate": 1.0 if p.get("all_match") else 0.0,
             })
+    if args.e4.exists():
+        e4 = json.loads(args.e4.read_text(encoding="utf-8"))
+        for r in e4.get("per_adapter", []):
+            ci = r.get("p95_latency_ms_ci_95", [0, 0])
+            ci_str = f"{r.get('p95_latency_ms_mean', 0):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]" if len(ci) == 2 else "—"
+            e4_rows.append({
+                "scenario": r.get("scenario", "—"),
+                "controller": r.get("controller", "—"),
+                "seeds": len(r.get("seeds", [])),
+                "replay_match_rate": r.get("replay_match_rate", 0),
+                "latency_mean_ci": ci_str,
+                "conformance_rate": r.get("conformance_rate", 0),
+            })
 
+    rows = e3_rows + e4_rows
     if not rows:
         print("No E4 or E3 data found. Run run_p0_e4_multi_adapter.py and/or produce_p0_e3_release.py first.", file=sys.stderr)
         return 1
 
     lines = [
-        "## Table 3 — Replay-link and conformance across controllers/scenarios (E3 + E4)",
+        "## Table 3 — E3 + E4 summary (replay-link and controller-independence)",
         "",
-        "| Scenario | Controller | Seeds | Replay match rate | Latency mean (95% CI) ms | Conformance rate |",
-        "|----------|-------------|-------|-------------------|---------------------------|------------------|",
+        "Latency column: mean of per-seed **task_latency_ms_p95** with 95% CI (t-interval on seed-level samples).",
+        "",
+        "| Scenario | Controller | Seeds | Replay match rate | p95 latency mean (95% CI) ms | Conformance rate |",
+        "|----------|-------------|-------|-------------------|------------------------------|------------------|",
     ]
     for r in rows:
         lines.append(

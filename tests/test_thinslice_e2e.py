@@ -58,6 +58,7 @@ class TestThinSliceE2E(unittest.TestCase):
                     "maestro_report.json",
                     "evidence_bundle.json",
                     "release_manifest.json",
+                    "conformance.json",
                 ):
                     self.assertTrue(
                         (release_dir / name).exists(),

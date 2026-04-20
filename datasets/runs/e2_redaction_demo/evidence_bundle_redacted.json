@@ -1,0 +1,30 @@
+{
+  "version": "0.1",
+  "run_id": "run_cf91ddcd23",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/e2_redaction_demo/trace_redacted.json",
+      "sha256": "ab101f0dd17c937317d11f5518cba2f29592c9e22b861d79929e18148c530e31",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "datasets/runs/e2_redaction_demo/maestro_report.json",
+      "sha256": "0bbd261041cff856e844b914574d539ed53837fb95ba11c25d13e45206d16d76",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.1"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": false,
+    "replay_diagnostics": "redacted trace not replayed (payloads replaced by refs; structure preserved for audit)"
+  },
+  "verification_mode": "evaluator",
+  "redaction_manifest": {
+    "policy_ref": "e2_redaction_v0.1",
+    "redacted_artifacts": [
+      "trace.json"
+    ],
+    "reason": "payloads replaced by content-addressed refs; structure preserved"
+  }
+}

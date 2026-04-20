@@ -1,0 +1,178 @@
+{
+  "experiment": "E4_algorithm_independence",
+  "scenarios": [
+    "toy_lab_v0",
+    "lab_profile_v0"
+  ],
+  "per_adapter": [
+    {
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "replay_match_rate": 1.0,
+      "conformance_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "replay_match_rate": 1.0,
+      "conformance_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "replay_match_rate": 1.0,
+      "conformance_rate": 1.0,
+      "p95_latency_ms_mean": 36.789482148713894,
+      "p95_latency_ms_ci_95": [
+        28.8490160714875,
+        44.72994822594029
+      ]
+    },
+    {
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seeds": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "replay_match_rate": 1.0,
+      "conformance_rate": 1.0,
+      "p95_latency_ms_mean": 36.789482148713894,
+      "p95_latency_ms_ci_95": [
+        28.8490160714875,
+        44.72994822594029
+      ]
+    }
+  ],
+  "run_manifest": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "scenario_ids": [
+      "toy_lab_v0",
+      "lab_profile_v0"
+    ],
+    "controllers": [
+      "centralized",
+      "rep_cps"
+    ],
+    "fault_settings": {
+      "drop_completion_prob": 0.0
+    },
+    "script": "run_p0_e4_multi_adapter.py",
+    "version": "3c8f2c477bd0d83c0dc6bf8aa27ede7e7535cde5"
+  }
+}
