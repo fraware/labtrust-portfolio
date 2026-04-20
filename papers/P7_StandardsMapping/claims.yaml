@@ -1,5 +1,5 @@
 # P7 Standards Mapping claim table (Draft conversion checklist 2.1)
-# Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
+# Each claim maps to release_id, artifact_paths, table_id, figure_id.
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P7_StandardsMapping"
@@ -16,7 +16,8 @@ claims:
         - "kernel/assurance_pack/ASSURANCE_PACK.v0.1.schema.json"
         - "datasets/runs/assurance_eval/results.json"
         - "datasets/runs/assurance_eval/robust_results.json"
-      table_ids: ["Table 1", "Table 2"]
+        - "docs/P7_STANDARDS_MAPPING.md"
+      table_ids: ["Table 1", "Table 2", "Table 3"]
       figure_ids: ["Figure 0", "Figure 1"]
       confidence: high
 
@@ -27,6 +28,7 @@ claims:
       artifact_paths:
         - "scripts/check_assurance_mapping.py"
         - "scripts/audit_bundle.py"
+        - "scripts/review_assurance_run.py"
         - "scripts/run_assurance_robust_eval.py"
         - "datasets/runs/assurance_eval/results.json"
         - "datasets/runs/assurance_eval/robust_results.json"
@@ -36,7 +38,7 @@ claims:
       confidence: high
 
   - id: "C3"
-    statement: "Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions."
+    statement: "Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions (20-seed robust matrix)."
     evidence:
       release_id: "assurance_eval"
       artifact_paths:
@@ -45,11 +47,19 @@ claims:
         - "scripts/run_assurance_eval.py"
         - "scripts/run_assurance_robust_eval.py"
         - "scripts/audit_bundle.py"
+        - "scripts/export_assurance_tables.py"
+        - "scripts/export_p7_mapping_flow.py"
+        - "scripts/export_assurance_gsn.py"
+        - "scripts/render_p7_mermaid_figures.py"
         - "docs/P7_REVIEW_CHECKLIST.md"
         - "docs/P7_ROBUST_EXPERIMENT_PLAN.md"
         - "docs/P7_STANDARDS_MAPPING.md"
-      table_ids: ["Table 1", "Table 2"]
-      figure_ids: ["Figure 1"]
-      confidence: medium
+        - "docs/figures/p7_mapping_flow.mmd"
+        - "docs/figures/p7_gsn.mmd"
+      table_ids: ["Table 1", "Table 2", "Table 3"]
+      figure_ids: ["Figure 0", "Figure 1"]
+      confidence: high
 
-# Table 1/2: export_assurance_tables.py. Figure 1: export_assurance_gsn.py (GSN-lite). One-command audit: audit_bundle.py --release. K7: no template theater.
+# Tables: export_assurance_tables.py (Table 3 from robust_results.json when present).
+# Figures: export_p7_mapping_flow.py (Figure 0), export_assurance_gsn.py (Figure 1); PNG/PDF via render_p7_mermaid_figures.py.
+# One-command audit: audit_bundle.py --release. K7: no template theater. No certification claim.

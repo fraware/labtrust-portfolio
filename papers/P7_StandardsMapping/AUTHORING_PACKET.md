@@ -6,52 +6,58 @@
 **Kernel ownership:** assurance-pack templates (hazards→controls→evidence→audit traces)
 
 ## 1) One-line question
-How do we translate the portfolio’s executable artifacts (gates, traces, evidence bundles) into **auditor-legible** assurance arguments without compliance cosplay?
+
+How do we translate the portfolio’s executable artifacts (gates, traces, evidence bundles) into **auditor-legible** assurance arguments **without** compliance cosplay or certification claims?
 
 ## 2) Scope anchors
-- UL 4600 is safety-case oriented; IEC 62443 is lifecycle security for industrial control; neither implies “certification by mapping.”
-- Regulated lab expectations emphasize secure audit trails and lifecycle/data-flow discipline (e.g., 21 CFR Part 11 audit trails; OECD GLP data integrity).
 
-## 3) Claims
-- **C1:** A structured “assurance pack” template enables traceable mapping: hazards → controls/invariants → evidence artifacts → audit traces.
-- **C2:** The mapping is mechanically checkable (artifact presence + trace reconstruction), not narrative.
-- **C3:** Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions.
+- **Audit-support, not attestation:** Outputs are machine-checkable traceability and review JSON; they support an auditor’s walk-through; they do not substitute for a QMS, notified-body review, or regulatory filing.
+- **Standards as illustrative anchors:** ISO 62304 / ISO 26262-6 mappings in `docs/P7_STANDARDS_MAPPING.md` are for expert readability and structural analogy—**not** a claim of compliance with those standards.
+- **Broader context:** UL 4600 (safety case), IEC 62443 (lifecycle security), 21 CFR Part 11 / OECD GLP (audit trail expectations) inform motivation only; **no** “certification by mapping.”
 
-## 4) Outline
-1. Why standards mappings often fail (template theater)
-2. Assurance pack structure and schemas
-3. Mapping rules to portfolio artifacts (Gatekeeper, trace, bundle)
-4. Example instantiation (lab profile)
-5. What this does *not* claim (no certification)
+## 3) Claims (see `claims.yaml`)
+
+- **C1:** Structured assurance pack enables traceable mapping: hazards → controls → evidence artifact types → reviewable traces/bundles.
+- **C2:** Mapping is **mechanically checkable** (schema + `check_assurance_mapping.py` + `audit_bundle.py` + scripted `review_assurance_run.py`), not narrative-only.
+- **C3:** Lab + warehouse + traffic-proxy scenarios under a **20-seed × 5 fault-regime** robust matrix demonstrate stable mechanical pass rates and replay/review pipeline behavior under stress (see `robust_results.json`). **Non-claim:** traffic↔medical pack pairing is a documented pipeline/proxy test, not semantic alignment of domains.
+
+## 4) Outline (manuscript)
+
+1. Why standards-style mappings fail in practice (template theater).
+2. Assurance pack structure, schema, and relationship to standards (structural compatibility only)—`docs/P7_STANDARDS_MAPPING.md`.
+3. Mapping rules to portfolio artifacts (P0 gatekeeper, trace, evidence bundle).
+4. **Three** worked instantiations: lab, warehouse, medical (minimal SaMD-style template); baseline eval uses **scenario-matched** thin-slice runs per profile (`run_manifest.per_profile_scenario` in `results.json`).
+5. Robust evaluation matrix and aggregate metrics (`robust_results.json`).
+6. Limitations and explicit **non-claims** (no certification).
 
 ## 5) Experiment plan
-- Not performance. Evidence quality.
-- Show that an independent reviewer can:
-  - verify evidence bundle,
-  - reconstruct PONR causal chains,
-  - map denials/allows to hazards and controls.
-- Execute robust matrix (scenario x fault-regime x seed) with
-  `scripts/run_assurance_robust_eval.py`, and report aggregate pass-rate,
-  evidence/trace validity rates, and real-world proxy performance.
 
-## 6) Artifact checklist
+- **Baseline:** `run_assurance_eval.py` → `results.json`. Table 1 flagship row uses **`lab_profile_v0`** (kernel PONR `disposition_commit`), not `toy_lab_v0`.
+- **Robust:** `run_assurance_robust_eval.py` — default **20 seeds**, **400 runs** (4 scenarios × 5 regimes × 20 seeds). Details: `docs/P7_ROBUST_EXPERIMENT_PLAN.md`.
+- **PONR semantics:** Per-scenario task names in `SCENARIO_PONR_TASK_NAMES` (`conformance.py`); lab / warehouse / traffic have non-vacuous definitions where listed; `toy_lab_v0` has no required PONR tasks (vacuous ratio by definition).
+
+## 6) Artifact checklist (submission)
+
 - `kernel/assurance_pack/ASSURANCE_PACK.v0.1.schema.json`
-- hazard log template + invariant registry template
-- worked instantiations using `profiles/lab/v0.1/`,
-  `profiles/warehouse/v0.1/`, and `profiles/medical_v0.1/`
-- checker that validates mapping completeness
-- robust eval artifact `datasets/runs/assurance_eval/robust_results.json`
+- Hazard / invariant templates (`HAZARD_LOG_TEMPLATE.v0.1.yaml`, `INVARIANT_REGISTRY_TEMPLATE.v0.1.yaml`)
+- `profiles/lab/v0.1/`, `profiles/warehouse/v0.1/`, `profiles/medical_v0.1/` instantiations
+- `scripts/check_assurance_mapping.py`, `scripts/review_assurance_run.py`, `scripts/audit_bundle.py`
+- `datasets/runs/assurance_eval/results.json`, `datasets/runs/assurance_eval/robust_results.json`
+- `docs/P7_STANDARDS_MAPPING.md`, `docs/P7_ROBUST_EXPERIMENT_PLAN.md`
+- Figures: `docs/figures/p7_mapping_flow.*`, `docs/figures/p7_gsn.*` (Mermaid + optional PNG/PDF via `render_p7_mermaid_figures.py`)
+- `tests/test_assurance_p7.py` (integration gate)
 
 ## 7) Kill criteria
-- **K1:** mapping cannot be made mechanical; becomes prose.
-- **K2:** cannot produce a worked example that survives hostile review.
-- **K7:** If mapping becomes "template theater" (prose without machine-checkable linkage), stop and tighten: every claim in the mapping must be checkable by script or schema.
+
+- **K1:** Mapping cannot be made mechanical; becomes prose-only.
+- **K2:** No worked example that survives script + checklist review.
+- **K7:** Template theater—if a claim is not checkable by schema or script, remove or narrow it.
 
 ## 8) Target venues
-- arXiv first (cs.SE, cs.RO, cs.CR)
-- safety/assurance workshops; dependability venues
+
+- arXiv (cs.SE, cs.RO, cs.CR); assurance / dependability workshops.
 
 ## 9) Integration contract
-- Depends on MADS definitions for tiers/PONRs.
-- Depends on Replay and MAESTRO for trace/report artifacts.
 
+- Depends on MADS / tiers / PONR definitions in kernel and portfolio.
+- Depends on Replay + MAESTRO for trace and report artifacts consumed by review.
