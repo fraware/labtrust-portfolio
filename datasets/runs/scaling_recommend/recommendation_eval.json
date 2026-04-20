@@ -1,0 +1,13 @@
+{
+  "run_manifest": {
+    "script": "scaling_recommend_eval.py",
+    "runs_dir": "datasets\\runs\\multiscenario_runs",
+    "holdout_mode": "family",
+    "n_folds": 3
+  },
+  "regime_selection_accuracy": 0.008333333333333333,
+  "n_decisions": 4320,
+  "mean_regret_tasks_completed": 0.04583333333333333,
+  "regret_p95": 0.0,
+  "brier_collapse_on_test_rows": 0.0
+}

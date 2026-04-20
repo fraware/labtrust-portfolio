@@ -1,3 +1,34 @@
-# P5 — Scaling Laws (Empirical Predictors)
+﻿# P5 - When More Agents Hurt (coordination scaling)
 
-P5 contributes scenario-based coordination tax prediction with held-out validation and comparison to a prior coordination heuristic. Task features (scenario YAML, `num_tasks`, faults, `tool_density`, trace `event_count`), derived proxies (`coordination_tax_proxy`, `error_amplification_proxy`), and taxonomy `family` support primary and secondary targets. Baselines: global mean, per-scenario oracle, same-num_tasks group mean, linear regression, optional stump. Protocols: leave-one-scenario-out (default) and optional leave-one-family-out (`scaling_eval_family/heldout_results.json`). Spec: [P5_SCALING_SPEC.md](../../docs/P5_SCALING_SPEC.md). Draft and claims: [DRAFT.md](DRAFT.md), [claims.yaml](claims.yaml). Tables and figures: [VISUALS_PER_PAPER.md](../docs/VISUALS_PER_PAPER.md), [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Outline: [AUTHORING_PACKET.md](AUTHORING_PACKET.md). Conditional paper: `success_criteria_met` in `heldout_results.json`; see [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md). Publishable: `generate_multiscenario_runs.py --fault-mix` (12--20+ seeds, `--profile all` or `real_world`), then `scaling_heldout_eval.py`. One-command: `python scripts/run_paper_experiments.py --paper P5`. Key numbers: Section 5 of DRAFT and [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
+P5 measures how **agent count** and **coordination regime** affect MAESTRO thin-slice outcomes, and evaluates whether compact predictors generalize out-of-sample under strict no-leakage rules.
+
+## One command
+
+`PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experiments.py --paper P5`
+
+- `--quick` runs a CI-sized sweep.
+- Default run uses 30 seeds, `real_world` profile, `--fault-mix`, bounded coordination grid (`--p5-lite`), and writes all paper artifacts.
+
+## Main artifacts
+
+- `datasets/runs/scaling_eval/heldout_results.json`
+- `datasets/runs/scaling_eval_family/heldout_results.json`
+- `datasets/runs/scaling_eval_regime/heldout_results.json`
+- `datasets/runs/scaling_eval_agent_count/heldout_results.json`
+- `datasets/runs/scaling_eval_fault/heldout_results.json`
+- `datasets/runs/sensitivity_sweep/scaling_sensitivity.json`
+- `datasets/runs/scaling_recommend/recommendation_eval.json`
+- `papers/P5_ScalingLaws/generated_tables.md`
+- `docs/figures/p5_fig*.png`
+
+## Trigger semantics (conditional paper)
+
+Go/no-go is `success_criteria_met.trigger_met` from **admissible** baselines only:
+
+- `beat_global_mean_out_of_sample`
+- `beat_feature_baseline_out_of_sample`
+- `beat_regime_baseline_out_of_sample`
+
+Oracle baselines are reported separately and never drive `trigger_met`.
+
+Spec: `docs/P5_SCALING_SPEC.md`.

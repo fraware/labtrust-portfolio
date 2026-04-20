@@ -4,58 +4,59 @@
 
 | Held-out | train_n | test_n | global_mae | oracle_ps_mae | adm_train_ps_mae | regime_train_mae | feat_mae | reg_mae | mean_actual |
 |----------|--------|--------|------------|---------------|------------------|------------------|---------|---------|-------------|
-| lab_profile_v0 | 144 | 36 | 1.50 | 0.32 | 1.50 | 1.50 | 1.50 | 0.40 | 4.81 |
-| regime_stress_v0 | 144 | 36 | 0.48 | 0.36 | 0.48 | 0.48 | 0.36 | 0.33 | 3.78 |
-| toy_lab_v0 | 144 | 36 | 0.48 | 0.36 | 0.48 | 0.48 | 0.36 | 0.33 | 3.78 |
-| traffic_v0 | 144 | 36 | 0.94 | 0.24 | 0.94 | 0.94 | 0.24 | 0.26 | 2.86 |
-| warehouse_v0 | 144 | 36 | 0.94 | 0.24 | 0.94 | 0.94 | 0.24 | 0.26 | 2.86 |
+| lab_profile_v0 | 3600 | 720 | 1.40 | 0.11 | 1.40 | 1.40 | 1.40 | 0.12 | 4.94 |
+| regime_stress_v0 | 3600 | 720 | 0.28 | 0.10 | 0.28 | 0.28 | 0.10 | 0.10 | 3.95 |
+| regime_stress_v1 | 3600 | 720 | 0.28 | 0.10 | 0.28 | 0.28 | 0.10 | 0.10 | 3.95 |
+| rep_cps_scheduling_v0 | 3600 | 720 | 0.28 | 0.10 | 0.28 | 0.28 | 0.10 | 0.10 | 3.95 |
+| traffic_v0 | 3600 | 720 | 0.99 | 0.07 | 0.99 | 0.99 | 0.07 | 0.08 | 2.96 |
+| warehouse_v0 | 3600 | 720 | 0.99 | 0.07 | 0.99 | 0.99 | 0.07 | 0.08 | 2.96 |
 
 # Table 2 — Baseline hierarchy (admissible vs oracle)
 
 | Class | Baseline | MAE | CI95 lower | CI95 upper |
 |-------|----------|-----|------------|------------|
-| Admissible | Global mean | 0.87 | 0.54 | 1.20 |
-| Admissible | Per-scenario train-only | 0.87 | — | — |
-| Admissible | Regime train mean | 0.87 | — | — |
-| Admissible | Agent-count train mean | 0.87 | — | — |
-| Admissible | Num-tasks bucket | 0.54 | 0.11 | 0.96 |
-| Admissible | Regression (P5 features) | 0.32 | 0.27 | 0.36 |
-| Oracle | Per-scenario (includes test) | 0.30 | — | — |
+| Admissible | Global mean | 0.70 | 0.34 | 1.06 |
+| Admissible | Per-scenario train-only | 0.70 | - | - |
+| Admissible | Regime train mean | 0.70 | - | - |
+| Admissible | Agent-count train mean | 0.70 | - | - |
+| Admissible | Num-tasks bucket | 0.31 | -0.08 | 0.70 |
+| Admissible | Regression (P5 features) | 0.10 | 0.08 | 0.11 |
+| Oracle | Per-scenario (includes test) | 0.10 | - | - |
 
 **Trigger (admissible):** `trigger_met` = True
 
 # Table 3 — Regime selection / recommendation
 
-| regime_match_rate | 0.08 |
-| mean_regret_tasks_completed | 0.22 |
-| regret_p95 | 1.00 |
+| regime_match_rate | 0.01 |
+| mean_regret_tasks_completed | 0.05 |
+| regret_p95 | 0.00 |
 | Brier collapse (LOFO rows) | 0.00 |
 
 # Table 4 — Family- and agent-held-out generalization
 
 | Protocol | regression_mae | trigger_met |
 |----------|----------------|-------------|
-| Leave-one-family-out | 0.26 | True |
-| Leave-one-agent-count-out | 0.31 | False |
+| Leave-one-family-out | 0.08 | True |
+| Leave-one-agent-count-out | 0.10 | False |
 
 # Table 5 — Feature ablation (mean MAE by feature set)
 
 | Features | mean MAE |
 |----------|---------|
-| ['num_tasks'] | 0.32 |
-| ['num_faults'] | 1.37 |
-| ['num_tasks', 'num_faults', 'tool_density', 'agent_count', 'regime_id', 'hierarchy_depth', 'fan_out', 'queue_contention_index', 'shared_state_contention'] | 0.32 |
+| ['num_tasks'] | 0.10 |
+| ['num_faults'] | 1.08 |
+| ['num_tasks', 'num_faults', 'tool_density', 'agent_count', 'regime_id', 'hierarchy_depth', 'fan_out', 'queue_contention_index', 'shared_state_contention'] | 0.10 |
 
 # Table 6 — Calibration / uncertainty
 
-| mean_regression_pi_coverage_95 | 0.92 |
-| paired_t_p_value (global vs feat fold MAE) | 0.11 |
+| mean_regression_pi_coverage_95 | 0.95 |
+| paired_t_p_value (global vs feat fold MAE) | 0.07 |
 
 # Table 7 — Sensitivity vs seed cap
 
 | max_seed | regression_mae | trigger_met |
 |----------|----------------|-------------|
-| 10 | 0.32 | True |
-| 20 | 0.32 | True |
-| 30 | 0.32 | True |
+| 10 | 0.12 | True |
+| 20 | 0.11 | True |
+| 30 | 0.10 | True |
 

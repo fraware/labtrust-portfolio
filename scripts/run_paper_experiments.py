@@ -208,6 +208,8 @@ def p4(quick: bool) -> bool:
 def p5(quick: bool) -> bool:
     seeds = 3 if quick else 30
     multiscenario = RUNS / "multiscenario_runs"
+    # Bounded grid (--p5-lite): 3 regimes x 2 agent counts; avoids 5x4 full combinatorial
+    # explosion on real_world x fault-mix x 30 seeds (still thousands of thin-slice runs).
     gen_cmd = [
         sys.executable,
         str(REPO / "scripts" / "generate_multiscenario_runs.py"),
@@ -216,18 +218,17 @@ def p5(quick: bool) -> bool:
         "--seeds",
         str(seeds),
         "--coordination-grid",
+        "--p5-lite",
         "--clean",
         "--profile",
         "core" if quick else "real_world",
     ]
-    if quick:
-        gen_cmd.append("--p5-lite")
     if not quick:
         gen_cmd.append("--fault-mix")
     if not run(
         gen_cmd,
-        "P5 Generate multi-scenario runs (coordination grid)",
-        timeout=1800 if not quick else 900,
+        "P5 Generate multi-scenario runs (coordination grid, bounded)",
+        timeout=3600 if not quick else 900,
     ):
         return False
 
@@ -440,12 +441,12 @@ def p7(quick: bool) -> bool:
 
 
 def p8(quick: bool) -> bool:
-    seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20"
+    seeds = "1,2,3" if quick else "11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30"
+    calib_seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10"
     meta_out = str(RUNS / "meta_eval")
-    # Publishable (not quick): per-scenario collapse sweep + meta_eval --non-vacuous (primary: v0; external validity: v1).
     if not quick:
         scenarios = [
-            ("regime_stress_v0", meta_out, "0.15,0.2,0.25,0.3"),
+            ("regime_stress_v0", meta_out, "0.15,0.2,0.25,0.3,0.35"),
             (
                 "regime_stress_v1",
                 str(RUNS / "meta_eval" / "scenario_regime_stress_v1"),
@@ -460,13 +461,14 @@ def p8(quick: bool) -> bool:
                     "--out", out_dir,
                     "--scenario", scen_id,
                     "--drop-probs", drop_probs,
-                    "--seeds", seeds,
+                    "--seeds", calib_seeds,
                 ],
                 f"P8 Meta collapse sweep ({scen_id}, non-vacuous calibration)",
                 timeout=400,
             )
             if not ok:
                 return False
+            sweep_path = str(Path(out_dir) / "collapse_sweep.json")
             ok = run(
                 [
                     sys.executable,
@@ -475,9 +477,11 @@ def p8(quick: bool) -> bool:
                     "--scenario", scen_id,
                     "--seeds", seeds,
                     "--run-naive",
-                    "--fault-threshold", "0",
                     "--non-vacuous",
+                    "--non-vacuous-select", "max_drop_any_collapse",
                     "--fallback-adapter", "retry_heavy",
+                    "--collapse-sweep-path", sweep_path,
+                    "--calibration-seeds", calib_seeds,
                 ],
                 f"P8 Meta-coordination (non-vacuous: {scen_id}, two coordination paths)",
                 timeout=500,
@@ -492,7 +496,6 @@ def p8(quick: bool) -> bool:
                 "--out", meta_out,
                 "--seeds", seeds,
                 "--run-naive",
-                "--fault-threshold", "0",
             ],
             "P8 Meta-coordination (fixed vs meta vs naive)",
             timeout=300,

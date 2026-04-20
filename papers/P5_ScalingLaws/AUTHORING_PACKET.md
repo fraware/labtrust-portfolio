@@ -1,51 +1,53 @@
-# When More Agents Hurt: Empirical Predictors of Coordination Tax and Error Amplification in CPS
+﻿# P5 authoring packet (current run)
 
-**Paper ID:** P5_ScalingLaws  
-**Tag:** conditional  
-**Board path:** Spec → MVP → Eval → Draft  
-**Kernel ownership:** none; consumes MAESTRO datasets and emits a predictive model/tool.
+**Paper:** P5_ScalingLaws  
+**Title:** When More Agents Hurt  
+**Type:** Conditional (triggered by admissible OOS criteria)
 
-## 1) Trigger condition
-Proceed only after MAESTRO provides **multi-scenario** datasets sufficient for out-of-sample validation. Otherwise this reads as overclaim.
+## 1) Question
 
-## 2) One-line question
-Can we predict coordination overhead and collapse risk from task properties (resource graph structure, sequential depth, tool density, deadline tightness) to guide architecture choice?
+When agent count and coordination regime vary, can we reliably predict throughput and risk in held-out CPS scenarios without leakage?
 
-## 3) Claims
-- **C1:** Coordination tax and error amplification are predictable from a compact CPS task feature set.
-- **C2:** The predictors generalize out-of-sample across scenario families and beat trivial baselines.
-- **C3:** The model supports architecture selection decisions with calibrated uncertainty.
+## 2) Claims to defend
 
-## 4) Outline
-1. Coordination tax as a systems effect
-2. Task feature indices (resource graph + workflow dependency depth + tool density)
-3. Response variables (tail latency, MTTR, safety violations, collapse probability)
-4. Modeling approach (modest, rigorous)
-5. Results: cross-scenario validation + decision rules
-6. Limits + data requirements
+- **C1:** Coordination behavior (throughput/risk proxies) depends reproducibly on agent count, regime, and task structure.
+- **C2:** Predictors generalize out-of-sample and beat admissible baselines on primary target (`tasks_completed`) under scenario and family holdouts.
+- **C3:** Regime recommendation is available as a risk-aware artifact, but recommendation-quality metrics must be reported transparently.
 
-## 5) Experiment plan
-- Data: MAESTRO runs across architectures + fault mixtures
-- Baselines: N-only heuristics; simple linear; fixed thresholds
-- Validation: held-out scenario family; held-out fault mixtures
-- Success criteria: beats baselines + calibrated collapse probability
+## 3) Frozen evidence (latest run)
 
-## 6) Artifact checklist
-- feature extractor (from scenario specs + traces)
-- dataset builder (MAESTRO → modeling table)
-- modeling code + evaluation script
-- architecture recommendation CLI
+- Scenario holdout: `datasets/runs/scaling_eval/heldout_results.json`
+  - `overall_regression_mae = 0.0962`
+  - `overall_baseline_mae = 0.7005`
+  - `trigger_met = true`
+- Family holdout: `datasets/runs/scaling_eval_family/heldout_results.json`
+  - `overall_regression_mae = 0.0774`
+  - `trigger_met = true`
+- Regime holdout: `datasets/runs/scaling_eval_regime/heldout_results.json`
+  - `overall_regression_mae = 0.0952`
+  - `trigger_met = false` (feature baseline tie/slight edge)
+- Agent-count holdout: `datasets/runs/scaling_eval_agent_count/heldout_results.json`
+  - `overall_regression_mae = 0.0952`
+  - `trigger_met = false`
+- Fault-setting holdout: `datasets/runs/scaling_eval_fault/heldout_results.json`
+  - `overall_regression_mae = 0.1000`
+  - `trigger_met = false`
+- Sensitivity: `datasets/runs/sensitivity_sweep/scaling_sensitivity.json`
+  - regression MAE improves from `0.12` (N=10) → `0.11` (N=20) → `0.10` (N=30)
+- Recommendation eval: `datasets/runs/scaling_recommend/recommendation_eval.json`
+  - `regime_selection_accuracy = 0.0083`
+  - `mean_regret_tasks_completed = 0.0458`
 
-## 7) Kill criteria
-- **K1:** does not beat trivial baselines out-of-sample.
-- **K2:** features are not computable from public artifacts.
-- **K3:** model is scenario-specific and non-actionable.
+## 4) Writing guidance
 
-## 8) Target venues
-- NeurIPS / CoRL / RSS (depending on empirical framing)
-- arXiv first (cs.RO, cs.LG)
+- Keep C2 scoped to **scenario/family** trigger success.
+- Do not overclaim regime-selection quality; report low match-rate and low regret together.
+- Explicitly state oracle-vs-admissible split and no-leakage policy.
 
-## 9) Integration contract
-Consumes: MAESTRO datasets + Replay traces.
-Produces: decision guidance for Meta-coordination and system design.
+## 5) Required outputs for draft sync
 
+- `papers/P5_ScalingLaws/DRAFT.md`
+- `papers/P5_ScalingLaws/generated_tables.md`
+- `papers/P5_ScalingLaws/claims.yaml`
+- `papers/P5_ScalingLaws/PHASE3_PASSED.md`
+- `papers/P5_ScalingLaws/README.md`

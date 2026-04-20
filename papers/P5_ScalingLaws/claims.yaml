@@ -1,47 +1,54 @@
-# P5 Scaling Laws claim table (Draft conversion checklist 2.1)
-# Conditional paper; beat_per_scenario_baseline, trigger_met in output. See docs/CONDITIONAL_TRIGGERS.md.
-# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
+﻿# P5 Scaling Laws claim table (synchronized to frozen artifacts)
 
 paper_id: "P5_ScalingLaws"
-title: "When More Agents Hurt: Empirical Predictors of Coordination Tax"
+title: "When More Agents Hurt: Coordination scaling in MAESTRO CPS scenarios"
 release_id: "scaling_eval"
 
 claims:
   - id: "C1"
-    statement: "Coordination tax and error amplification are predictable from a compact CPS task feature set."
+    statement: >
+      Coordination behavior is a reproducible function of scenario structure,
+      agent count, and coordination regime in MAESTRO thin-slice CPS runs.
     evidence:
       release_id: "scaling_eval"
       confidence: "high"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
-        - "datasets/runs/scaling_eval_family/heldout_results.json"
-        - "docs/P5_SCALING_SPEC.md"
-        - "impl/src/labtrust_portfolio/scaling.py"
-      table_ids: ["Table 1", "Table 2"]
-      figure_ids: ["Figure 0"]
+        - "datasets/runs/multiscenario_runs/"
+        - "impl/src/labtrust_portfolio/thinslice.py"
+        - "impl/src/labtrust_portfolio/coordination_profile.py"
+      table_ids: ["Table 1", "Table 5"]
+      figure_ids: ["Figure 2", "Figure 3", "Figure 4"]
 
   - id: "C2"
-    statement: "The predictors generalize out-of-sample across scenario families and beat trivial baselines."
+    statement: >
+      On primary target tasks_completed, predictors beat admissible baselines
+      out-of-sample under scenario and family holdouts; oracle baselines are
+      separated and do not drive trigger logic.
     evidence:
       release_id: "scaling_eval"
       confidence: "high"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
         - "datasets/runs/scaling_eval_family/heldout_results.json"
-      table_ids: ["Table 1", "Table 2"]
-      figure_ids: ["Figure 1"]
+        - "datasets/runs/scaling_eval_regime/heldout_results.json"
+        - "datasets/runs/scaling_eval_agent_count/heldout_results.json"
+        - "datasets/runs/scaling_eval_fault/heldout_results.json"
+      table_ids: ["Table 1", "Table 2", "Table 4", "Table 7"]
+      figure_ids: ["Figure 1", "Figure 5"]
 
   - id: "C3"
-    statement: "The model supports architecture selection decisions with calibrated uncertainty."
+    statement: >
+      A regime recommendation artifact is available (counterfactual scoring with
+      uncertainty and unsafe-region flags), but recommendation selection accuracy
+      is currently weak and should be reported as exploratory rather than strong
+      decision superiority.
     evidence:
       release_id: "scaling_eval"
-      confidence: "high"
+      confidence: "low"
       artifact_paths:
-        - "datasets/runs/scaling_eval/heldout_results.json"
+        - "datasets/runs/scaling_recommend/recommendation_eval.json"
         - "scripts/scaling_recommend.py"
-      table_ids: ["Table 2"]
-      figure_ids: []
-
-# Table 1/2: export_scaling_tables.py. Figure 1: plot_scaling_mae.py. Baseline hierarchy: global mean, per-scenario mean, feature, regression.
-# Protocol: generate_multiscenario_runs.py --seeds 12+ --fault-mix; scaling_heldout_eval.py; optional --holdout-mode family --no-secondary -> scaling_eval_family/.
-# C1: secondary_targets (coordination_tax_proxy, error_amplification_proxy) in heldout_results.json; C2: family OOS in scaling_eval_family/; C3: mean_regression_pi_coverage_95, regression MAE CI.
+        - "datasets/runs/scaling_eval/heldout_results.json"
+      table_ids: ["Table 3", "Table 6"]
+      figure_ids: ["Figure 4"]
