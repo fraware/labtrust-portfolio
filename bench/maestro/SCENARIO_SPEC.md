@@ -27,17 +27,17 @@ When present, `resource_graph` models capacity-constrained resources and bottlen
 
 ## Fault model
 
-Faults are injectable by the harness. Supported fault types (v0.1):
+Faults are injectable by the harness. **Core** fault types (YAML + thin-slice):
 
-- **drop_completion:** With probability `drop_completion_prob`, the task does not complete (no task_end); a fault_injected event is emitted. Models tool failure or lost message.
-- **delay:** Adds a random delay (e.g. scaled by `delay_p95_ms`) before the next event; optionally inject with `delay_fault_prob`. Emits fault_injected with fault "delay" then continues; models queue contention or network delay.
-- **calibration_invalid:** Lab-real fault. With probability `calibration_invalid_prob`, a fault_injected event with fault "calibration_invalid" is emitted before task_end (instrument state invalid; task still completes). Models calibration drift or invalidation. When combined with resource_graph (instrument capacity 1, shared station bottleneck, cleaning/calibration states), fault injection stresses **contention and recovery**, not only drop/delay.
+- **drop_completion**, **delay**, **calibration_invalid** (see parameters on `run_thin_slice`).
 
-Fault parameters are scenario-specific (e.g. drop_completion_prob, delay_p95_ms, delay_fault_prob). The harness reads scenario YAML and fault config to decide when to inject. Fault sweeps can vary fault type (drop_completion vs delay) and probability.
+**Extended** injectors (thin-slice harness; surfaced in `recovery_stress_aux` sweep rows and/or lab-heavy paths) include at least: **timeout**, **partial_result**, **reordered_event**, **resource_contention_spike**, **invalid_action_injection**, **agent_nonresponse** (worker stall), **duplicate_completion**, **conflicting_action**, **constraint_guard_trigger** (lab disposition), **sensor_stale** / stale reads, **deadline_miss** (synthetic). Lab-profile runs additionally model disposition / PONR-adjacent risk via explicit `ponr_violation` and `unsafe_task_completion` markers when guards fire.
+
+Fault parameters are scenario-specific and sweep-specific. See `datasets/runs/maestro_fault_sweep/multi_sweep.json` `run_manifest.fault_params` for the frozen publishable grid.
 
 ## Scoring and report
 
-Scoring is standardized: tasks_completed, task_latency_ms_p50/p95/p99, coordination_messages, fault_injected, fault_events, recovery_ok. The scoring library is in `impl` (maestro_report_from_trace); reports conform to MAESTRO_REPORT schema.
+Scoring is standardized in **MAESTRO_REPORT v0.2**: throughput, latency tails, coordination efficiency, recovery timing, explicit safety counters, `run_outcome`, and structured `safety_violation_types`. Implemented in `impl/src/labtrust_portfolio/maestro.py` (`maestro_report_from_trace`). Semantics: `bench/maestro/RECOVERY_AND_SAFETY_METRICS.md`. Composite ranking / anti-gaming: `bench/maestro/SCORING.md`.
 
 ## Adapter interface
 

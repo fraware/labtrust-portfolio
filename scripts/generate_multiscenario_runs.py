@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import sys
 from pathlib import Path
 
@@ -75,7 +76,42 @@ def main() -> int:
             "core: legacy five scenarios only"
         ),
     )
+    ap.add_argument(
+        "--coordination-grid",
+        action="store_true",
+        help=(
+            "P5 paper mode: sweep coordination_regime x agent_count (otherwise only "
+            "centralized, 1 agent for backward compatibility)"
+        ),
+    )
+    ap.add_argument(
+        "--p5-lite",
+        action="store_true",
+        help="With --coordination-grid: fewer regimes and agent counts for CI / smoke",
+    )
+    ap.add_argument(
+        "--agent-counts",
+        type=str,
+        default="1,2,4,8",
+        help="Comma-separated agent counts (used with --coordination-grid)",
+    )
+    ap.add_argument(
+        "--regimes",
+        type=str,
+        default="",
+        help=(
+            "Comma-separated coordination regimes; default all valid harness regimes"
+        ),
+    )
+    ap.add_argument(
+        "--clean",
+        action="store_true",
+        help="Delete output directory before generating (avoids mixed layout / stale traces)",
+    )
     args = ap.parse_args()
+
+    if args.clean and args.out.exists():
+        shutil.rmtree(args.out)
 
     if (args.seed_min is None) ^ (args.seed_max is None):
         print(
@@ -94,6 +130,7 @@ def main() -> int:
     else:
         seed_range = range(1, args.seeds + 1)
 
+    from labtrust_portfolio.coordination_profile import VALID_REGIMES
     from labtrust_portfolio.thinslice import run_thin_slice
     from labtrust_portfolio.scenario import list_scenario_ids, load_scenario
 
@@ -176,6 +213,32 @@ def main() -> int:
                 "label": "delay_01",
             }
         )
+    if args.coordination_grid:
+        if args.p5_lite:
+            agent_list = [1, 4]
+            regime_list = ["centralized", "hierarchical", "decentralized"]
+        else:
+            agent_list = [
+                int(x.strip())
+                for x in args.agent_counts.split(",")
+                if x.strip().isdigit()
+            ]
+            if not agent_list:
+                agent_list = [1, 2, 4, 8]
+            if args.regimes.strip():
+                regime_list = [
+                    x.strip()
+                    for x in args.regimes.split(",")
+                    if x.strip() in VALID_REGIMES
+                ]
+            else:
+                regime_list = list(VALID_REGIMES)
+            if not regime_list:
+                regime_list = ["centralized"]
+    else:
+        agent_list = [1]
+        regime_list = ["centralized"]
+
     args.out.mkdir(parents=True, exist_ok=True)
     count = 0
     for scenario_id in scenario_ids:
@@ -184,20 +247,35 @@ def main() -> int:
         except (FileNotFoundError, ValueError):
             continue
         for s in settings:
-            for seed in seed_range:
-                run_dir = args.out / scenario_id / s["label"] / f"seed_{seed}"
-                run_dir.mkdir(parents=True, exist_ok=True)
-                run_thin_slice(
-                    run_dir,
-                    seed=seed,
-                    scenario_id=scenario_id,
-                    drop_completion_prob=s["drop_completion_prob"],
-                    delay_fault_prob=s.get("delay_fault_prob", 0.0),
-                    calibration_invalid_prob=s.get(
-                        "calibration_invalid_prob", 0.0
-                    ),
-                )
-                count += 1
+            for regime in regime_list:
+                for ac in agent_list:
+                    for seed in seed_range:
+                        if args.coordination_grid:
+                            run_dir = (
+                                args.out
+                                / scenario_id
+                                / s["label"]
+                                / regime
+                                / f"agents_{ac}"
+                                / f"seed_{seed}"
+                            )
+                        else:
+                            run_dir = args.out / scenario_id / s["label"] / f"seed_{seed}"
+                        run_dir.mkdir(parents=True, exist_ok=True)
+                        run_thin_slice(
+                            run_dir,
+                            seed=seed,
+                            scenario_id=scenario_id,
+                            drop_completion_prob=s["drop_completion_prob"],
+                            delay_fault_prob=s.get("delay_fault_prob", 0.0),
+                            calibration_invalid_prob=s.get(
+                                "calibration_invalid_prob", 0.0
+                            ),
+                            agent_count=ac,
+                            coordination_regime=regime,
+                            fault_setting_label=s["label"],
+                        )
+                        count += 1
     print(f"Generated {count} runs under {args.out}")
     return 0
 

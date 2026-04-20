@@ -1,6 +1,6 @@
 # Table 1 — Corpus and fidelity
 
-All corpus traces (from summary.json); N = 11. Regenerate with export_replay_corpus_table.py.
+All corpus traces (from summary.json); N = 12. Regenerate with export_replay_corpus_table.py.
 
 | Trace | expected_replay_ok | expected_divergence_at_seq | observed_replay_ok | observed_divergence_at_seq |
 |-------|--------------------|----------------------------|---------------------|----------------------------|
@@ -13,6 +13,7 @@ All corpus traces (from summary.json); N = 11. Regenerate with export_replay_cor
 | mixed_failure_trap | false | 2 | false | 2 |
 | nondeterminism_trap | false | 0 | false | 0 |
 | real_bucket_example | true | — | true | — |
+| real_bucket_toy_lab_session | true | — | true | — |
 | reorder_trap | false | 1 | false | 1 |
 | timestamp_reorder_trap | false | 1 | false | 1 |
 
@@ -22,7 +23,7 @@ Per-trace divergence detection, localization vs expected (when declared), ambigu
 
 | Trace | corpus_category | divergence_detected | localization_matches_expected | localization_ambiguous | root_cause_category | trace_json_bytes | state_hash_after_count | diagnostic_payload_bytes_approx |
 |-------|-----------------|---------------------|-------------------------------|-------------------------|----------------------|------------------|-------------------------|--------------------------------|
-| thin_slice | synthetic_pass | false | true | false | — | 3388 | 12 | — |
+| thin_slice | synthetic_pass | false | true | false | — | 4574 | 13 | — |
 | benign_perturbation_pass | synthetic_pass | false | true | false | — | 1901 | 5 | — |
 | field_style_pass | field_proxy | false | true | false | — | 4932 | 12 | — |
 | field_style_pass_variant_b | field_proxy | false | true | false | — | 2408 | 6 | — |
@@ -31,16 +32,17 @@ Per-trace divergence detection, localization vs expected (when declared), ambigu
 | mixed_failure_trap | synthetic_trap | true | true | false | tool_io | 2263 | 6 | 1285 |
 | nondeterminism_trap | synthetic_trap | true | true | false | tool_io | 519 | 1 | 452 |
 | real_bucket_example | real_ingest | false | true | false | — | 1319 | 3 | — |
+| real_bucket_toy_lab_session | real_ingest | false | true | false | — | 5859 | 13 | — |
 | reorder_trap | synthetic_trap | true | true | false | tool_io | 784 | 2 | 651 |
 | timestamp_reorder_trap | synthetic_trap | true | true | false | tool_io | 804 | 2 | 651 |
 
 ## Corpus space summary (aggregate, corpus rows only)
 
-- corpus_traces_n: 10
-- trace_json_bytes_sum: 23224
-- trace_json_bytes_mean: 2322.4
-- state_hash_after_count_sum: 61
-- state_hash_after_count_mean: 6.1
+- corpus_traces_n: 11
+- trace_json_bytes_sum: 29083
+- trace_json_bytes_mean: 2643.9091
+- state_hash_after_count_sum: 74
+- state_hash_after_count_mean: 6.7273
 - diagnostic_payload_bytes_approx_sum: 4758
 - diagnostic_payload_bytes_approx_mean: 793
 
@@ -49,7 +51,15 @@ Per-trace divergence detection, localization vs expected (when declared), ambigu
 - n_seeds: 5
 - all_pass: true
 - n_pass: 5
-- mean_time_ms: 1.7425
-- stdev_time_ms: 0.8187
-- min_time_ms: 1.0233
-- max_time_ms: 3.0904
+- mean_time_ms: 0.4403
+- stdev_time_ms: 0.0094
+- min_time_ms: 0.4287
+- max_time_ms: 0.4542
+
+### L1 twin on real_ingest traces (second evaluation family)
+
+| Trace | L0 replay_ok | L1 twin_ok | L1 time (ms) |
+|-------|--------------|------------|--------------|
+| real_bucket_example | true | true | 0.3262 |
+| real_bucket_toy_lab_session | true | true | 0.4532 |
+- real_ingest_all_pass: true

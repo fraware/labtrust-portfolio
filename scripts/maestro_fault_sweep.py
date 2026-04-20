@@ -19,6 +19,29 @@ sys.path.insert(0, str(REPO_ROOT / "impl" / "src"))
 if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO_ROOT / "kernel")
 
+_THIN_SLICE_FAULT_KEYS = (
+    "timeout_fault_prob",
+    "partial_result_fault_prob",
+    "reordered_event_fault_prob",
+    "resource_contention_spike_prob",
+    "invalid_action_injection_prob",
+    "agent_nonresponse_fault_prob",
+    "duplicate_completion_prob",
+    "conflicting_action_prob",
+    "constraint_guard_trigger_prob",
+    "sensor_stale_prob",
+    "shutdown_after_first_fault",
+    "deadline_miss_prob",
+)
+
+
+def _thin_slice_kwargs(setting: dict) -> dict:
+    out = {}
+    for k in _THIN_SLICE_FAULT_KEYS:
+        if k in setting:
+            out[k] = setting[k]
+    return out
+
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="P4: Fault sweep for MAESTRO scenario")
@@ -75,26 +98,35 @@ def main() -> int:
         {"drop_completion_prob": 0.0, "delay_fault_prob": 0.1, "calibration_invalid_prob": 0.0, "label": "delay_01"},
         {"drop_completion_prob": 0.05, "delay_fault_prob": 0.1, "calibration_invalid_prob": 0.0, "label": "drop_005_delay_01"},
         {"drop_completion_prob": 0.0, "delay_fault_prob": 0.0, "calibration_invalid_prob": 0.1, "label": "calibration_invalid_01"},
+        {
+            "label": "recovery_stress_aux",
+            "drop_completion_prob": 0.08,
+            "delay_fault_prob": 0.05,
+            "calibration_invalid_prob": 0.0,
+            "timeout_fault_prob": 0.12,
+            "invalid_action_injection_prob": 0.06,
+            "agent_nonresponse_fault_prob": 0.05,
+            "sensor_stale_prob": 0.04,
+            "partial_result_fault_prob": 0.05,
+            "reordered_event_fault_prob": 0.03,
+            "duplicate_completion_prob": 0.02,
+            "conflicting_action_prob": 0.02,
+            "deadline_miss_prob": 0.03,
+        },
     ]
     run_manifest = {
         "seeds": list(range(1, args.seeds + 1)),
         "seed_count": args.seeds,
         "scenarios": scenarios,
         "fault_settings": [s["label"] for s in settings],
-        "fault_params": [
-            {
-                "drop_completion_prob": s["drop_completion_prob"],
-                "delay_fault_prob": s.get("delay_fault_prob", 0.0),
-                "calibration_invalid_prob": s.get("calibration_invalid_prob", 0.0),
-            }
-            for s in settings
-        ],
+        "fault_params": [{k: v for k, v in s.items() if k != "label"} for s in settings],
     }
     multi_sweep = {
         "scenarios": scenarios,
         "run_manifest": run_manifest,
         "per_scenario": [],
         "success_criteria_met": {"run_manifest_present": True},
+        "maestro_report_version": "0.2",
     }
 
     # Excellence metrics (STANDARDS_OF_EXCELLENCE.md) - populated after loop
@@ -111,28 +143,45 @@ def main() -> int:
                     run_dir,
                     seed=seed,
                     scenario_id=scenario_id,
-                    drop_completion_prob=s["drop_completion_prob"],
+                    drop_completion_prob=s.get("drop_completion_prob", 0.0),
                     delay_fault_prob=s.get("delay_fault_prob", 0.0),
                     calibration_invalid_prob=s.get("calibration_invalid_prob", 0.0),
+                    **_thin_slice_kwargs(s),
                 )
                 report_path = run_dir / "maestro_report.json"
                 data = json.loads(report_path.read_text(encoding="utf-8"))
                 m = data["metrics"]
+                sf = data.get("safety") or {}
                 run_row = {
                     "seed": seed,
                     "tasks_completed": m["tasks_completed"],
                     "coordination_messages": m["coordination_messages"],
                     "p95_latency_ms": m["task_latency_ms_p95"],
+                    "p99_latency_ms": m["task_latency_ms_p99"],
+                    "time_to_recovery_ms": m.get("time_to_recovery_ms"),
+                    "time_to_safe_state_ms": m.get("time_to_safe_state_ms"),
+                    "safety_violation_count": sf.get("safety_violation_count", 0),
+                    "unsafe_success_count": sf.get("unsafe_success_count", 0),
+                    "run_outcome": data.get("run_outcome"),
                 }
                 if m.get("steps_to_completion_after_first_fault") is not None:
                     run_row["steps_to_completion_after_first_fault"] = m["steps_to_completion_after_first_fault"]
                 if m.get("tasks_completed_after_fault") is not None:
                     run_row["tasks_completed_after_fault"] = m["tasks_completed_after_fault"]
+                fi = (data.get("faults") or {}).get("fault_injected")
+                run_row["recovery_success_seed"] = 1.0 if (
+                    (m.get("fault_to_recovery_event_count") or 0) > 0
+                    or m.get("time_to_recovery_ms") is not None
+                ) else (0.0 if fi else 1.0)
                 runs.append(run_row)
             tasks = [r["tasks_completed"] for r in runs]
             p95s = [r["p95_latency_ms"] for r in runs]
             steps_after = [r["steps_to_completion_after_first_fault"] for r in runs if r.get("steps_to_completion_after_first_fault") is not None]
             tasks_after = [r["tasks_completed_after_fault"] for r in runs if r.get("tasks_completed_after_fault") is not None]
+            ttr = [r["time_to_recovery_ms"] for r in runs if r.get("time_to_recovery_ms") is not None]
+            tts = [r["time_to_safe_state_ms"] for r in runs if r.get("time_to_safe_state_ms") is not None]
+            sv = [r["safety_violation_count"] for r in runs]
+            rs = [r["recovery_success_seed"] for r in runs]
             n = len(p95s)
             p99_idx = min(int(0.99 * n), n - 1) if n > 0 else -1
             p99_latency = sorted(p95s)[p99_idx] if p99_idx >= 0 else 0.0
@@ -158,6 +207,12 @@ def main() -> int:
             if tasks_after:
                 summary["tasks_completed_after_fault_mean"] = round(statistics.mean(tasks_after), 2)
                 summary["tasks_completed_after_fault_stdev"] = round(statistics.stdev(tasks_after), 2) if len(tasks_after) > 1 else 0.0
+            if ttr:
+                summary["time_to_recovery_ms_mean"] = round(statistics.mean(ttr), 2)
+            if tts:
+                summary["time_to_safe_state_ms_mean"] = round(statistics.mean(tts), 2)
+            summary["safety_violation_count_mean"] = round(statistics.mean(sv), 4)
+            summary["recovery_success_rate_mean"] = round(statistics.mean(rs), 4)
             all_results.append(summary)
             (args.out / scenario_id / f"{s['label']}_summary.json").write_text(
                 json.dumps(summary, indent=2) + "\n", encoding="utf-8"

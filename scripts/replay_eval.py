@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import platform
 import statistics
@@ -110,6 +111,25 @@ def _diagnostic_payload_bytes_approx(diagnostics: list) -> int | None:
 
 def _state_hash_after_count(trace: dict) -> int:
     return sum(1 for e in (trace.get("events") or []) if e.get("state_hash_after"))
+
+
+def _overhead_curve_event_counts(n_events: int) -> list[int]:
+    """
+    Prefix sizes for overhead curve: scale with actual thin-slice length so the
+    curve has multiple points (not a single-prefix pseudo-curve when n is small).
+    """
+    if n_events < 1:
+        return []
+    if n_events == 1:
+        return [1]
+    sizes: list[int] = []
+    for frac in (0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1.0):
+        sz = max(1, min(n_events, int(math.ceil(n_events * frac))))
+        sizes.append(sz)
+    out = sorted(set(sizes))
+    if len(out) < 2:
+        out = sorted({1, max(1, n_events // 2), n_events})
+    return out
 
 
 def _infer_corpus_category(trace_name: str, trace: dict) -> str:
@@ -329,6 +349,7 @@ def main() -> int:
     l1_twin_message = ""
     l1_twin_time_ms: float | None = None
     l1_twin_multi_seed: list[dict] = []
+    l1_twin_real_ingest_rows: list[dict] = []
     if thin_slice_trace is not None:
         l1_stub_ok, l1_stub_message = replay_l1_stub(thin_slice_trace, twin_config_path)
         if args.l1_twin:
@@ -506,6 +527,33 @@ def main() -> int:
         entry["corpus_category"] = _infer_corpus_category(trace_name, trace)
         results.append(entry)
 
+    # L1 twin on real_ingest corpus rows (second evaluation family vs thin-slice seeds)
+    if args.l1_twin and twin_config_path.exists():
+        for r in results:
+            if r["name"] == "thin_slice":
+                continue
+            if r.get("corpus_category") != "real_ingest":
+                continue
+            if not r.get("replay_ok"):
+                continue
+            tp = args.corpus_dir / f"{r['name']}_trace.json"
+            if not tp.exists():
+                continue
+            tr_body = json.loads(tp.read_text(encoding="utf-8"))
+            t0 = time.perf_counter()
+            ok_tr, msg_tr = replay_l1_twin(tr_body, twin_config_path)
+            elapsed_tr = (time.perf_counter() - t0) * 1000
+            l1_twin_real_ingest_rows.append(
+                {
+                    "trace_name": r["name"],
+                    "corpus_category": "real_ingest",
+                    "l0_replay_ok": r.get("replay_ok"),
+                    "l1_twin_ok": ok_tr,
+                    "l1_twin_time_ms": round(elapsed_tr, 4),
+                    "l1_twin_message": msg_tr,
+                }
+            )
+
     replay_level = "L0"
     if l1_stub_ok:
         replay_level = "L1"
@@ -541,9 +589,7 @@ def main() -> int:
     if args.overhead_curve and thin_slice_trace is not None:
         events = thin_slice_trace.get("events", [])
         n_curve_runs = max(5, args.overhead_runs)
-        for size in [10, 25, 50, 100, 200, 500]:
-            if size > len(events):
-                break
+        for size in _overhead_curve_event_counts(len(events)):
             sub_trace = dict(thin_slice_trace)
             sub_trace["events"] = events[:size]
             times_ms = []
@@ -611,13 +657,19 @@ def main() -> int:
     if args.l1_twin and l1_twin_multi_seed:
         twin_oks = [x["l1_twin_ok"] for x in l1_twin_multi_seed]
         twin_times = [x["l1_twin_time_ms"] for x in l1_twin_multi_seed if x.get("l1_twin_time_ms") is not None]
+        real_oks = [x["l1_twin_ok"] for x in l1_twin_real_ingest_rows]
+        all_pass = all(twin_oks) and (all(real_oks) if real_oks else True)
         l1_twin_summary = {
             "n_seeds": len(l1_twin_multi_seed),
             "seeds": [x["seed"] for x in l1_twin_multi_seed],
-            "all_pass": all(twin_oks),
+            "all_pass": all_pass,
             "n_pass": sum(1 for ok in twin_oks if ok),
             "per_seed": l1_twin_multi_seed,
         }
+        if l1_twin_real_ingest_rows:
+            l1_twin_summary["real_ingest_traces"] = l1_twin_real_ingest_rows
+            l1_twin_summary["real_ingest_all_pass"] = all(real_oks)
+            l1_twin_summary["n_real_ingest_traces"] = len(l1_twin_real_ingest_rows)
         if twin_times:
             l1_twin_summary["mean_time_ms"] = round(statistics.mean(twin_times), 4)
             l1_twin_summary["stdev_time_ms"] = round(statistics.stdev(twin_times), 4) if len(twin_times) > 1 else 0.0
@@ -681,6 +733,7 @@ def main() -> int:
             "python_version": sys.version.split()[0],
             "platform": platform.platform(),
             "script": "replay_eval.py",
+            "l1_twin_real_ingest_n": len(l1_twin_real_ingest_rows),
         },
         "success_criteria_met": {
             "fidelity_pass": fidelity_pass,

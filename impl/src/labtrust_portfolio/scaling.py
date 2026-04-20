@@ -6,9 +6,39 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
+from .coordination_profile import VALID_REGIMES, counterfactual_profile_row
 from .scenario import get_scenario_family, get_scenario_task_names, load_scenario
+
+TRACE_META_KEYS = (
+    "fault_setting_label",
+    "agent_count",
+    "coordination_regime",
+    "coordination_topology",
+    "hierarchy_depth",
+    "fan_out",
+    "handoff_factor",
+    "shared_state_contention",
+    "deadline_tightness",
+    "critical_path_length",
+    "branching_factor",
+    "queue_contention_index",
+    "regime_fault_interaction",
+    "regime_id",
+)
+
+DEFAULT_FEATURE_COLS_P5 = [
+    "num_tasks",
+    "num_faults",
+    "tool_density",
+    "agent_count",
+    "regime_id",
+    "hierarchy_depth",
+    "fan_out",
+    "queue_contention_index",
+    "shared_state_contention",
+]
 
 
 def extract_features_from_scenario(scenario_id: str) -> Dict[str, Any]:
@@ -52,13 +82,26 @@ def extract_features_from_scenario(scenario_id: str) -> Dict[str, Any]:
 
 
 def extract_features_from_trace(trace: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract from trace: event_count, scenario_id, seed."""
+    """Extract from trace: event_count, scenario_id, seed, P5 coordination metadata."""
     events = trace.get("events", [])
-    return {
+    out: Dict[str, Any] = {
         "scenario_id": trace.get("scenario_id", ""),
         "seed": trace.get("seed", 0),
         "event_count": len(events),
     }
+    meta = trace.get("metadata") or {}
+    for k in TRACE_META_KEYS:
+        if k in meta:
+            out[k] = meta[k]
+    if "fault_setting_label" not in out:
+        out["fault_setting_label"] = "unknown"
+    if "agent_count" not in out:
+        out["agent_count"] = 1
+    if "coordination_regime" not in out:
+        out["coordination_regime"] = "centralized"
+    if "regime_id" not in out:
+        out["regime_id"] = 0
+    return out
 
 
 def extract_response_from_report(report: Dict[str, Any]) -> Dict[str, Any]:
@@ -126,8 +169,10 @@ def build_dataset_from_runs(runs_dir: Path) -> List[Dict[str, Any]]:
         )
         feats["scenario_family"] = scenario_family_for_id(scenario_id)
         enrich_row_derived_metrics(feats)
+        feats["collapse_probability"] = 1.0 if feats.get("collapse") else 0.0
         feats["response"]["coordination_tax_proxy"] = feats["coordination_tax_proxy"]
         feats["response"]["error_amplification_proxy"] = feats["error_amplification_proxy"]
+        feats["response"]["collapse_probability"] = feats["collapse_probability"]
         rows.append(feats)
     return rows
 
@@ -144,10 +189,45 @@ def predict_by_scenario(
     rows: List[Dict[str, Any]],
     scenario_id: str,
     target: str = "tasks_completed",
+    fallback: float | None = None,
 ) -> float:
     """Predict for scenario: mean of target among rows with same scenario_id."""
     subset = [r for r in rows if r.get("scenario_id") == scenario_id]
+    if not subset:
+        if fallback is not None:
+            return float(fallback)
+        return 0.0
     return predict_baseline_mean(subset, target)
+
+
+def predict_train_regime_baseline(
+    train_rows: List[Dict[str, Any]],
+    regime: str,
+    target: str,
+    global_fallback: float,
+) -> float:
+    """Train-only mean for coordination_regime; admissible baseline."""
+    sub = [r for r in train_rows if r.get("coordination_regime") == regime]
+    if not sub:
+        return float(global_fallback)
+    return predict_baseline_mean(sub, target)
+
+
+def predict_train_agent_band_baseline(
+    train_rows: List[Dict[str, Any]],
+    agent_count: Any,
+    target: str,
+    global_fallback: float,
+) -> float:
+    """Train-only mean for same agent_count; admissible when agent_count is not leaked from test."""
+    try:
+        ac = int(agent_count)
+    except (TypeError, ValueError):
+        return float(global_fallback)
+    sub = [r for r in train_rows if int(r.get("agent_count", 1) or 1) == ac]
+    if not sub:
+        return float(global_fallback)
+    return predict_baseline_mean(sub, target)
 
 
 def predict_prior_model(row: Dict[str, Any], target: str = "tasks_completed") -> float:
@@ -197,9 +277,10 @@ def _ols_fit(
             XtX[i][j] = sum(X[row][i] * X[row][j] for row in range(n))
     # X'y (k x 1)
     Xty = [sum(X[row][i] * y[row] for row in range(n)) for i in range(k)]
-    # Invert XtX (simple 2x2 or 3x3; for larger use numpy if available)
     try:
-        inv = _invert_2x2_or_3x3(XtX)
+        inv = _invert_matrix_gauss(XtX)
+        if inv is None:
+            inv = _invert_2x2_or_3x3(XtX)
         if inv is None:
             return None
         beta = [sum(inv[i][j] * Xty[j] for j in range(k)) for i in range(k)]
@@ -232,6 +313,34 @@ def _invert_2x2_or_3x3(M: List[List[float]]) -> Any:
         ]
         return inv
     return None
+
+
+def _invert_matrix_gauss(M: List[List[float]]) -> List[List[float]] | None:
+    """Invert n x n matrix via Gauss-Jordan; None if singular."""
+    n = len(M)
+    if n == 0 or any(len(row) != n for row in M):
+        return None
+    if n > 14:
+        return None
+    aug = [list(M[i]) + [1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+    for col in range(n):
+        piv_row = max(range(col, n), key=lambda r: abs(aug[r][col]))
+        if abs(aug[piv_row][col]) < 1e-12:
+            return None
+        if piv_row != col:
+            aug[col], aug[piv_row] = aug[piv_row], aug[col]
+        piv = aug[col][col]
+        for j in range(2 * n):
+            aug[col][j] /= piv
+        for r in range(n):
+            if r == col:
+                continue
+            f = aug[r][col]
+            if abs(f) < 1e-15:
+                continue
+            for j in range(2 * n):
+                aug[r][j] -= f * aug[col][j]
+    return [row[n:] for row in aug]
 
 
 def fit_linear_predictor(
@@ -293,6 +402,67 @@ def fit_tree_stump_predictor(
     return predict
 
 
+def build_scaling_holdout_folds(
+    rows: List[Dict[str, Any]],
+    holdout_mode: str,
+    scenario_feature_fn: Any = None,
+) -> Tuple[str, List[Tuple[str, List[Dict[str, Any]], List[Dict[str, Any]]]]]:
+    """
+    Leave-one-out style folds for P5 held-out protocols.
+    Mutates rows in place with _num_tasks for feat baseline compatibility.
+    """
+    fn = scenario_feature_fn or extract_features_from_scenario
+    for r in rows:
+        feats = fn(r.get("scenario_id", ""))
+        r["_num_tasks"] = feats.get("num_tasks", 0)
+    if holdout_mode == "scenario":
+        ids = sorted({r.get("scenario_id") for r in rows if r.get("scenario_id")})
+        folds_out: List[Tuple[str, List[Dict[str, Any]], List[Dict[str, Any]]]] = []
+        for hid in ids:
+            tr = [r for r in rows if r.get("scenario_id") != hid]
+            te = [r for r in rows if r.get("scenario_id") == hid]
+            if te:
+                folds_out.append((str(hid), tr, te))
+        return "scenario", folds_out
+    if holdout_mode == "family":
+        fams = sorted({r.get("scenario_family", "unknown") for r in rows})
+        folds_out = []
+        for fam in fams:
+            tr = [r for r in rows if r.get("scenario_family") != fam]
+            te = [r for r in rows if r.get("scenario_family") == fam]
+            if te and tr:
+                folds_out.append((str(fam), tr, te))
+        return "family", folds_out
+    if holdout_mode == "regime":
+        regs = sorted({str(r.get("coordination_regime", "centralized")) for r in rows})
+        folds_out = []
+        for reg in regs:
+            tr = [r for r in rows if str(r.get("coordination_regime", "")) != reg]
+            te = [r for r in rows if str(r.get("coordination_regime", "")) == reg]
+            if te and tr:
+                folds_out.append((reg, tr, te))
+        return "regime", folds_out
+    if holdout_mode == "agent_count":
+        acs = sorted({int(r.get("agent_count", 1) or 1) for r in rows})
+        folds_out = []
+        for ac in acs:
+            tr = [r for r in rows if int(r.get("agent_count", 1) or 1) != ac]
+            te = [r for r in rows if int(r.get("agent_count", 1) or 1) == ac]
+            if te and tr:
+                folds_out.append((f"agents_{ac}", tr, te))
+        return "agent_count", folds_out
+    if holdout_mode == "fault_setting":
+        labs = sorted({str(r.get("fault_setting_label", "unknown")) for r in rows})
+        folds_out = []
+        for lab in labs:
+            tr = [r for r in rows if str(r.get("fault_setting_label", "")) != lab]
+            te = [r for r in rows if str(r.get("fault_setting_label", "")) == lab]
+            if te and tr:
+                folds_out.append((lab, tr, te))
+        return "fault_setting", folds_out
+    raise ValueError(f"Unknown holdout_mode: {holdout_mode}")
+
+
 def fit_scaling_exponent(
     rows: List[Dict[str, Any]],
     target: str = "tasks_completed",
@@ -335,4 +505,84 @@ def fit_scaling_exponent(
         "scaling_exponent": slope,
         "scaling_r2": r2,
         "n_used": n,
+    }
+
+
+def train_residual_sigma(
+    train_rows: List[Dict[str, Any]],
+    target: str,
+    pred_fn: Any,
+) -> float | None:
+    import statistics
+
+    if pred_fn is None or len(train_rows) < 3:
+        return None
+    res: List[float] = []
+    for r in train_rows:
+        a = float(r.get("response", {}).get(target, 0) or 0.0)
+        res.append(a - float(pred_fn(r)))
+    if len(res) < 2:
+        return None
+    return float(statistics.pstdev(res))
+
+
+def regime_recommendation_bundle(
+    train_rows: List[Dict[str, Any]],
+    template_row: Dict[str, Any],
+    *,
+    agent_count: int,
+    regimes: Tuple[str, ...] = VALID_REGIMES,
+    collapse_threshold: float = 0.35,
+) -> Dict[str, Any]:
+    """
+    Per-regime counterfactual predictions and a risk-adjusted recommendation.
+    Uses only train_rows for fit (caller must enforce LOSO / held-out design).
+    """
+    feats = list(DEFAULT_FEATURE_COLS_P5)
+    pred_tc = fit_linear_predictor(train_rows, "tasks_completed", feats)
+    pred_cp = fit_linear_predictor(train_rows, "collapse_probability", feats)
+    sigma_tc = train_residual_sigma(train_rows, "tasks_completed", pred_tc)
+    sigma_cp = train_residual_sigma(train_rows, "collapse_probability", pred_cp)
+    n = max(1, int(agent_count))
+    per: List[Dict[str, Any]] = []
+    unsafe: List[str] = []
+    best_reg: str | None = None
+    best_obj = -1e30
+    gmean_tc = predict_baseline_mean(train_rows, "tasks_completed")
+    for reg in regimes:
+        cf = counterfactual_profile_row(template_row, reg, n)
+        p_tc = float(pred_tc(cf)) if pred_tc else float(gmean_tc)
+        p_cp = float(pred_cp(cf)) if pred_cp else 0.0
+        p_cp = max(0.0, min(1.0, p_cp))
+        lo_tc = (
+            round(p_tc - 1.96 * sigma_tc, 4) if sigma_tc and sigma_tc > 1e-15 else None
+        )
+        hi_tc = (
+            round(p_tc + 1.96 * sigma_tc, 4) if sigma_tc and sigma_tc > 1e-15 else None
+        )
+        lo_cp = (
+            round(p_cp - 1.96 * sigma_cp, 4) if sigma_cp and sigma_cp > 1e-15 else None
+        )
+        hi_cp = (
+            round(p_cp + 1.96 * sigma_cp, 4) if sigma_cp and sigma_cp > 1e-15 else None
+        )
+        per.append({
+            "regime": reg,
+            "pred_tasks_completed": round(p_tc, 4),
+            "pred_collapse_probability": round(p_cp, 4),
+            "pi95_tasks_completed": [lo_tc, hi_tc],
+            "pi95_collapse_probability": [lo_cp, hi_cp],
+        })
+        if p_cp > collapse_threshold:
+            unsafe.append(reg)
+        obj = p_tc - 3.0 * p_cp
+        if obj > best_obj:
+            best_obj = obj
+            best_reg = reg
+    return {
+        "recommended_regime": best_reg,
+        "per_regime": per,
+        "unsafe_regimes_predicted": unsafe,
+        "collapse_threshold": collapse_threshold,
+        "agent_count": n,
     }

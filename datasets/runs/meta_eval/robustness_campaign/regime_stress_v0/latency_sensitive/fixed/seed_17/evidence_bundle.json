@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_2759f60a4c",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/latency_sensitive/fixed/seed_17/trace.json",
+      "sha256": "c7eca5acad049e84dbafba9d58783e9d19d6bed2676bb58261ceb7cde5bbab27",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/latency_sensitive/fixed/seed_17/maestro_report.json",
+      "sha256": "d2e28ddb8cbd24f935d9b259a3f965fab439adbd3813db54f4577d04fa0ad498",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": true,
+    "replay_diagnostics": "replay ok"
+  },
+  "verification_mode": "evaluator"
+}

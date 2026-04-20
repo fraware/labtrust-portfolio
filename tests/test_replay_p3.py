@@ -361,7 +361,11 @@ class TestReplayEvalIntegration(unittest.TestCase):
             self.assertIn("apply_only_no_hash", bo)
             self.assertIn("final_hash_only", bo)
             curve = summary.get("overhead_curve") or []
-            self.assertGreater(len(curve), 0)
+            self.assertGreaterEqual(
+                len(curve),
+                2,
+                "overhead_curve should have multiple prefix sizes",
+            )
             self.assertIn("p95_replay_ci95_lower_ms", curve[0])
             self.assertTrue(
                 summary["success_criteria_met"].get("corpus_expected_outcomes_met")

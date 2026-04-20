@@ -9,18 +9,27 @@ import tempfile
 import unittest
 from pathlib import Path
 
+_ROOT = Path(__file__).resolve().parents[1]
+_SRC = str(_ROOT / "impl" / "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
+
 try:
     from labtrust_portfolio.scaling import (
         build_dataset_from_runs,
+        build_scaling_holdout_folds,
         fit_linear_predictor,
         fit_scaling_exponent,
         predict_baseline_mean,
+        predict_by_scenario,
     )
 except ImportError:
     build_dataset_from_runs = None
+    build_scaling_holdout_folds = None
     fit_linear_predictor = None
     fit_scaling_exponent = None
     predict_baseline_mean = None
+    predict_by_scenario = None
 
 
 def repo_root() -> Path:
@@ -50,12 +59,19 @@ class TestScalingHeldoutEvalIntegration(unittest.TestCase):
                     str(runs_dir),
                     "--seeds",
                     "2",
+                    "--coordination-grid",
+                    "--p5-lite",
+                    "--clean",
+                    "--profile",
+                    "core",
+                    "--scenarios",
+                    "toy_lab_v0,lab_profile_v0,warehouse_v0",
                 ],
                 cwd=str(repo_root()),
                 env={**env, "PYTHONPATH": pypath},
                 capture_output=True,
                 text=True,
-                timeout=300,
+                timeout=900,
             )
             self.assertEqual(
                 proc_gen.returncode, 0,
@@ -89,6 +105,8 @@ class TestScalingHeldoutEvalIntegration(unittest.TestCase):
             self.assertIn("held_out_results", data)
             self.assertIn("overall_baseline_mae", data)
             self.assertIn("overall_feat_baseline_mae", data)
+            self.assertIn("admissible_baselines", data)
+            self.assertIn("oracle_baselines", data)
             self.assertIn("total_rows", data)
             self.assertIn("scenario_ids", data)
             self.assertGreater(len(data["held_out_results"]), 0)
@@ -112,11 +130,23 @@ class TestScalingHeldoutEvalIntegration(unittest.TestCase):
             self.assertIn("run_manifest", data)
             rm = data["run_manifest"]
             self.assertIn("script", rm)
+            self.assertIn("coordination_regimes", rm)
+            self.assertIn("agent_counts", rm)
             self.assertGreaterEqual(len(data["held_out_results"]), 2, "held_out_results length >= 2")
             self.assertIn("success_criteria_met", data)
             sc = data["success_criteria_met"]
-            self.assertIn("beat_baseline_out_of_sample", sc)
+            self.assertIn("beat_global_mean_out_of_sample", sc)
+            self.assertIn("beat_feature_baseline_out_of_sample", sc)
+            self.assertIn("beat_regime_baseline_out_of_sample", sc)
             self.assertIn("trigger_met", sc)
+            self.assertIsInstance(sc.get("beat_global_mean_out_of_sample"), bool)
+            self.assertIsInstance(sc.get("trigger_met"), bool)
+            first = data["held_out_results"][0]
+            self.assertLessEqual(
+                first["oracle_per_scenario_baseline_mae"] + 1e-6,
+                first["admissible_per_scenario_train_mae"] + 1e-6,
+                "Oracle per-scenario MAE should be <= admissible train-only (leakage helps)",
+            )
             if "overall_baseline_mae_ci95_lower" in data and "overall_baseline_mae_ci95_upper" in data:
                 self.assertLessEqual(
                     data["overall_baseline_mae_ci95_lower"],
@@ -153,6 +183,44 @@ class TestScalingHeldoutEvalIntegration(unittest.TestCase):
                 proc_exp.returncode, 0,
                 "export_scaling_tables must succeed on eval output",
             )
+            sens_dir = base / "sensitivity_sweep"
+            proc_sens = subprocess.run(
+                [
+                    sys.executable,
+                    str(repo_root() / "scripts" / "scaling_sensitivity_sweep.py"),
+                    "--runs-dir",
+                    str(runs_dir),
+                    "--out-dir",
+                    str(sens_dir),
+                    "--caps",
+                    "1,2",
+                ],
+                cwd=str(repo_root()),
+                env={**env, "PYTHONPATH": pypath},
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            self.assertEqual(proc_sens.returncode, 0, (proc_sens.stdout, proc_sens.stderr))
+            self.assertTrue((sens_dir / "scaling_sensitivity.json").exists())
+            rec_path = base / "recommendation_eval.json"
+            proc_rec = subprocess.run(
+                [
+                    sys.executable,
+                    str(repo_root() / "scripts" / "scaling_recommend_eval.py"),
+                    "--runs-dir",
+                    str(runs_dir),
+                    "--out",
+                    str(rec_path),
+                ],
+                cwd=str(repo_root()),
+                env={**env, "PYTHONPATH": pypath},
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            self.assertEqual(proc_rec.returncode, 0, (proc_rec.stdout, proc_rec.stderr))
+            self.assertTrue(rec_path.exists())
 
 
 class TestScalingModule(unittest.TestCase):
@@ -226,3 +294,45 @@ class TestScalingModule(unittest.TestCase):
         self.assertIn("coordination_tax_proxy", rows[0])
         self.assertIn("error_amplification_proxy", rows[0])
         self.assertIn("coordination_tax_proxy", rows[0].get("response", {}))
+        self.assertEqual(rows[0].get("agent_count"), 1)
+        self.assertEqual(rows[0].get("coordination_regime"), "centralized")
+
+
+class TestScalingBaselines(unittest.TestCase):
+    """Oracle vs admissible predict_by_scenario semantics."""
+
+    def test_predict_by_scenario_fallback(self) -> None:
+        if predict_by_scenario is None or predict_baseline_mean is None:
+            self.skipTest("scaling not importable")
+        train = [
+            {
+                "scenario_id": "A",
+                "response": {"tasks_completed": 10},
+            },
+        ]
+        g = predict_baseline_mean(train, "tasks_completed")
+        self.assertEqual(
+            predict_by_scenario(train, "B", "tasks_completed", fallback=g),
+            g,
+        )
+
+
+class TestScalingHoldoutFolds(unittest.TestCase):
+    def test_regime_folds_need_two_regimes(self) -> None:
+        if build_scaling_holdout_folds is None:
+            self.skipTest("scaling not importable")
+        from labtrust_portfolio.scaling import extract_features_from_scenario
+
+        rows = [
+            {
+                "scenario_id": "s1",
+                "scenario_family": "lab",
+                "coordination_regime": "centralized",
+                "agent_count": 1,
+                "response": {"tasks_completed": 1},
+            },
+        ]
+        _mode, folds = build_scaling_holdout_folds(
+            list(rows), "regime", extract_features_from_scenario,
+        )
+        self.assertEqual(folds, [])

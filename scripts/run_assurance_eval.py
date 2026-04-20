@@ -2,7 +2,9 @@
 """
 P7 Assurance eval: check_assurance_mapping + review_assurance_run on one or more
 thin-slice runs; write results.json. With --out DIR writes there. Runs review for
-toy_lab_v0 and lab_profile_v0 to exercise kernel PONR (lab has disposition_commit).
+toy_lab_v0 and lab_profile_v0 (Table 2); per-profile reviews use scenario-matched
+runs (lab_profile_v0, warehouse_v0, traffic_v0 for medical proxy). Table 1 primary
+review is lab_profile_v0 (kernel PONR disposition_commit).
 Usage: python run_assurance_eval.py [--out DIR]
 """
 from __future__ import annotations
@@ -21,10 +23,25 @@ if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO / "kernel")
 
 DEFAULT_OUT = REPO / "datasets" / "runs" / "assurance_eval"
-# (scenario_id, seed) for thin-slice runs; lab_profile_v0 exercises kernel PONR
+DEFAULT_REVIEW_SEED = 7
+# Pairwise scenario reviews for Table 2; lab_profile_v0 carries kernel PONR (disposition_commit).
 REVIEW_SCENARIOS = [
-    ("toy_lab_v0", 7),
-    ("lab_profile_v0", 7),
+    ("toy_lab_v0", DEFAULT_REVIEW_SEED),
+    ("lab_profile_v0", DEFAULT_REVIEW_SEED),
+]
+# Materialize one run per scenario so per-profile review uses a scenario-matched trace.
+SCENARIOS_MATERIALIZE = [
+    "toy_lab_v0",
+    "lab_profile_v0",
+    "warehouse_v0",
+    "traffic_v0",
+]
+# (profile_name, scenario_id): review each pack on a matching thin-slice run (not toy_lab only).
+# medical_v0.1 uses traffic_v0 as a mechanical stress run; see run_manifest note (proxy, not SaMD semantics).
+PROFILE_PACK_SCENARIOS = [
+    ("lab_v0.1", "lab_profile_v0"),
+    ("warehouse_v0.1", "warehouse_v0"),
+    ("medical_v0.1", "traffic_v0"),
 ]
 # Three assurance-pack instantiations (lab, warehouse, medical) for state-of-the-art
 PROFILE_PACKS = [
@@ -32,6 +49,9 @@ PROFILE_PACKS = [
     ("warehouse_v0.1", REPO / "profiles" / "warehouse" / "v0.1" / "assurance_pack_instantiation.json"),
     ("medical_v0.1", REPO / "profiles" / "medical_v0.1" / "assurance_pack_instantiation.json"),
 ]
+PACK_BY_NAME = dict(PROFILE_PACKS)
+# Table 1 flagship row: lab scenario with non-vacuous kernel PONR (disposition_commit).
+PRIMARY_TABLE1_SCENARIO = "lab_profile_v0"
 
 
 def _run_review(run_dir: Path, scenario_id: str, pack_path: Path, env: dict) -> dict:
@@ -95,35 +115,52 @@ def main() -> int:
         "stderr": r.stderr.strip() if r.stderr else "",
     }
 
-    # 2) Produce runs and review per scenario; run review with each profile pack (two instantiations)
+    # 2) Materialize runs and review: scenario-matched traces for each profile pack
+    from labtrust_portfolio.thinslice import run_thin_slice
+
     with tempfile.TemporaryDirectory() as td:
-        for scenario_id, seed in REVIEW_SCENARIOS:
+        run_dirs: dict[str, Path] = {}
+        for scenario_id in SCENARIOS_MATERIALIZE:
             run_dir = Path(td) / f"run_{scenario_id}"
             run_dir.mkdir(parents=True)
-            from labtrust_portfolio.thinslice import run_thin_slice
             run_thin_slice(
                 run_dir,
-                seed=seed,
+                seed=DEFAULT_REVIEW_SEED,
                 scenario_id=scenario_id,
                 drop_completion_prob=0.0,
             )
+            run_dirs[scenario_id] = run_dir
+
+        for scenario_id, _seed in REVIEW_SCENARIOS:
             results["reviews"][scenario_id] = _run_review(
-                run_dir, scenario_id, PROFILE_PACKS[0][1], env
+                run_dirs[scenario_id],
+                scenario_id,
+                PROFILE_PACKS[0][1],
+                env,
             )
-        # Per-profile review (lab and warehouse) on first run dir
-        first_run_dir = Path(td) / f"run_{REVIEW_SCENARIOS[0][0]}"
+
         results["per_profile"] = {}
-        for profile_name, pack_path in PROFILE_PACKS:
-            if pack_path.exists():
+        for profile_name, scen in PROFILE_PACK_SCENARIOS:
+            pack_path = PACK_BY_NAME.get(profile_name)
+            if pack_path and pack_path.exists():
                 results["per_profile"][profile_name] = _run_review(
-                    first_run_dir, REVIEW_SCENARIOS[0][0], pack_path, env
+                    run_dirs[scen], scen, pack_path, env
                 )
 
-    # Backward compatibility: primary review = toy_lab_v0
-    results["review"] = results["reviews"].get("toy_lab_v0", {})
+    # Table 1 flagship summary: lab_profile_v0 (kernel PONR disposition_commit), not toy_lab_v0
+    results["review"] = results["reviews"].get(PRIMARY_TABLE1_SCENARIO, {})
 
     results["run_manifest"] = {
         "scenarios": [s for s, _ in REVIEW_SCENARIOS],
+        "scenarios_materialized": list(SCENARIOS_MATERIALIZE),
+        "per_profile_scenario": {p: s for p, s in PROFILE_PACK_SCENARIOS},
+        "table1_primary_scenario": PRIMARY_TABLE1_SCENARIO,
+        "medical_pack_traffic_run_note": (
+            "medical_v0.1 is reviewed on a traffic_v0 thin-slice run: the run stresses "
+            "scheduler, trace, and review mechanics; the pack is a minimal regulator-style "
+            "template. This pairing tests the review pipeline, not semantic alignment "
+            "between traffic dynamics and SaMD content."
+        ),
         "profile_dirs": [name for name, _ in PROFILE_PACKS],
         "script": "run_assurance_eval.py",
     }
@@ -136,10 +173,9 @@ def main() -> int:
         r.get("exit_ok", False) for r in results["reviews"].values()
     )
     ponr_ratio = None
-    for r in results["reviews"].values():
-        if isinstance(r.get("ponr_coverage"), dict) and "ratio" in r["ponr_coverage"]:
-            ponr_ratio = r["ponr_coverage"]["ratio"]
-            break
+    lab_rev = results["reviews"].get(PRIMARY_TABLE1_SCENARIO, {})
+    if isinstance(lab_rev.get("ponr_coverage"), dict) and "ratio" in lab_rev["ponr_coverage"]:
+        ponr_ratio = lab_rev["ponr_coverage"]["ratio"]
     results["excellence_metrics"] = {
         "mapping_completeness_pct": 100.0 if results["mapping_check"]["ok"] else 0.0,
         "ponr_coverage_ratio": ponr_ratio,

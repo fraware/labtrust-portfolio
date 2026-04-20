@@ -1,0 +1,20 @@
+{
+  "version": "0.1",
+  "release_id": "release_run_b66c5dbff1",
+  "created_at_utc": "2026-04-20T05:56:40.468758Z",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/scenario_lab_profile_v0/naive/seed_14/trace.json",
+      "sha256": "0f7b426447152b2e92159fee0407bb2501f55cb98a33878b8862dd07df4ff9f7"
+    },
+    {
+      "path": "datasets/runs/meta_eval/scenario_lab_profile_v0/naive/seed_14/maestro_report.json",
+      "sha256": "5a2e32ca26aa7877c5e3bbaacb9ec9e16443d002d29ec4415681d7e635f8a68a"
+    },
+    {
+      "path": "datasets/runs/meta_eval/scenario_lab_profile_v0/naive/seed_14/evidence_bundle.json",
+      "sha256": "7c765ce7ab6e269699d22eb94232cb8b0a5ff8908cb6e56ecb59168ee40c5554"
+    }
+  ]
+}

@@ -82,6 +82,11 @@ class TestAssuranceEvalIntegration(unittest.TestCase):
             pc = review.get("ponr_coverage") or {}
             self.assertIn("ratio", pc)
             self.assertIn(
+                "disposition_commit",
+                pc.get("required_task_names", []),
+                "primary Table 1 review must be lab_profile_v0 with disposition_commit",
+            )
+            self.assertIn(
                 "control_coverage_ratio", review,
                 "review must include control_coverage_ratio (SOTA metric)",
             )

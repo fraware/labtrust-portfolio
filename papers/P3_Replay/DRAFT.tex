@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[margin=1in]{geometry}
-\usepackage{microtype}
+\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
 \usepackage{amsmath,amssymb,amsthm,mathtools}
 \usepackage{booktabs}
 \usepackage{multirow}
@@ -37,9 +37,9 @@
 \newcommand{\tool}[1]{\texttt{#1}}
 \newcommand{\field}[1]{\texttt{#1}}
 \newcommand{\code}[1]{\texttt{#1}}
-\newcommand{\Lzero}{\mathrm{L0}}
-\newcommand{\Lone}{\mathrm{L1}}
-\newcommand{\Ltwo}{\mathrm{L2}}
+\newcommand{\Lzero}{\ensuremath{\mathrm{L0}}}
+\newcommand{\Lone}{\ensuremath{\mathrm{L1}}}
+\newcommand{\Ltwo}{\ensuremath{\mathrm{L2}}}
 \newcommand{\trace}{\mathcal{T}}
 \newcommand{\event}{e}
 \newcommand{\state}{s}

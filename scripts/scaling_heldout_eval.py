@@ -13,14 +13,36 @@ import os
 import statistics
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "impl" / "src"))
 if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO_ROOT / "kernel")
 
-FEATURE_COLS_DEFAULT = ["num_tasks", "num_faults", "tool_density"]
+
+def _try_git_commit(root: Path) -> Optional[str]:
+    import subprocess
+
+    try:
+        p = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=8,
+        )
+        if p.returncode == 0:
+            return p.stdout.strip()[:48]
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return None
+
+
+def _feature_cols_default() -> List[str]:
+    from labtrust_portfolio.scaling import DEFAULT_FEATURE_COLS_P5
+
+    return list(DEFAULT_FEATURE_COLS_P5)
 
 
 def _response_val(row: Dict[str, Any], target: str) -> float:
@@ -58,6 +80,12 @@ def regression_pi_coverage(
     return covered / len(test_preds)
 
 
+def _mae(actuals: List[float], preds: List[float]) -> float:
+    if not actuals or len(preds) != len(actuals):
+        return 0.0
+    return sum(abs(a - p) for a, p in zip(actuals, preds)) / len(actuals)
+
+
 def eval_fold(
     train_rows: List[Dict[str, Any]],
     test_rows: List[Dict[str, Any]],
@@ -68,6 +96,8 @@ def eval_fold(
     predict_baseline_mean: Any,
     predict_by_scenario: Any,
     predict_prior_model: Any,
+    predict_train_regime_baseline: Any,
+    predict_train_agent_band_baseline: Any,
     fit_linear_predictor: Any,
     fit_tree_stump_predictor: Any,
     feature_cols: Sequence[str],
@@ -77,14 +107,23 @@ def eval_fold(
     mae_global = (
         sum(abs(a - global_pred) for a in actuals) / len(actuals) if actuals else 0.0
     )
-    per_scenario_preds = [
+    # Oracle (analysis only): per-scenario mean includes held-out test rows.
+    oracle_per_scenario_preds = [
         predict_by_scenario(rows_all, r.get("scenario_id", ""), target)
         for r in test_rows
     ]
-    mae_per_scenario = (
-        sum(abs(a - p) for a, p in zip(actuals, per_scenario_preds)) / len(actuals)
-        if actuals else 0.0
-    )
+    mae_oracle_per_scenario = _mae(actuals, oracle_per_scenario_preds)
+    # Admissible: train-only identity for scenario (fallback = train global mean).
+    adm_per_scenario_preds = [
+        predict_by_scenario(
+            train_rows,
+            r.get("scenario_id", ""),
+            target,
+            fallback=global_pred,
+        )
+        for r in test_rows
+    ]
+    mae_adm_per_scenario_train = _mae(actuals, adm_per_scenario_preds)
     mae_feat_list: List[float] = []
     for r in test_rows:
         nt = r.get("_num_tasks", 0)
@@ -136,6 +175,26 @@ def eval_fold(
     pi_cov = regression_pi_coverage(
         train_rows, test_rows, target, feature_cols, fit_linear_predictor,
     )
+    regime_preds = [
+        predict_train_regime_baseline(
+            train_rows,
+            str(r.get("coordination_regime", "centralized") or "centralized"),
+            target,
+            global_pred,
+        )
+        for r in test_rows
+    ]
+    mae_regime_train = _mae(actuals, regime_preds)
+    agent_preds = [
+        predict_train_agent_band_baseline(
+            train_rows,
+            r.get("agent_count", 1),
+            target,
+            global_pred,
+        )
+        for r in test_rows
+    ]
+    mae_agent_train = _mae(actuals, agent_preds)
     sid0 = test_rows[0].get("scenario_id", "") if test_rows else ""
     num_tasks_held = extract_features_from_scenario(sid0).get("num_tasks", 0)
     return {
@@ -145,8 +204,10 @@ def eval_fold(
         "test_n": len(test_rows),
         "global_baseline_pred": global_pred,
         "baseline_mae": mae_global,
-        "per_scenario_baseline_pred": per_scenario_preds[0] if per_scenario_preds else None,
-        "per_scenario_baseline_mae": mae_per_scenario,
+        "oracle_per_scenario_baseline_mae": mae_oracle_per_scenario,
+        "admissible_per_scenario_train_mae": mae_adm_per_scenario_train,
+        "regime_train_mean_baseline_mae": mae_regime_train,
+        "agent_count_train_mean_baseline_mae": mae_agent_train,
         "num_tasks_held_out": num_tasks_held,
         "feat_baseline_mae": mae_feat,
         "prior_model_mae": mae_prior,
@@ -159,35 +220,6 @@ def eval_fold(
     }
 
 
-def build_folds(
-    rows: List[Dict[str, Any]],
-    holdout_mode: str,
-    extract_features_from_scenario: Any,
-) -> Tuple[str, List[Tuple[str, List[Dict[str, Any]], List[Dict[str, Any]]]]]:
-    for r in rows:
-        feats = extract_features_from_scenario(r.get("scenario_id", ""))
-        r["_num_tasks"] = feats.get("num_tasks", 0)
-    if holdout_mode == "scenario":
-        ids = sorted({r.get("scenario_id") for r in rows if r.get("scenario_id")})
-        folds = []
-        for hid in ids:
-            tr = [r for r in rows if r.get("scenario_id") != hid]
-            te = [r for r in rows if r.get("scenario_id") == hid]
-            if te:
-                folds.append((hid, tr, te))
-        return "scenario", folds
-    if holdout_mode == "family":
-        fams = sorted({r.get("scenario_family", "unknown") for r in rows})
-        folds = []
-        for fam in fams:
-            tr = [r for r in rows if r.get("scenario_family") != fam]
-            te = [r for r in rows if r.get("scenario_family") == fam]
-            if te and tr:
-                folds.append((fam, tr, te))
-        return "family", folds
-    raise ValueError(f"Unknown holdout_mode: {holdout_mode}")
-
-
 def run_eval_for_target(
     rows: List[Dict[str, Any]],
     folds: List[Tuple[str, List[Dict[str, Any]], List[Dict[str, Any]]]],
@@ -197,6 +229,8 @@ def run_eval_for_target(
     predict_baseline_mean: Any,
     predict_by_scenario: Any,
     predict_prior_model: Any,
+    predict_train_regime_baseline: Any,
+    predict_train_agent_band_baseline: Any,
     fit_linear_predictor: Any,
     fit_tree_stump_predictor: Any,
     fit_scaling_exponent: Any,
@@ -216,6 +250,8 @@ def run_eval_for_target(
                 predict_baseline_mean,
                 predict_by_scenario,
                 predict_prior_model,
+                predict_train_regime_baseline,
+                predict_train_agent_band_baseline,
                 fit_linear_predictor,
                 fit_tree_stump_predictor,
                 feature_cols,
@@ -224,8 +260,20 @@ def run_eval_for_target(
     overall_mae = (
         sum(r["baseline_mae"] for r in results) / len(results) if results else 0.0
     )
-    overall_per_scenario_mae = (
-        sum(r["per_scenario_baseline_mae"] for r in results) / len(results)
+    overall_oracle_ps_mae = (
+        sum(r["oracle_per_scenario_baseline_mae"] for r in results) / len(results)
+        if results else 0.0
+    )
+    overall_adm_ps_mae = (
+        sum(r["admissible_per_scenario_train_mae"] for r in results) / len(results)
+        if results else 0.0
+    )
+    overall_regime_train_mae = (
+        sum(r["regime_train_mean_baseline_mae"] for r in results) / len(results)
+        if results else 0.0
+    )
+    overall_agent_train_mae = (
+        sum(r["agent_count_train_mean_baseline_mae"] for r in results) / len(results)
         if results else 0.0
     )
     overall_feat_mae = (
@@ -288,16 +336,38 @@ def run_eval_for_target(
     held_labels = [r["holdout_label"] for r in results]
     train_n_total = sum(r["train_n"] for r in results)
     test_n_total = sum(r["test_n"] for r in results)
+    eps = 1e-9
+    reg_beats = overall_reg_mae is not None
+    beat_global = reg_beats and overall_reg_mae < overall_mae - eps
+    beat_feat = reg_beats and overall_reg_mae < overall_feat_mae - eps
+    beat_regime = reg_beats and overall_reg_mae < overall_regime_train_mae - eps
+    beat_agent = reg_beats and overall_reg_mae < overall_agent_train_mae - eps
+    beat_oracle_ps = reg_beats and overall_reg_mae < overall_oracle_ps_mae - eps
     summary_inner = {
         "target": target,
         "holdout_mode": holdout_mode,
         "held_out_results": results,
         "overall_baseline_mae": overall_mae,
-        "overall_per_scenario_baseline_mae": overall_per_scenario_mae,
+        "overall_oracle_per_scenario_baseline_mae": overall_oracle_ps_mae,
+        "overall_admissible_per_scenario_train_mae": overall_adm_ps_mae,
+        "overall_regime_train_mean_baseline_mae": overall_regime_train_mae,
+        "overall_agent_count_train_mean_baseline_mae": overall_agent_train_mae,
         "overall_feat_baseline_mae": overall_feat_mae,
         "overall_regression_mae": overall_reg_mae,
         "overall_prior_model_mae": overall_prior_mae,
         "overall_stump_mae": overall_stump_mae,
+        "admissible_baselines": {
+            "global_mean_mae": overall_mae,
+            "per_scenario_train_only_mae": overall_adm_ps_mae,
+            "num_tasks_bucket_mae": overall_feat_mae,
+            "regime_train_mean_mae": overall_regime_train_mae,
+            "agent_count_train_mean_mae": overall_agent_train_mae,
+            "regression_mae": overall_reg_mae,
+            "stump_mae": overall_stump_mae,
+        },
+        "oracle_baselines": {
+            "per_scenario_mean_including_test_mae": overall_oracle_ps_mae,
+        },
         "regression_skipped_reason": (
             "train_n < k or singular; see run_manifest.train_n_total"
             if overall_reg_mae is None else None
@@ -317,14 +387,17 @@ def run_eval_for_target(
         "scaling_fit": scaling_fit if scaling_fit else None,
         "feature_ablation": feature_ablation,
         "success_criteria_met": {
-            "beat_baseline_out_of_sample": (
-                overall_reg_mae is not None and overall_reg_mae <= overall_mae
-            ) or (overall_feat_mae <= overall_mae),
-            "beat_per_scenario_baseline": overall_per_scenario_mae is not None,
-            "trigger_met": (
-                (overall_reg_mae is not None and overall_reg_mae <= overall_mae)
-                or (overall_feat_mae <= overall_mae)
+            "beat_global_mean_out_of_sample": beat_global,
+            "beat_feature_baseline_out_of_sample": beat_feat,
+            "beat_regime_baseline_out_of_sample": beat_regime,
+            "beat_agent_count_baseline_out_of_sample": beat_agent,
+            "beat_oracle_per_scenario_baseline": beat_oracle_ps,
+            "trigger_met": bool(beat_global and beat_feat and beat_regime),
+            "negative_result": bool(
+                reg_beats
+                and not (beat_global and beat_feat and beat_regime)
             ),
+            "legacy_beat_baseline_out_of_sample": beat_global or beat_feat,
         },
     }
     summary_inner["run_manifest"] = {
@@ -360,9 +433,18 @@ def main() -> int:
     )
     ap.add_argument(
         "--holdout-mode",
-        choices=("scenario", "family"),
+        choices=(
+            "scenario",
+            "family",
+            "regime",
+            "agent_count",
+            "fault_setting",
+        ),
         default="scenario",
-        help="Leave-one-scenario-out (default) or leave-one-taxonomy-family-out",
+        help=(
+            "Held-out split: scenario, family, coordination regime, agent_count, "
+            "or fault_setting label"
+        ),
     )
     ap.add_argument(
         "--extra-targets",
@@ -375,6 +457,13 @@ def main() -> int:
         action="store_true",
         help="Do not evaluate secondary targets (coordination tax / error amplification proxies)",
     )
+    ap.add_argument(
+        "--max-seed",
+        type=int,
+        default=None,
+        metavar="N",
+        help="Keep only rows with seed <= N (sensitivity / subsample designs)",
+    )
     args = ap.parse_args()
 
     from labtrust_portfolio.scaling import (
@@ -382,11 +471,15 @@ def main() -> int:
         predict_baseline_mean,
         predict_by_scenario,
         predict_prior_model,
+        predict_train_regime_baseline,
+        predict_train_agent_band_baseline,
         extract_features_from_scenario,
         fit_linear_predictor,
         fit_tree_stump_predictor,
         fit_scaling_exponent,
     )
+
+    feat_cols = _feature_cols_default()
 
     if not args.runs_dir.exists():
         print(f"Runs dir not found: {args.runs_dir}")
@@ -397,10 +490,14 @@ def main() -> int:
     if not rows:
         print("No rows. Ensure runs dir has run subdirs with trace.json and maestro_report.json")
         return 1
+    if args.max_seed is not None:
+        rows = [r for r in rows if int(r.get("seed", 0) or 0) <= int(args.max_seed)]
 
     scenario_ids = sorted({r.get("scenario_id") for r in rows if r.get("scenario_id")})
     try:
-        holdout_mode, folds = build_folds(
+        from labtrust_portfolio.scaling import build_scaling_holdout_folds
+
+        holdout_mode, folds = build_scaling_holdout_folds(
             rows, args.holdout_mode, extract_features_from_scenario,
         )
     except ValueError as e:
@@ -414,6 +511,15 @@ def main() -> int:
         return 1
     if len(folds) < 2 and args.holdout_mode == "family":
         print("Need at least 2 scenario families with data (check scenario YAML family:).")
+        return 1
+    if len(folds) < 2 and args.holdout_mode == "regime":
+        print("Need at least 2 coordination regimes in runs (P5 multiscenario generator).")
+        return 1
+    if len(folds) < 2 and args.holdout_mode == "agent_count":
+        print("Need at least 2 distinct agent_count values in runs.")
+        return 1
+    if len(folds) < 2 and args.holdout_mode == "fault_setting":
+        print("Need at least 2 fault_setting_label values in runs.")
         return 1
 
     if args.no_secondary:
@@ -430,10 +536,12 @@ def main() -> int:
         predict_baseline_mean,
         predict_by_scenario,
         predict_prior_model,
+        predict_train_regime_baseline,
+        predict_train_agent_band_baseline,
         fit_linear_predictor,
         fit_tree_stump_predictor,
         fit_scaling_exponent,
-        FEATURE_COLS_DEFAULT,
+        feat_cols,
         scenario_ids,
     )
     summary["runs_dir"] = str(args.runs_dir)
@@ -441,6 +549,19 @@ def main() -> int:
     summary["scenario_ids"] = scenario_ids
     summary["run_manifest"]["runs_dir"] = str(args.runs_dir)
     summary["run_manifest"]["holdout_mode"] = holdout_mode
+    summary["run_manifest"]["seeds"] = sorted(
+        {int(r.get("seed", 0) or 0) for r in rows},
+    )
+    summary["run_manifest"]["coordination_regimes"] = sorted(
+        {str(r.get("coordination_regime", "centralized")) for r in rows},
+    )
+    summary["run_manifest"]["agent_counts"] = sorted(
+        {int(r.get("agent_count", 1) or 1) for r in rows},
+    )
+    summary["run_manifest"]["fault_setting_labels"] = sorted(
+        {str(r.get("fault_setting_label", "unknown")) for r in rows},
+    )
+    summary["run_manifest"]["commit"] = _try_git_commit(REPO_ROOT)
 
     secondary: Dict[str, Any] = {}
     for et in extra_parts:
@@ -455,10 +576,12 @@ def main() -> int:
             predict_baseline_mean,
             predict_by_scenario,
             predict_prior_model,
+            predict_train_regime_baseline,
+            predict_train_agent_band_baseline,
             fit_linear_predictor,
             fit_tree_stump_predictor,
             fit_scaling_exponent,
-            FEATURE_COLS_DEFAULT,
+            feat_cols,
             scenario_ids,
         )
         secondary[et] = {
@@ -488,8 +611,11 @@ def main() -> int:
             round(out_of_sample_margin, 4) if out_of_sample_margin is not None else None
         ),
         "ci_width_95_baseline_mae": round(ci_width, 4),
-        "beat_baseline_out_of_sample": summary["success_criteria_met"]["beat_baseline_out_of_sample"],
-        "scenario_coverage": len(results),
+        "trigger_met": summary["success_criteria_met"].get("trigger_met"),
+        "legacy_beat_baseline_out_of_sample": summary["success_criteria_met"].get(
+            "legacy_beat_baseline_out_of_sample",
+        ),
+        "fold_coverage": len(results),
     }
     if len(summary["held_out_results"]) >= 2:
         baseline_maes = [r["baseline_mae"] for r in summary["held_out_results"]]

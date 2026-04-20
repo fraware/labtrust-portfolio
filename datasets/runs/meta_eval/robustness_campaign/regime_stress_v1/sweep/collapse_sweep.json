@@ -1,0 +1,777 @@
+{
+  "schema_version": "p8_collapse_sweep_v0.2",
+  "collapse_sweep": true,
+  "scenario_id": "regime_stress_v1",
+  "collapse_threshold": 2,
+  "collapse_definition": "tasks_completed < 2 or recovery_ok false",
+  "drop_probs": [
+    0.2,
+    0.25,
+    0.3,
+    0.35,
+    0.4
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "collapse_count": 7,
+  "per_run": [
+    {
+      "drop_prob": 0.2,
+      "seed": 1,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 2,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 3,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 4,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 5,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 6,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 7,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 8,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 9,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 10,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 11,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 12,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 13,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 14,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 15,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 16,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 17,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 18,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 19,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.2,
+      "seed": 20,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 1,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 2,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 3,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 4,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 5,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 6,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 7,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 8,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 9,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 10,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 11,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 12,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 13,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 14,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 15,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 16,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 17,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 18,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 19,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.25,
+      "seed": 20,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 1,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 2,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 3,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 4,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 5,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 6,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 7,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 8,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 9,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 10,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 11,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 12,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 13,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 14,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 15,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 16,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 17,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 18,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 19,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.3,
+      "seed": 20,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 1,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 2,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 3,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 4,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 5,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 6,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 7,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 8,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 9,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 10,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 11,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 12,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 13,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 14,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 15,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 16,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 17,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 18,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 19,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.35,
+      "seed": 20,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 1,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 2,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 3,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 4,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 5,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 6,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 7,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 8,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 9,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 10,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 11,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 12,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 13,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 14,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 15,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 16,
+      "tasks_completed": 2,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 17,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 18,
+      "tasks_completed": 3,
+      "recovery_ok": true,
+      "collapsed": false
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 19,
+      "tasks_completed": 1,
+      "recovery_ok": true,
+      "collapsed": true
+    },
+    {
+      "drop_prob": 0.4,
+      "seed": 20,
+      "tasks_completed": 4,
+      "recovery_ok": true,
+      "collapsed": false
+    }
+  ],
+  "run_manifest": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "scenario_id": "regime_stress_v1",
+    "drop_probs": [
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4
+    ],
+    "collapse_threshold": 2,
+    "script": "meta_collapse_sweep.py",
+    "schema_version": "p8_collapse_sweep_v0.2"
+  },
+  "success_criteria_met": {
+    "sweep_completed": true
+  }
+}

@@ -27,30 +27,16 @@ How do we make CPS coordination **measurable and comparable** under tail latency
 6. Reproducibility protocol and dataset format
 7. Baseline results + ablations
 
-## 5) Experiment plan
-- Scenarios (minimum):
-  - lab profile micro-world (resource graph + PONRs + recovery),
-  - warehouse micro-world,
-  - traffic micro-intersection.
-- Fault sweeps:
-  - drift/calibration invalidation,
-  - tool timeouts/partial results,
-  - queue contention,
-  - delay/drop/reorder,
-  - compromised agent behavior.
-- Metrics:
-  - p95/p99 latency, throughput, success, safety violations, MTTR,
-  - coordination messages per completed task,
-  - operational overhead proxies.
-- Baselines:
-  - centralized scheduler,
-  - blackboard/event-sourced,
-  - market allocation,
-  - swarm fallback.
+## 5) Experiment plan (implemented vs aspirational)
+- **Implemented scenarios:** lab-first `toy_lab_v0`, `lab_profile_v0` (resource graph + disposition risk path); auxiliary `warehouse_v0`, `traffic_v0`; `regime_stress_v0` (and `regime_stress_v1` exists for P8 cross-links).
+- **Implemented fault sweeps:** drop/delay/calibration_invalid grid plus `recovery_stress_aux` (timeout, partial_result, invalid_action, agent_nonresponse, sensor_stale, resource spikes, etc.) documented in `SCENARIO_SPEC.md` and `multi_sweep.json` `run_manifest`.
+- **Implemented metrics:** MAESTRO_REPORT v0.2 fields per `RECOVERY_AND_SAFETY_METRICS.md` (recovery times, safety structure, coordination efficiency, `run_outcome`).
+- **Implemented baselines:** Centralized, Blackboard (parameterization), RetryHeavy, NoRecovery, ConservativeSafeShutdown with fault-free and `drop_0_2` regimes.
+- **Not claimed here:** market allocation, swarm fallback, compromised-agent red-team beyond scripted fault injectors, real OPC-UA plant loops.
 
 ## 6) Artifact checklist
 - scenario definitions + fault injection harness
-- `kernel/eval/MAESTRO_REPORT.v0.1.schema.json`
+- `kernel/eval/MAESTRO_REPORT.v0.2.schema.json` (publishable); v0.1 retained for legacy
 - scoring library + standardized JSON reports
 - adapter interface + 2–4 reference adapters
 - dataset release scripts + reproducibility README

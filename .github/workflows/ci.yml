@@ -5,6 +5,22 @@ on:
   pull_request:
 
 jobs:
+  p3-paper-latex:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            texlive-latex-base texlive-latex-recommended texlive-latex-extra \
+            texlive-fonts-recommended
+      - name: Compile P3 DRAFT (two passes)
+        run: |
+          cd papers/P3_Replay
+          pdflatex -interaction=nonstopmode -halt-on-error DRAFT.tex
+          pdflatex -interaction=nonstopmode -halt-on-error DRAFT.tex
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -63,7 +79,7 @@ jobs:
         env:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
         run: |
-          PYTHONPATH=impl/src python scripts/replay_eval.py --overhead-curve --overhead-runs 5 --bootstrap-reps 50 --thin-slice-seeds 42
+          PYTHONPATH=impl/src python scripts/replay_eval.py --overhead-curve --overhead-runs 5 --bootstrap-reps 50 --thin-slice-seeds 42,43 --l1-twin
           PYTHONPATH=impl/src python scripts/verify_p3_replay_summary.py --strict-curve
       - name: P4 MAESTRO fault sweep (multi-scenario)
         env:

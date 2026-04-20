@@ -163,6 +163,25 @@ def build_markdown(
             if "min_time_ms" in l1_twin_summary:
                 lines.append(f"- min_time_ms: {l1_twin_summary.get('min_time_ms')}")
                 lines.append(f"- max_time_ms: {l1_twin_summary.get('max_time_ms')}")
+        if l1_twin_summary.get("real_ingest_traces"):
+            lines.extend(
+                [
+                    "",
+                    "### L1 twin on real_ingest traces (second evaluation family)",
+                    "",
+                    "| Trace | L0 replay_ok | L1 twin_ok | L1 time (ms) |",
+                    "|-------|--------------|------------|--------------|",
+                ]
+            )
+            for row in l1_twin_summary["real_ingest_traces"]:
+                lines.append(
+                    f"| {row.get('trace_name', '')} | {_fmt(row.get('l0_replay_ok'))} | "
+                    f"{_fmt(row.get('l1_twin_ok'))} | "
+                    f"{_fmt(row.get('l1_twin_time_ms'))} |"
+                )
+            lines.append(
+                f"- real_ingest_all_pass: {_fmt(l1_twin_summary.get('real_ingest_all_pass'))}"
+            )
     lines.append("")
     return "\n".join(lines)
 

@@ -1,0 +1,411 @@
+{
+  "schema_version": "p8_robustness_campaign_v0.1",
+  "methodology_note": "latency_trigger_profile and contention_trigger_profile disable fault-based switching (fault_threshold=999) to isolate latency vs contention channels; when meta_strictly_reduces_collapse is false under latency-only isolation, paired collapse can tie while still demonstrating auditable latency_threshold switches. Primary Version-B evidence is baseline_non_vacuous_retry_heavy with fault_threshold=0 for naive only and default meta fault_threshold=1.",
+  "run_manifest": {
+    "script": "p8_robustness_campaign.py",
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "seed_count": 20,
+    "scenarios": [
+      "regime_stress_v0",
+      "regime_stress_v1"
+    ],
+    "collapse_threshold": 2
+  },
+  "runs": [
+    {
+      "run_id": "regime_stress_v0/baseline_non_vacuous",
+      "scenario_id": "regime_stress_v0",
+      "profile": "baseline_non_vacuous_retry_heavy",
+      "seed_count": 20,
+      "drop_completion_prob": 0.35,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 16,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 73.7186322923436,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.8,
+        1.5
+      ],
+      "fallback_tasks_completed_mean": 3.8125,
+      "switch_reasons": {
+        "fault_threshold": 16
+      }
+    },
+    {
+      "run_id": "regime_stress_v0/latency_sensitive",
+      "scenario_id": "regime_stress_v0",
+      "profile": "latency_trigger_profile",
+      "seed_count": 20,
+      "drop_completion_prob": 0.35,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 2,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": false,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 7,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 71.1692496561106,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 1.0,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "difference_ci95": [
+        0.0,
+        0.45
+      ],
+      "fallback_tasks_completed_mean": 3.857142857142857,
+      "switch_reasons": {
+        "latency_threshold": 7
+      }
+    },
+    {
+      "run_id": "regime_stress_v0/contention_sensitive",
+      "scenario_id": "regime_stress_v0",
+      "profile": "contention_trigger_profile",
+      "seed_count": 20,
+      "drop_completion_prob": 0.35,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 20,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 73.7186322923436,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.8,
+        1.5
+      ],
+      "fallback_tasks_completed_mean": 3.85,
+      "switch_reasons": {
+        "contention_threshold": 20
+      }
+    },
+    {
+      "run_id": "regime_stress_v0/hysteresis_h1",
+      "scenario_id": "regime_stress_v0",
+      "profile": "hysteresis_h1",
+      "seed_count": 20,
+      "drop_completion_prob": 0.35,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 16,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 73.7186322923436,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.8,
+        1.5
+      ],
+      "fallback_tasks_completed_mean": 3.8125,
+      "switch_reasons": {
+        "fault_threshold": 16
+      }
+    },
+    {
+      "run_id": "regime_stress_v0/hysteresis_h3",
+      "scenario_id": "regime_stress_v0",
+      "profile": "hysteresis_h3",
+      "seed_count": 20,
+      "drop_completion_prob": 0.35,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 8,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 84.60629040777518,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.4,
+        1.2
+      ],
+      "fallback_tasks_completed_mean": 3.75,
+      "switch_reasons": {
+        "contention_threshold": 6,
+        "fault_threshold": 2
+      }
+    },
+    {
+      "run_id": "regime_stress_v1/baseline_non_vacuous",
+      "scenario_id": "regime_stress_v1",
+      "profile": "baseline_non_vacuous_retry_heavy",
+      "seed_count": 20,
+      "drop_completion_prob": 0.4,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 17,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 72.90737029548418,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.9,
+        1.6
+      ],
+      "fallback_tasks_completed_mean": 3.764705882352941,
+      "switch_reasons": {
+        "fault_threshold": 17
+      }
+    },
+    {
+      "run_id": "regime_stress_v1/latency_sensitive",
+      "scenario_id": "regime_stress_v1",
+      "profile": "latency_trigger_profile",
+      "seed_count": 20,
+      "drop_completion_prob": 0.4,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 2,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": false,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 7,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 60.685870532303795,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 1.0,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "difference_ci95": [
+        0.0,
+        0.45
+      ],
+      "fallback_tasks_completed_mean": 3.7142857142857144,
+      "switch_reasons": {
+        "latency_threshold": 7
+      }
+    },
+    {
+      "run_id": "regime_stress_v1/contention_sensitive",
+      "scenario_id": "regime_stress_v1",
+      "profile": "contention_trigger_profile",
+      "seed_count": 20,
+      "drop_completion_prob": 0.4,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 20,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 72.90737029548418,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.9,
+        1.6
+      ],
+      "fallback_tasks_completed_mean": 3.8,
+      "switch_reasons": {
+        "contention_threshold": 20
+      }
+    },
+    {
+      "run_id": "regime_stress_v1/hysteresis_h1",
+      "scenario_id": "regime_stress_v1",
+      "profile": "hysteresis_h1",
+      "seed_count": 20,
+      "drop_completion_prob": 0.4,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 17,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 72.90737029548418,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.9,
+        1.6
+      ],
+      "fallback_tasks_completed_mean": 3.764705882352941,
+      "switch_reasons": {
+        "fault_threshold": 17
+      }
+    },
+    {
+      "run_id": "regime_stress_v1/hysteresis_h3",
+      "scenario_id": "regime_stress_v1",
+      "profile": "hysteresis_h3",
+      "seed_count": 20,
+      "drop_completion_prob": 0.4,
+      "fixed_collapse_count": 2,
+      "meta_collapse_count": 0,
+      "meta_non_worse_collapse": true,
+      "meta_strictly_reduces_collapse": true,
+      "no_safety_regression": true,
+      "trigger_met": true,
+      "regime_switch_count_total": 10,
+      "fixed_time_to_recovery_ms_mean": null,
+      "meta_time_to_recovery_ms_mean": 83.46632999544947,
+      "fixed_ponr_violation_count_total": 0,
+      "meta_ponr_violation_count_total": 0,
+      "mcnemar_exact_p_value_two_sided": 0.5,
+      "fixed_collapse_rate_wilson_ci95": [
+        0.027866,
+        0.301038
+      ],
+      "meta_collapse_rate_wilson_ci95": [
+        0.0,
+        0.16113
+      ],
+      "difference_ci95": [
+        0.6,
+        1.4
+      ],
+      "fallback_tasks_completed_mean": 3.8,
+      "switch_reasons": {
+        "contention_threshold": 8,
+        "fault_threshold": 2
+      }
+    }
+  ],
+  "claim_support": {
+    "C1": {
+      "switches_observed": 10,
+      "no_safety_regression_all_switch_profiles": true
+    },
+    "C2": {
+      "audit_replay_artifacts_verified": true,
+      "note": "Each run is validated with verify_p8_meta_artifacts.py; trace-level regime_switch payloads are generated by MetaAdapter."
+    },
+    "C3": {
+      "non_vacuous_baseline_runs": 2,
+      "meta_non_worse_collapse_all_non_vacuous": true,
+      "strict_reduction_any": true
+    }
+  },
+  "success_criteria_met": {
+    "campaign_completed": true,
+    "c1_supported": true,
+    "c2_supported": true,
+    "c3_supported": true,
+    "all_claims_supported": true
+  }
+}

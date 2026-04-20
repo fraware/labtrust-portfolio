@@ -1,0 +1,52 @@
+{
+  "version": "0.2",
+  "run_id": "run_baf22ab020",
+  "scenario_id": "lab_profile_v0",
+  "run_outcome": "success_safe",
+  "metrics": {
+    "tasks_completed": 5,
+    "planned_task_count": 5,
+    "task_latency_ms_p50": 5.268378232402088,
+    "task_latency_ms_p95": 61.791498861601994,
+    "task_latency_ms_p99": 72.58809585370614,
+    "coordination_messages": 5,
+    "tasks_completed_after_fault": 5,
+    "steps_to_completion_after_first_fault": 22,
+    "time_to_first_fault_ms": 4.713005188635753,
+    "time_to_recovery_ms": 25.246299494501407,
+    "time_to_safe_state_ms": 264.42431842478567,
+    "recovery_attempt_count": 2,
+    "tasks_pending_at_first_fault": 1,
+    "tasks_recovered_after_fault": 5,
+    "fault_to_safe_state_event_count": 1,
+    "fault_to_recovery_event_count": 2
+  },
+  "safety": {
+    "safety_violation_count": 0,
+    "safety_violation_types": [],
+    "ponr_violation_count": 0,
+    "unsafe_completion_count": 0,
+    "unsafe_success_count": 0,
+    "constraint_violation_count": 0,
+    "deadline_miss_count": 0,
+    "resource_conflict_count": 0,
+    "invalid_action_count": 0,
+    "blocked_action_count": 0
+  },
+  "coordination_efficiency": {
+    "messages_per_completed_task": 1.0,
+    "messages_after_fault": 4,
+    "retries_per_completed_task": 0.4,
+    "duplicate_action_count": 0,
+    "wasted_action_count": 0
+  },
+  "faults": {
+    "fault_injected": true,
+    "fault_events": [
+      "drop_completion",
+      "drop_completion"
+    ],
+    "recovery_ok": true
+  },
+  "notes": "MAESTRO_REPORT v0.2; thin-slice synthetic trace times (ts) are scenario simulation timestamps in seconds, not wall-clock unless the harness records wall time in ts."
+}

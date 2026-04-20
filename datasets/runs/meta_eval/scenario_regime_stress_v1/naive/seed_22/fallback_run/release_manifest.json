@@ -1,0 +1,20 @@
+{
+  "version": "0.1",
+  "release_id": "release_run_0d620a8210",
+  "created_at_utc": "2026-04-20T05:52:16.020644Z",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_22/fallback_run/trace.json",
+      "sha256": "5973873e72d1ffac1aaf12c34c03b797c2df53e65cbff16ef58108c6be59827d"
+    },
+    {
+      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_22/fallback_run/maestro_report.json",
+      "sha256": "017d8387928426f26def598d699b096b98faf97b2334472ae5755156404de65e"
+    },
+    {
+      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_22/fallback_run/evidence_bundle.json",
+      "sha256": "92ec3c46406a2d82e0d05d6e08bb73201bc77988a7004250ad5543b2822d2dcc"
+    }
+  ]
+}

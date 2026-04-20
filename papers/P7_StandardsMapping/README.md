@@ -11,7 +11,9 @@ Current repository state includes:
   `datasets/runs/assurance_eval/results.json`.
 - **Robust eval matrix:** `scripts/run_assurance_robust_eval.py` writes
   `datasets/runs/assurance_eval/robust_results.json` across scenario x
-  fault-regime x seed.
+  fault-regime x seed (default **20 seeds**, 400 runs).
+- **Mermaid render (camera-ready):** `scripts/render_p7_mermaid_figures.py` for
+  `docs/figures/p7_mapping_flow.*` and `p7_gsn.*`.
 - **Paper runner integration:** `scripts/run_paper_experiments.py --paper P7`
   executes baseline and robust eval.
 

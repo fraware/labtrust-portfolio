@@ -1,0 +1,20 @@
+{
+  "version": "0.1",
+  "release_id": "release_run_626f47a59c",
+  "created_at_utc": "2026-04-20T05:51:31.413273Z",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/naive/seed_12/fallback_run/trace.json",
+      "sha256": "8540a0ddbb4e4c7fc8b03694631ee52db030086780d2450e1e4b3304a32e7c5c"
+    },
+    {
+      "path": "datasets/runs/meta_eval/naive/seed_12/fallback_run/maestro_report.json",
+      "sha256": "a4b4012c53fc76c6c711107e8482d6c836f0eca34a9aeecafc6c06b3de69233c"
+    },
+    {
+      "path": "datasets/runs/meta_eval/naive/seed_12/fallback_run/evidence_bundle.json",
+      "sha256": "c85f119e65d1ccd910fc6c26ab091e4b1595d7db954f767fbdf56f25d50fb9da"
+    }
+  ]
+}

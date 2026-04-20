@@ -1,57 +1,61 @@
 # P4 CPS-MAESTRO claim table (Draft conversion checklist 2.1)
-# Max 3-4 claims; each claim maps to release_id, artifact_paths, table_id, figure_id.
-# See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
-
 paper_id: "P4_CPS-MAESTRO"
-title: "CPS-MAESTRO: Benchmark + Fault Injection Suite for CPS-Grade Agent Coordination"
-release_id: "maestro_fault_sweep"
+title: "CPS-MAESTRO: Lab-first scenario benchmark for agent coordination under faults (MAESTRO_REPORT v0.2)"
+release_id: "p4_publishable_v1"
 
 claims:
   - id: "C1"
-    statement: "Standard scenarios + fault models + scoring produce stable, comparable measurements across coordination architectures."
+    statement: "Lab-first scenario-driven coordination benchmark with explicit fault injection, standardized MAESTRO_REPORT v0.2, variance-aware sweeps, and recovery/safety metrics suitable for AI safety and CPS-style evaluation (thin-slice, not physical plant certification)."
     evidence:
-      release_id: "maestro_fault_sweep"
+      release_id: "p4_publishable_v1"
       artifact_paths:
-        - "datasets/runs/maestro_fault_sweep/multi_sweep.json"
+        - "datasets/releases/p4_publishable_v1/maestro_fault_sweep/multi_sweep.json"
+        - "datasets/releases/p4_publishable_v1/generated_tables.md"
+        - "kernel/eval/MAESTRO_REPORT.v0.2.schema.json"
         - "bench/maestro/SCENARIO_SPEC.md"
-        - "kernel/eval/MAESTRO_REPORT.v0.1.schema.json"
-      table_ids: ["Table 1", "Table 2"]
-      figure_ids: ["Figure 0", "Figure 1"]
+        - "bench/maestro/RECOVERY_AND_SAFETY_METRICS.md"
+      table_ids: ["Table A", "Table B", "Table C"]
+      figure_ids:
+        - "docs/figures/p4_recovery_curve.png"
+        - "docs/figures/p4_safety_violations.png"
+        - "docs/figures/p4_efficiency_messages.png"
       confidence: high
 
   - id: "C2"
-    statement: "Variance is first-class: repeated runs and tail reporting are mandatory."
+    statement: "Variance is first-class: repeated seeds and tail latency reporting are mandatory in publishable sweeps."
     evidence:
-      release_id: "maestro_fault_sweep"
+      release_id: "p4_publishable_v1"
       artifact_paths:
-        - "datasets/runs/maestro_fault_sweep/multi_sweep.json"
-        - "impl/src/labtrust_portfolio/maestro_report_from_trace.py"
-      table_ids: ["Table 1"]
-      figure_ids: ["Figure 1"]
+        - "datasets/releases/p4_publishable_v1/maestro_fault_sweep/multi_sweep.json"
+        - "impl/src/labtrust_portfolio/maestro.py"
+      table_ids: ["Table A"]
+      figure_ids:
+        - "docs/figures/p4_recovery_curve.png"
+        - "docs/figures/p4_safety_violations.png"
       confidence: high
 
   - id: "C3"
-    statement: "Adapter interface makes adoption tractable across centralized/blackboard/hybrid stacks."
+    statement: "Adapter interface remains tractable across centralized, blackboard-style parameterization, retry-heavy recovery, no-recovery, and conservative shutdown comparators."
     evidence:
-      release_id: "maestro_fault_sweep"
+      release_id: "p4_publishable_v1"
       artifact_paths:
-        - "bench/maestro/baseline_summary.json"
+        - "datasets/releases/p4_publishable_v1/baseline_summary.json"
         - "impl/src/labtrust_portfolio/adapters/"
         - "bench/maestro/adapter_costs.json"
-      table_ids: ["Table 2"]
+      table_ids: ["Table B"]
       figure_ids: []
       confidence: high
 
   - id: "C4"
-    statement: "The suite is usable by third parties: docs + CI + reference baselines."
+    statement: "Third-party usability: reproducibility docs, CI tests, frozen artifact bundle, and safety-dominant scoring with explicit anti-gaming checks."
     evidence:
-      release_id: "maestro_fault_sweep"
+      release_id: "p4_publishable_v1"
       artifact_paths:
         - "bench/maestro/REPRODUCIBILITY.md"
         - "bench/maestro/BENCHMARK_RELEASE.v0.1.md"
-        - "bench/maestro/baseline_results.md"
-      table_ids: ["Table 1", "Table 2"]
+        - "datasets/releases/p4_publishable_v1/maestro_antigaming/antigaming_results.json"
+        - "bench/maestro/SCORING.md"
+        - "datasets/runs/RUN_RESULTS_SUMMARY.md"
+      table_ids: ["Table D"]
       figure_ids: []
       confidence: medium
-
-# Table 1: export_maestro_tables (fault sweep). Table 2: baselines. Figure 1: plot_maestro_recovery.py.

@@ -13,8 +13,8 @@ Papers P2, P5, P6, and P8 are **conditional**: proceed only when their trigger c
 ## P5 Scaling laws
 
 - **Trigger:** MAESTRO provides **multi-scenario** datasets sufficient for out-of-sample validation. Otherwise the paper reads as overclaim.
-- **Trigger proof required:** Beat **per-scenario baseline** out-of-sample, or reposition paper to "dataset analysis + negative results." Deliverable: heldout_results.json (or summary) explicitly states "beat_per_scenario_baseline" true/false; if false, draft states negative result and scope.
-- **Proceed when:** MAESTRO runs exist across multiple scenario families and fault mixtures, and you can hold out a scenario family or fault mixture for validation.
+- **Trigger proof required (admissible, no leakage):** `heldout_results.json` must report `success_criteria_met.trigger_met` from **admissible** baselines only: `beat_global_mean_out_of_sample`, `beat_feature_baseline_out_of_sample`, and `beat_regime_baseline_out_of_sample` (train-only regime means). Oracle baselines (`oracle_baselines.per_scenario_mean_including_test_mae`, etc.) are for analysis only and **must not** drive the go/no-go trigger. If `trigger_met` is false, treat as negative / exploratory and say so in the draft.
+- **Proceed when:** Runs span multiple scenario families, coordination regimes, agent counts, and fault mixtures, with frozen artifacts under `datasets/runs/scaling_eval/`, `scaling_eval_family/`, `scaling_eval_regime/`, `scaling_eval_agent_count/`, `scaling_eval_fault/`, `sensitivity_sweep/scaling_sensitivity.json`, and `scaling_recommend/recommendation_eval.json` produced by the paper runner.
 - **Dependency order:** After P4 (MAESTRO) has multi-scenario coverage; consumes MAESTRO datasets and Replay traces.
 
 ## P6 LLM Planning

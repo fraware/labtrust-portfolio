@@ -9,7 +9,7 @@ The kernel is the shared spine of the portfolio: versioned JSON Schemas and supp
 | Schema | Path | Description |
 |--------|------|-------------|
 | TRACE | trace/TRACE.v0.1.schema.json | Execution trace format for replay and evaluation |
-| MAESTRO_REPORT | eval/MAESTRO_REPORT.v0.1.schema.json | Benchmark evaluation report |
+| MAESTRO_REPORT | eval/MAESTRO_REPORT.v0.1.schema.json; eval/MAESTRO_REPORT.v0.2.schema.json | Benchmark evaluation report (v0.1 legacy; **v0.2** adds recovery timing, safety block, coordination efficiency, run_outcome) |
 | EVIDENCE_BUNDLE | mads/EVIDENCE_BUNDLE.v0.1.schema.json | Admissible evidence bundle for verification |
 | RELEASE_MANIFEST | policy/RELEASE_MANIFEST.v0.1.schema.json | Release artifact manifest |
 | COORD_CONTRACT | contracts/COORD_CONTRACT.v0.1.schema.json | Coordination contract schema |

@@ -34,6 +34,8 @@ def table1(data: dict) -> list[str]:
     mc = data.get("mapping_check") or {}
     rev = data.get("review") or {}
     ponr = rev.get("ponr_coverage") or {}
+    rm = data.get("run_manifest") or {}
+    primary = rm.get("table1_primary_scenario")
     h1 = (
         "| mapping_check_ok | ponr_coverage_ok | review_exit_ok | "
         "ponr_events_count | ponr_coverage_ratio | control_coverage_ratio |"
@@ -42,7 +44,14 @@ def table1(data: dict) -> list[str]:
         "|------------------|------------------|---------------|"
         "-------------------|---------------------|-------------------------|"
     )
-    lines = ["# Table 1 - Mapping and review results", "", h1, h2]
+    lines = ["# Table 1 - Mapping and review results", ""]
+    if primary:
+        lines.append(
+            f"*Primary scripted review row: `{primary}` "
+            f"(kernel PONR task names; not toy_lab_v0).*"
+        )
+        lines.append("")
+    lines.extend([h1, h2])
     n_events = len(rev.get("ponr_events", []))
     row = (
         f"| {_fmt(mc.get('ok'))} | {_fmt(mc.get('ponr_coverage_ok'))} | "

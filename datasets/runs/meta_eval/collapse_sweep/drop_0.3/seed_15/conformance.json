@@ -1,0 +1,7 @@
+{
+  "tier": 1,
+  "pass": false,
+  "reasons": [
+    "maestro_report.json: schema validation failed: Additional properties are not allowed ('steps_to_completion_after_first_fault', 'tasks_completed_after_fault' were unexpected)\n\nFailed validating 'additionalProperties' in schema['properties']['metrics']:\n    {'type': 'object',\n     'additionalProperties': False,\n     'required': ['tasks_completed',\n                  'task_latency_ms_p50',\n                  'task_latency_ms_p95',\n                  'task_latency_ms_p99',\n                  'coordination_messages'],\n     'properties': {'tasks_completed': {'type': 'integer', 'minimum': 0},\n                    'task_latency_ms_p50': {'type': 'number', 'minimum': 0},\n                    'task_latency_ms_p95': {'type': 'number', 'minimum': 0},\n                    'task_latency_ms_p99': {'type': 'number', 'minimum': 0},\n                    'coordination_messages': {'type': 'integer',\n                                              'minimum': 0}}}\n\nOn instance['metrics']:\n    {'tasks_completed': 2,\n     'task_latency_ms_p50': 10.979405864222306,\n     'task_latency_ms_p95': 18.277340213247918,\n     'task_latency_ms_p99': 18.926045488716863,\n     'coordination_messages': 4,\n     'tasks_completed_after_fault': 0,\n     'steps_to_completion_after_first_fault': 4}"
+  ]
+}

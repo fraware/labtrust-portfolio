@@ -13,7 +13,7 @@ If you publish a dataset, publish **a release manifest** + **evidence bundle** r
 Each run directory under `datasets/runs/<run_id>/` should contain:
 
 - `trace.json` — TRACE (kernel/trace/TRACE.v0.1)
-- `maestro_report.json` — MAESTRO_REPORT (kernel/eval/MAESTRO_REPORT.v0.1)
+- `maestro_report.json` — MAESTRO_REPORT (kernel/eval/MAESTRO_REPORT.v0.2 for P4 publishable thin-slice; v0.1 remains for legacy corpora)
 - `evidence_bundle.json` — EVIDENCE_BUNDLE (kernel/mads/EVIDENCE_BUNDLE.v0.1)
 - `release_manifest.json` — RELEASE_MANIFEST (kernel/policy/RELEASE_MANIFEST.v0.1)
 

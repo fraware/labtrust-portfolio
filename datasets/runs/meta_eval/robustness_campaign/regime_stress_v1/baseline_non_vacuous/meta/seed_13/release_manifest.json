@@ -1,0 +1,20 @@
+{
+  "version": "0.1",
+  "release_id": "release_run_35344420f5",
+  "created_at_utc": "2026-04-20T05:54:58.931835Z",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/baseline_non_vacuous/meta/seed_13/trace.json",
+      "sha256": "b9b8dd3a2a3a0508e343e052d6148487ca32e1cfecc5646ba3fbb199aaa09a20"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/baseline_non_vacuous/meta/seed_13/maestro_report.json",
+      "sha256": "516c853b3b09310dc8b93cc19afbb52b570eea9b60f8b100f061e47572ea611b"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/baseline_non_vacuous/meta/seed_13/evidence_bundle.json",
+      "sha256": "e93a18918e008118d3b385b0380a91c26b49f26e390badd4a990f4c17d81181f"
+    }
+  ]
+}

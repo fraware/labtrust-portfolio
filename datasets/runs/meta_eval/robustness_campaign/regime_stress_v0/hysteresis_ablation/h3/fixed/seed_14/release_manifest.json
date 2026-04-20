@@ -1,0 +1,20 @@
+{
+  "version": "0.1",
+  "release_id": "release_run_63c7edbaa0",
+  "created_at_utc": "2026-04-20T05:54:26.370561Z",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/hysteresis_ablation/h3/fixed/seed_14/trace.json",
+      "sha256": "cdece2374957625d270fb21aabae18d61ff81e2b7fe891ca0592ae5402dcc515"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/hysteresis_ablation/h3/fixed/seed_14/maestro_report.json",
+      "sha256": "a7e3de0b7938259b9fd435f7517552e78ad99057d94d4b785307e46590c02917"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/hysteresis_ablation/h3/fixed/seed_14/evidence_bundle.json",
+      "sha256": "0bf5f27d180d23e1921dcf9c0fb919cb7432e65cb76053795d8cb825c5aa4eee"
+    }
+  ]
+}

@@ -17,3 +17,10 @@ datasets/releases/**
 !datasets/runs/p0_e4_summary.json
 !datasets/releases/p0_e3_release/
 !datasets/releases/p0_e3_release/**
+# P3 Replay publishable summary
+!datasets/runs/replay_eval/
+!datasets/runs/replay_eval/**
+# P8 Meta-Coordination publishable artifacts (comparison, sweeps, robustness campaign)
+!datasets/runs/meta_eval/
+!datasets/runs/meta_eval/**
+!datasets/runs/RUN_RESULTS_SUMMARY.md

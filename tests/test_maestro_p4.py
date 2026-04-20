@@ -166,8 +166,156 @@ class TestMaestroBaselinesIntegration(unittest.TestCase):
         self.assertIn("scenario", data)
         self.assertGreater(len(data["rows"]), 0)
         row = data["rows"][0]
-        for key in ("adapter", "seed", "tasks_completed", "coordination_messages", "p95_latency_ms"):
+        for key in ("adapter", "seed", "tasks_completed", "coordination_messages", "p95_latency_ms", "regime"):
             self.assertIn(key, row, f"Row must have '{key}'")
+        self.assertIn("aggregates", data)
+        drop_rows = [r for r in data["rows"] if r.get("regime", "").startswith("drop_")]
+        cen = [r["tasks_completed"] for r in drop_rows if r["adapter"] == "Centralized"]
+        rh = [r["tasks_completed"] for r in drop_rows if r["adapter"] == "RetryHeavy"]
+        if cen and rh:
+            self.assertGreaterEqual(
+                sum(rh),
+                sum(cen) - 1,
+                "RetryHeavy should not trail Centralized by much under drop fault regime",
+            )
+
+
+class TestMaestroReportSemantics(unittest.TestCase):
+    """MAESTRO_REPORT v0.2 semantics and scoring."""
+
+    def setUp(self) -> None:
+        os.environ["LABTRUST_KERNEL_DIR"] = str(repo_root() / "kernel")
+
+    def test_schema_validation_v02(self) -> None:
+        from labtrust_portfolio.schema import validate
+        from labtrust_portfolio.thinslice import run_thin_slice
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            run_thin_slice(
+                out,
+                seed=11,
+                scenario_id="toy_lab_v0",
+                drop_completion_prob=0.15,
+                delay_fault_prob=0.15,
+                max_retries_per_task=2,
+            )
+            report = json.loads((out / "maestro_report.json").read_text(encoding="utf-8"))
+            validate(report, "eval/MAESTRO_REPORT.v0.2.schema.json")
+            self.assertEqual(report.get("version"), "0.2")
+
+    def test_time_to_recovery_nonnegative_when_fault(self) -> None:
+        from labtrust_portfolio.thinslice import run_thin_slice
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            run_thin_slice(
+                out,
+                seed=2,
+                scenario_id="toy_lab_v0",
+                drop_completion_prob=0.0,
+                delay_fault_prob=0.25,
+                max_retries_per_task=0,
+            )
+            report = json.loads((out / "maestro_report.json").read_text(encoding="utf-8"))
+            ttr = report["metrics"].get("time_to_recovery_ms")
+            if report["faults"].get("fault_injected") and ttr is not None:
+                self.assertGreaterEqual(float(ttr), 0.0)
+
+    def test_unsafe_success_when_calibration_fault_toy(self) -> None:
+        from labtrust_portfolio.thinslice import run_thin_slice
+
+        with tempfile.TemporaryDirectory() as td:
+            out = Path(td)
+            run_thin_slice(
+                out,
+                seed=1,
+                scenario_id="toy_lab_v0",
+                drop_completion_prob=0.0,
+                calibration_invalid_prob=1.0,
+            )
+            report = json.loads((out / "maestro_report.json").read_text(encoding="utf-8"))
+            self.assertGreater(report["safety"]["safety_violation_count"], 0)
+
+    def test_composite_score_penalizes_unsafe(self) -> None:
+        from labtrust_portfolio.maestro_scoring import composite_score
+
+        safe = {
+            "metrics": {"tasks_completed": 4, "task_latency_ms_p95": 40.0},
+            "safety": {
+                "safety_violation_count": 0,
+                "unsafe_success_count": 0,
+                "unsafe_completion_count": 0,
+                "ponr_violation_count": 0,
+            },
+            "coordination_efficiency": {"wasted_action_count": 0},
+        }
+        unsafe = {
+            "metrics": {"tasks_completed": 4, "task_latency_ms_p95": 40.0},
+            "safety": {
+                "safety_violation_count": 2,
+                "unsafe_success_count": 1,
+                "unsafe_completion_count": 1,
+                "ponr_violation_count": 0,
+            },
+            "coordination_efficiency": {"wasted_action_count": 0},
+        }
+        self.assertGreater(composite_score(safe), composite_score(unsafe))
+
+
+class TestExportTablesRepro(unittest.TestCase):
+    """Lightweight pipeline: sweep -> export tables; markdown reflects JSON."""
+
+    def setUp(self) -> None:
+        os.environ["LABTRUST_KERNEL_DIR"] = str(repo_root() / "kernel")
+
+    def test_exported_table_contains_sweep_mean(self) -> None:
+        env = os.environ.copy()
+        script_sweep = repo_root() / "scripts" / "maestro_fault_sweep.py"
+        script_export = repo_root() / "scripts" / "export_maestro_tables.py"
+        with tempfile.TemporaryDirectory() as td:
+            sweep_dir = Path(td) / "sweep"
+            sweep_dir.mkdir(parents=True)
+            proc = subprocess.run(
+                [
+                    sys.executable,
+                    str(script_sweep),
+                    "--scenario",
+                    "toy_lab_v0",
+                    "--seeds",
+                    "2",
+                    "--out",
+                    str(sweep_dir),
+                ],
+                cwd=str(repo_root()),
+                env={**env, "PYTHONPATH": str(repo_root() / "impl" / "src")},
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+            self.assertEqual(proc.returncode, 0, (proc.stdout, proc.stderr))
+            multi = sweep_dir / "multi_sweep.json"
+            data = json.loads(multi.read_text(encoding="utf-8"))
+            first_mean = float(data["per_scenario"][0]["sweep"][0]["tasks_completed_mean"])
+            needle = f"{first_mean:.2f}"
+            out_md = Path(td) / "tables.md"
+            proc2 = subprocess.run(
+                [
+                    sys.executable,
+                    str(script_export),
+                    "--multi-sweep",
+                    str(multi),
+                    "--out",
+                    str(out_md),
+                ],
+                cwd=str(repo_root()),
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            self.assertEqual(proc2.returncode, 0, proc2.stderr)
+            text = out_md.read_text(encoding="utf-8")
+            self.assertIn(needle, text.replace(" ", ""))
 
 
 class TestScenarioFamily(unittest.TestCase):

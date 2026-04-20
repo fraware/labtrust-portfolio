@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_eb0c3ef3f8",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/hysteresis_ablation/h3/meta/seed_11/trace.json",
+      "sha256": "7c225d6604b9cd31503049fc6257706182889febee7ec818a547890f2f8ab31f",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/hysteresis_ablation/h3/meta/seed_11/maestro_report.json",
+      "sha256": "c2dd1ebfaa29b9fff4c9b96265e28c2c406a568d6cbe1af9757526fe37431a28",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": true,
+    "replay_diagnostics": "replay ok"
+  },
+  "verification_mode": "evaluator"
+}

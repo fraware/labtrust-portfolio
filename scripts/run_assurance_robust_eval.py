@@ -49,12 +49,20 @@ PROFILE_PACKS = {
         REPO / "profiles" / "medical_v0.1" / "assurance_pack_instantiation.json"
     ),
 }
+# One pack per scenario for review; traffic_v0 uses medical_v0.1 as a minimal
+# regulator-style template while stress-testing the same review pipeline (not a claim
+# that traffic semantics match SaMD hazard text).
 SCENARIO_PROFILE = {
     "toy_lab_v0": "lab_v0.1",
     "lab_profile_v0": "lab_v0.1",
     "warehouse_v0": "warehouse_v0.1",
     "traffic_v0": "medical_v0.1",
 }
+SCENARIO_PROFILE_NOTE = (
+    "traffic_v0 is paired with medical_v0.1: a thin traffic scenario exercises trace/"
+    "bundle/review mechanics with a minimal SaMD-style pack; it does not assert "
+    "standards alignment between traffic control and medical device software content."
+)
 FAULT_REGIMES = [
     {
         "id": "nominal",
@@ -182,8 +190,8 @@ def main() -> int:
     ap.add_argument(
         "--seeds",
         type=str,
-        default="1,2,3,4,5,6,7,8,9,10",
-        help="Comma-separated seed list",
+        default=",".join(str(i) for i in range(1, 21)),
+        help="Comma-separated seed list (default: 1..20 for publishable tables)",
     )
     args = ap.parse_args()
 
@@ -307,6 +315,8 @@ def main() -> int:
             "script": "run_assurance_robust_eval.py",
             "scenarios": SCENARIOS,
             "profiles": sorted(PROFILE_PACKS.keys()),
+            "scenario_profile_alignment": dict(SCENARIO_PROFILE),
+            "scenario_profile_note": SCENARIO_PROFILE_NOTE,
             "fault_regimes": [r["id"] for r in FAULT_REGIMES],
             "seeds": seeds,
             "n_total_runs": total,

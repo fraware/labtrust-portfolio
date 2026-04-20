@@ -206,45 +206,126 @@ def p4(quick: bool) -> bool:
 
 
 def p5(quick: bool) -> bool:
-    seeds = 3 if quick else 20
+    seeds = 3 if quick else 30
     multiscenario = RUNS / "multiscenario_runs"
-    cmd = [
+    gen_cmd = [
         sys.executable,
         str(REPO / "scripts" / "generate_multiscenario_runs.py"),
-        "--out", str(multiscenario),
-        "--seeds", str(seeds),
+        "--out",
+        str(multiscenario),
+        "--seeds",
+        str(seeds),
+        "--coordination-grid",
+        "--clean",
+        "--profile",
+        "core" if quick else "real_world",
     ]
+    if quick:
+        gen_cmd.append("--p5-lite")
     if not quick:
-        cmd.append("--fault-mix")
-    ok = run(
-        cmd,
-        "P5 Generate multi-scenario runs",
-        timeout=900 if seeds >= 20 else 600,
-    )
-    if not ok:
+        gen_cmd.append("--fault-mix")
+    if not run(
+        gen_cmd,
+        "P5 Generate multi-scenario runs (coordination grid)",
+        timeout=1800 if not quick else 900,
+    ):
         return False
-    ok = run(
+
+    eval_py = str(REPO / "scripts" / "scaling_heldout_eval.py")
+    eval_specs = [
+        ("scaling_eval", "scenario"),
+        ("scaling_eval_family", "family"),
+        ("scaling_eval_regime", "regime"),
+        ("scaling_eval_agent_count", "agent_count"),
+        ("scaling_eval_fault", "fault_setting"),
+    ]
+    for out_sub, mode in eval_specs:
+        if not run(
+            [
+                sys.executable,
+                eval_py,
+                "--runs-dir",
+                str(multiscenario),
+                "--out",
+                str(RUNS / out_sub),
+                "--holdout-mode",
+                mode,
+            ],
+            f"P5 held-out eval ({mode})",
+            timeout=180 if not quick else 120,
+        ):
+            return False
+
+    if not run(
         [
             sys.executable,
-            str(REPO / "scripts" / "scaling_heldout_eval.py"),
-            "--runs-dir", str(multiscenario),
-            "--out", str(RUNS / "scaling_eval"),
+            str(REPO / "scripts" / "scaling_sensitivity_sweep.py"),
+            "--runs-dir",
+            str(multiscenario),
+            "--out-dir",
+            str(RUNS / "sensitivity_sweep"),
         ],
-        "P5 Scaling held-out eval",
-        timeout=60,
-    )
-    if not ok:
+        "P5 sensitivity sweep (max seed caps)",
+        timeout=240 if not quick else 120,
+    ):
         return False
-    run(
+
+    if not run(
+        [
+            sys.executable,
+            str(REPO / "scripts" / "scaling_recommend_eval.py"),
+            "--runs-dir",
+            str(multiscenario),
+            "--out",
+            str(RUNS / "scaling_recommend" / "recommendation_eval.json"),
+        ],
+        "P5 recommendation / regret eval",
+        timeout=180 if not quick else 120,
+    ):
+        return False
+
+    if not run(
         [
             sys.executable,
             str(REPO / "scripts" / "export_scaling_tables.py"),
-            "--results", str(RUNS / "scaling_eval" / "heldout_results.json"),
+            "--results",
+            str(RUNS / "scaling_eval" / "heldout_results.json"),
+            "--family-results",
+            str(RUNS / "scaling_eval_family" / "heldout_results.json"),
+            "--recommend-results",
+            str(RUNS / "scaling_recommend" / "recommendation_eval.json"),
+            "--sensitivity-results",
+            str(RUNS / "sensitivity_sweep" / "scaling_sensitivity.json"),
+            "--agent-results",
+            str(RUNS / "scaling_eval_agent_count" / "heldout_results.json"),
+            "--out",
+            str(REPO / "papers" / "P5_ScalingLaws" / "generated_tables.md"),
         ],
         "P5 Export scaling tables",
-        timeout=15,
+        timeout=30,
+    ):
+        return False
+
+    return run(
+        [
+            sys.executable,
+            str(REPO / "scripts" / "plot_scaling_paper.py"),
+            "--heldout-main",
+            str(RUNS / "scaling_eval" / "heldout_results.json"),
+            "--heldout-family",
+            str(RUNS / "scaling_eval_family" / "heldout_results.json"),
+            "--heldout-regime",
+            str(RUNS / "scaling_eval_regime" / "heldout_results.json"),
+            "--recommend",
+            str(RUNS / "scaling_recommend" / "recommendation_eval.json"),
+            "--sensitivity",
+            str(RUNS / "sensitivity_sweep" / "scaling_sensitivity.json"),
+            "--runs-dir",
+            str(multiscenario),
+        ],
+        "P5 Plot scaling paper figures",
+        timeout=60,
     )
-    return True
 
 
 def p6(quick: bool) -> bool:

@@ -1,14 +1,15 @@
 # CPS-MAESTRO (benchmark scaffolding)
 
-MAESTRO is the evaluation substrate: scenarios, adapters, scoring, variance-aware reporting.
+MAESTRO is a **lab-first**, scenario-driven coordination benchmark (thin-slice simulation): scenarios, adapters, explicit fault injection, **MAESTRO_REPORT v0.2** recovery and safety metrics, and variance-aware reporting. Warehouse/traffic/regime scenarios are **auxiliary micro-scenarios**, not equal-strength pillars versus lab profiles.
 
 - **Reference scenario:** **lab_profile_v0** (`scenarios/lab_profile_v0.yaml`) is the portfolio anchor; it supports faults: drop_completion, delay, calibration_invalid. See [SCENARIO_SPEC.md](SCENARIO_SPEC.md) (including Anti-gaming).
 - **Scenarios:** YAMLs under `scenarios/` (toy_lab_v0, lab_profile_v0, warehouse_v0, traffic_v0, regime_stress_v0, regime_stress_v1) with optional `family` (lab, warehouse, traffic). The second regime-stress id is used by P8 publishable evals alongside v0 (see `scripts/meta_eval.py --scenario`).
 - **Benchmark release:** Canonical v0.1 set in [BENCHMARK_RELEASE.v0.1.md](BENCHMARK_RELEASE.v0.1.md) and [benchmark_scenarios.v0.1.json](benchmark_scenarios.v0.1.json).
 - **Fault sweep:** `scripts/maestro_fault_sweep.py` writes `datasets/runs/maestro_fault_sweep/multi_sweep.json` (includes calibration_invalid_01).
-- **Anti-gaming:** `scripts/maestro_antigaming_eval.py` writes `datasets/runs/maestro_antigaming/antigaming_results.json` with `scoring_proof` (always_deny/always_wait score 0/1; legitimate safe completion scores higher; unsafe success not rewarded). See SCENARIO_SPEC Anti-gaming and P4 AUTHORING_PACKET K4.
-- **Baselines:** `scripts/maestro_baselines.py` writes `baseline_results.md` and `baseline_summary.json` (Centralized, Blackboard, RetryHeavy). Draft tables: `scripts/export_maestro_tables.py`.
-- **Reproducibility:** [REPRODUCIBILITY.md](REPRODUCIBILITY.md). Thin-slice report generator: `kernel/eval/MAESTRO_REPORT.v0.1`.
+- **Anti-gaming:** `scripts/maestro_antigaming_eval.py` writes `datasets/runs/maestro_antigaming/antigaming_results.json` with ranked `composite_score` (`bench/maestro/SCORING.md`). See SCENARIO_SPEC Anti-gaming.
+- **Baselines:** `scripts/maestro_baselines.py` writes `baseline_results.md` and `baseline_summary.json` (Centralized, Blackboard, RetryHeavy, NoRecovery, ConservativeSafeShutdown; fault-free and drop regimes). Tables: `scripts/export_maestro_tables.py --out papers/P4_CPS-MAESTRO/generated_tables.md`.
+- **Publishable bundle:** `datasets/releases/p4_publishable_v1/` mirrors the sweep, antigaming run, baselines, and exported tables. Summary: `datasets/runs/RUN_RESULTS_SUMMARY.md`.
+- **Reproducibility:** [REPRODUCIBILITY.md](REPRODUCIBILITY.md). Report schema: `kernel/eval/MAESTRO_REPORT.v0.2.schema.json` (v0.1 retained for historical corpora). Semantics: [RECOVERY_AND_SAFETY_METRICS.md](RECOVERY_AND_SAFETY_METRICS.md).
 - **Adapter cost:** Coarse implementation cost (LOC estimate, hours estimate) per reference adapter in [adapter_costs.json](adapter_costs.json). Used to back adoption claims; see REPRODUCIBILITY for run instructions.
 
 ## MAESTRO adoption (external use)

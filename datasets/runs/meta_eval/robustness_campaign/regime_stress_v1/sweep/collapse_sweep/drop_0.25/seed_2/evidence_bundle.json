@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_bee97dfcff",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/sweep/collapse_sweep/drop_0.25/seed_2/trace.json",
+      "sha256": "86272b61c9e52fe2b357a260526d76d68960a94898fc2d1b55fd392407ef6b46",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/sweep/collapse_sweep/drop_0.25/seed_2/maestro_report.json",
+      "sha256": "fdd5ed3d4550136d1818522e7e690ad35352d023fdfc5d2e52e52694d4f1622f",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": true,
+    "replay_diagnostics": "replay ok"
+  },
+  "verification_mode": "evaluator"
+}

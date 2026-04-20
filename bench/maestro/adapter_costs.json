@@ -1,5 +1,5 @@
 {
-  "description": "Adapter implementation cost (coarse) for adoption reporting",
+  "description": "Adapter implementation cost (coarse) for adoption reporting; aligns with P4 baseline adapters",
   "adapters": [
     {
       "adapter_id": "centralized",
@@ -13,7 +13,28 @@
       "scenario_id": null,
       "loc_estimate": 180,
       "hours_estimate": 14,
-      "notes": "Event-sourced / blackboard variant"
+      "notes": "Same harness as centralized; different default delay prior (parameterization, not a distinct distributed blackboard implementation)"
+    },
+    {
+      "adapter_id": "retry_heavy",
+      "scenario_id": null,
+      "loc_estimate": 200,
+      "hours_estimate": 16,
+      "notes": "Retry-on-drop policy; architecturally distinct recovery path"
+    },
+    {
+      "adapter_id": "no_recovery",
+      "scenario_id": null,
+      "loc_estimate": 110,
+      "hours_estimate": 6,
+      "notes": "Explicit no-retry baseline for recovery comparisons"
+    },
+    {
+      "adapter_id": "conservative_safe_shutdown",
+      "scenario_id": null,
+      "loc_estimate": 160,
+      "hours_estimate": 12,
+      "notes": "Stops after first fault; models conservative supervisor"
     }
   ]
 }

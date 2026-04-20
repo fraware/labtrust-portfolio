@@ -20,9 +20,9 @@ Strengthen `P7_StandardsMapping` from a single worked example to a broad, mechan
   - `drop_stress`
   - `calibration_noise`
   - `composite`
-- **Seeds:** default `1..10` (publishable target can increase to `1..20`)
+- **Seeds:** default `1..20` (portfolio submission bar for publishable tables; override with `--seeds` only with justification)
 
-Total default runs: `4 scenarios x 5 regimes x 10 seeds = 200`.
+Total default runs: `4 scenarios x 5 regimes x 20 seeds = 400`.
 
 ## Metrics
 
@@ -51,8 +51,11 @@ Total default runs: `4 scenarios x 5 regimes x 10 seeds = 200`.
 ## Execution
 
 ```bash
-python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval
-python scripts/run_assurance_robust_eval.py --out datasets/runs/assurance_eval --seeds 1,2,3,4,5,6,7,8,9,10
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
+  python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
+  python scripts/run_assurance_robust_eval.py --out datasets/runs/assurance_eval
+# Default robust seeds are 1..20. Override only with an explicit methodological note.
 python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/robust_results.json
 ```
 

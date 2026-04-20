@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_ce20f4235f",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "datasets/runs/meta_eval/fixed/seed_30/trace.json",
+      "sha256": "39e322f109fe91ebb7e808cd8d09fdba8ad1221b1b692c4669c76bcb439c2e1d",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "datasets/runs/meta_eval/fixed/seed_30/maestro_report.json",
+      "sha256": "ed703ee27acc3bc18c871da1f281eae6f23be75cebbeb5101daaad61746dc9e9",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": true,
+    "replay_diagnostics": "replay ok"
+  },
+  "verification_mode": "evaluator"
+}

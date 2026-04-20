@@ -97,6 +97,12 @@ def main() -> int:
         if not curve:
             print("strict-curve: overhead_curve missing or empty", file=sys.stderr)
             return 1
+        if len(curve) < 2:
+            print(
+                "strict-curve: overhead_curve must have at least 2 points (multi-size trace)",
+                file=sys.stderr,
+            )
+            return 1
     if args.figure_json.exists():
         fig = json.loads(args.figure_json.read_text(encoding="utf-8"))
         fc = fig.get("overhead_curve") or []

@@ -13,6 +13,7 @@ from .release import build_release_manifest
 from .schema import validate
 from .scenario import load_scenario, get_scenario_task_names, get_resource_graph
 from .conformance import write_conformance_artifact
+from .coordination_profile import coordination_experiment_profile
 
 KERNEL_VERSION = "0.1"
 
@@ -76,10 +77,9 @@ def run_thin_slice(
     Thin-slice harness: emits TRACE v0.1 and MAESTRO_REPORT v0.2.
     Timestamps `ts` are synthetic scenario seconds (not host wall clock).
 
-    Extra keyword arguments (e.g. ``agent_count``, ``coordination_regime``,
-    ``fault_setting_label`` from ``generate_multiscenario_runs.py``) are accepted
-    and ignored so sweep tooling stays compatible when the harness does not yet
-    vary those dimensions.
+    Optional P5 sweep kwargs (from ``generate_multiscenario_runs.py``):
+    ``agent_count`` (int), ``coordination_regime`` (str), ``fault_setting_label`` (str).
+    These change coordination_message volume, drop stress, actor rotation, and trace metadata.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -114,9 +114,15 @@ def run_thin_slice(
             ns["faults"] = faults
         return ns
 
-    def emit(ev_type: str, actor_kind: str, actor_id: str, payload: Dict[str, Any]) -> None:
+    def emit(
+        ev_type: str,
+        actor_kind: str,
+        actor_id: str,
+        payload: Dict[str, Any],
+        delay_mult: float = 1.0,
+    ) -> None:
         nonlocal seq, ts, state
-        ts += sample_delay_ms() / 1000.0
+        ts += sample_delay_ms() * max(0.05, float(delay_mult)) / 1000.0
         state = _apply_state_for_hash(state, ev_type, payload)
         events.append(
             TraceEvent(
@@ -151,6 +157,15 @@ def run_thin_slice(
     max_retries = max(0, int(max_retries_per_task))
 
     planned_n = len(task_names)
+    n_agents = max(1, int(kwargs.get("agent_count", 1) or 1))
+    coord_regime = str(kwargs.get("coordination_regime") or "centralized")
+    fault_setting_label = str(kwargs.get("fault_setting_label") or "unknown")
+    cprof = coordination_experiment_profile(coord_regime, n_agents, planned_n)
+    lat_mult = float(cprof["latency_stress_multiplier"])
+    effective_drop_p = min(
+        0.92,
+        float(drop_completion_prob) * float(cprof["drop_stress_multiplier"]),
+    )
     calibration_invalidated = False
     run_fault_seen = False
     shutdown_triggered = False
@@ -240,7 +255,29 @@ def run_thin_slice(
 
     for i, name in enumerate(task_names):
         tid = _task_id(name, i)
-        emit("coordination_message", "system", "scheduler", {"detail": "assign_task", "task_id": tid})
+        emit(
+            "coordination_message",
+            "system",
+            "scheduler",
+            {
+                "detail": "assign_task",
+                "task_id": tid,
+                "regime": cprof["coordination_regime"],
+            },
+        )
+        for k in range(max(0, int(cprof["pre_task_coordination_messages"]) - 1)):
+            emit(
+                "coordination_message",
+                "system",
+                "scheduler",
+                {
+                    "detail": "regime_pre_task",
+                    "task_id": tid,
+                    "step": k,
+                    "regime": cprof["coordination_regime"],
+                },
+                delay_mult=0.02 * lat_mult,
+            )
         task_done = False
         had_fault_this_task = False
         disposition_risk = False
@@ -276,7 +313,8 @@ def run_thin_slice(
                 break
 
             aux_ctx = {"had_aux_fault": False}
-            emit("task_start", "agent", "agent_1", {"task_id": tid, "name": name})
+            actor_id = f"agent_{1 + (i % n_agents)}"
+            emit("task_start", "agent", actor_id, {"task_id": tid, "name": name})
 
             if block_schedule:
                 emit(
@@ -299,7 +337,7 @@ def run_thin_slice(
                 run_fault_seen = True
                 ts += sample_delay_ms() * 2.0 / 1000.0
 
-            if rng.random() < drop_completion_prob:
+            if rng.random() < effective_drop_p:
                 emit("fault_injected", "system", "fault_injector", {"fault": "drop_completion", "task_id": tid})
                 had_fault_this_task = True
                 run_fault_seen = True
@@ -347,6 +385,20 @@ def run_thin_slice(
                 break
             if aux_ctx2["had_aux_fault"]:
                 had_fault_this_task = True
+
+            for h in range(int(cprof["intra_task_coordination_messages"])):
+                peer = f"agent_{1 + ((i + h + 1) % n_agents)}"
+                emit(
+                    "coordination_message",
+                    "agent",
+                    peer,
+                    {
+                        "detail": "handoff",
+                        "task_id": tid,
+                        "regime": cprof["coordination_regime"],
+                    },
+                    delay_mult=0.015 * lat_mult,
+                )
 
             emit("task_end", "tool", "lab_device_1", {"task_id": tid, "name": name})
             if had_fault_this_task:
@@ -413,6 +465,23 @@ def run_thin_slice(
             "sensor_stale_prob": sensor_stale_prob,
             "shutdown_after_first_fault": shutdown_after_first_fault,
             "deadline_miss_prob": deadline_miss_prob,
+            "fault_setting_label": fault_setting_label,
+            "agent_count": n_agents,
+            "coordination_regime": cprof["coordination_regime"],
+            "coordination_topology": cprof["coordination_topology"],
+            "hierarchy_depth": cprof["hierarchy_depth"],
+            "fan_out": cprof["fan_out"],
+            "handoff_factor": cprof["handoff_factor"],
+            "shared_state_contention": cprof["shared_state_contention"],
+            "deadline_tightness": cprof["deadline_tightness"],
+            "critical_path_length": cprof["critical_path_length"],
+            "branching_factor": cprof["branching_factor"],
+            "queue_contention_index": cprof["queue_contention_index"],
+            "regime_fault_interaction": cprof["regime_fault_interaction"],
+            "regime_id": cprof["regime_id"],
+            "effective_drop_completion_prob": round(effective_drop_p, 6),
+            "latency_stress_multiplier": cprof["latency_stress_multiplier"],
+            "drop_stress_multiplier": cprof["drop_stress_multiplier"],
         },
     )
 

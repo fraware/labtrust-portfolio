@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_ff73a5e482",
+  "scenario_id": "regime_stress_v0",
+  "metrics": {
+    "tasks_completed": 3,
+    "task_latency_ms_p50": 14.23988874551052,
+    "task_latency_ms_p95": 44.31159084747446,
+    "task_latency_ms_p99": 46.98463103431571,
+    "coordination_messages": 4,
+    "tasks_completed_after_fault": 2,
+    "steps_to_completion_after_first_fault": 7
+  },
+  "faults": {
+    "fault_injected": true,
+    "fault_events": [
+      "drop_completion"
+    ],
+    "recovery_ok": true
+  },
+  "notes": "Thin-slice MAESTRO report; semantics will expand in v0.2+",
+  "metadata_meta_controller": true
+}
