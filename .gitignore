@@ -27,3 +27,22 @@ datasets/releases/**
 !datasets/runs/assurance_eval/
 !datasets/runs/assurance_eval/**
 !datasets/runs/RUN_RESULTS_SUMMARY.md
+# P4 MAESTRO publishable artifacts
+!datasets/runs/maestro_fault_sweep/
+!datasets/runs/maestro_fault_sweep/multi_sweep.json
+!datasets/runs/maestro_antigaming/
+!datasets/runs/maestro_antigaming/antigaming_results.json
+!datasets/releases/p4_publishable_v1/
+!datasets/releases/p4_publishable_v1/maestro_fault_sweep/
+!datasets/releases/p4_publishable_v1/maestro_fault_sweep/multi_sweep.json
+!datasets/releases/p4_publishable_v1/maestro_antigaming/
+!datasets/releases/p4_publishable_v1/maestro_antigaming/antigaming_results.json
+!datasets/releases/p4_publishable_v1/baseline_summary.json
+!datasets/releases/p4_publishable_v1/baseline_results.md
+!datasets/releases/p4_publishable_v1/generated_tables.md
+!datasets/releases/p4_publishable_v1/p4_recovery_curve.png
+!datasets/releases/p4_publishable_v1/p4_safety_violations.png
+!datasets/releases/p4_publishable_v1/p4_efficiency_messages.png
+!datasets/releases/p4_publishable_v1/p4_recovery_times.json
+!datasets/releases/p4_publishable_v1/p4_safety_violations.json
+!datasets/releases/p4_publishable_v1/p4_efficiency_messages_per_task.json
