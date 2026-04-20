@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """
 Export P7 Assurance eval results as markdown tables for the draft.
-Reads assurance_eval/results.json.
+Reads baseline results.json; Table 3 uses robust_results.json when present
+(`--robust-results`, or default path if that file exists).
 Usage (from repo root):
   python scripts/export_assurance_tables.py
-  python scripts/export_assurance_tables.py --results path/to/results.json
+  python scripts/export_assurance_tables.py --results path/to/results.json \\
+      --robust-results path/to/robust_results.json
 """
 from __future__ import annotations
 
@@ -17,6 +19,7 @@ REPO = Path(__file__).resolve().parents[1]
 DEFAULT_RESULTS = (
     REPO / "datasets" / "runs" / "assurance_eval" / "results.json"
 )
+DEFAULT_ROBUST = REPO / "datasets" / "runs" / "assurance_eval" / "robust_results.json"
 
 
 def _fmt(x: float | int | str | bool | None) -> str:
@@ -125,12 +128,37 @@ def main() -> int:
         default=DEFAULT_RESULTS,
         help="Path to results.json",
     )
+    ap.add_argument(
+        "--robust-results",
+        type=Path,
+        default=None,
+        nargs="?",
+        const=DEFAULT_ROBUST,
+        help=(
+            "Optional path to robust_results.json for Table 3 "
+            "(default when flag alone: datasets/runs/assurance_eval/robust_results.json). "
+            "If omitted, Table 3 is taken from that default path when the file exists."
+        ),
+    )
     args = ap.parse_args()
     if not args.results.exists():
         print("Run run_assurance_eval.py then re-run this script.")
         return 1
     data = json.loads(args.results.read_text(encoding="utf-8"))
-    out = table1(data) + table2_reviews(data) + table3_robustness(data)
+    robust_path = args.robust_results
+    if robust_path is None and DEFAULT_ROBUST.exists():
+        robust_path = DEFAULT_ROBUST
+    robust_data: dict = {}
+    if robust_path is not None:
+        if not robust_path.exists():
+            print("Robust results file missing; run run_assurance_robust_eval.py.", file=sys.stderr)
+            return 1
+        robust_data = json.loads(robust_path.read_text(encoding="utf-8"))
+    out = (
+        table1(data)
+        + table2_reviews(data)
+        + table3_robustness(robust_data if robust_data.get("aggregate") else data)
+    )
     print("\n".join(out))
     return 0
 

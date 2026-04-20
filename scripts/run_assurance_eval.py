@@ -54,6 +54,19 @@ PACK_BY_NAME = dict(PROFILE_PACKS)
 PRIMARY_TABLE1_SCENARIO = "lab_profile_v0"
 
 
+def _redact_ephemeral_paths(obj: object) -> None:
+    """Replace absolute temp run_dir paths in nested dicts for portable results.json."""
+    if isinstance(obj, dict):
+        for k, v in list(obj.items()):
+            if k == "run_dir" and isinstance(v, str) and ("Temp" in v or "tmp" in v.lower()):
+                obj[k] = "<ephemeral_thin_slice_run>"
+            else:
+                _redact_ephemeral_paths(v)
+    elif isinstance(obj, list):
+        for item in obj:
+            _redact_ephemeral_paths(item)
+
+
 def _run_review(run_dir: Path, scenario_id: str, pack_path: Path, env: dict) -> dict:
     review_cmd = [
         sys.executable,
@@ -183,6 +196,7 @@ def main() -> int:
         "no_certification_claimed": True,
     }
 
+    _redact_ephemeral_paths(results)
     out_path = out_dir / "results.json"
     out_path.write_text(json.dumps(results, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(results, indent=2))

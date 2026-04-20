@@ -1,0 +1,271 @@
+{
+  "mapping_check": {
+    "ok": true,
+    "ponr_coverage_ok": true,
+    "stdout": "OK: mapping complete (every hazard has controls, every control has evidence types)\nOK: PONR coverage (every profile PONR in at least one hazard ponr_ids)\n{\"mapping_ok\": true, \"ponr_coverage_ok\": true}",
+    "stderr": ""
+  },
+  "reviews": {
+    "toy_lab_v0": {
+      "run_dir": "<ephemeral_thin_slice_run>",
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [],
+      "controls_covered": [
+        {
+          "id": "C-001",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-002",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [],
+        "found_in_trace": [],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "exit_ok": true
+    },
+    "lab_profile_v0": {
+      "run_dir": "<ephemeral_thin_slice_run>",
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [
+        {
+          "seq": 14,
+          "type": "task_end",
+          "name": "disposition_commit"
+        }
+      ],
+      "controls_covered": [
+        {
+          "id": "C-001",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-002",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [
+          "disposition_commit"
+        ],
+        "found_in_trace": [
+          "disposition_commit"
+        ],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "exit_ok": true
+    }
+  },
+  "per_profile": {
+    "lab_v0.1": {
+      "run_dir": "<ephemeral_thin_slice_run>",
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [
+        {
+          "seq": 14,
+          "type": "task_end",
+          "name": "disposition_commit"
+        }
+      ],
+      "controls_covered": [
+        {
+          "id": "C-001",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-002",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [
+          "disposition_commit"
+        ],
+        "found_in_trace": [
+          "disposition_commit"
+        ],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "exit_ok": true
+    },
+    "warehouse_v0.1": {
+      "run_dir": "<ephemeral_thin_slice_run>",
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [
+        {
+          "seq": 8,
+          "type": "task_end",
+          "name": "place"
+        }
+      ],
+      "controls_covered": [
+        {
+          "id": "C-W01",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-W02",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [
+          "place"
+        ],
+        "found_in_trace": [
+          "place"
+        ],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "exit_ok": true
+    },
+    "medical_v0.1": {
+      "run_dir": "<ephemeral_thin_slice_run>",
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [
+        {
+          "seq": 8,
+          "type": "task_end",
+          "name": "actuate"
+        }
+      ],
+      "controls_covered": [
+        {
+          "id": "C-M01",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-M02",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [
+          "actuate"
+        ],
+        "found_in_trace": [
+          "actuate"
+        ],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "exit_ok": true
+    }
+  },
+  "review": {
+    "run_dir": "<ephemeral_thin_slice_run>",
+    "evidence_bundle_ok": true,
+    "trace_ok": true,
+    "ponr_events": [
+      {
+        "seq": 14,
+        "type": "task_end",
+        "name": "disposition_commit"
+      }
+    ],
+    "controls_covered": [
+      {
+        "id": "C-001",
+        "evidence_types": [
+          "trace",
+          "evidence_bundle"
+        ]
+      },
+      {
+        "id": "C-002",
+        "evidence_types": [
+          "trace",
+          "evidence_bundle"
+        ]
+      }
+    ],
+    "ponr_coverage": {
+      "required_task_names": [
+        "disposition_commit"
+      ],
+      "found_in_trace": [
+        "disposition_commit"
+      ],
+      "ratio": 1.0
+    },
+    "control_coverage_ratio": 1.0,
+    "exit_ok": true
+  },
+  "run_manifest": {
+    "scenarios": [
+      "toy_lab_v0",
+      "lab_profile_v0"
+    ],
+    "scenarios_materialized": [
+      "toy_lab_v0",
+      "lab_profile_v0",
+      "warehouse_v0",
+      "traffic_v0"
+    ],
+    "per_profile_scenario": {
+      "lab_v0.1": "lab_profile_v0",
+      "warehouse_v0.1": "warehouse_v0",
+      "medical_v0.1": "traffic_v0"
+    },
+    "table1_primary_scenario": "lab_profile_v0",
+    "medical_pack_traffic_run_note": "medical_v0.1 is reviewed on a traffic_v0 thin-slice run: the run stresses scheduler, trace, and review mechanics; the pack is a minimal regulator-style template. This pairing tests the review pipeline, not semantic alignment between traffic dynamics and SaMD content.",
+    "profile_dirs": [
+      "lab_v0.1",
+      "warehouse_v0.1",
+      "medical_v0.1"
+    ],
+    "script": "run_assurance_eval.py"
+  },
+  "success_criteria_met": {
+    "mapping_ok": true,
+    "ponr_coverage_ok": true
+  },
+  "excellence_metrics": {
+    "mapping_completeness_pct": 100.0,
+    "ponr_coverage_ratio": 1.0,
+    "review_pass_all_scenarios": true,
+    "no_certification_claimed": true
+  }
+}
