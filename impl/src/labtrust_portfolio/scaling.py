@@ -275,6 +275,15 @@ def _ols_fit(
     for i in range(k):
         for j in range(k):
             XtX[i][j] = sum(X[row][i] * X[row][j] for row in range(n))
+    # Adaptive ridge on feature columns only (not intercept): stabilizes LOO OLS when
+    # train composition leaves X'X ill-conditioned or test points extrapolate (e.g.
+    # rare scenario ids under leave-one-scenario-out). Apply only for richer P5 vectors.
+    if len(feature_cols) >= 6:
+        tr_feat = sum(XtX[i][i] for i in range(1, k))
+        lam = 1e-4 * (tr_feat / float(k - 1))
+        if lam > 0.0:
+            for i in range(1, k):
+                XtX[i][i] += lam
     # X'y (k x 1)
     Xty = [sum(X[row][i] * y[row] for row in range(n)) for i in range(k)]
     try:
@@ -533,14 +542,23 @@ def regime_recommendation_bundle(
     agent_count: int,
     regimes: Tuple[str, ...] = VALID_REGIMES,
     collapse_threshold: float = 0.35,
+    fitted_tasks_predictor: Any | None = None,
+    fitted_collapse_predictor: Any | None = None,
 ) -> Dict[str, Any]:
     """
     Per-regime counterfactual predictions and a risk-adjusted recommendation.
     Uses only train_rows for fit (caller must enforce LOSO / held-out design).
+
+    Optional fitted_* predictors skip refitting (same train_rows); use for
+    batch eval where the same OLS models apply to many template rows.
     """
     feats = list(DEFAULT_FEATURE_COLS_P5)
-    pred_tc = fit_linear_predictor(train_rows, "tasks_completed", feats)
-    pred_cp = fit_linear_predictor(train_rows, "collapse_probability", feats)
+    if fitted_tasks_predictor is not None and fitted_collapse_predictor is not None:
+        pred_tc = fitted_tasks_predictor
+        pred_cp = fitted_collapse_predictor
+    else:
+        pred_tc = fit_linear_predictor(train_rows, "tasks_completed", feats)
+        pred_cp = fit_linear_predictor(train_rows, "collapse_probability", feats)
     sigma_tc = train_residual_sigma(train_rows, "tasks_completed", pred_tc)
     sigma_cp = train_residual_sigma(train_rows, "collapse_probability", pred_cp)
     n = max(1, int(agent_count))

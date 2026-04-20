@@ -208,8 +208,9 @@ def p4(quick: bool) -> bool:
 def p5(quick: bool) -> bool:
     seeds = 3 if quick else 30
     multiscenario = RUNS / "multiscenario_runs"
-    # Bounded grid (--p5-lite): 3 regimes x 2 agent counts; avoids 5x4 full combinatorial
-    # explosion on real_world x fault-mix x 30 seeds (still thousands of thin-slice runs).
+    # Quick: --p5-lite (3 regimes x agents {1,4}) on core scenarios.
+    # Publishable: all VALID_REGIMES x agents {1,2,4,8} with narrow fault grid
+    # (no_drop, drop_005 only) to bound runtime vs full --fault-mix.
     gen_cmd = [
         sys.executable,
         str(REPO / "scripts" / "generate_multiscenario_runs.py"),
@@ -218,17 +219,25 @@ def p5(quick: bool) -> bool:
         "--seeds",
         str(seeds),
         "--coordination-grid",
-        "--p5-lite",
         "--clean",
         "--profile",
         "core" if quick else "real_world",
     ]
-    if not quick:
-        gen_cmd.append("--fault-mix")
+    if quick:
+        gen_cmd.append("--p5-lite")
+    else:
+        gen_cmd.extend(
+            [
+                "--agent-counts",
+                "1,2,4,8",
+                "--fault-settings",
+                "no_drop,drop_005",
+            ],
+        )
     if not run(
         gen_cmd,
-        "P5 Generate multi-scenario runs (coordination grid, bounded)",
-        timeout=3600 if not quick else 900,
+        "P5 Generate multi-scenario runs (coordination grid)",
+        timeout=10800 if not quick else 900,
     ):
         return False
 
@@ -253,7 +262,7 @@ def p5(quick: bool) -> bool:
                 mode,
             ],
             f"P5 held-out eval ({mode})",
-            timeout=180 if not quick else 120,
+            timeout=900 if not quick else 120,
         ):
             return False
 
@@ -267,7 +276,7 @@ def p5(quick: bool) -> bool:
             str(RUNS / "sensitivity_sweep"),
         ],
         "P5 sensitivity sweep (max seed caps)",
-        timeout=240 if not quick else 120,
+        timeout=2400 if not quick else 120,
     ):
         return False
 
@@ -281,7 +290,24 @@ def p5(quick: bool) -> bool:
             str(RUNS / "scaling_recommend" / "recommendation_eval.json"),
         ],
         "P5 recommendation / regret eval",
-        timeout=180 if not quick else 120,
+        # LOFO over 5 regimes x many rows: ~O(test_rows * folds); allow headroom.
+        timeout=1800 if not quick else 120,
+    ):
+        return False
+
+    if not run(
+        [
+            sys.executable,
+            str(REPO / "scripts" / "export_scaling_regime_agent_summary.py"),
+            "--runs-dir",
+            str(multiscenario),
+            "--out-json",
+            str(RUNS / "scaling_summary" / "regime_agent_summary.json"),
+            "--out-md",
+            str(REPO / "papers" / "P5_ScalingLaws" / "regime_agent_summary.md"),
+        ],
+        "P5 regime x agent summary export",
+        timeout=120 if not quick else 90,
     ):
         return False
 
@@ -299,6 +325,8 @@ def p5(quick: bool) -> bool:
             str(RUNS / "sensitivity_sweep" / "scaling_sensitivity.json"),
             "--agent-results",
             str(RUNS / "scaling_eval_agent_count" / "heldout_results.json"),
+            "--regime-agent-summary",
+            str(RUNS / "scaling_summary" / "regime_agent_summary.json"),
             "--out",
             str(REPO / "papers" / "P5_ScalingLaws" / "generated_tables.md"),
         ],
@@ -325,7 +353,7 @@ def p5(quick: bool) -> bool:
             str(multiscenario),
         ],
         "P5 Plot scaling paper figures",
-        timeout=60,
+        timeout=120 if not quick else 60,
     )
 
 

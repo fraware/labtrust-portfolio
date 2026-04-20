@@ -8,26 +8,33 @@ claims:
   - id: "C1"
     statement: >
       Coordination behavior is a reproducible function of scenario structure,
-      agent count, and coordination regime in MAESTRO thin-slice CPS runs.
+      agent count, and coordination regime in MAESTRO thin-slice CPS runs, and
+      scaling deltas directly show where adding agents increases coordination
+      tax and can reduce throughput.
     evidence:
       release_id: "scaling_eval"
       confidence: "high"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
+        - "datasets/runs/scaling_summary/regime_agent_summary.json"
         - "datasets/runs/multiscenario_runs/"
         - "impl/src/labtrust_portfolio/thinslice.py"
         - "impl/src/labtrust_portfolio/coordination_profile.py"
-      table_ids: ["Table 1", "Table 5"]
+      table_ids: ["Table 1", "Table 5", "Table 8"]
       figure_ids: ["Figure 2", "Figure 3", "Figure 4"]
 
   - id: "C2"
     statement: >
-      On primary target tasks_completed, predictors beat admissible baselines
-      out-of-sample under scenario and family holdouts; oracle baselines are
-      separated and do not drive trigger logic.
+      Held-out evaluation is leakage-aware: admissible vs oracle baselines are
+      separated, and strict family-holdout rules null protocol-level regression
+      when any fold cannot fit. On the rich coordination grid, primary
+      tasks_completed trigger_met may be false on scenario or regime holdouts
+      (e.g. ill-conditioned OLS on a rare scenario fold, or regression not
+      beating the num-tasks bucket baseline); ridge stabilization in P5 OLS
+      and re-frozen JSON should be cited for the latest numbers.
     evidence:
       release_id: "scaling_eval"
-      confidence: "high"
+      confidence: "medium"
       artifact_paths:
         - "datasets/runs/scaling_eval/heldout_results.json"
         - "datasets/runs/scaling_eval_family/heldout_results.json"
