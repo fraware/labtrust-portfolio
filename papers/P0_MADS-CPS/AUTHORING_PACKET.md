@@ -40,7 +40,7 @@ Appendix: reproduction and artifact references
 ## 6) Experiment plan (E1–E4)
 - **E1 (Conformance corpus):** Challenge set of run dirs (missing artifact, schema-invalid, hash mismatch, replay mismatch, missing PONR event, etc.); checker run on each; Table 1 (case ID, fault injected, expected tier, observed tier, agreement). Tier 1 includes schema validation of `maestro_report.json` against **MAESTRO_REPORT v0.2** (see kernel).
 - **E2 (Restricted auditability):** Verification-mode admissibility matrix: predicate x full / evaluator / regulator / public-redacted; Table 2.
-- **E3 (Replay link):** Independent verifier recomputes the evaluation report from the trace; for publishable evidence use **`--standalone-verifier`** (separate process) with **20 seeds** and scenarios **`toy_lab_v0,lab_profile_v0`**; match rate and variance feed Table 3 and per-seed export.
+- **E3 (Replay link):** Independent verifier recomputes the evaluation report from the trace; for publishable evidence use **`--standalone-verifier`** (separate process) with **20 seeds** and scenarios **`lab_profile_v0,toy_lab_v0`**; canonical frozen release scenario is `lab_profile_v0` (or set `--release-scenario` explicitly); match rate and variance feed Table 3 and per-seed export.
 - **E4 (Algorithm-independence):** At least two adapters (centralized, rep_cps) emit the same artifact interface; same checker; conformance by scenario/controller; Table 3.
 
 Reporting rules: repeated trials where stochasticity exists; explicit variance reporting; all runs produce admissible evidence bundles.

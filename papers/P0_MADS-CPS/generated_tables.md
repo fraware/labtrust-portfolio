@@ -38,34 +38,6 @@ Full mode: all artifacts present and unredacted; all predicates checkable. Evalu
 
 Per-seed rows for trace-to-report replay check; aggregate replay match and latency CIs appear in **Table 3**. Full manifest: `datasets/runs/e3_summary.json` (`run_manifest`).
 
-## Scenario: toy_lab_v0
-
-| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
-|------|----------------|----------------------|----------------|-------|
-| 1 | 4 | 4 | 25.26 | yes |
-| 2 | 4 | 4 | 75.59 | yes |
-| 3 | 4 | 4 | 28.09 | yes |
-| 4 | 4 | 4 | 41.26 | yes |
-| 5 | 4 | 4 | 42.64 | yes |
-| 6 | 4 | 4 | 26.54 | yes |
-| 7 | 4 | 4 | 10.68 | yes |
-| 8 | 4 | 4 | 19.02 | yes |
-| 9 | 4 | 4 | 29.77 | yes |
-| 10 | 4 | 4 | 45.64 | yes |
-| 11 | 4 | 4 | 11.74 | yes |
-| 12 | 4 | 4 | 37.70 | yes |
-| 13 | 4 | 4 | 29.20 | yes |
-| 14 | 4 | 4 | 43.76 | yes |
-| 15 | 4 | 4 | 17.26 | yes |
-| 16 | 4 | 4 | 46.90 | yes |
-| 17 | 4 | 4 | 42.05 | yes |
-| 18 | 4 | 4 | 42.43 | yes |
-| 19 | 4 | 4 | 13.74 | yes |
-| 20 | 4 | 4 | 78.08 | yes |
-| **Summary (n=20)** | mean 4.00, stdev 0.00 | - | mean 35.37, stdev 18.46 | true |
-
-95% CI: tasks_completed [4, 4]; p95_latency_ms [27.11415732757751, 43.62175076100369]
-
 ## Scenario: lab_profile_v0
 
 | Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
@@ -94,6 +66,34 @@ Per-seed rows for trace-to-report replay check; aggregate replay match and laten
 
 95% CI: tasks_completed [5, 5]; p95_latency_ms [40.476976268464604, 60.268873664712]
 
+## Scenario: toy_lab_v0
+
+| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
+|------|----------------|----------------------|----------------|-------|
+| 1 | 4 | 4 | 25.26 | yes |
+| 2 | 4 | 4 | 75.59 | yes |
+| 3 | 4 | 4 | 28.09 | yes |
+| 4 | 4 | 4 | 41.26 | yes |
+| 5 | 4 | 4 | 42.64 | yes |
+| 6 | 4 | 4 | 26.54 | yes |
+| 7 | 4 | 4 | 10.68 | yes |
+| 8 | 4 | 4 | 19.02 | yes |
+| 9 | 4 | 4 | 29.77 | yes |
+| 10 | 4 | 4 | 45.64 | yes |
+| 11 | 4 | 4 | 11.74 | yes |
+| 12 | 4 | 4 | 37.70 | yes |
+| 13 | 4 | 4 | 29.20 | yes |
+| 14 | 4 | 4 | 43.76 | yes |
+| 15 | 4 | 4 | 17.26 | yes |
+| 16 | 4 | 4 | 46.90 | yes |
+| 17 | 4 | 4 | 42.05 | yes |
+| 18 | 4 | 4 | 42.43 | yes |
+| 19 | 4 | 4 | 13.74 | yes |
+| 20 | 4 | 4 | 78.08 | yes |
+| **Summary (n=20)** | mean 4.00, stdev 0.00 | - | mean 35.37, stdev 18.46 | true |
+
+95% CI: tasks_completed [4, 4]; p95_latency_ms [27.11415732757751, 43.62175076100369]
+
 ## From export_p0_table3.py
 
 ## Table 3 — E3 + E4 summary (replay-link and controller-independence)
@@ -102,8 +102,8 @@ Latency column: mean of per-seed **task_latency_ms_p95** with 95% CI (t-interval
 
 | Scenario | Controller | Seeds | Replay match rate | p95 latency mean (95% CI) ms | Conformance rate |
 |----------|-------------|-------|-------------------|------------------------------|------------------|
-| toy_lab_v0 | thinslice | 20 | 1.00 | 35.37 [27.11, 43.62] | 1.00 |
 | lab_profile_v0 | thinslice | 20 | 1.00 | 50.37 [40.48, 60.27] | 1.00 |
+| toy_lab_v0 | thinslice | 20 | 1.00 | 35.37 [27.11, 43.62] | 1.00 |
 | toy_lab_v0 | centralized | 20 | 1.00 | 35.37 [26.73, 44.01] | 1.00 |
 | toy_lab_v0 | rep_cps | 20 | 1.00 | 35.37 [26.73, 44.01] | 1.00 |
 | lab_profile_v0 | centralized | 20 | 1.00 | 50.37 [40.02, 60.73] | 1.00 |

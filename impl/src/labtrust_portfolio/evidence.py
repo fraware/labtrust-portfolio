@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from .hashing import sha256_file, sha256_bytes
 
@@ -41,14 +41,27 @@ def build_evidence_bundle(
     replay_diag: str,
     verification_mode: str = "evaluator",
     redaction_manifest: Dict[str, Any] | None = None,
+    artifact_display_paths: List[str] | None = None,
 ) -> Dict[str, Any]:
     if len(artifacts) != len(schema_ids):
         raise ValueError("artifacts and schema_ids must have same length")
+    if (
+        artifact_display_paths is not None
+        and len(artifact_display_paths) != len(artifacts)
+    ):
+        raise ValueError(
+            "artifact_display_paths must have same length as artifacts"
+        )
 
     items = []
-    for p, sid in zip(artifacts, schema_ids):
+    for i, (p, sid) in enumerate(zip(artifacts, schema_ids)):
+        item_path = (
+            artifact_display_paths[i]
+            if artifact_display_paths is not None
+            else str(p.as_posix())
+        )
         items.append({
-            "path": str(p.as_posix()),
+            "path": item_path,
             "sha256": sha256_file(p),
             "schema_id": sid,
         })
@@ -68,3 +81,20 @@ def build_evidence_bundle(
     if redaction_manifest:
         bundle["redaction_manifest"] = redaction_manifest
     return bundle
+
+
+def rewrite_evidence_bundle_artifact_paths(
+    bundle_path: Path,
+    artifact_display_paths: List[str],
+) -> None:
+    """Rewrite evidence bundle artifacts[].path values in-place."""
+    data = json.loads(bundle_path.read_text(encoding="utf-8"))
+    artifacts = data.get("artifacts", [])
+    if len(artifacts) != len(artifact_display_paths):
+        raise ValueError(
+            "artifact_display_paths length must match "
+            "evidence artifacts length"
+        )
+    for art, display in zip(artifacts, artifact_display_paths):
+        art["path"] = display
+    bundle_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")

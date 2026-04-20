@@ -10,11 +10,11 @@ P0 defines a machine-checkable minimum assurance bar for agentic CPS: conformanc
 
 **E2 (Restricted auditability):** `python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo` produces full and redacted traces/bundles. Table 2: `python scripts/export_e2_admissibility_matrix.py`. Normative modes: `kernel/mads/VERIFICATION_MODES.v0.1.md`.
 
-**E3 (Replay link):** Publishable path uses **20 seeds**, scenarios **`toy_lab_v0,lab_profile_v0`**, and **`--standalone-verifier`** (verifier in a separate process):
+**E3 (Replay link):** Publishable path uses **20 seeds**, scenarios **`lab_profile_v0,toy_lab_v0`**, and **`--standalone-verifier`** (verifier in a separate process). Canonical frozen release scenario is `lab_profile_v0`:
 
-`python scripts/produce_p0_e3_release.py --runs 20 --scenarios toy_lab_v0,lab_profile_v0 --standalone-verifier`
+`python scripts/produce_p0_e3_release.py --runs 20 --scenarios lab_profile_v0,toy_lab_v0 --standalone-verifier`
 
-Writes `datasets/runs/e3_summary.json`, `datasets/runs/p0_e3_variance.json`, and `datasets/releases/p0_e3_release/`. To refresh summaries from on-disk runs: `python scripts/replay_link_e3.py --runs 20 --scenarios toy_lab_v0,lab_profile_v0 --standalone-verifier --out datasets/runs/e3_summary.json`. Per-seed markdown: `python scripts/export_e3_table.py`; optional latency figure: `python scripts/plot_e3_latency.py --summary datasets/runs/e3_summary.json --out docs/figures/p0_e3_latency.png`.
+Writes `datasets/runs/e3_summary.json`, `datasets/runs/p0_e3_variance.json`, and `datasets/releases/p0_e3_release/`. To freeze a different scenario while keeping run order, set `--release-scenario <scenario_id>`. To refresh summaries from on-disk runs: `python scripts/replay_link_e3.py --runs 20 --scenarios lab_profile_v0,toy_lab_v0 --standalone-verifier --out datasets/runs/e3_summary.json`. Per-seed markdown: `python scripts/export_e3_table.py`; optional latency figure: `python scripts/plot_e3_latency.py --summary datasets/runs/e3_summary.json --out docs/figures/p0_e3_latency.png`.
 
 **E4 (Algorithm-independence):** `python scripts/run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0 --out datasets/runs/p0_e4_summary.json`. Controllers **centralized** and **rep_cps**; same checker. Table 3: `python scripts/export_p0_table3.py --e3 datasets/runs/e3_summary.json --e4 datasets/runs/p0_e4_summary.json`.
 

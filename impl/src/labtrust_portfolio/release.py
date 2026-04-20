@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from .conformance import check_conformance, write_conformance_artifact
+from .evidence import rewrite_evidence_bundle_artifact_paths
 from .gatekeeper import allow_release
 from .hashing import sha256_file
 from .schema import validate
@@ -16,7 +17,6 @@ REQUIRED_ARTIFACTS = (
     "trace.json",
     "maestro_report.json",
     "evidence_bundle.json",
-    "release_manifest.json",
 )
 
 
@@ -24,7 +24,16 @@ def build_release_manifest(
     release_id: str,
     kernel_version: str,
     artifacts: List[Path],
+    path_base: Path | None = None,
 ) -> Dict[str, Any]:
+    def _path_for_manifest(p: Path) -> str:
+        if path_base is None:
+            return str(p.as_posix())
+        try:
+            return str(p.relative_to(path_base).as_posix())
+        except ValueError:
+            return str(p.as_posix())
+
     return {
         "version": "0.1",
         "release_id": release_id,
@@ -33,7 +42,7 @@ def build_release_manifest(
         ),
         "kernel_version": kernel_version,
         "artifacts": [
-            {"path": str(p.as_posix()), "sha256": sha256_file(p)}
+            {"path": _path_for_manifest(p), "sha256": sha256_file(p)}
             for p in artifacts
         ],
     }
@@ -63,22 +72,32 @@ def release_dataset(
             raise FileNotFoundError(
                 f"Run directory missing required artifact: {run_dir / name}"
             )
+    existing: Dict[str, Any] = {}
     existing_manifest_path = run_dir / "release_manifest.json"
-    existing = json.loads(existing_manifest_path.read_text(encoding="utf-8"))
-    validate(existing, RELEASE_MANIFEST_SCHEMA)
+    if existing_manifest_path.exists():
+        existing_text = existing_manifest_path.read_text(encoding="utf-8")
+        existing = json.loads(existing_text)
+        validate(existing, RELEASE_MANIFEST_SCHEMA)
     release_dir = releases_root / release_id
     release_dir.mkdir(parents=True, exist_ok=True)
-    new_artifacts: List[Path] = []
+    release_artifacts: List[Path] = []
     for name in REQUIRED_ARTIFACTS:
         src = run_dir / name
         dst = release_dir / name
         shutil.copy2(src, dst)
-        new_artifacts.append(dst)
+        release_artifacts.append(dst)
     conformance_path = write_conformance_artifact(release_dir)
-    new_artifacts.append(conformance_path)
+    release_artifacts.append(conformance_path)
+    rewrite_evidence_bundle_artifact_paths(
+        release_dir / "evidence_bundle.json",
+        ["trace.json", "maestro_report.json"],
+    )
     kernel_version = existing.get("kernel_version", "0.1")
     manifest = build_release_manifest(
-        release_id, kernel_version, new_artifacts
+        release_id,
+        kernel_version,
+        release_artifacts,
+        path_base=release_dir,
     )
     manifest_path = release_dir / "release_manifest.json"
     manifest_path.write_text(

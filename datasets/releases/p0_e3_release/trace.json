@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "run_id": "run_9c78f9a654",
-  "scenario_id": "toy_lab_v0",
+  "run_id": "run_d09ae78bf0",
+  "scenario_id": "lab_profile_v0",
   "seed": 1,
-  "start_time_utc": "2026-04-20T06:24:00.411057Z",
+  "start_time_utc": "2026-04-20T07:34:03.729964Z",
   "events": [
     {
       "seq": 0,
@@ -36,7 +36,7 @@
     },
     {
       "seq": 2,
-      "ts": 0.03870357619897312,
+      "ts": 0.04375156359163362,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -50,7 +50,7 @@
     },
     {
       "seq": 3,
-      "ts": 0.05012079771937398,
+      "ts": 0.06134966261693488,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -65,7 +65,7 @@
     },
     {
       "seq": 4,
-      "ts": 0.060083505287361186,
+      "ts": 0.08729635494911839,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -79,7 +79,7 @@
     },
     {
       "seq": 5,
-      "ts": 0.0860301976195447,
+      "ts": 0.09675957116571379,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -93,7 +93,7 @@
     },
     {
       "seq": 6,
-      "ts": 0.08767522118076614,
+      "ts": 0.12073805095238337,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -108,7 +108,7 @@
     },
     {
       "seq": 7,
-      "ts": 0.0881551877122001,
+      "ts": 0.1207732389132499,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -122,7 +122,7 @@
     },
     {
       "seq": 8,
-      "ts": 0.0976184039287955,
+      "ts": 0.16926482156198935,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -136,7 +136,7 @@
     },
     {
       "seq": 9,
-      "ts": 0.12159688371546508,
+      "ts": 0.2079358762381739,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -151,7 +151,7 @@
     },
     {
       "seq": 10,
-      "ts": 0.12163207167633161,
+      "ts": 0.20845440759588785,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -165,7 +165,7 @@
     },
     {
       "seq": 11,
-      "ts": 0.1429704433313836,
+      "ts": 0.21646547074694988,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -179,7 +179,50 @@
     },
     {
       "seq": 12,
-      "ts": 0.14730592003998172,
+      "ts": 0.22053978490296927,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "scheduler"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "disposition_commit:4",
+        "regime": "centralized"
+      },
+      "state_hash_after": "d05a3019d1ed134fe9d99f20688849095d593ce5c89e15544a43cb587b082379"
+    },
+    {
+      "seq": 13,
+      "ts": 0.22969252400705964,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "disposition_commit:4",
+        "name": "disposition_commit"
+      },
+      "state_hash_after": "bcb06910bc30f0c50f51f4bdb92f1afdc8a42a6b47c4ff741b6b247169112a1a"
+    },
+    {
+      "seq": 14,
+      "ts": 0.24112222600997313,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "lab_device_1"
+      },
+      "payload": {
+        "task_id": "disposition_commit:4",
+        "name": "disposition_commit"
+      },
+      "state_hash_after": "2847a590dc83ac92cf5a28a8f559091c17462390b06fd0df5b6738d3582ce534"
+    },
+    {
+      "seq": 15,
+      "ts": 0.24555150346340032,
       "type": "safe_state_reached",
       "actor": {
         "kind": "system",
@@ -188,10 +231,10 @@
       "payload": {
         "detail": "all_tasks_terminal_safe"
       },
-      "state_hash_after": "858a864b8107df1c6d5b730ba66b02d3b537faac680d1ce7969a2972e741b9b0"
+      "state_hash_after": "2847a590dc83ac92cf5a28a8f559091c17462390b06fd0df5b6738d3582ce534"
     }
   ],
-  "final_state_hash": "858a864b8107df1c6d5b730ba66b02d3b537faac680d1ce7969a2972e741b9b0",
+  "final_state_hash": "2847a590dc83ac92cf5a28a8f559091c17462390b06fd0df5b6738d3582ce534",
   "metadata": {
     "delay_p95_ms": 50.0,
     "drop_completion_prob": 0.0,
@@ -200,11 +243,11 @@
     "max_retries_per_task": 0,
     "rep_cps_scheduling_dependent": false,
     "rep_cps_safety_gate_ok": null,
-    "planned_task_count": 4,
+    "planned_task_count": 5,
     "timeout_fault_prob": 0.0,
     "partial_result_fault_prob": 0.0,
     "reordered_event_fault_prob": 0.0,
-    "resource_contention_spike_prob": 0.0,
+    "resource_contention_spike_prob": 0.02,
     "invalid_action_injection_prob": 0.0,
     "agent_nonresponse_fault_prob": 0.0,
     "duplicate_completion_prob": 0.0,
@@ -220,11 +263,11 @@
     "hierarchy_depth": 2,
     "fan_out": 1,
     "handoff_factor": 1,
-    "shared_state_contention": 0.25,
+    "shared_state_contention": 0.2,
     "deadline_tightness": 1.0,
-    "critical_path_length": 4,
+    "critical_path_length": 5,
     "branching_factor": 1.0,
-    "queue_contention_index": 0.25,
+    "queue_contention_index": 0.2,
     "regime_fault_interaction": 0.0,
     "regime_id": 0,
     "effective_drop_completion_prob": 0.0,

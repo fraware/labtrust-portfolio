@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
 Produce E3 runs and release one to datasets/releases/p0_e3_release.
-Runs replay_link_e3.py (default 20 seeds; --scenarios for multi-scenario; optional --standalone-verifier), then release-dataset for first scenario seed_1.
+Runs replay_link_e3.py (default 20 seeds; --scenarios for multi-scenario; optional
+--standalone-verifier), then release-dataset for seed_1 of
+--release-scenario (or first scenario).
 Usage (from repo root):
   PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/produce_p0_e3_release.py
 """
@@ -38,8 +40,8 @@ def main() -> int:
     ap.add_argument(
         "--scenarios",
         type=str,
-        default="toy_lab_v0,lab_profile_v0",
-        help="Comma-separated scenario ids for E3 (minimal: toy_lab_v0; publishable: toy_lab_v0,lab_profile_v0 or more)",
+        default="lab_profile_v0,toy_lab_v0",
+        help="Comma-separated scenario ids for E3 (publishable default: lab_profile_v0,toy_lab_v0)",
     )
     ap.add_argument(
         "--no-release",
@@ -51,11 +53,27 @@ def main() -> int:
         action="store_true",
         help="Forward to replay_link_e3.py (separate-process verifier; recommended for publishable E3)",
     )
+    ap.add_argument(
+        "--release-scenario",
+        type=str,
+        default=None,
+        help=(
+            "Scenario id used for frozen release seed_1. "
+            "Defaults to the first id in --scenarios."
+        ),
+    )
     args = ap.parse_args()
     do_release = not args.no_release
     scenario_ids = [s.strip() for s in args.scenarios.split(",") if s.strip()]
     if not scenario_ids:
         scenario_ids = ["toy_lab_v0"]
+    release_scenario = args.release_scenario or scenario_ids[0]
+    if release_scenario not in scenario_ids:
+        print(
+            f"--release-scenario '{release_scenario}' "
+            f"must be included in --scenarios ({scenario_ids})"
+        )
+        return 2
 
     env = os.environ.copy()
     env.setdefault("LABTRUST_KERNEL_DIR", str(REPO / "kernel"))
@@ -136,7 +154,7 @@ def main() -> int:
 
     if not do_release:
         return 0
-    run_dir = runs_dir / "e3" / scenario_ids[0] / "seed_1"
+    run_dir = runs_dir / "e3" / release_scenario / "seed_1"
     if not (run_dir / "trace.json").exists():
         print(f"E3 run {run_dir} missing trace.json")
         return 1
