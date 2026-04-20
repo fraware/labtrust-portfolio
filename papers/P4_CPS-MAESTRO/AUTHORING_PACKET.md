@@ -40,6 +40,7 @@ How do we make CPS coordination **measurable and comparable** under tail latency
 - scoring library + standardized JSON reports
 - adapter interface + 2–4 reference adapters
 - dataset release scripts + reproducibility README
+- frozen rerun bundle in `datasets/releases/p4_publishable_v1/` with 20-seed evidence (refreshed 2026-04-20)
 
 ## 7) Kill criteria
 - **K1:** results are unstable run-to-run due to underspecification.

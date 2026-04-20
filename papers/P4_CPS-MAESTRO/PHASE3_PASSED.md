@@ -1,6 +1,6 @@
 # Phase 3 passed
 
-Submission-readiness checklist (docs/STATE_OF_THE_ART_CRITERIA.md section 3) verified on 2026-04-19.
+Submission-readiness checklist (docs/STATE_OF_THE_ART_CRITERIA.md section 3) verified on 2026-04-20.
 
 - Claim-evidence: `papers/P4_CPS-MAESTRO/claims.yaml` paths resolve to committed artifacts under `datasets/releases/p4_publishable_v1/` and `datasets/runs/`.
 - MAESTRO_REPORT: Publishable runs use **v0.2** (`kernel/eval/MAESTRO_REPORT.v0.2.schema.json`); report derivation is `impl/src/labtrust_portfolio/maestro.py` (`maestro_report_from_trace`).

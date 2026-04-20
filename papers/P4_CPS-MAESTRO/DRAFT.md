@@ -6,7 +6,7 @@
 
 **Minimal run (under 20 min):** `python scripts/maestro_fault_sweep.py --scenario toy_lab_v0 --seeds 3` then `python scripts/maestro_baselines.py --seeds 3` then `python scripts/export_p4_maestro_flow.py` then `python scripts/export_maestro_tables.py --out papers/P4_CPS-MAESTRO/generated_tables.md` then `python scripts/plot_maestro_recovery.py` then `python scripts/maestro_antigaming_eval.py`.
 
-**Publishable run (frozen in repo):** `maestro_fault_sweep.py` with **20 seeds** and scenarios `toy_lab_v0,lab_profile_v0,warehouse_v0,traffic_v0,regime_stress_v0`; `maestro_baselines.py --seeds 20`; `export_maestro_tables.py`; `plot_maestro_recovery.py`; `maestro_antigaming_eval.py`. Canonical copy: `datasets/releases/p4_publishable_v1/`. Summary: `datasets/runs/RUN_RESULTS_SUMMARY.md`.
+**Publishable run (frozen in repo):** `maestro_fault_sweep.py` with **20 seeds** and scenarios `toy_lab_v0,lab_profile_v0,warehouse_v0,traffic_v0,regime_stress_v0`; `maestro_baselines.py --seeds 20`; `export_maestro_tables.py`; `plot_maestro_recovery.py`; `maestro_antigaming_eval.py`. Canonical copy: `datasets/releases/p4_publishable_v1/`. Summary: `datasets/runs/RUN_RESULTS_SUMMARY.md`. Last regenerated: 2026-04-20.
 
 - **Figure 0:** `python scripts/export_p4_maestro_flow.py` (output `docs/figures/p4_maestro_flow.mmd`). Render Mermaid to PNG for camera-ready.
 - **Tables A–D:** `python scripts/export_maestro_tables.py --out papers/P4_CPS-MAESTRO/generated_tables.md` (reads `multi_sweep.json`, `baseline_summary.json`, `antigaming_results.json`).
@@ -77,7 +77,7 @@ Scope and fault model: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_
 - **Adapters:** Centralized and Blackboard share the same thin-slice harness (parameterization only).
 - **Scoring:** Automated from TRACE via `maestro_report_from_trace`; composite ranking in `maestro_scoring.py`. No human judge.
 - **Synthetic scenarios:** All scenarios (toy_lab, lab_profile, warehouse, traffic, regime_stress) are synthetic; no real lab or physical plant.
-- **Recovery metric is a proxy:** Figure 1 plots tasks_completed vs fault setting as a recovery proxy; not full MTTR or time-to-safe-state.
+- **Recovery timing limits:** `time_to_recovery_ms` and `time_to_safe_state_ms` are event-derived in thin-slice traces; they are useful benchmark diagnostics, not claims about physical plant MTTR.
 
 ## 9. Methodology and reproducibility
 

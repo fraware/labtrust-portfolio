@@ -56,6 +56,7 @@ claims:
         - "datasets/releases/p4_publishable_v1/maestro_antigaming/antigaming_results.json"
         - "bench/maestro/SCORING.md"
         - "datasets/runs/RUN_RESULTS_SUMMARY.md"
+        - "tests/test_maestro_p4.py"
       table_ids: ["Table D"]
       figure_ids: []
-      confidence: medium
+      confidence: high
