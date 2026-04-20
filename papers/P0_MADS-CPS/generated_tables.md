@@ -4,6 +4,8 @@ Regenerate from repo root (`PYTHONPATH=impl/src`, `LABTRUST_KERNEL_DIR=kernel`):
 
 Tier 1 includes `maestro_report.json` validation against `kernel/eval/MAESTRO_REPORT.v0.2.schema.json`.
 
+Canonical frozen release witness is `lab_profile_v0`; release artifact paths in `datasets/releases/p0_e3_release/` are release-local relative paths.
+
 ## From export_e1_corpus_table.py
 
 ## Table 1 — E1 conformance corpus

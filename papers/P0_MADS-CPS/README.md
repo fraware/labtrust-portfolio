@@ -16,6 +16,8 @@ P0 defines a machine-checkable minimum assurance bar for agentic CPS: conformanc
 
 Writes `datasets/runs/e3_summary.json`, `datasets/runs/p0_e3_variance.json`, and `datasets/releases/p0_e3_release/`. To freeze a different scenario while keeping run order, set `--release-scenario <scenario_id>`. To refresh summaries from on-disk runs: `python scripts/replay_link_e3.py --runs 20 --scenarios lab_profile_v0,toy_lab_v0 --standalone-verifier --out datasets/runs/e3_summary.json`. Per-seed markdown: `python scripts/export_e3_table.py`; optional latency figure: `python scripts/plot_e3_latency.py --summary datasets/runs/e3_summary.json --out docs/figures/p0_e3_latency.png`.
 
+Frozen release integrity in `datasets/releases/p0_e3_release/release_manifest.json` hashes `trace.json`, `maestro_report.json`, `evidence_bundle.json`, and `conformance.json` using release-local relative paths.
+
 **E4 (Algorithm-independence):** `python scripts/run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0 --out datasets/runs/p0_e4_summary.json`. Controllers **centralized** and **rep_cps**; same checker. Table 3: `python scripts/export_p0_table3.py --e3 datasets/runs/e3_summary.json --e4 datasets/runs/p0_e4_summary.json`.
 
 **Conformance CLI:** `python -m labtrust_portfolio check-conformance <run_dir>` (or `labtrust_portfolio check-conformance` if installed). Implementation: `impl/src/labtrust_portfolio/conformance.py`. Operator guide: `docs/VALIDATING_A_RUN.md`. Committed evidence index: `datasets/releases/p0_e3_release/release_manifest.json`, `datasets/runs/e3_summary.json` (`run_manifest`).

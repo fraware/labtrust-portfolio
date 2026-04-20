@@ -16,6 +16,7 @@ claims:
         - "kernel/mads/NORMATIVE.v0.1.md"
         - "kernel/mads/VERIFICATION_MODES.v0.1.md"
         - "datasets/releases/p0_e3_release/release_manifest.json"
+        - "datasets/releases/p0_e3_release/trace.json"
       table_ids: ["Table 1", "Table 3"]
       figure_ids: ["Figure 1"]
 
@@ -57,4 +58,5 @@ claims:
       figure_ids: []
 
 # E1: conformance corpus (Table 1); E2: admissibility matrix (Table 2); E3: replay link (standalone verifier); E4: algorithm-independence (Table 3).
-# Reproduction: papers/P0_MADS-CPS/DRAFT.md (Reproducibility + Appendix). E3 publishable path uses produce_p0_e3_release.py / replay_link_e3.py with --standalone-verifier.
+# Reproduction: papers/P0_MADS-CPS/DRAFT.md (Reproducibility + Appendix). E3 publishable path uses produce_p0_e3_release.py / replay_link_e3.py with --standalone-verifier;
+# canonical frozen release scenario is lab_profile_v0 (first in --scenarios, or --release-scenario override).

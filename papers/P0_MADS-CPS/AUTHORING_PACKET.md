@@ -54,6 +54,7 @@ Reporting rules: repeated trials where stochasticity exists; explicit variance r
 - `profiles/lab/v0.1/` (PONRs, fault model, minimal telemetry fields)
 - Reference thin-slice pipeline producing: trace, MAESTRO report, evidence bundle, release manifest
 - Conformance checker: Tier pass/fail computed from artifacts; frozen release includes `datasets/releases/p0_e3_release/conformance.json` when produced via the release script
+- Frozen release integrity object: `datasets/releases/p0_e3_release/release_manifest.json` lists `trace.json`, `maestro_report.json`, `evidence_bundle.json`, `conformance.json` with release-local relative paths (no machine-local absolute paths)
 - E1 corpus (`corpus_manifest.json`) and Table 1 export; E2 matrix (4 columns); E3/E4 scripts and Table 3
 
 ## 8) Kill criteria (stop or re-scope hard)
