@@ -15,7 +15,7 @@ How do we make CPS coordination **measurable and comparable** under tail latency
 ## 3) Claims
 - **C1:** Standard scenarios + fault models + scoring produce stable, comparable measurements across coordination architectures.
 - **C2:** Variance is first-class: repeated runs and tail reporting are mandatory.
-- **C3:** Adapter interface makes adoption tractable across centralized/blackboard/hybrid stacks.
+- **C3:** Adapter interface makes adoption tractable across centralized, blackboard-style parameterization, retry-heavy recovery, no-recovery, and conservative shutdown comparators.
 - **C4:** The suite is usable by third parties: docs + CI + reference baselines.
 
 ## 4) Outline
@@ -38,7 +38,7 @@ How do we make CPS coordination **measurable and comparable** under tail latency
 - scenario definitions + fault injection harness
 - `kernel/eval/MAESTRO_REPORT.v0.2.schema.json` (publishable); v0.1 retained for legacy
 - scoring library + standardized JSON reports
-- adapter interface + 2–4 reference adapters
+- adapter interface + five reference adapters (Centralized, Blackboard, RetryHeavy, NoRecovery, ConservativeSafeShutdown)
 - dataset release scripts + reproducibility README
 - frozen rerun bundle in `datasets/releases/p4_publishable_v1/` with 20-seed evidence (refreshed 2026-04-20)
 

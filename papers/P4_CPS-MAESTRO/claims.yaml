@@ -40,6 +40,7 @@ claims:
       release_id: "p4_publishable_v1"
       artifact_paths:
         - "datasets/releases/p4_publishable_v1/baseline_summary.json"
+        - "datasets/releases/p4_publishable_v1/baseline_results.md"
         - "impl/src/labtrust_portfolio/adapters/"
         - "bench/maestro/adapter_costs.json"
       table_ids: ["Table B"]

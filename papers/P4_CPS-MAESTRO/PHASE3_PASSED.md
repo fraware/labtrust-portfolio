@@ -7,6 +7,7 @@ Submission-readiness checklist (docs/STATE_OF_THE_ART_CRITERIA.md section 3) ver
 - Recovery and safety semantics: documented in `bench/maestro/RECOVERY_AND_SAFETY_METRICS.md`; scoring in `bench/maestro/SCORING.md`.
 - Repro: Minimal run remains fast (CI uses fewer seeds); publishable sweep uses **20 seeds** and five scenarios (see `datasets/runs/RUN_RESULTS_SUMMARY.md`).
 - Variance: `multi_sweep.json` includes `run_manifest` and per-run rows with p99, recovery, and safety aggregates.
+- Artifact integrity: frozen release artifacts under `datasets/releases/p4_publishable_v1/` are committed and synchronized with the cited live run sources and benchmark baseline artifacts.
 - No kernel redefinition: Draft cites schemas and bench specs; does not redefine tiers or PONR admissibility.
 - Honest scope: Lab-first benchmark; warehouse/traffic/regime stress are auxiliary micro-scenarios; thin-slice simulation only (no certification, no physical plant).
 - Figures: `docs/figures/p4_recovery_curve.png`, `p4_safety_violations.png`, `p4_efficiency_messages.png` with JSON sidecars from `scripts/plot_maestro_recovery.py`.

@@ -1,10 +1,10 @@
 # CPS-MAESTRO: Benchmark + Fault Injection Suite for CPS-Grade Agent Coordination
 
-**Draft (v0.1). Paper ID: P4_CPS-MAESTRO.**
+**Draft (MAESTRO_REPORT v0.2). Paper ID: P4_CPS-MAESTRO.**
 
 **Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Minimal run target: under 20 min. Repro time optional: `python scripts/repro_time_p4.py` (writes repro_manifest.json).
 
-**Minimal run (under 20 min):** `python scripts/maestro_fault_sweep.py --scenario toy_lab_v0 --seeds 3` then `python scripts/maestro_baselines.py --seeds 3` then `python scripts/export_p4_maestro_flow.py` then `python scripts/export_maestro_tables.py --out papers/P4_CPS-MAESTRO/generated_tables.md` then `python scripts/plot_maestro_recovery.py` then `python scripts/maestro_antigaming_eval.py`.
+**Minimal run (under 20 min):** `python scripts/maestro_fault_sweep.py --scenarios toy_lab_v0 --seeds 3` then `python scripts/maestro_baselines.py --scenario toy_lab_v0 --seeds 3` then `python scripts/export_p4_maestro_flow.py` then `python scripts/export_maestro_tables.py --out papers/P4_CPS-MAESTRO/generated_tables.md` then `python scripts/plot_maestro_recovery.py` then `python scripts/maestro_antigaming_eval.py`.
 
 **Publishable run (frozen in repo):** `maestro_fault_sweep.py` with **20 seeds** and scenarios `toy_lab_v0,lab_profile_v0,warehouse_v0,traffic_v0,regime_stress_v0`; `maestro_baselines.py --seeds 20`; `export_maestro_tables.py`; `plot_maestro_recovery.py`; `maestro_antigaming_eval.py`. Canonical copy: `datasets/releases/p4_publishable_v1/`. Summary: `datasets/runs/RUN_RESULTS_SUMMARY.md`. Last regenerated: 2026-04-20.
 
@@ -37,7 +37,7 @@ Adapter interface: `run(scenario_id, out_dir, seed, **fault_params) -> AdapterRe
 |----------------|--------|-------------|---------|
 | SMAC / MAPF | Multi-agent RL / pathfinding | N/A or env-specific | Win rate, reward |
 | CPS testbeds | Simulation / hardware | Varies | Varies |
-| **MAESTRO** | Scenario-driven coordination | drop_completion, delay | tasks_completed, p95, variance |
+| **MAESTRO** | Scenario-driven coordination | drop_completion, delay, calibration_invalid (+auxiliary injectors in recovery stress) | tasks_completed, p95/p99, recovery timing, safety counters, variance |
 
 ## 5. Scenarios
 
@@ -59,7 +59,7 @@ Dataset layout and release process in `bench/maestro/REPRODUCIBILITY.md`. All ru
 
 Numeric tables are **not** duplicated here (they go stale). Authoritative publishable tables: `papers/P4_CPS-MAESTRO/generated_tables.md` (produced by `scripts/export_maestro_tables.py`). Machine-readable sources: `datasets/runs/maestro_fault_sweep/multi_sweep.json` (includes `run_manifest`, per-run recovery and safety fields, `maestro_report_version: "0.2"`), `bench/maestro/baseline_summary.json`, `datasets/runs/maestro_antigaming/antigaming_results.json`. Frozen bundle for citations: `datasets/releases/p4_publishable_v1/`. Index: `datasets/runs/RUN_RESULTS_SUMMARY.md`.
 
-**Figures.** `docs/figures/p4_recovery_curve.png` (mean recovery times by sweep row), `docs/figures/p4_safety_violations.png`, `docs/figures/p4_efficiency_messages.png`, with `.json` sidecars from `scripts/plot_maestro_recovery.py`.
+**Figures.** `docs/figures/p4_recovery_curve.png` (mean recovery times by sweep row), `docs/figures/p4_safety_violations.png`, `docs/figures/p4_efficiency_messages.png`, with sidecars `p4_recovery_times.json`, `p4_recovery_curve.json`, `p4_safety_violations.json`, and `p4_efficiency_messages_per_task.json` from `scripts/plot_maestro_recovery.py`.
 
 ## References
 
@@ -96,4 +96,4 @@ Scope and fault model: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_
 | C1 (Stable measurements) | MAESTRO_REPORT v0.2 schema, scenario spec, Table A (fault sweep variance). |
 | C2 (Variance first-class) | Table A stdev; fault_sweep repeated seeds. |
 | C3 (Adapter tractable) | MAESTROAdapter protocol, Table B baselines (five adapters, two regimes). |
-| C4 (Third-party usable) | REPRODUCIBILITY.md, CI, baseline_results.md, BENCHMARK_RELEASE.v0.1.md. |
+| C4 (Third-party usable) | REPRODUCIBILITY.md, CI (`tests/test_maestro_p4.py`), frozen `p4_publishable_v1` bundle, BENCHMARK_RELEASE.v0.1.md. |
