@@ -11,25 +11,27 @@ from .replay import replay_trace
 from .evidence import build_evidence_bundle
 from .release import build_release_manifest
 from .schema import validate
-from .scenario import load_scenario, get_scenario_task_names
+from .scenario import load_scenario, get_scenario_task_names, get_resource_graph
 from .conformance import write_conformance_artifact
 
 KERNEL_VERSION = "0.1"
 
 SCHEMA_TRACE = "trace/TRACE.v0.1.schema.json"
-SCHEMA_MAESTRO = "eval/MAESTRO_REPORT.v0.1.schema.json"
+SCHEMA_MAESTRO = "eval/MAESTRO_REPORT.v0.2.schema.json"
 SCHEMA_EVIDENCE = "mads/EVIDENCE_BUNDLE.v0.1.schema.json"
 SCHEMA_RELEASE = "policy/RELEASE_MANIFEST.v0.1.schema.json"
 
 SCHEMA_IDS = {
     SCHEMA_TRACE: "https://example.org/labtrust/kernel/trace/TRACE.v0.1",
-    SCHEMA_MAESTRO: "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.1",
+    SCHEMA_MAESTRO: "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2",
     SCHEMA_EVIDENCE: "https://example.org/labtrust/kernel/mads/EVIDENCE_BUNDLE.v0.1",
     SCHEMA_RELEASE: "https://example.org/labtrust/kernel/policy/RELEASE_MANIFEST.v0.1",
 }
 
+
 def _task_id(name: str, idx: int) -> str:
     return f"{name}:{idx}"
+
 
 DEFAULT_TASK_NAMES = ["receive_sample", "centrifuge", "analyze", "report_results"]
 
@@ -56,7 +58,29 @@ def run_thin_slice(
     calibration_invalid_prob: float = 0.0,
     max_retries_per_task: int = 0,
     rep_cps_safety_gate_ok: Optional[bool] = None,
+    timeout_fault_prob: float = 0.0,
+    partial_result_fault_prob: float = 0.0,
+    reordered_event_fault_prob: float = 0.0,
+    resource_contention_spike_prob: float = 0.0,
+    invalid_action_injection_prob: float = 0.0,
+    agent_nonresponse_fault_prob: float = 0.0,
+    duplicate_completion_prob: float = 0.0,
+    conflicting_action_prob: float = 0.0,
+    constraint_guard_trigger_prob: float = 0.0,
+    sensor_stale_prob: float = 0.0,
+    shutdown_after_first_fault: bool = False,
+    deadline_miss_prob: float = 0.0,
+    **kwargs: Any,
 ) -> Dict[str, Path]:
+    """
+    Thin-slice harness: emits TRACE v0.1 and MAESTRO_REPORT v0.2.
+    Timestamps `ts` are synthetic scenario seconds (not host wall clock).
+
+    Extra keyword arguments (e.g. ``agent_count``, ``coordination_regime``,
+    ``fault_setting_label`` from ``generate_multiscenario_runs.py``) are accepted
+    and ignored so sweep tooling stays compatible when the harness does not yet
+    vary those dimensions.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rng = random.Random(seed)
@@ -70,7 +94,7 @@ def run_thin_slice(
         return rng.expovariate(lam)
 
     state: Dict[str, Any] = {"tasks": {}, "coord_msgs": 0}
-    events = []
+    events: List[TraceEvent] = []
     ts = 0.0
     seq = 0
 
@@ -94,27 +118,164 @@ def run_thin_slice(
         nonlocal seq, ts, state
         ts += sample_delay_ms() / 1000.0
         state = _apply_state_for_hash(state, ev_type, payload)
-        events.append(TraceEvent(seq=seq, ts=ts, type=ev_type, actor_kind=actor_kind, actor_id=actor_id, payload=payload, state_hash_after=state_hash(state)))
+        events.append(
+            TraceEvent(
+                seq=seq,
+                ts=ts,
+                type=ev_type,
+                actor_kind=actor_kind,
+                actor_id=actor_id,
+                payload=payload,
+                state_hash_after=state_hash(state),
+            )
+        )
         seq += 1
 
     sched_dep = False
+    resource_graph: Dict[str, Any] | None = None
     try:
         scenario_data = load_scenario(sid)
         names = get_scenario_task_names(scenario_data)
         task_names = names if names else list(DEFAULT_TASK_NAMES)
         sched_dep = bool(scenario_data.get("rep_cps_scheduling_dependent"))
+        resource_graph = get_resource_graph(scenario_data)
     except (FileNotFoundError, ValueError, RuntimeError, OSError):
         task_names = _task_list_for_scenario(sid)
         sched_dep = False
+        resource_graph = None
 
+    lab_queue = bool(resource_graph and resource_graph.get("queue_contention"))
+    if lab_queue and resource_contention_spike_prob == 0.0:
+        resource_contention_spike_prob = max(resource_contention_spike_prob, 0.02)
     block_schedule = sched_dep and rep_cps_safety_gate_ok is False
     max_retries = max(0, int(max_retries_per_task))
+
+    planned_n = len(task_names)
+    calibration_invalidated = False
+    run_fault_seen = False
+    shutdown_triggered = False
+
+    def inject_auxiliary_faults(
+        tid: str,
+        name: str,
+        task_fault_ctx: Dict[str, bool],
+    ) -> Optional[str]:
+        """Return 'stop_task' to abort current task attempt, else None."""
+        nonlocal run_fault_seen, calibration_invalidated, shutdown_triggered, ts
+
+        def touch_fault(code: str) -> None:
+            nonlocal run_fault_seen
+            run_fault_seen = True
+            task_fault_ctx["had_aux_fault"] = True
+            emit("fault_injected", "system", "fault_injector", {"fault": code, "task_id": tid})
+
+        if deadline_miss_prob > 0 and rng.random() < deadline_miss_prob:
+            touch_fault("deadline_risk")
+            emit("deadline_miss", "system", "scheduler", {"task_id": tid, "detail": "synthetic_deadline"})
+
+        if timeout_fault_prob > 0 and rng.random() < timeout_fault_prob:
+            touch_fault("timeout")
+            emit("recovery_attempt", "agent", "agent_1", {"task_id": tid, "reason": "timeout_retry"})
+            ts += sample_delay_ms() * 3.0 / 1000.0
+
+        if agent_nonresponse_fault_prob > 0 and rng.random() < agent_nonresponse_fault_prob:
+            touch_fault("agent_nonresponse")
+            emit("worker_stall", "agent", "agent_1", {"task_id": tid, "detail": "no_response_window"})
+            emit("recovery_attempt", "agent", "agent_1", {"task_id": tid, "reason": "worker_stall_escalation"})
+            ts += sample_delay_ms() * 2.0 / 1000.0
+
+        if invalid_action_injection_prob > 0 and rng.random() < invalid_action_injection_prob:
+            touch_fault("invalid_action_injection")
+            emit("invalid_action", "agent", "agent_1", {"task_id": tid, "action": "illegal_transition"})
+            emit("blocked_action", "system", "guard", {"task_id": tid, "reason": "policy_block"})
+
+        if resource_contention_spike_prob > 0 and rng.random() < resource_contention_spike_prob:
+            touch_fault("resource_contention_spike")
+            emit(
+                "resource_conflict",
+                "system",
+                "station_controller",
+                {"task_id": tid, "resource": "prep_station", "detail": "queue_spike"},
+            )
+
+        if sensor_stale_prob > 0 and rng.random() < sensor_stale_prob:
+            touch_fault("sensor_stale")
+            emit(
+                "safety_violation",
+                "system",
+                "instrument_guard",
+                {
+                    "violation_type": "stale_state",
+                    "detail": "instrument_reading_stale",
+                    "task_id": tid,
+                },
+            )
+
+        if conflicting_action_prob > 0 and rng.random() < conflicting_action_prob:
+            touch_fault("conflicting_action")
+            emit("wasted_action", "agent", "agent_2", {"task_id": tid, "detail": "superseded_plan_step"})
+
+        if duplicate_completion_prob > 0 and rng.random() < duplicate_completion_prob:
+            touch_fault("duplicate_completion")
+            emit("duplicate_action", "tool", "lab_device_1", {"task_id": tid, "detail": "duplicate_submit"})
+
+        if partial_result_fault_prob > 0 and rng.random() < partial_result_fault_prob:
+            touch_fault("partial_result")
+            emit("recovery_attempt", "agent", "agent_1", {"task_id": tid, "reason": "partial_result_rework"})
+
+        if reordered_event_fault_prob > 0 and rng.random() < reordered_event_fault_prob:
+            touch_fault("reordered_event")
+
+        if shutdown_after_first_fault and run_fault_seen and not shutdown_triggered:
+            shutdown_triggered = True
+            emit(
+                "safe_shutdown_initiated",
+                "system",
+                "supervisor",
+                {"detail": "conservative_shutdown_after_fault", "task_id": tid},
+            )
+            return "stop_task"
+
+        return None
 
     for i, name in enumerate(task_names):
         tid = _task_id(name, i)
         emit("coordination_message", "system", "scheduler", {"detail": "assign_task", "task_id": tid})
         task_done = False
+        had_fault_this_task = False
+        disposition_risk = False
+        if name == "disposition_commit" and sid == "lab_profile_v0":
+            disposition_risk = calibration_invalidated or (
+                constraint_guard_trigger_prob > 0 and rng.random() < constraint_guard_trigger_prob
+            )
+            if disposition_risk:
+                emit(
+                    "constraint_guard_trigger",
+                    "system",
+                    "disposition_gate",
+                    {"task_id": tid, "detail": "disposition_commit_blocked_lab"},
+                )
+                emit(
+                    "safety_violation",
+                    "system",
+                    "ponr_guard",
+                    {
+                        "violation_type": "disposition_under_risk",
+                        "detail": "calibration_or_guard_not_clear",
+                    },
+                )
+                emit(
+                    "ponr_violation",
+                    "system",
+                    "ponr_monitor",
+                    {"task_id": tid, "stage": "disposition_commit"},
+                )
+
         for attempt in range(max_retries + 1):
+            if shutdown_triggered:
+                break
+
+            aux_ctx = {"had_aux_fault": False}
             emit("task_start", "agent", "agent_1", {"task_id": tid, "name": name})
 
             if block_schedule:
@@ -124,37 +285,136 @@ def run_thin_slice(
                     "fault_injector",
                     {"fault": "scheduling_denied_rep_cps_gate", "task_id": tid},
                 )
+                run_fault_seen = True
                 break
+
+            if inject_auxiliary_faults(tid, name, aux_ctx) == "stop_task":
+                break
+            if aux_ctx["had_aux_fault"]:
+                had_fault_this_task = True
 
             if delay_fault_prob > 0 and rng.random() < delay_fault_prob:
                 emit("fault_injected", "system", "fault_injector", {"fault": "delay", "task_id": tid})
+                had_fault_this_task = True
+                run_fault_seen = True
                 ts += sample_delay_ms() * 2.0 / 1000.0
 
             if rng.random() < drop_completion_prob:
                 emit("fault_injected", "system", "fault_injector", {"fault": "drop_completion", "task_id": tid})
+                had_fault_this_task = True
+                run_fault_seen = True
                 if attempt < max_retries:
+                    emit(
+                        "recovery_attempt",
+                        "agent",
+                        "agent_1",
+                        {"task_id": tid, "reason": "retry_after_drop"},
+                    )
                     continue
+                if shutdown_after_first_fault and run_fault_seen:
+                    shutdown_triggered = True
+                    emit(
+                        "safe_shutdown_initiated",
+                        "system",
+                        "supervisor",
+                        {"detail": "conservative_shutdown_after_fault", "task_id": tid},
+                    )
                 break
 
             if calibration_invalid_prob > 0 and rng.random() < calibration_invalid_prob:
-                emit("fault_injected", "system", "fault_injector", {"fault": "calibration_invalid", "task_id": tid})
+                emit(
+                    "fault_injected",
+                    "system",
+                    "fault_injector",
+                    {"fault": "calibration_invalid", "task_id": tid},
+                )
+                had_fault_this_task = True
+                run_fault_seen = True
+                calibration_invalidated = True
+                emit(
+                    "safety_violation",
+                    "system",
+                    "instrument_guard",
+                    {
+                        "violation_type": "calibration_invalid",
+                        "detail": "instrument_calibration_state_invalid",
+                        "task_id": tid,
+                    },
+                )
+
+            aux_ctx2 = {"had_aux_fault": False}
+            if inject_auxiliary_faults(tid, name, aux_ctx2) == "stop_task":
+                break
+            if aux_ctx2["had_aux_fault"]:
+                had_fault_this_task = True
 
             emit("task_end", "tool", "lab_device_1", {"task_id": tid, "name": name})
+            if had_fault_this_task:
+                emit(
+                    "recovery_succeeded",
+                    "system",
+                    "supervisor",
+                    {"task_id": tid, "detail": "task_completed_after_fault"},
+                )
+            if name in ("centrifuge", "analyze", "report_results") and calibration_invalidated:
+                emit(
+                    "coordination_message",
+                    "system",
+                    "qc_coordinator",
+                    {"detail": "recalibration_ok", "task_id": tid},
+                )
+                calibration_invalidated = False
+
+            if disposition_risk:
+                emit(
+                    "unsafe_task_completion",
+                    "tool",
+                    "lab_device_1",
+                    {"task_id": tid, "detail": "completed_under_prior_violation"},
+                )
+
             task_done = True
             break
-        if not task_done:
-            pass  # task dropped after all retries; no task_end
+
+        if shutdown_triggered:
+            break
+
+    completed_n = sum(1 for e in events if e.type == "task_end")
+    all_tasks_done = completed_n >= planned_n and planned_n > 0
+    if all_tasks_done and not shutdown_triggered:
+        emit("safe_state_reached", "system", "supervisor", {"detail": "all_tasks_terminal_safe"})
 
     final_hash = state_hash(state)
-    trace = build_trace(run_id, sid, seed, start_time, events, final_hash, metadata={
-        "delay_p95_ms": delay_p95_ms,
-        "drop_completion_prob": drop_completion_prob,
-        "delay_fault_prob": delay_fault_prob,
-        "calibration_invalid_prob": calibration_invalid_prob,
-        "max_retries_per_task": max_retries,
-        "rep_cps_scheduling_dependent": sched_dep,
-        "rep_cps_safety_gate_ok": rep_cps_safety_gate_ok,
-    })
+    trace = build_trace(
+        run_id,
+        sid,
+        seed,
+        start_time,
+        events,
+        final_hash,
+        metadata={
+            "delay_p95_ms": delay_p95_ms,
+            "drop_completion_prob": drop_completion_prob,
+            "delay_fault_prob": delay_fault_prob,
+            "calibration_invalid_prob": calibration_invalid_prob,
+            "max_retries_per_task": max_retries,
+            "rep_cps_scheduling_dependent": sched_dep,
+            "rep_cps_safety_gate_ok": rep_cps_safety_gate_ok,
+            "planned_task_count": planned_n,
+            "timeout_fault_prob": timeout_fault_prob,
+            "partial_result_fault_prob": partial_result_fault_prob,
+            "reordered_event_fault_prob": reordered_event_fault_prob,
+            "resource_contention_spike_prob": resource_contention_spike_prob,
+            "invalid_action_injection_prob": invalid_action_injection_prob,
+            "agent_nonresponse_fault_prob": agent_nonresponse_fault_prob,
+            "duplicate_completion_prob": duplicate_completion_prob,
+            "conflicting_action_prob": conflicting_action_prob,
+            "constraint_guard_trigger_prob": constraint_guard_trigger_prob,
+            "sensor_stale_prob": sensor_stale_prob,
+            "shutdown_after_first_fault": shutdown_after_first_fault,
+            "deadline_miss_prob": deadline_miss_prob,
+        },
+    )
 
     trace_path = out_dir / "trace.json"
     maestro_path = out_dir / "maestro_report.json"
@@ -163,7 +423,7 @@ def run_thin_slice(
 
     trace_path.write_text(json.dumps(trace, indent=2) + "\n", encoding="utf-8")
 
-    maestro = maestro_report_from_trace(run_id, scenario_id, trace)
+    maestro = maestro_report_from_trace(run_id, sid, trace)
     maestro_path.write_text(json.dumps(maestro, indent=2) + "\n", encoding="utf-8")
 
     replay_ok, replay_diag = replay_trace(trace)

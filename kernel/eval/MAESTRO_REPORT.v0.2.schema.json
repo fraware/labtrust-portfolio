@@ -1,0 +1,253 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2",
+  "title": "MAESTRO_REPORT.v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "run_id",
+    "scenario_id",
+    "run_outcome",
+    "metrics",
+    "safety",
+    "coordination_efficiency",
+    "faults",
+    "notes"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.2"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "scenario_id": {
+      "type": "string"
+    },
+    "run_outcome": {
+      "type": "string",
+      "enum": [
+        "success_safe",
+        "success_unsafe",
+        "partial_safe",
+        "partial_unsafe",
+        "failed_safe_shutdown",
+        "failed_unsafe"
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tasks_completed",
+        "task_latency_ms_p50",
+        "task_latency_ms_p95",
+        "task_latency_ms_p99",
+        "coordination_messages",
+        "tasks_completed_after_fault",
+        "steps_to_completion_after_first_fault",
+        "time_to_first_fault_ms",
+        "time_to_recovery_ms",
+        "time_to_safe_state_ms",
+        "recovery_attempt_count",
+        "tasks_pending_at_first_fault",
+        "tasks_recovered_after_fault",
+        "fault_to_safe_state_event_count",
+        "fault_to_recovery_event_count",
+        "planned_task_count"
+      ],
+      "properties": {
+        "tasks_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "planned_task_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "task_latency_ms_p50": {
+          "type": "number",
+          "minimum": 0
+        },
+        "task_latency_ms_p95": {
+          "type": "number",
+          "minimum": 0
+        },
+        "task_latency_ms_p99": {
+          "type": "number",
+          "minimum": 0
+        },
+        "coordination_messages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tasks_completed_after_fault": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "steps_to_completion_after_first_fault": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "time_to_first_fault_ms": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "time_to_recovery_ms": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "time_to_safe_state_ms": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "recovery_attempt_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tasks_pending_at_first_fault": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "tasks_recovered_after_fault": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fault_to_safe_state_event_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fault_to_recovery_event_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "safety_violation_count",
+        "safety_violation_types",
+        "ponr_violation_count",
+        "unsafe_completion_count",
+        "unsafe_success_count",
+        "constraint_violation_count",
+        "deadline_miss_count",
+        "resource_conflict_count",
+        "invalid_action_count",
+        "blocked_action_count"
+      ],
+      "properties": {
+        "safety_violation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "safety_violation_types": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "detail"],
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "ponr_violation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsafe_completion_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsafe_success_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "constraint_violation_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deadline_miss_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "resource_conflict_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invalid_action_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked_action_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "coordination_efficiency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messages_per_completed_task",
+        "messages_after_fault",
+        "retries_per_completed_task",
+        "duplicate_action_count",
+        "wasted_action_count"
+      ],
+      "properties": {
+        "messages_per_completed_task": {
+          "type": "number",
+          "minimum": 0
+        },
+        "messages_after_fault": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "retries_per_completed_task": {
+          "type": "number",
+          "minimum": 0
+        },
+        "duplicate_action_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wasted_action_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "faults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fault_injected", "fault_events", "recovery_ok"],
+      "properties": {
+        "fault_injected": {
+          "type": "boolean"
+        },
+        "fault_events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "recovery_ok": {
+          "type": "boolean"
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  }
+}

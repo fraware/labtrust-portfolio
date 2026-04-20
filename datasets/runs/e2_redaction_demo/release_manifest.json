@@ -1,20 +1,20 @@
 {
   "version": "0.1",
-  "release_id": "release_run_cf91ddcd23",
-  "created_at_utc": "2026-04-20T05:25:35.835908Z",
+  "release_id": "release_run_feef4debc8",
+  "created_at_utc": "2026-04-20T05:51:25.305244Z",
   "kernel_version": "0.1",
   "artifacts": [
     {
       "path": "datasets/runs/e2_redaction_demo/trace.json",
-      "sha256": "76b15ab190286b0c497feeec685bb8b05ed5559e4e9891989e4ee8e880a33ea6"
+      "sha256": "92ec3a9e37399597153c4f31e8fb2cd887956fa5506d2d74b19edea7b0c2aade"
     },
     {
       "path": "datasets/runs/e2_redaction_demo/maestro_report.json",
-      "sha256": "0bbd261041cff856e844b914574d539ed53837fb95ba11c25d13e45206d16d76"
+      "sha256": "73965637740269b8aba5c0553250c9d0bd247990698a75e64578566ca7a056ec"
     },
     {
       "path": "datasets/runs/e2_redaction_demo/evidence_bundle.json",
-      "sha256": "1610bdfe139abb3818a9687d9f78311e926cd9512e13e6f3328ea41c15d264ba"
+      "sha256": "89149718126933778f5792892b1b311d8d1c7cec93673b1443965b169aceb28e"
     }
   ]
 }

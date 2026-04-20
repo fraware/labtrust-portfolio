@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "run_id": "run_4bcd34dd7e",
+  "run_id": "run_0424b866f9",
   "scenario_id": "lab_profile_v0",
   "seed": 42,
-  "start_time_utc": "2026-04-20T05:25:33.584832Z",
+  "start_time_utc": "2026-04-20T05:51:22.194333Z",
   "events": [
     {
       "seq": 0,
@@ -35,7 +35,7 @@
     },
     {
       "seq": 2,
-      "ts": 0.021663740172078172,
+      "ts": 0.03629433368116601,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -49,7 +49,7 @@
     },
     {
       "seq": 3,
-      "ts": 0.04392194870060555,
+      "ts": 0.07346868532823483,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -63,7 +63,7 @@
     },
     {
       "seq": 4,
-      "ts": 0.06276830921764529,
+      "ts": 0.07498671825476642,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -77,7 +77,7 @@
     },
     {
       "seq": 5,
-      "ts": 0.06428634214417688,
+      "ts": 0.08673535704469178,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -91,7 +91,7 @@
     },
     {
       "seq": 6,
-      "ts": 0.07343345726248342,
+      "ts": 0.08718423566975665,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -105,7 +105,7 @@
     },
     {
       "seq": 7,
-      "ts": 0.07393834512369858,
+      "ts": 0.09088436052939032,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -119,7 +119,7 @@
     },
     {
       "seq": 8,
-      "ts": 0.08568698391362393,
+      "ts": 0.10573563269007204,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -133,7 +133,7 @@
     },
     {
       "seq": 9,
-      "ts": 0.08613586253868881,
+      "ts": 0.13340396121290826,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -147,7 +147,7 @@
     },
     {
       "seq": 10,
-      "ts": 0.08983598739832248,
+      "ts": 0.13351278216149276,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -161,7 +161,7 @@
     },
     {
       "seq": 11,
-      "ts": 0.10297683548399524,
+      "ts": 0.1363332322661143,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -175,7 +175,7 @@
     },
     {
       "seq": 12,
-      "ts": 0.10713318852604113,
+      "ts": 0.18893343750240352,
       "type": "coordination_message",
       "actor": {
         "kind": "system",
@@ -189,7 +189,7 @@
     },
     {
       "seq": 13,
-      "ts": 0.12198446068672285,
+      "ts": 0.19578266320764723,
       "type": "task_start",
       "actor": {
         "kind": "agent",
@@ -203,7 +203,7 @@
     },
     {
       "seq": 14,
-      "ts": 0.12209328163530735,
+      "ts": 0.21123213235960636,
       "type": "task_end",
       "actor": {
         "kind": "tool",
@@ -212,6 +212,19 @@
       "payload": {
         "task_id": "disposition_commit:4",
         "name": "disposition_commit"
+      },
+      "state_hash_after": "2847a590dc83ac92cf5a28a8f559091c17462390b06fd0df5b6738d3582ce534"
+    },
+    {
+      "seq": 15,
+      "ts": 0.2387000398547719,
+      "type": "safe_state_reached",
+      "actor": {
+        "kind": "system",
+        "id": "supervisor"
+      },
+      "payload": {
+        "detail": "all_tasks_terminal_safe"
       },
       "state_hash_after": "2847a590dc83ac92cf5a28a8f559091c17462390b06fd0df5b6738d3582ce534"
     }
@@ -224,6 +237,19 @@
     "calibration_invalid_prob": 0.0,
     "max_retries_per_task": 0,
     "rep_cps_scheduling_dependent": false,
-    "rep_cps_safety_gate_ok": null
+    "rep_cps_safety_gate_ok": null,
+    "planned_task_count": 5,
+    "timeout_fault_prob": 0.0,
+    "partial_result_fault_prob": 0.0,
+    "reordered_event_fault_prob": 0.0,
+    "resource_contention_spike_prob": 0.02,
+    "invalid_action_injection_prob": 0.0,
+    "agent_nonresponse_fault_prob": 0.0,
+    "duplicate_completion_prob": 0.0,
+    "conflicting_action_prob": 0.0,
+    "constraint_guard_trigger_prob": 0.0,
+    "sensor_stale_prob": 0.0,
+    "shutdown_after_first_fault": false,
+    "deadline_miss_prob": 0.0
   }
 }

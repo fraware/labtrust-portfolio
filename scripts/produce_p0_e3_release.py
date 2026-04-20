@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Produce E3 runs and release one to datasets/releases/p0_e3_release.
-Runs replay_link_e3.py (default 20 seeds; --scenarios for multi-scenario), then release-dataset for first scenario seed_1.
+Runs replay_link_e3.py (default 20 seeds; --scenarios for multi-scenario; optional --standalone-verifier), then release-dataset for first scenario seed_1.
 Usage (from repo root):
   PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/produce_p0_e3_release.py
 """
@@ -13,6 +13,22 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+
+
+def _git_head() -> str | None:
+    try:
+        r = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(REPO),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if r.returncode == 0 and (r.stdout or "").strip():
+            return r.stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return None
 
 
 def main() -> int:
@@ -30,6 +46,11 @@ def main() -> int:
         action="store_true",
         help="Skip release step (only run E3 and write variance)",
     )
+    ap.add_argument(
+        "--standalone-verifier",
+        action="store_true",
+        help="Forward to replay_link_e3.py (separate-process verifier; recommended for publishable E3)",
+    )
     args = ap.parse_args()
     do_release = not args.no_release
     scenario_ids = [s.strip() for s in args.scenarios.split(",") if s.strip()]
@@ -39,21 +60,28 @@ def main() -> int:
     env = os.environ.copy()
     env.setdefault("LABTRUST_KERNEL_DIR", str(REPO / "kernel"))
     env.setdefault("PYTHONPATH", str(REPO / "impl" / "src"))
+    env.setdefault("PYTHONIOENCODING", "utf-8")
+    _gh = _git_head()
+    if _gh:
+        env.setdefault("GIT_SHA", _gh)
     runs_dir = REPO / "datasets" / "runs"
     runs_dir.mkdir(parents=True, exist_ok=True)
     summary_path = runs_dir / "e3_summary.json"
 
+    replay_cmd = [
+        sys.executable,
+        str(REPO / "scripts" / "replay_link_e3.py"),
+        "--runs",
+        str(args.runs),
+        "--scenarios",
+        ",".join(scenario_ids),
+        "--out",
+        str(summary_path),
+    ]
+    if args.standalone_verifier:
+        replay_cmd.append("--standalone-verifier")
     r = subprocess.run(
-        [
-            sys.executable,
-            str(REPO / "scripts" / "replay_link_e3.py"),
-            "--runs",
-            str(args.runs),
-            "--scenarios",
-            ",".join(scenario_ids),
-            "--out",
-            str(summary_path),
-        ],
+        replay_cmd,
         cwd=str(REPO),
         env=env,
     )

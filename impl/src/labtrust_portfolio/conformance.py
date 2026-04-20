@@ -11,14 +11,19 @@ from .schema import validate
 
 # Scenario -> task names that are PONR-aligned (must appear as task_end in trace for Tier 3).
 # lab_profile_v0: disposition_commit (PONR-B); toy_lab_v0 has no PONR tasks in scope.
+# warehouse_v0 / traffic_v0: domain-appropriate final-commitment tasks from scenario YAML
+# (place / actuate), not lab semantics—used so scripted PONR coverage is non-vacuous outside
+# the lab scenario when reviewers inspect those traces.
 SCENARIO_PONR_TASK_NAMES: Dict[str, List[str]] = {
     "lab_profile_v0": ["disposition_commit"],
     "toy_lab_v0": [],
+    "warehouse_v0": ["place"],
+    "traffic_v0": ["actuate"],
 }
 
 REQUIRED_ARTIFACTS = {
     "trace.json": "trace/TRACE.v0.1.schema.json",
-    "maestro_report.json": "eval/MAESTRO_REPORT.v0.1.schema.json",
+    "maestro_report.json": "eval/MAESTRO_REPORT.v0.2.schema.json",
     "evidence_bundle.json": "mads/EVIDENCE_BUNDLE.v0.1.schema.json",
     "release_manifest.json": "policy/RELEASE_MANIFEST.v0.1.schema.json",
 }

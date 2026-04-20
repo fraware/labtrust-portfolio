@@ -61,7 +61,7 @@ def main() -> int:
     run_id = trace.get("run_id", "run_e2_redacted")
     kernel_version = "0.1"
     schema_trace_id = "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
-    schema_maestro_id = "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.1"
+    schema_maestro_id = "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     maestro_path = args.out / "maestro_report.json"
     redaction_manifest = {
         "policy_ref": "e2_redaction_v0.1",

@@ -39,9 +39,24 @@ def _ci95(mean: float, stdev: float, n: int) -> tuple[float, float]:
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "impl" / "src"))
 
-import os
 if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO_ROOT / "kernel")
+
+
+def _git_head() -> str | None:
+    try:
+        r = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(REPO_ROOT),
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if r.returncode == 0 and (r.stdout or "").strip():
+            return r.stdout.strip()
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+    return None
 
 
 def main() -> int:
@@ -170,8 +185,9 @@ def main() -> int:
         "script": "replay_link_e3.py",
         "standalone_verifier": bool(args.standalone_verifier),
     }
-    if os.environ.get("GIT_SHA"):
-        run_manifest["version"] = os.environ.get("GIT_SHA")
+    _ver = os.environ.get("GIT_SHA") or _git_head()
+    if _ver:
+        run_manifest["version"] = _ver
     # Excellence metrics (STANDARDS_OF_EXCELLENCE.md)
     first = per_scenario[0] if per_scenario else {}
     p95_ci = first.get("p95_latency_ms_ci_95", [0, 0])

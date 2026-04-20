@@ -72,19 +72,20 @@ def _git_head() -> str | None:
 
 
 def _align_maestro(maestro_path: Path) -> None:
-    """Keep only MAESTRO_REPORT.v0.1 top-level fields and allowed metric keys (strip adapter extras)."""
+    """Keep only MAESTRO_REPORT.v0.2 top-level keys (strip adapter-only extras such as metadata_rep_cps)."""
     data = json.loads(maestro_path.read_text(encoding="utf-8"))
-    allowed_top = {"version", "run_id", "scenario_id", "metrics", "faults", "notes"}
-    data = {k: v for k, v in data.items() if k in allowed_top}
-    metrics = data.get("metrics", {})
-    allowed_metrics = {
-        "tasks_completed",
-        "task_latency_ms_p50",
-        "task_latency_ms_p95",
-        "task_latency_ms_p99",
-        "coordination_messages",
+    allowed_top = {
+        "version",
+        "run_id",
+        "scenario_id",
+        "run_outcome",
+        "metrics",
+        "safety",
+        "coordination_efficiency",
+        "faults",
+        "notes",
     }
-    data["metrics"] = {k: v for k, v in metrics.items() if k in allowed_metrics}
+    data = {k: v for k, v in data.items() if k in allowed_top}
     maestro_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 

@@ -55,6 +55,7 @@ class TestSchemaLoading(unittest.TestCase):
         schemas = [
             "trace/TRACE.v0.1.schema.json",
             "eval/MAESTRO_REPORT.v0.1.schema.json",
+            "eval/MAESTRO_REPORT.v0.2.schema.json",
             "mads/EVIDENCE_BUNDLE.v0.1.schema.json",
             "policy/RELEASE_MANIFEST.v0.1.schema.json",
         ]

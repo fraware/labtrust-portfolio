@@ -173,157 +173,157 @@
       "scenario_id": "lab_profile_v0",
       "tasks_completed_mean": 5,
       "tasks_completed_stdev": 0.0,
-      "p95_latency_ms_mean": 36.789482148713894,
-      "p95_latency_ms_stdev": 16.966480574973065,
+      "p95_latency_ms_mean": 50.3729249665883,
+      "p95_latency_ms_stdev": 22.128013990855138,
       "all_match": true,
       "tasks_completed_ci_95": [
         5,
         5
       ],
       "p95_latency_ms_ci_95": [
-        29.201841367799997,
-        44.37712292962779
+        40.476976268464604,
+        60.268873664712
       ],
-      "p99_latency_ms": 75.79873185822433,
+      "p99_latency_ms": 100.06887023562564,
       "per_run": [
         {
           "seed": 1,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 25.025028196757205,
+          "p95_latency_ms": 41.079206519574264,
           "match": true
         },
         {
           "seed": 2,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 71.50114894940037,
+          "p95_latency_ms": 20.403761974428576,
           "match": true
         },
         {
           "seed": 3,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 28.772425057470222,
+          "p95_latency_ms": 34.93961071896642,
           "match": true
         },
         {
           "seed": 4,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 40.414268524197624,
+          "p95_latency_ms": 31.236645881635475,
           "match": true
         },
         {
           "seed": 5,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 46.40428968541852,
+          "p95_latency_ms": 49.29581928396359,
           "match": true
         },
         {
           "seed": 6,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 26.37832708752498,
+          "p95_latency_ms": 52.13257531797538,
           "match": true
         },
         {
           "seed": 7,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 11.141949175060807,
+          "p95_latency_ms": 42.31031422579716,
           "match": true
         },
         {
           "seed": 8,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 35.096380864005525,
+          "p95_latency_ms": 49.89130824031382,
           "match": true
         },
         {
           "seed": 9,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 41.102659523386166,
+          "p95_latency_ms": 45.28452545157724,
           "match": true
         },
         {
           "seed": 10,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 43.85965374388571,
+          "p95_latency_ms": 54.721775703960034,
           "match": true
         },
         {
           "seed": 11,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 15.1587344847818,
+          "p95_latency_ms": 50.83868624395996,
           "match": true
         },
         {
           "seed": 12,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 37.11699229146519,
+          "p95_latency_ms": 100.06887023562564,
           "match": true
         },
         {
           "seed": 13,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 33.6923106115743,
+          "p95_latency_ms": 35.31378478012061,
           "match": true
         },
         {
           "seed": 14,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 42.661046881225715,
+          "p95_latency_ms": 26.79548469161043,
           "match": true
         },
         {
           "seed": 15,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 16.6478940763884,
+          "p95_latency_ms": 42.477727326348415,
           "match": true
         },
         {
           "seed": 16,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 45.444039717939646,
+          "p95_latency_ms": 18.78544463306994,
           "match": true
         },
         {
           "seed": 17,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 44.36435867009443,
+          "p95_latency_ms": 90.42336384632823,
           "match": true
         },
         {
           "seed": 18,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 41.35412731675008,
+          "p95_latency_ms": 70.9969238009289,
           "match": true
         },
         {
           "seed": 19,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 13.8552762587269,
+          "p95_latency_ms": 78.56118584546158,
           "match": true
         },
         {
           "seed": 20,
           "tasks_completed": 5,
           "coordination_messages": 5,
-          "p95_latency_ms": 75.79873185822433,
+          "p95_latency_ms": 71.9014846101203,
           "match": true
         }
       ]
@@ -370,6 +370,7 @@
       "delay_fault_prob": 0.0
     },
     "script": "replay_link_e3.py",
-    "standalone_verifier": true
+    "standalone_verifier": true,
+    "version": "41e7e12548c8e0e0d873fdcf9561991e97b7dc2c"
   }
 }

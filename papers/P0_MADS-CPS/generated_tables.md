@@ -66,29 +66,29 @@ Per-seed rows for trace-to-report replay check; aggregate replay match and laten
 
 | Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
 |------|----------------|----------------------|----------------|-------|
-| 1 | 5 | 5 | 25.03 | yes |
-| 2 | 5 | 5 | 71.50 | yes |
-| 3 | 5 | 5 | 28.77 | yes |
-| 4 | 5 | 5 | 40.41 | yes |
-| 5 | 5 | 5 | 46.40 | yes |
-| 6 | 5 | 5 | 26.38 | yes |
-| 7 | 5 | 5 | 11.14 | yes |
-| 8 | 5 | 5 | 35.10 | yes |
-| 9 | 5 | 5 | 41.10 | yes |
-| 10 | 5 | 5 | 43.86 | yes |
-| 11 | 5 | 5 | 15.16 | yes |
-| 12 | 5 | 5 | 37.12 | yes |
-| 13 | 5 | 5 | 33.69 | yes |
-| 14 | 5 | 5 | 42.66 | yes |
-| 15 | 5 | 5 | 16.65 | yes |
-| 16 | 5 | 5 | 45.44 | yes |
-| 17 | 5 | 5 | 44.36 | yes |
-| 18 | 5 | 5 | 41.35 | yes |
-| 19 | 5 | 5 | 13.86 | yes |
-| 20 | 5 | 5 | 75.80 | yes |
-| **Summary (n=20)** | mean 5.00, stdev 0.00 | - | mean 36.79, stdev 16.97 | true |
+| 1 | 5 | 5 | 41.08 | yes |
+| 2 | 5 | 5 | 20.40 | yes |
+| 3 | 5 | 5 | 34.94 | yes |
+| 4 | 5 | 5 | 31.24 | yes |
+| 5 | 5 | 5 | 49.30 | yes |
+| 6 | 5 | 5 | 52.13 | yes |
+| 7 | 5 | 5 | 42.31 | yes |
+| 8 | 5 | 5 | 49.89 | yes |
+| 9 | 5 | 5 | 45.28 | yes |
+| 10 | 5 | 5 | 54.72 | yes |
+| 11 | 5 | 5 | 50.84 | yes |
+| 12 | 5 | 5 | 100.07 | yes |
+| 13 | 5 | 5 | 35.31 | yes |
+| 14 | 5 | 5 | 26.80 | yes |
+| 15 | 5 | 5 | 42.48 | yes |
+| 16 | 5 | 5 | 18.79 | yes |
+| 17 | 5 | 5 | 90.42 | yes |
+| 18 | 5 | 5 | 71.00 | yes |
+| 19 | 5 | 5 | 78.56 | yes |
+| 20 | 5 | 5 | 71.90 | yes |
+| **Summary (n=20)** | mean 5.00, stdev 0.00 | - | mean 50.37, stdev 22.13 | true |
 
-95% CI: tasks_completed [5, 5]; p95_latency_ms [29.201841367799997, 44.37712292962779]
+95% CI: tasks_completed [5, 5]; p95_latency_ms [40.476976268464604, 60.268873664712]
 
 ## From export_p0_table3.py
 
@@ -99,9 +99,9 @@ Latency column: mean of per-seed **task_latency_ms_p95** with 95% CI (t-interval
 | Scenario | Controller | Seeds | Replay match rate | p95 latency mean (95% CI) ms | Conformance rate |
 |----------|-------------|-------|-------------------|------------------------------|------------------|
 | toy_lab_v0 | thinslice | 20 | 1.00 | 35.37 [27.11, 43.62] | 1.00 |
-| lab_profile_v0 | thinslice | 20 | 1.00 | 36.79 [29.20, 44.38] | 1.00 |
+| lab_profile_v0 | thinslice | 20 | 1.00 | 50.37 [40.48, 60.27] | 1.00 |
 | toy_lab_v0 | centralized | 20 | 1.00 | 35.37 [26.73, 44.01] | 1.00 |
 | toy_lab_v0 | rep_cps | 20 | 1.00 | 35.37 [26.73, 44.01] | 1.00 |
-| lab_profile_v0 | centralized | 20 | 1.00 | 36.79 [28.85, 44.73] | 1.00 |
-| lab_profile_v0 | rep_cps | 20 | 1.00 | 36.79 [28.85, 44.73] | 1.00 |
+| lab_profile_v0 | centralized | 20 | 1.00 | 50.37 [40.02, 60.73] | 1.00 |
+| lab_profile_v0 | rep_cps | 20 | 1.00 | 50.37 [40.02, 60.73] | 1.00 |
 

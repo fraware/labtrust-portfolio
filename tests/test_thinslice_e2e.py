@@ -197,7 +197,7 @@ class TestE2Redaction(unittest.TestCase):
             ]
             schema_ids = [
                 "https://example.org/labtrust/kernel/trace/TRACE.v0.1",
-                "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.1",
+                "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2",
             ]
             bundle = build_evidence_bundle(
                 run_id=trace["run_id"],
