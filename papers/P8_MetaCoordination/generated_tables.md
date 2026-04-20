@@ -1,26 +1,60 @@
-# Table 1 - Comparison (fixed vs meta vs naive)
+﻿# Table 1 - Comparison (fixed vs meta vs naive)
 
-Source: comparison.json. Run meta_eval.py --run-naive to regenerate.
+Source: `datasets/runs/meta_eval/comparison.json` (`schema_version`: `p8_meta_eval_v0.3`). Regenerate via `run_paper_experiments.py --paper P8` or the command block in `DRAFT.md`; then `export_meta_tables.py` with the same `--comparison` path.
 
 | Regime | tasks_completed_mean | collapse_count | regime_switch_count_total |
 |--------|---------------------|----------------|---------------------------|
-| fixed (Centralized) | 3.40 | 1 | - |
-| meta_controller | 3.40 | 1 | 8 |
-| naive (fault_threshold=0) | 3.40 | 1 | 8 |
+| fixed (Centralized) | 2.70 | 1 | - |
+| meta_controller | 3.45 | 0 | 8 |
+| naive (fault_threshold=0) | 3.85 | 0 | 17 |
+
+## Recovery latency proxy and explicit safety counts
+
+`time_to_recovery_ms_mean` is from MAESTRO metrics on the evaluated regime.
+
+| Arm | time_to_recovery_ms_mean | ponr_violation_count_total | safety_violation_count_total |
+|-----|---------------------------|------------------------------|------------------------------|
+| fixed (Centralized) | - | 0 | 0 |
+| meta_controller | 106.04 | 0 | 0 |
 
 ## Collapse outcome interpretation (paired seeds)
 
 - **Non-inferior on counts (meta <= fixed):** `meta_non_worse_collapse` = True
-- **Strict improvement (meta < fixed):** `meta_strictly_reduces_collapse` = False
+- **Strict improvement (meta < fixed):** `meta_strictly_reduces_collapse` = True
 - **McNemar (discordant pairs only) p (two-sided):** 1.0
 - **Wilson 95% CI - fixed collapse rate:** [0.008881, 0.236136]
-- **Wilson 95% CI - meta collapse rate:** [0.008881, 0.236136]
+- **Wilson 95% CI - meta collapse rate:** [0.0, 0.16113]
 
 ## Stress selection (non-vacuous runs)
 
-- **rule_id:** `smallest_drop_prob_with_any_collapse`
-- **chosen_drop_completion_prob:** 0.15
-- **source:** `datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/sweep/collapse_sweep.json`
+- **rule_id:** `largest_drop_prob_with_any_collapse`
+- **chosen_drop_completion_prob:** 0.35
+- **source:** `datasets/runs/meta_eval/collapse_sweep.json`
+
+# Table 2 - Per-seed (meta_controller)
+
+| seed | tasks_completed | regime_switch_count | collapse |
+|------|----------------|---------------------|---------|
+| 11 | 4 | 1 | False |
+| 12 | 4 | 1 | False |
+| 13 | 3 | 0 | False |
+| 14 | 4 | 0 | False |
+| 15 | 4 | 1 | False |
+| 16 | 4 | 1 | False |
+| 17 | 4 | 0 | False |
+| 18 | 3 | 0 | False |
+| 19 | 3 | 1 | False |
+| 20 | 4 | 0 | False |
+| 21 | 3 | 0 | False |
+| 22 | 3 | 0 | False |
+| 23 | 3 | 0 | False |
+| 24 | 4 | 1 | False |
+| 25 | 3 | 0 | False |
+| 26 | 3 | 0 | False |
+| 27 | 3 | 0 | False |
+| 28 | 3 | 1 | False |
+| 29 | 3 | 0 | False |
+| 30 | 4 | 1 | False |
 
 # Table 3 - Robustness campaign matrix (C1-C3)
 
@@ -28,20 +62,20 @@ Source: robustness campaign summary JSON (multi-scenario stress matrix).
 
 | run_id | scenario_id | profile | drop_completion_prob | fixed_collapse_count | meta_collapse_count | non_worse | strict | no_safety_regression | switch_total | switch_reasons |
 |--------|-------------|---------|----------------------|----------------------|---------------------|-----------|--------|----------------------|--------------|----------------|
-| regime_stress_v0/baseline_non_vacuous | regime_stress_v0 | baseline_non_vacuous_retry_heavy | 0.15 | 1 | 1 | True | False | True | 8 | fault_threshold:8 |
-| regime_stress_v0/latency_sensitive | regime_stress_v0 | latency_trigger_profile | 0.15 | 1 | 1 | True | False | True | 10 | latency_threshold:10 |
-| regime_stress_v0/contention_sensitive | regime_stress_v0 | contention_trigger_profile | 0.15 | 1 | 1 | True | False | True | 20 | contention_threshold:20 |
-| regime_stress_v0/hysteresis_h1 | regime_stress_v0 | hysteresis_h1 | 0.15 | 1 | 1 | True | False | True | 8 | fault_threshold:8 |
-| regime_stress_v0/hysteresis_h3 | regime_stress_v0 | hysteresis_h3 | 0.15 | 1 | 1 | True | False | True | 3 | contention_threshold:2, fault_threshold:1 |
-| regime_stress_v1/baseline_non_vacuous | regime_stress_v1 | baseline_non_vacuous_retry_heavy | 0.20 | 1 | 1 | True | False | True | 9 | fault_threshold:9 |
-| regime_stress_v1/latency_sensitive | regime_stress_v1 | latency_trigger_profile | 0.15 | 1 | 1 | True | False | True | 10 | latency_threshold:10 |
-| regime_stress_v1/contention_sensitive | regime_stress_v1 | contention_trigger_profile | 0.15 | 1 | 1 | True | False | True | 20 | contention_threshold:20 |
-| regime_stress_v1/hysteresis_h1 | regime_stress_v1 | hysteresis_h1 | 0.15 | 1 | 1 | True | False | True | 8 | fault_threshold:8 |
-| regime_stress_v1/hysteresis_h3 | regime_stress_v1 | hysteresis_h3 | 0.15 | 1 | 1 | True | False | True | 3 | contention_threshold:2, fault_threshold:1 |
+| regime_stress_v0/baseline_non_vacuous | regime_stress_v0 | baseline_non_vacuous_retry_heavy | 0.35 | 2 | 0 | True | True | True | 8 | fault_threshold:8 |
+| regime_stress_v0/latency_sensitive | regime_stress_v0 | latency_trigger_profile | 0.35 | 2 | 2 | True | False | True | 7 | latency_threshold:7 |
+| regime_stress_v0/contention_sensitive | regime_stress_v0 | contention_trigger_profile | 0.35 | 2 | 0 | True | True | True | 20 | contention_threshold:20 |
+| regime_stress_v0/hysteresis_h1 | regime_stress_v0 | hysteresis_h1 | 0.35 | 2 | 0 | True | True | True | 16 | fault_threshold:16 |
+| regime_stress_v0/hysteresis_h3 | regime_stress_v0 | hysteresis_h3 | 0.35 | 2 | 0 | True | True | True | 8 | contention_threshold:6, fault_threshold:2 |
+| regime_stress_v1/baseline_non_vacuous | regime_stress_v1 | baseline_non_vacuous_retry_heavy | 0.40 | 2 | 0 | True | True | True | 10 | fault_threshold:10 |
+| regime_stress_v1/latency_sensitive | regime_stress_v1 | latency_trigger_profile | 0.40 | 2 | 2 | True | False | True | 7 | latency_threshold:7 |
+| regime_stress_v1/contention_sensitive | regime_stress_v1 | contention_trigger_profile | 0.40 | 2 | 0 | True | True | True | 20 | contention_threshold:20 |
+| regime_stress_v1/hysteresis_h1 | regime_stress_v1 | hysteresis_h1 | 0.40 | 2 | 0 | True | True | True | 17 | fault_threshold:17 |
+| regime_stress_v1/hysteresis_h3 | regime_stress_v1 | hysteresis_h3 | 0.40 | 2 | 0 | True | True | True | 10 | contention_threshold:8, fault_threshold:2 |
 
 ## Campaign claim-support summary
 
 - **C1:** `{'switches_observed': 10, 'no_safety_regression_all_switch_profiles': True}`
 - **C2:** `{'audit_replay_artifacts_verified': True, 'note': 'Each run is validated with verify_p8_meta_artifacts.py; trace-level regime_switch payloads are generated by MetaAdapter.'}`
-- **C3:** `{'non_vacuous_baseline_runs': 2, 'meta_non_worse_collapse_all_non_vacuous': True, 'strict_reduction_any': False}`
+- **C3:** `{'non_vacuous_baseline_runs': 2, 'meta_non_worse_collapse_all_non_vacuous': True, 'strict_reduction_any': True}`
 

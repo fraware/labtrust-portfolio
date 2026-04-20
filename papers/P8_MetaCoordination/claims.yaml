@@ -1,6 +1,8 @@
 # P8 Meta-Coordination claim table (Draft conversion checklist 2.1)
-# Conditional paper; trigger_met = no_safety_regression and meta_non_worse_collapse (alias meta_reduces_collapse: meta collapse_count <= fixed).
-# Strict improvement on counts: meta_strictly_reduces_collapse. See comparison.json collapse_paired_analysis and docs/CONDITIONAL_TRIGGERS.md.
+# Conditional paper; trigger_met = no_safety_regression and meta_non_worse_collapse
+#   (legacy alias meta_reduces_collapse: paired collapse counts meta <= fixed).
+# Strict improvement: meta_strictly_reduces_collapse. Evidence schema: p8_meta_eval_v0.3
+#   (outcome attribution when --fallback-adapter is set; calibration vs eval seeds in run_manifest).
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P8_MetaCoordination"
@@ -12,7 +14,7 @@ claims:
     statement: "A meta-controller can switch regimes based on measurable stress signals (tail latency, contention, fault rate) while preserving safety constraints."
     evidence:
       release_id: "meta_eval"
-      confidence: "medium"  # spec + impl; single scenario; conditional on non-vacuous trigger
+      confidence: "medium"  # spec + impl; conditional on stress profile; campaign broadens signal channels
       artifact_paths:
         - "datasets/runs/meta_eval/comparison.json"
         - "datasets/runs/meta_eval/robustness_campaign/campaign_summary.json"
@@ -28,7 +30,7 @@ claims:
     statement: "Switching is auditable and replayable: every regime change is justified by logged criteria and does not silently violate higher-level intent."
     evidence:
       release_id: "meta_eval"
-      confidence: "high"  # trace events + payload; script-generated tables
+      confidence: "high"  # trace events + payload; script-generated tables + verifier
       artifact_paths:
         - "impl/src/labtrust_portfolio/adapters/meta_adapter.py"
         - "kernel/trace/TRACE.v0.1.schema.json"
@@ -46,10 +48,11 @@ claims:
         - "datasets/runs/meta_eval/collapse_sweep.json"
         - "datasets/runs/meta_eval/scenario_regime_stress_v1/comparison.json"
         - "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep.json"
+        - "datasets/runs/meta_eval/scenario_lab_profile_v0/comparison.json"
         - "datasets/runs/meta_eval/robustness_campaign/campaign_summary.json"
         - "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/comparison.json"
         - "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/baseline_non_vacuous/comparison.json"
       table_ids: ["Table 1", "Table 2", "Table 3"]
       figure_ids: ["Figure 1"]
 
-# Table 1/2: export_meta_tables. Figure 1: plot_meta_collapse. Collapse sweep for non-vacuous trigger.
+# Table 1/2: export_meta_tables.py. Figure 1: plot_meta_collapse.py. Collapse sweep drives non-vacuous drop selection.

@@ -1,6 +1,6 @@
 {
   "schema_version": "p8_robustness_campaign_v0.1",
-  "methodology_note": "latency_trigger_profile and contention_trigger_profile disable fault-based switching (fault_threshold=999) to isolate latency vs contention channels; when meta_strictly_reduces_collapse is false under latency-only isolation, paired collapse can tie while still demonstrating auditable latency_threshold switches. Primary Version-B evidence is baseline_non_vacuous_retry_heavy with fault_threshold=0 for naive only and default meta fault_threshold=1.",
+  "methodology_note": "latency_trigger_profile and contention_trigger_profile set fault_threshold=999 to isolate latency vs contention channels; each profile reuses the baseline chosen_drop_completion_prob from baseline_non_vacuous_retry_heavy so stress severity matches the publishable non-vacuous row. Under latency-only isolation, meta_strictly_reduces_collapse may tie (non-inferiority still holds) while latency_threshold-driven switches remain observable. Primary evidence: baseline_non_vacuous_retry_heavy (meta fault_threshold=1; naive arm uses fault_threshold=0 inside meta_eval when --run-naive is set).",
   "run_manifest": {
     "script": "p8_robustness_campaign.py",
     "seeds": [
@@ -45,11 +45,7 @@
       "meta_strictly_reduces_collapse": true,
       "no_safety_regression": true,
       "trigger_met": true,
-      "regime_switch_count_total": 16,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 73.7186322923436,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
+      "regime_switch_count_total": 8,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -60,12 +56,12 @@
         0.16113
       ],
       "difference_ci95": [
-        0.8,
-        1.5
+        0.4,
+        1.2
       ],
-      "fallback_tasks_completed_mean": 3.8125,
+      "fallback_tasks_completed_mean": 3.75,
       "switch_reasons": {
-        "fault_threshold": 16
+        "fault_threshold": 8
       }
     },
     {
@@ -81,10 +77,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 7,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 71.1692496561106,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 1.0,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -116,10 +108,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 20,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 73.7186322923436,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -151,10 +139,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 16,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 73.7186322923436,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -186,10 +170,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 8,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 84.60629040777518,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -221,11 +201,7 @@
       "meta_strictly_reduces_collapse": true,
       "no_safety_regression": true,
       "trigger_met": true,
-      "regime_switch_count_total": 17,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 72.90737029548418,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
+      "regime_switch_count_total": 10,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -236,12 +212,12 @@
         0.16113
       ],
       "difference_ci95": [
-        0.9,
-        1.6
+        0.6,
+        1.4
       ],
-      "fallback_tasks_completed_mean": 3.764705882352941,
+      "fallback_tasks_completed_mean": 3.8,
       "switch_reasons": {
-        "fault_threshold": 17
+        "fault_threshold": 10
       }
     },
     {
@@ -257,10 +233,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 7,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 60.685870532303795,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 1.0,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -292,10 +264,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 20,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 72.90737029548418,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -327,10 +295,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 17,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 72.90737029548418,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,
@@ -362,10 +326,6 @@
       "no_safety_regression": true,
       "trigger_met": true,
       "regime_switch_count_total": 10,
-      "fixed_time_to_recovery_ms_mean": null,
-      "meta_time_to_recovery_ms_mean": 83.46632999544947,
-      "fixed_ponr_violation_count_total": 0,
-      "meta_ponr_violation_count_total": 0,
       "mcnemar_exact_p_value_two_sided": 0.5,
       "fixed_collapse_rate_wilson_ci95": [
         0.027866,

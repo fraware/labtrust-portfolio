@@ -85,6 +85,7 @@ def _meta_eval(
     fallback_adapter: str = "",
     non_vacuous: bool = False,
     collapse_sweep_path: Path | None = None,
+    drop_prob: float | None = None,
 ) -> Path:
     cmd = [
         sys.executable,
@@ -111,8 +112,11 @@ def _meta_eval(
         cmd.extend(["--fallback-adapter", fallback_adapter])
     if non_vacuous:
         cmd.append("--non-vacuous")
+        cmd.extend(["--non-vacuous-select", "max_drop_any_collapse"])
     if collapse_sweep_path is not None:
         cmd.extend(["--collapse-sweep-path", str(collapse_sweep_path)])
+    if drop_prob is not None:
+        cmd.extend(["--drop-prob", str(drop_prob)])
     _run(
         cmd,
         (
@@ -250,7 +254,7 @@ def main() -> int:
             scenario,
             args.seeds,
             collapse_threshold=args.collapse_threshold,
-            fault_threshold=0,
+            fault_threshold=1,
             hysteresis=1,
             latency_threshold_ms=200.0,
             contention_threshold=1.5,
@@ -260,6 +264,7 @@ def main() -> int:
         )
         _verify(base_cmp, sweep_path, strict=args.strict_publishable)
         base_data = _load_json(base_cmp)
+        chosen_drop = float(base_data.get("drop_completion_prob", 0.15))
         base_reasons = _collect_switch_reasons(base_dir)
         runs.append(
             _extract_run_row(
@@ -283,6 +288,7 @@ def main() -> int:
             contention_threshold=999.0,
             fallback_adapter="retry_heavy",
             non_vacuous=False,
+            drop_prob=chosen_drop,
         )
         _verify(lat_cmp, sweep_path, strict=False)
         lat_data = _load_json(lat_cmp)
@@ -309,6 +315,7 @@ def main() -> int:
             contention_threshold=0.5,
             fallback_adapter="retry_heavy",
             non_vacuous=False,
+            drop_prob=chosen_drop,
         )
         _verify(cont_cmp, sweep_path, strict=False)
         cont_data = _load_json(cont_cmp)
@@ -337,6 +344,7 @@ def main() -> int:
                 contention_threshold=1.5,
                 fallback_adapter="retry_heavy",
                 non_vacuous=False,
+                drop_prob=chosen_drop,
             )
             _verify(cmp_path, sweep_path, strict=False)
             cmp_data = _load_json(cmp_path)
@@ -360,6 +368,16 @@ def main() -> int:
 
     summary = {
         "schema_version": "p8_robustness_campaign_v0.1",
+        "methodology_note": (
+            "latency_trigger_profile and contention_trigger_profile set fault_threshold=999 "
+            "to isolate latency vs contention channels; each profile reuses the baseline "
+            "chosen_drop_completion_prob from baseline_non_vacuous_retry_heavy so stress "
+            "severity matches the publishable non-vacuous row. Under latency-only isolation, "
+            "meta_strictly_reduces_collapse may tie (non-inferiority still holds) while "
+            "latency_threshold-driven switches remain observable. Primary evidence: "
+            "baseline_non_vacuous_retry_heavy (meta fault_threshold=1; naive arm uses "
+            "fault_threshold=0 inside meta_eval when --run-naive is set)."
+        ),
         "run_manifest": {
             "script": "p8_robustness_campaign.py",
             "seeds": [int(x.strip()) for x in args.seeds.split(",") if x.strip()],

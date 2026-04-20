@@ -1,16 +1,16 @@
 {
   "version": "0.1",
-  "run_id": "run_7d0747c76a",
+  "run_id": "run_37d11ad0fd",
   "kernel_version": "0.1",
   "artifacts": [
     {
-      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/naive/seed_6/trace.json",
-      "sha256": "5ff14be7d7fb5f1baf9dc265880855d8ac17fa36359d92a09d8342d4063a774d",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/naive/seed_6/trace.json",
+      "sha256": "a2faf1df5d1f416e1bb2aa4f9c7b9352cc2056c8369186315510fd18ff6c48c4",
       "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
     },
     {
-      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/naive/seed_6/maestro_report.json",
-      "sha256": "72688e9e331373c5a43722e27808a23b3a698060c6a274e5f3370798d49fd19e",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/naive/seed_6/maestro_report.json",
+      "sha256": "8ef5f34091b963a23a7a6944ad171b5e4713a15ac5faa3bec09987aed2f33245",
       "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     }
   ],

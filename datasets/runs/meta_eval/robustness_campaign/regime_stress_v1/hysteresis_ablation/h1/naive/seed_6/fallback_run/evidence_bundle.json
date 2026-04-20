@@ -1,16 +1,16 @@
 {
   "version": "0.1",
-  "run_id": "run_c2de0d7e52",
+  "run_id": "run_87c97a32bc",
   "kernel_version": "0.1",
   "artifacts": [
     {
-      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/hysteresis_ablation/h1/naive/seed_6/fallback_run/trace.json",
-      "sha256": "47d60c9a48d39157ccd2cab37f1ddfecb56bdddf12e0abac6a20d0a24548017b",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/hysteresis_ablation/h1/naive/seed_6/fallback_run/trace.json",
+      "sha256": "6d3c48e4cb388beb193534e8d882c19168c9b91cd882482f19aadc7adf6aa967",
       "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
     },
     {
-      "path": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/hysteresis_ablation/h1/naive/seed_6/fallback_run/maestro_report.json",
-      "sha256": "ae298d9151b16adae17818f8b2cc372d9340ca70962a7396745b897cf721fa4d",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/hysteresis_ablation/h1/naive/seed_6/fallback_run/maestro_report.json",
+      "sha256": "5fb15d0e04d444f22f2b72a7ddca598e9166f0ab7a94fe22168c0a5c0ba1b2de",
       "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     }
   ],

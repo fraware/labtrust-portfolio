@@ -1,95 +1,92 @@
 # Meta-Coordination for CPS: Switching Regimes Under Stress
 
-**Draft (v0.1). Paper ID: P8_MetaCoordination. Conditional paper; trigger and scope: docs/CONDITIONAL_TRIGGERS.md (P8).**
+**Draft (v0.2). Paper ID: P8_MetaCoordination. Conditional paper; trigger and scope: `docs/CONDITIONAL_TRIGGERS.md` (P8).**
 
-**Reproducibility.** From repo root, with `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). Run_manifest: comparison.json (seeds, scenario_id, fault_threshold, excellence_metrics); collapse_sweep.json (seeds, drop_probs, scenario_id). Robust campaign artifact: `datasets/runs/meta_eval/robustness_campaign/campaign_summary.json` (multi-scenario signal matrix, claim support). Conditional trigger: see Limitations and docs/CONDITIONAL_TRIGGERS.md (P8).
+**Reproducibility.** From repo root, set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel`. See [`REPORTING_STANDARD.md`](../docs/REPORTING_STANDARD.md) and [`RESULTS_PER_PAPER.md`](../docs/RESULTS_PER_PAPER.md). Primary artifacts: `datasets/runs/meta_eval/comparison.json` (**`schema_version`: `p8_meta_eval_v0.3`**), `collapse_sweep.json`, and optionally `datasets/runs/meta_eval/robustness_campaign/campaign_summary.json`.
 
-**Minimal run (under 20 min):** `python scripts/meta_eval.py --run-naive --fault-threshold 0` then `python scripts/export_p8_meta_diagram.py` then `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json` then `python scripts/meta_collapse_sweep.py` then `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json`.
+**Minimal path (portfolio default).** One command reproduces the primary v0 + v1 sweeps and evals:
 
-**Publishable run:** For publishable tables, the default procedure is (1) run `meta_collapse_sweep.py` (default 20 seeds, --drop-probs 0.15,0.2,0.25,0.3), (2) run `meta_eval.py --run-naive --fault-threshold 0 --non-vacuous` so that Table 1 uses a drop_prob where collapse_count > 0; optionally (3) add `--fallback-adapter retry_heavy` for two-regime comparison. For state-of-the-art robustness evidence across C1-C3, run `python scripts/p8_robustness_campaign.py --strict-publishable` to generate a multi-scenario matrix and `campaign_summary.json`. Run manifests in comparison.json and collapse_sweep.json. If no drop_prob in the sweep has collapse, the script exits with a message and Table 1 should be presented as methodology and auditability only (see section 7).
+`python scripts/run_paper_experiments.py --paper P8`
 
-- **Figure 0:** `python scripts/export_p8_meta_diagram.py` (output `docs/figures/p8_meta_diagram.mmd`). Render Mermaid to PNG for camera-ready.
-- **Table 1:** Run `python scripts/meta_collapse_sweep.py` then `python scripts/meta_eval.py --run-naive --fault-threshold 0 --non-vacuous` (writes comparison.json), then `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json`.
-- **Table 2:** Same run; `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json --table2` (per-seed table).
-- **Table 3 (robustness matrix):** `python scripts/p8_robustness_campaign.py --strict-publishable` then `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/comparison.json --campaign datasets/runs/meta_eval/robustness_campaign/campaign_summary.json`.
-- **Figure 1:** `python scripts/meta_collapse_sweep.py` (writes collapse_sweep.json), then `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (output `docs/figures/p8_meta_collapse.png`).
+Then regenerate markdown tables (primary + per-seed + campaign matrix):
+
+`python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json --table2 --campaign datasets/runs/meta_eval/robustness_campaign/campaign_summary.json`
+
+Write output to `papers/P8_MetaCoordination/generated_tables.md` if you want a frozen table file.
+
+**Figures.** Figure 0 (diagram): `python scripts/export_p8_meta_diagram.py` → `docs/figures/p8_meta_diagram.mmd`. Figure 1 (collapse sweep): `python scripts/meta_collapse_sweep.py` (writes `collapse_sweep.json` under `--out`) then `python scripts/plot_meta_collapse.py --sweep <path>/collapse_sweep.json` → `docs/figures/p8_meta_collapse.png`.
+
+**Publishable evaluation semantics (v0.3).**
+
+1. **Non-vacuous stress:** `meta_eval.py --non-vacuous --non-vacuous-select max_drop_any_collapse` reads (or runs) a collapse sweep and selects the **largest** `drop_completion_prob` in the grid where the **fixed** arm still shows at least one collapsed run—stronger stress than the legacy “smallest drop with collapse” rule.
+2. **Calibration vs evaluation seeds:** pass `--calibration-seeds` for the sweep only; `--seeds` are the held-out evaluation seeds. The portfolio uses calibration `1–10` and evaluation `11–30` (recorded under `run_manifest.stress_selection_policy`).
+3. **Two coordination paths:** `--fallback-adapter retry_heavy` runs Centralized vs RetryHeavy; after a meta decision to switch, **reported meta outcomes** (`tasks_completed`, recovery, safety counters) follow the fallback run (`outcome_attribution_note` in `comparison.json`).
+4. **Naive baseline:** `--run-naive` adds a third arm where the naive policy uses **`fault_threshold=0`** inside `meta_eval.py`. The **meta** arm for publishable rows uses the default **`fault_threshold=1`** (do not pass `--fault-threshold 0` on the CLI for publishable meta).
+
+**Robustness campaign (Table 3).** `python scripts/p8_robustness_campaign.py --strict-publishable` builds a multi-profile matrix (baseline non-vacuous, latency- and contention-isolation profiles, hysteresis ablations) for `regime_stress_v0` and `regime_stress_v1`. Isolation profiles reuse the **same** `drop_completion_prob` as the scenario’s baseline non-vacuous row so severity is aligned. `python scripts/verify_p8_meta_artifacts.py --strict-publishable` checks primary and campaign bundles.
+
+**Optional scenario.** `scenario_lab_profile_v0` under `datasets/runs/meta_eval/scenario_lab_profile_v0/` when that sweep + eval is run (same scripts; different `--scenario` and output directory).
+
+---
 
 ## 1. Motivation
 
-Multiple coordination regimes (centralized, blackboard, fallback) exist; under compound faults, mode-thrashing or collapse can occur. Meta-controller switches regimes by criteria while keeping PONRs invariant and every switch auditable. **Primary evidence tier:** auditable, safety-constrained regime switching with replayable traces. **Secondary (collapse):** under pre-specified stress, we report **non-inferiority on paired collapse counts** versus the fixed regime (`meta_non_worse_collapse` / legacy `meta_reduces_collapse`: meta collapse_count <= fixed) and separately **strict improvement** (`meta_strictly_reduces_collapse`), McNemar on discordant pairs, and Wilson intervals on marginal collapse rates (`collapse_paired_analysis`, `excellence_metrics`). **Supporting:** performance tradeoff when using `--fallback-adapter` (e.g. retry_heavy). When collapse is not observed under a sweep, we report methodology and auditability only. The publishable run uses `--non-vacuous` with a recorded `stress_selection_policy` in `run_manifest`. For a second stress setting, use `--stress-preset high` (drop_prob 0.25) or `--stress-preset very_high` (0.35), or `--scenario regime_stress_v1` (see multi-scenario paths below).
+Multiple coordination regimes exist; under compound faults, fixed choice can collapse or thrash. A meta-controller switches regime using explicit, logged criteria while preserving PONRs. We report **auditability**, **safety proxies**, and—when stress is non-vacuous—**paired collapse non-inferiority** and optional **strict** improvement.
 
 ## 2. Meta-controller model and formal switch criterion
 
-Spec: `kernel/meta/META_CONTROLLER_SPEC.v0.1.md`. State: current_regime, fault_count, latency_p95.
+Spec: `kernel/meta/META_CONTROLLER_SPEC.v0.1.md`. Reference implementation: `meta_controller.decide_switch`. MetaAdapter injects `regime_switch` events with payload (`from_regime`, `to_regime`, `reason`).
 
-**Second stress scenario / preset.** For external validity, `meta_eval.py` and `meta_collapse_sweep.py` accept `--scenario regime_stress_v0` (default) or `regime_stress_v1`. Publishable portfolio run (`run_paper_experiments.py --paper P8`) writes `datasets/runs/meta_eval/comparison.json` (v0) and `datasets/runs/meta_eval/scenario_regime_stress_v1/comparison.json` (v1), each with its own `collapse_sweep.json` under the same output directory prefix. Robustness campaign (`scripts/p8_robustness_campaign.py`) additionally runs latency-sensitive and contention-sensitive profiles with explicit switch-reason accounting from trace (`fault_threshold`, `latency_threshold`, `contention_threshold`). `--stress-preset very_high` sets drop_completion_prob to 0.35 (high: 0.25).
-
-**Figure 0 — Meta-controller regimes and switch.** Centralized and fallback regimes; switch to fallback when fault_count or latency_p95 exceeds threshold; revert when below 0.5*threshold. Regenerate with `python scripts/export_p8_meta_diagram.py` (output `docs/figures/p8_meta_diagram.mmd`). Actions: switch_regime(to_regime). **Formal switch criterion (v0.1):** threshold-based. Revert is checked first (no hysteresis): if in fallback and fault_count <= 0 and latency_p95 < 0.5 * latency_threshold_ms, switch back to centralized. Fault-based switch to fallback requires fault_count >= hysteresis_consecutive and fault_count > fault_threshold (thrash control). Latency-based switch to fallback: if latency_p95 > latency_threshold_ms, switch to fallback (no hysteresis). Reference impl: `meta_controller.decide_switch`; spec: `kernel/meta/META_CONTROLLER_SPEC.v0.1.md`. Regret-based or safety-bound-based switching are future work.
+**Scenarios.** `regime_stress_v0` (primary comparison path), `regime_stress_v1` (secondary), optional `lab_profile_v0` for an alternate lab-shaped stress slice.
 
 ## 3. Trace events and auditability
 
-Event type `regime_switch` with payload from_regime, to_regime, reason. Emitted by meta-controller; replay can reconstruct regime history. MetaAdapter (`adapters/meta_adapter.py`) runs scenario, evaluates switch criteria from report (fault count, p95), injects regime_switch event into trace.
+Event type `regime_switch` is emitted on each switch; replay reconstructs regime history. This supports C2 and integration tests.
 
-## 4. Regime-stress scenario and evaluation
+## 4. Regime-stress evaluation and current headline numbers
 
-**Headline:** Under regime_stress_v0 and regime_stress_v1, the meta-controller switches on measurable stress (fault_count, latency_p95, contention proxy), preserves `no_safety_regression`, and reports **non-inferior collapse counts vs fixed** (`meta_non_worse_collapse`); **strict** reduction and paired binary tests are in `collapse_paired_analysis` / `excellence_metrics` (comparison.json). Naive baseline collapse_count is exported in Table 1 when `--run-naive` is used.
-
-**Key results.** (1) `success_criteria_met.trigger_met`: `no_safety_regression` and **non-inferior collapse counts** (`meta_non_worse_collapse`); (2) `no_safety_regression`: meta >= 90% of fixed tasks_completed; (3) When non-vacuous, `run_manifest.stress_selection_policy` documents the pre-specified rule choosing `drop_completion_prob`; (4) `meta_strictly_reduces_collapse`, McNemar p-value, Wilson CIs for marginal collapse rates; (5) Excellence metrics: `collapse_reduction_vs_fixed`, `switch_audit_trail_total`, bootstrap `difference_ci95` for paired tasks_completed; (6) With `--fallback-adapter retry_heavy`: `fallback_tasks_completed_mean` (two real regimes); (7) robustness matrix (`campaign_summary.json`) confirms observable switching under fault-, latency-, and contention-driven profiles and bounded thrashing under higher hysteresis. Publishable run uses `run_paper_experiments.py --paper P8` (per-scenario collapse_sweep then meta_eval `--non-vacuous`, v0 and v1) or `scripts/p8_robustness_campaign.py` for the matrix. When collapse_count = 0 under a sweep: present as methodology and auditability only. *Numbers from comparison.json, collapse_sweep.json, and campaign_summary.json. See [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).*
-
-`bench/maestro/scenarios/regime_stress_v0.yaml`: high fault load to trigger meta-controller. Evaluation: `scripts/meta_eval.py` with `--run-naive` and `--fault-threshold 0` compares fixed (CentralizedAdapter), meta-controller, and naive switching baseline. Output: `comparison.json` (fixed, meta_controller, naive_switch_baseline, meta_reduces_collapse, no_safety_regression). **Two real coordination algorithms:** With `--fallback-adapter retry_heavy`, the primary regime (Centralized) and the fallback (RetryHeavy) are architecturally different (retry-on-drop vs no retry); when a switch is decided, the fallback adapter is run and `fallback_tasks_completed` is recorded in trace metadata and in comparison.json (`fallback_tasks_completed_mean`). So "meta switches regime" is an empirical claim about different algorithms; use `--fallback-adapter retry_heavy` for tables comparing tasks_completed and collapse for regime A vs regime B.
-
-**Table 1 — Comparison (fixed vs meta vs naive).** Source: `datasets/runs/meta_eval/comparison.json`. Units: tasks_completed_mean (count), collapse_count, regime_switch_count_total. Run_manifest in comparison.json. Run meta_eval.py --run-naive --fault-threshold 0 (optionally --non-vacuous) to regenerate. From non-vacuous run (collapse_count > 0) when available; see Reproducibility.
-
-**Submission note (Table 1).** The numbers in Table 1 must come from a non-vacuous run: run `meta_collapse_sweep` then `meta_eval --run-naive --fault-threshold 0 --non-vacuous`. If no drop_prob in the sweep yields collapse_count > 0, do not claim "meta reduces collapse"; present Table 1 as methodology and auditability only and state so in the table caption or the first paragraph of Section 4. The latest comparison.json used here has `run_manifest.non_vacuous=true`, `drop_completion_prob=0.15`, and `collapse_count=1` for fixed and meta; success_criteria_met.trigger_met and no_safety_regression are true.
+**Primary `comparison.json` (regime_stress_v0, evaluation seeds 11–30, `drop_completion_prob` 0.35, `retry_heavy`, non-vacuous `max_drop_any_collapse`).** Table 1 aggregates (see also `papers/P8_MetaCoordination/generated_tables.md`):
 
 | Regime | tasks_completed_mean | collapse_count | regime_switch_count_total |
-|--------|----------------------|----------------|---------------------------|
-| fixed (Centralized) | 3.40 | 1 | — |
-| meta_controller | 3.40 | 1 | 8 |
-| naive (fault_threshold=0) | 3.40 | 1 | 8 |
+|--------|------------------------|----------------|---------------------------|
+| fixed (Centralized) | 2.70 | 1 | — |
+| meta_controller | 3.45 | 0 | 8 |
+| naive (fault_threshold=0) | 3.85 | 0 | 17 |
 
-**Results summary (excellence metrics).** From comparison.json: **non-inferior collapse counts** (`meta_non_worse_collapse`); **strict improvement** (`meta_strictly_reduces_collapse`); **paired binary** (McNemar, Wilson CIs in `collapse_paired_analysis`); **no_safety_regression**; **switch audit trail** (regime_switch_count_total in trace). See [STANDARDS_OF_EXCELLENCE.md](../docs/STANDARDS_OF_EXCELLENCE.md) (P8).
+**Paired collapse (same seeds):** `collapse_paired_analysis` has `fixed_collapse_count` = 1, `meta_collapse_count` = 0 → **`meta_non_worse_collapse`** and **`meta_strictly_reduces_collapse`** true; **`trigger_met`** true with **`no_safety_regression`** true. McNemar two-sided *p* is 1.0 on discordant pairs when discordant counts are small; Wilson CIs on marginal rates are still reported.
 
-**Non-vacuous evaluation.** Under default stress, collapse_count may be 0, so "meta reduces collapse" is vacuously true. For a meaningful trigger: (1) run `meta_collapse_sweep.py --drop-probs 0.2,0.25,0.3,0.35 --seeds 1,2,...,20` (or default 20 seeds); (2) from collapse_sweep.json choose a drop_prob where collapse_count > 0; (3) run `meta_eval.py --run-naive --fault-threshold 0 --drop-prob <that_drop_prob>`. Exact commands are in the Reproducibility block (Section 7).
+**Recovery / safety row (meta arm):** `time_to_recovery_ms_mean` ≈ 106 ms when aggregated; PONR and safety violation totals 0 in the checked-in bundle (`generated_tables.md`).
 
-**Table 2 — Per-seed.** Per-seed tasks_completed (count), regime_switch_count, collapse. Run_manifest in comparison.json. Regenerate with `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json --table2`.
+**Interpretation.** Under this pre-specified stress, meta is **strictly better** than fixed on paired collapse counts while meeting the safety proxy. The naive arm completes more tasks on average but switches more aggressively; the paper treats naive as a **diagnostic** baseline, not the safety anchor.
 
-**Table 3 — Robustness campaign matrix (C1-C3).** Source: `datasets/runs/meta_eval/robustness_campaign/campaign_summary.json`. Rows cover two scenarios and signal-specific profiles (fault, latency, contention) plus hysteresis ablations. Reported columns include non-vacuous drop calibration, fixed/meta collapse counts, non-inferiority/strict flags, no_safety_regression, switch totals, and trace-derived switch reasons. For the current campaign run, `C1`/`C2`/`C3` are all supported (`campaign_summary.success_criteria_met.all_claims_supported=true`), with 10 switch-observed profiles and non-vacuous baseline runs in both scenarios (`drop_completion_prob` 0.15 in v0, 0.20 in v1).
+## 5. Contribution and related work
 
-**Thrashing vs hysteresis (empirical).** Run meta_eval with `--hysteresis 1`, `--hysteresis 2`, and `--hysteresis 3` (same seeds and drop_prob); comparison.json reports `excellence_metrics.switch_audit_trail_total` and fixed/meta collapse_count. Build a small table: hysteresis H=1, H=2, H=3 vs regime_switch_count_total and collapse_count. With hysteresis H ≥ 2, thrashing is typically bounded (switch count lower). In the campaign matrix (Table 3), H=1 shows 8 switches while H=3 shows 3 switches in both scenarios, with no safety regression. Kernel lemma: `kernel/meta/META_CONTROLLER_SPEC.v0.1.md` states that with hysteresis_consecutive = K, fault-driven switching requires K consecutive fault observations, reducing rapid toggling. **Figure 1 — Collapse sweep.** tasks_completed (mean, count) and collapse rate vs drop_completion_prob (fraction, or % when scaled) from collapse_sweep.json. Run_manifest in collapse_sweep.json. Regenerate: `python scripts/meta_collapse_sweep.py` then `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (output `docs/figures/p8_meta_collapse.png`).
-
-## 5. Contribution to the literature and comparison to prior work
-
-**Contribution to the literature.** Meta-learning and regime-switching work often focus on regret or bandit policy selection; fault-tolerant control often focuses on Lyapunov or mode-dependent dynamics with closed-loop guarantees. We contribute (1) **auditability**: every regime_switch is logged in the trace with reason (fault_count, latency_p95, contention_index) so that mode changes are justified and replayable; (2) **PONR invariance**: safety constraints (e.g. no Tier 2/3 actuation without authorization) are preserved across switches; (3) comparison to **fixed and naive baselines** and, with `--fallback-adapter retry_heavy`, to a **second real coordination algorithm** (RetryHeavy vs Centralized); (4) when collapse occurs we report collapse reduction; when it does not we report methodology and auditability only. We do not claim learning-theoretic or control-theoretic optimality.
-
-| Aspect | P8 (this work) | Context-dependent / MAB policy selection | Fault-tolerant control mode switching |
-|--------|----------------|------------------------------------------|----------------------------------------|
-| Switch criterion | Threshold-based (fault_count, latency_p95, contention_index) | Often regret or bandit reward | Stability / Lyapunov or heuristic |
-| Execution path | Thin-slice; with --fallback-adapter two real regimes | Policy selects among options | Mode switch changes controller |
-| **Auditability** | **regime_switch events in trace; PONR invariant** | Varies | Often closed-loop only |
-| Safety | no_safety_regression (meta >= 90% fixed) | Learning-theoretic bounds (when present) | Control-theoretic guarantees |
-
-We emphasize auditability and PONR invariance; no claim to learning or control-theoretic optimality.
+We emphasize **trace-level auditability** and **PONR invariance** under explicit switching rules, with statistical reporting suited to **paired** collapse outcomes and marginal Wilson bounds. We do not claim learning-theoretic optimality.
 
 ## 6. Limitations
 
-Scope and conditional triggers: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md). Per-paper:
+See [`EXPERIMENTS_AND_LIMITATIONS.md`](../docs/EXPERIMENTS_AND_LIMITATIONS.md) and [`CONDITIONAL_TRIGGERS.md`](../docs/CONDITIONAL_TRIGGERS.md) (P8). Thin-slice harness only; external validity beyond MAESTRO stress YAMLs is open. Latency-only isolation rows in the robustness campaign may show **ties** on strict collapse improvement while still exhibiting latency-driven switches; the baseline non-vacuous rows carry the primary strict-reduction evidence.
 
-- **Conditional paper:** Trigger requires meta to beat best fixed regime in at least one stress regime with no safety regression (trigger_met, no_safety_regression in comparison.json). If collapse_count is 0 under default settings, trigger is vacuous; run collapse_sweep then meta_eval with higher drop_prob for non-vacuous evaluation. When collapse_count = 0, present results as methodology and auditability only; do not claim "meta reduces collapse." See [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md) (P8).
-- **Two-regime comparison:** When `--fallback-adapter retry_heavy` is used, the fallback regime (RetryHeavy) is a distinct coordination algorithm; comparison.json then reports fallback_tasks_completed_mean and supports the claim that meta switches between two real algorithms. Without --fallback-adapter, meta and naive differ only by regime_switch event injection (same thin-slice execution).
-- **Collapse may not be observed:** Under default stress (e.g. drop_completion_prob=0.15), tasks_completed may stay above threshold so collapse_count = 0; "meta reduces collapse" is then vacuously true. For non-vacuous evaluation, run `meta_collapse_sweep.py` to find a drop_prob where collapse occurs, then run `meta_eval.py` with that drop_prob (see Reproducibility).
-- **Toy:** Thin-slice only; no real stress (e.g. network partitions). With --fallback-adapter, two real algorithms (e.g. Centralized vs RetryHeavy) are compared.
-- **Future work:** Additional fallback options beyond retry_heavy; regret-based or safety-bound-based switch criterion; real stress (e.g. network partitions). See kernel/meta/META_CONTROLLER_SPEC.v0.1.md.
+## 7. Methodology and commands (copy-paste)
 
-**Threats to validity.** *Internal:* Default tables use regime_stress_v0; publishable pipeline also emits regime_stress_v1 under `scenario_regime_stress_v1/`; with `--fallback-adapter retry_heavy` a second coordination algorithm is wired. *External:* Generalization to other regimes or real stress (e.g. network partitions) is untested. *Construct:* collapse_count and tasks_completed below threshold are proxies for regime collapse; no control-theoretic stability measure.
+**Portfolio P8:**
 
-## 7. Methodology and reproducibility
+`PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experiments.py --paper P8`
 
-**Methodology:** Hypothesis—meta-controller reduces collapse vs best fixed regime under compound faults; PONRs remain invariant. Metrics: regime_switch count, collapse (e.g. tasks_completed below threshold), mode-thrashing rate. Kill criterion: safety regression at PONRs or audit gap (regime change not logged). Baselines: best fixed regime, naive switching. Portfolio criteria: `docs/STATE_OF_THE_ART_CRITERIA.md`.
+**Verifier (primary):**
 
-**Publishable run:** For publishable Table 1, use **non-vacuous** evaluation: `run_paper_experiments.py --paper P8` runs (1) meta_collapse_sweep.py (20 seeds, drop_probs 0.15–0.3), (2) meta_eval.py --run-naive --fault-threshold 0 --non-vacuous --fallback-adapter retry_heavy so Table 1 uses a drop_prob where collapse_count > 0 and two real regimes are compared. If no drop_prob in the sweep has collapse, present Table 1 as methodology and auditability only. **For submission:** verify comparison.json has `success_criteria_met.trigger_met` true and `no_safety_regression` true for the run used for tables; state in the draft that the conditional trigger is met, or present as methodology/auditability only per [CONDITIONAL_TRIGGERS.md](../docs/CONDITIONAL_TRIGGERS.md) (P8).
+`PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/verify_p8_meta_artifacts.py --comparison datasets/runs/meta_eval/comparison.json --sweep datasets/runs/meta_eval/collapse_sweep.json --strict-publishable`
 
-**Reproducibility:** Run full eval: `python scripts/meta_eval.py --run-naive --fault-threshold 0` (writes `datasets/runs/meta_eval/comparison.json`). Tables: `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/comparison.json` (add `--table2` for per-seed). Figure 1: `python scripts/meta_collapse_sweep.py` then `python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (Wilson bands on collapse rate; t-CI on mean tasks_completed). Schema check: `python scripts/verify_p8_meta_artifacts.py --comparison datasets/runs/meta_eval/comparison.json` (add `--sweep` / `--strict-publishable` as needed). Run manifests: comparison.json (`schema_version`, seeds, scenario_id, fault_threshold, `stress_selection_policy` when `--non-vacuous`, success_criteria_met, excellence_metrics, collapse_paired_analysis); collapse_sweep.json (`schema_version`, seeds, drop_probs, scenario_id). For a **non-vacuous trigger**: (1) `meta_collapse_sweep.py` (optionally `--scenario regime_stress_v1` and wider `--drop-probs` for v1); (2) `meta_eval.py --run-naive --fault-threshold 0 --non-vacuous` with matching `--scenario` and `--out`. Optionally `--fallback-adapter retry_heavy`. For a **robustness campaign** (Table 3): run `python scripts/p8_robustness_campaign.py --strict-publishable` (writes `datasets/runs/meta_eval/robustness_campaign/campaign_summary.json`) and export via `python scripts/export_meta_tables.py --comparison datasets/runs/meta_eval/robustness_campaign/regime_stress_v0/baseline_non_vacuous/comparison.json --campaign datasets/runs/meta_eval/robustness_campaign/campaign_summary.json`. Integration tests: `tests/test_meta_p8.py`, `tests/test_stats_p8_tools.py`. Scenario YAMLs: `bench/maestro/scenarios/regime_stress_v0.yaml`, `regime_stress_v1.yaml`. Spec: `kernel/meta/META_CONTROLLER_SPEC.v0.1.md`.
+**Robustness campaign:**
+
+`PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/p8_robustness_campaign.py --strict-publishable`
+
+**Manual equivalent (v0 only, illustrative):**
+
+1. `python scripts/meta_collapse_sweep.py --out datasets/runs/meta_eval --scenario regime_stress_v0 --drop-probs 0.15,0.2,0.25,0.3,0.35 --seeds 1,2,3,4,5,6,7,8,9,10`  
+2. `python scripts/meta_eval.py --out datasets/runs/meta_eval --scenario regime_stress_v0 --seeds 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30 --run-naive --non-vacuous --non-vacuous-select max_drop_any_collapse --fallback-adapter retry_heavy --collapse-sweep-path datasets/runs/meta_eval/collapse_sweep.json --calibration-seeds 1,2,3,4,5,6,7,8,9,10`
+
+**Tests:** `tests/test_meta_p8.py`, `tests/test_stats_p8_tools.py`.
 
 ---
 
@@ -97,8 +94,7 @@ Scope and conditional triggers: [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIM
 
 | Claim | Artifact / backing |
 |-------|---------------------|
-| C1 Spec + impl | META_CONTROLLER_SPEC, decide_switch, regime_switch_event |
-| C2 PONRs + audit | Safety condition in spec; regime_switch payload (from_regime, to_regime, reason) |
-| C3 Scenario + adapter | regime_stress_v0/v1, MetaAdapter trace events, comparison.json (`meta_non_worse_collapse`, `meta_strictly_reduces_collapse`, `collapse_paired_analysis`) |
-| Two regimes (optional) | With --fallback-adapter retry_heavy, comparison.json reports fallback_tasks_completed_mean; two real algorithms compared |
-| Collapse may be vacuous | Use --non-vacuous for publishable; otherwise present as methodology/auditability only |
+| C1 Spec + impl | `META_CONTROLLER_SPEC`, `decide_switch`, `regime_switch` events, campaign latency/contention rows |
+| C2 PONRs + audit | Trace schema; MetaAdapter; `campaign_summary.json` |
+| C3 Scenario + paired collapse | `comparison.json` (`collapse_paired_analysis`, `meta_non_worse_collapse`, `meta_strictly_reduces_collapse`), `collapse_sweep.json`, campaign baseline rows |
+| Two regimes | `--fallback-adapter retry_heavy`, `fallback_tasks_completed_mean`, outcome attribution fields |

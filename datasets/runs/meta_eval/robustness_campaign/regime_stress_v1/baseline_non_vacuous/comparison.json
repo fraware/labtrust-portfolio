@@ -2,7 +2,7 @@
   "schema_version": "p8_meta_eval_v0.3",
   "scenario_id": "regime_stress_v1",
   "drop_completion_prob": 0.4,
-  "fault_threshold": 0,
+  "fault_threshold": 1,
   "seeds": [
     1,
     2,
@@ -25,7 +25,7 @@
     19,
     20
   ],
-  "collapse_definition": "tasks_completed < 2 or recovery_ok false; meta arm attributes to fallback run when a switch occurs and --fallback-adapter is set (see outcome_attribution_note).",
+  "collapse_definition": "tasks_completed < 2 or recovery_ok false; meta arm uses fallback metrics after switch when --fallback-adapter is set (see outcome_attribution_note).",
   "collapse_threshold": 2,
   "outcome_attribution_note": "When --fallback-adapter is set and the meta-controller switches, evaluated tasks_completed, recovery_ok, time_to_recovery_ms, and safety counters for the meta arm are taken from the fallback adapter run; the fixed arm is always the centralized thin-slice run only.",
   "recovery_latency_note": "time_to_recovery_ms is the MAESTRO metric from the evaluated regime's report (fault-to-recovery latency in the thin-slice harness); null when no recovery event is recorded.",
@@ -57,7 +57,7 @@
     "scenario_id": "regime_stress_v1",
     "drop_completion_prob": 0.4,
     "collapse_threshold": 2,
-    "fault_threshold": 0,
+    "fault_threshold": 1,
     "hysteresis_consecutive": 1,
     "latency_threshold_ms": 200.0,
     "contention_threshold": 1.5,
@@ -69,7 +69,7 @@
     "stress_selection_policy": {
       "rule_id": "largest_drop_prob_with_any_collapse",
       "description": "Choose the maximum drop_completion_prob in the sweep grid such that the fixed (centralized) regime still has at least one collapsed run in collapse_sweep.json per_run (stronger compound-fault stress).",
-      "source_path": "datasets\\runs\\meta_eval\\robustness_campaign\\regime_stress_v1\\sweep\\collapse_sweep.json",
+      "source_path": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\meta_eval\\robustness_campaign\\regime_stress_v1\\sweep\\collapse_sweep.json",
       "source_path_repo_relative": "datasets/runs/meta_eval/robustness_campaign/regime_stress_v1/sweep/collapse_sweep.json",
       "chosen_drop_completion_prob": 0.4,
       "calibration_note": "Selection uses the sweep artifact only; evaluation seeds may differ from sweep seeds unless the same --seeds list is used for both scripts."
@@ -271,15 +271,15 @@
     ]
   },
   "meta_controller": {
-    "tasks_completed_mean": 3.8,
-    "tasks_completed_stdev": 0.41039134083406165,
+    "tasks_completed_mean": 3.55,
+    "tasks_completed_stdev": 0.5104177855340404,
     "tasks_completed_ci95": [
-      3.6079331476035654,
-      3.992066852396434
+      3.3111198684761702,
+      3.7888801315238294
     ],
     "tasks_completed_ci95_method": "student_t_equal_tailed_95",
     "collapse_count": 0,
-    "time_to_recovery_ms_mean": 72.90737029548418,
+    "time_to_recovery_ms_mean": 83.46632999544947,
     "ponr_violation_count_total": 0,
     "safety_violation_count_total": 0,
     "per_seed": [
@@ -298,12 +298,12 @@
       {
         "seed": 2,
         "tasks_completed": 3,
-        "regime_switch_count": 1,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 3,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 74.04132266277374,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
@@ -333,25 +333,25 @@
       },
       {
         "seed": 5,
-        "tasks_completed": 4,
-        "regime_switch_count": 1,
+        "tasks_completed": 3,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 4,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 77.96331295787157,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
       {
         "seed": 6,
-        "tasks_completed": 4,
-        "regime_switch_count": 1,
+        "tasks_completed": 3,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 4,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 53.46623860959629,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
@@ -393,13 +393,13 @@
       },
       {
         "seed": 10,
-        "tasks_completed": 4,
-        "regime_switch_count": 1,
+        "tasks_completed": 3,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 4,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 118.86773426668651,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
@@ -429,25 +429,25 @@
       },
       {
         "seed": 13,
-        "tasks_completed": 4,
-        "regime_switch_count": 1,
+        "tasks_completed": 3,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 4,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 34.2755299230051,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
       {
         "seed": 14,
-        "tasks_completed": 4,
-        "regime_switch_count": 1,
+        "tasks_completed": 3,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 4,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 18.75235403707659,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
@@ -490,12 +490,12 @@
       {
         "seed": 18,
         "tasks_completed": 3,
-        "regime_switch_count": 1,
+        "regime_switch_count": 0,
         "collapse": false,
         "recovery_ok": true,
-        "fallback_tasks_completed": 3,
-        "outcome_source": "fallback_regime_after_switch",
-        "time_to_recovery_ms": 37.954462311691934,
+        "fallback_tasks_completed": null,
+        "outcome_source": "primary_thin_slice",
+        "time_to_recovery_ms": null,
         "ponr_violation_count": 0,
         "safety_violation_count": 0
       },
@@ -551,7 +551,7 @@
   "meta_strictly_reduces_collapse": true,
   "meta_reduces_collapse": true,
   "no_safety_regression": true,
-  "fallback_tasks_completed_mean": 3.764705882352941,
+  "fallback_tasks_completed_mean": 3.8,
   "success_criteria_met": {
     "no_safety_regression": true,
     "meta_reduces_collapse": true,
@@ -560,24 +560,24 @@
     "trigger_met": true
   },
   "excellence_metrics": {
-    "difference_mean": 1.25,
+    "difference_mean": 1.0,
     "difference_ci95": [
-      0.9,
-      1.6
+      0.6,
+      1.4
     ],
     "difference_ci95_method": "bootstrap_paired_resample_pairs",
-    "difference_ci_width": 0.7,
-    "paired_t_p_value": 0.0,
+    "difference_ci_width": 0.8,
+    "paired_t_p_value": 0.0004,
     "paired_continuous_note": "difference_mean is mean(meta tasks_completed - fixed tasks_completed) over seeds; difference_ci95 is bootstrap on paired resampling; paired_t_p_value is two-tailed.",
     "alpha": 0.05,
-    "power_post_hoc": 1.0,
-    "cohens_d": 1.8087,
+    "power_post_hoc": 0.9918,
+    "cohens_d": 1.3819,
     "collapse_reduction_vs_fixed": 2,
     "collapse_outcome_non_worse": true,
     "collapse_outcome_strict_improvement": true,
     "mcnemar_exact_p_value_two_sided": 0.5,
     "no_safety_regression": true,
-    "switch_audit_trail_total": 17,
+    "switch_audit_trail_total": 10,
     "trigger_met": true
   },
   "naive_switch_baseline": {
