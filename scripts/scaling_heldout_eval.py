@@ -279,8 +279,19 @@ def run_eval_for_target(
     overall_feat_mae = (
         sum(r["feat_baseline_mae"] for r in results) / len(results) if results else 0.0
     )
+    reg_missing_folds = [
+        str(r.get("holdout_label", "unknown"))
+        for r in results
+        if r.get("regression_mae") is None
+    ]
     reg_maes = [r["regression_mae"] for r in results if r.get("regression_mae") is not None]
-    overall_reg_mae = sum(reg_maes) / len(reg_maes) if reg_maes else None
+    # Strict protocol-level semantics:
+    # if any fold cannot fit regression, do not publish a protocol-level regression MAE.
+    overall_reg_mae = (
+        sum(reg_maes) / len(reg_maes)
+        if reg_maes and not reg_missing_folds
+        else None
+    )
     prior_maes = [r["prior_model_mae"] for r in results if r.get("prior_model_mae") is not None]
     overall_prior_mae = sum(prior_maes) / len(prior_maes) if prior_maes else None
     stump_maes = [r["stump_mae"] for r in results if r.get("stump_mae") is not None]
@@ -338,6 +349,10 @@ def run_eval_for_target(
     test_n_total = sum(r["test_n"] for r in results)
     eps = 1e-9
     reg_beats = overall_reg_mae is not None
+    regression_protocol_invalid = bool(reg_missing_folds)
+    if regression_protocol_invalid:
+        # Do not average PI coverage across folds when protocol-level regression is undefined.
+        mean_pi_cov = None
     beat_global = reg_beats and overall_reg_mae < overall_mae - eps
     beat_feat = reg_beats and overall_reg_mae < overall_feat_mae - eps
     beat_regime = reg_beats and overall_reg_mae < overall_regime_train_mae - eps
@@ -369,8 +384,16 @@ def run_eval_for_target(
             "per_scenario_mean_including_test_mae": overall_oracle_ps_mae,
         },
         "regression_skipped_reason": (
-            "train_n < k or singular; see run_manifest.train_n_total"
-            if overall_reg_mae is None else None
+            (
+                "at least one held-out fold could not fit regression; "
+                "protocol-level trigger invalid; missing_folds="
+                + ",".join(reg_missing_folds)
+            )
+            if regression_protocol_invalid
+            else (
+                "train_n < k or singular; see run_manifest.train_n_total"
+                if overall_reg_mae is None else None
+            )
         ),
         "overall_collapse_rate": overall_collapse_rate,
         "overall_baseline_mae_ci95_lower": overall_mae - ci_half,
@@ -392,11 +415,21 @@ def run_eval_for_target(
             "beat_regime_baseline_out_of_sample": beat_regime,
             "beat_agent_count_baseline_out_of_sample": beat_agent,
             "beat_oracle_per_scenario_baseline": beat_oracle_ps,
-            "trigger_met": bool(beat_global and beat_feat and beat_regime),
-            "negative_result": bool(
-                reg_beats
-                and not (beat_global and beat_feat and beat_regime)
+            "trigger_met": (
+                False
+                if regression_protocol_invalid
+                else bool(beat_global and beat_feat and beat_regime)
             ),
+            "negative_result": (
+                True
+                if regression_protocol_invalid
+                else bool(
+                    reg_beats
+                    and not (beat_global and beat_feat and beat_regime)
+                )
+            ),
+            "regression_protocol_valid": not regression_protocol_invalid,
+            "regression_missing_fold_labels": reg_missing_folds,
             "legacy_beat_baseline_out_of_sample": beat_global or beat_feat,
         },
     }

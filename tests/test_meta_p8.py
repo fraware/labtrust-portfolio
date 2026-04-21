@@ -133,8 +133,6 @@ class TestMetaEvalIntegration(unittest.TestCase):
                     "--out",
                     str(out_dir),
                     "--run-naive",
-                    "--fault-threshold",
-                    "0",
                     "--seeds",
                     "1,2,3",
                 ],

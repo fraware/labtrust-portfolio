@@ -26,7 +26,7 @@ Paper owners are TBD unless set in the board.
 | P2 | REP-CPS Profile | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
 | P3 | Replay levels + nondeterminism detection | core-kernel | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
 | P4 | CPS-MAESTRO Benchmark | core-kernel | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
-| P5 | Scaling Laws (coordination tax) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
+| P5 | Scaling Laws (coordination tax) | conditional | TBD | Draft | Publishable freeze verified 2026-04-20 (`papers/P5_ScalingLaws/PHASE3_PASSED.md`); headline metrics tied to `run_manifest.commit` in `scaling_eval/heldout_results.json`; submission prep. |
 | P6 | LLM Planning (typed plans + validators) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
 | P7 | Standards Mapping (assurance pack) | core-kernel | TBD | Draft | Phase 3 passed (2025-03-11). Submission prep; venue adaptation. |
 | P8 | Meta-Coordination (regime switching) | conditional | TBD | Draft | Phase 3 passed (2025-03-11). Evidence: dual-scenario publishable run, `verify_p8_meta_artifacts`, tiered collapse claims; submission prep per PRE_SUBMISSION_CHECKLIST. |

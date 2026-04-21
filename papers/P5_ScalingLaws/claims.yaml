@@ -54,7 +54,7 @@ claims:
       confidence: "low"
       artifact_paths:
         - "datasets/runs/scaling_recommend/recommendation_eval.json"
-        - "scripts/scaling_recommend.py"
+        - "scripts/scaling_recommend_eval.py"
         - "datasets/runs/scaling_eval/heldout_results.json"
       table_ids: ["Table 3", "Table 6"]
       figure_ids: ["Figure 4"]

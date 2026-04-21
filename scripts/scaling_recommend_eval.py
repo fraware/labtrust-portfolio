@@ -83,12 +83,11 @@ def main() -> int:
     regrets: List[float] = []
     brier_terms: List[float] = []
 
+    feats = list(DEFAULT_FEATURE_COLS_P5)
     for _held, train_rows, test_rows in folds:
-        pred_col = fit_linear_predictor(
-            train_rows,
-            "collapse_probability",
-            list(DEFAULT_FEATURE_COLS_P5),
-        )
+        pred_tc = fit_linear_predictor(train_rows, "tasks_completed", feats)
+        pred_cp = fit_linear_predictor(train_rows, "collapse_probability", feats)
+        pred_col = pred_cp
         for r in test_rows:
             k = p5_group_key(r)
             pool = groups.get(k, [])
@@ -103,6 +102,8 @@ def main() -> int:
                 train_rows,
                 r,
                 agent_count=ac,
+                fitted_tasks_predictor=pred_tc,
+                fitted_collapse_predictor=pred_cp,
             )
             rec = bundle.get("recommended_regime")
             total += 1

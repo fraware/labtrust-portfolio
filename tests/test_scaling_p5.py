@@ -297,6 +297,62 @@ class TestScalingModule(unittest.TestCase):
         self.assertEqual(rows[0].get("agent_count"), 1)
         self.assertEqual(rows[0].get("coordination_regime"), "centralized")
 
+    def test_regime_bundle_prefitted_predictors_match(self) -> None:
+        if fit_linear_predictor is None:
+            self.skipTest("scaling module not importable")
+        from labtrust_portfolio.scaling import (
+            DEFAULT_FEATURE_COLS_P5,
+            regime_recommendation_bundle,
+        )
+
+        feats = list(DEFAULT_FEATURE_COLS_P5)
+        train_rows = []
+        for i in range(20):
+            train_rows.append({
+                "num_tasks": 3 + (i % 4),
+                "num_faults": 1,
+                "tool_density": 0.4,
+                "agent_count": 2,
+                "regime_id": 1.0,
+                "hierarchy_depth": 2,
+                "fan_out": 2,
+                "queue_contention_index": 0.3,
+                "shared_state_contention": 0.2,
+                "response": {
+                    "tasks_completed": float(i),
+                    "collapse_probability": 0.05 + i * 0.01,
+                },
+                "scenario_id": "lab_profile_v0",
+                "coordination_regime": "centralized",
+            })
+        template = dict(train_rows[5])
+        pred_tc = fit_linear_predictor(train_rows, "tasks_completed", feats)
+        pred_cp = fit_linear_predictor(
+            train_rows, "collapse_probability", feats,
+        )
+        self.assertIsNotNone(pred_tc)
+        self.assertIsNotNone(pred_cp)
+        b1 = regime_recommendation_bundle(train_rows, template, agent_count=2)
+        b2 = regime_recommendation_bundle(
+            train_rows,
+            template,
+            agent_count=2,
+            fitted_tasks_predictor=pred_tc,
+            fitted_collapse_predictor=pred_cp,
+        )
+        self.assertEqual(b1["recommended_regime"], b2["recommended_regime"])
+        self.assertEqual(len(b1["per_regime"]), len(b2["per_regime"]))
+        for p, q in zip(b1["per_regime"], b2["per_regime"]):
+            self.assertEqual(p["regime"], q["regime"])
+            self.assertAlmostEqual(
+                p["pred_tasks_completed"], q["pred_tasks_completed"], places=5,
+            )
+            self.assertAlmostEqual(
+                p["pred_collapse_probability"],
+                q["pred_collapse_probability"],
+                places=5,
+            )
+
 
 class TestScalingBaselines(unittest.TestCase):
     """Oracle vs admissible predict_by_scenario semantics."""

@@ -46,3 +46,21 @@ datasets/releases/**
 !datasets/releases/p4_publishable_v1/p4_recovery_times.json
 !datasets/releases/p4_publishable_v1/p4_safety_violations.json
 !datasets/releases/p4_publishable_v1/p4_efficiency_messages_per_task.json
+# P5 Scaling Laws frozen empirical summary (tracked explicitly)
+!datasets/runs/scaling_summary/
+!datasets/runs/scaling_summary/regime_agent_summary.json
+# P5 Scaling Laws frozen held-out eval + sweep (single coherent freeze; paths explicit)
+!datasets/runs/scaling_eval/
+!datasets/runs/scaling_eval/heldout_results.json
+!datasets/runs/scaling_eval_family/
+!datasets/runs/scaling_eval_family/heldout_results.json
+!datasets/runs/scaling_eval_regime/
+!datasets/runs/scaling_eval_regime/heldout_results.json
+!datasets/runs/scaling_eval_agent_count/
+!datasets/runs/scaling_eval_agent_count/heldout_results.json
+!datasets/runs/scaling_eval_fault/
+!datasets/runs/scaling_eval_fault/heldout_results.json
+!datasets/runs/sensitivity_sweep/
+!datasets/runs/sensitivity_sweep/scaling_sensitivity.json
+!datasets/runs/scaling_recommend/
+!datasets/runs/scaling_recommend/recommendation_eval.json

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from .hashing import sha256_file, sha256_bytes
 
@@ -42,6 +42,7 @@ def build_evidence_bundle(
     verification_mode: str = "evaluator",
     redaction_manifest: Dict[str, Any] | None = None,
     artifact_display_paths: List[str] | None = None,
+    artifact_hashes: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     if len(artifacts) != len(schema_ids):
         raise ValueError("artifacts and schema_ids must have same length")
@@ -52,6 +53,8 @@ def build_evidence_bundle(
         raise ValueError(
             "artifact_display_paths must have same length as artifacts"
         )
+    if artifact_hashes is not None and len(artifact_hashes) != len(artifacts):
+        raise ValueError("artifact_hashes must have same length as artifacts")
 
     items = []
     for i, (p, sid) in enumerate(zip(artifacts, schema_ids)):
@@ -60,9 +63,14 @@ def build_evidence_bundle(
             if artifact_display_paths is not None
             else str(p.as_posix())
         )
+        digest = (
+            artifact_hashes[i]
+            if artifact_hashes is not None
+            else sha256_file(p)
+        )
         items.append({
             "path": item_path,
-            "sha256": sha256_file(p),
+            "sha256": digest,
             "schema_id": sid,
         })
 

@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-P8 Meta-Coordination: comparison eval. Run regime_stress_v0/v1 with high fault;
-compare CentralizedAdapter (fixed) vs MetaAdapter. Collapse = tasks_completed
-below threshold. Writes datasets/runs/meta_eval/comparison.json.
+P8 Meta-Coordination: comparison eval for regime_stress_*, lab_profile_v0, etc.
+
+When --fallback-adapter is set and the meta-controller switches, evaluated metrics
+for the meta arm use the fallback adapter run (schema p8_meta_eval_v0.3).
+
+Collapse = tasks_completed below threshold or recovery_ok false. Writes comparison.json.
 """
 from __future__ import annotations
 
@@ -29,9 +32,71 @@ ALLOWED_META_SCENARIOS = frozenset(
         "traffic_v0",
     }
 )
-SCHEMA_VERSION = "p8_meta_eval_v0.2"
+SCHEMA_VERSION = "p8_meta_eval_v0.3"
 # Collapse proxy: tasks_completed below this (no safety claim)
 DEFAULT_COLLAPSE_THRESHOLD = 2
+
+
+def _metrics_from_report(report: dict) -> dict:
+    m = report.get("metrics", {}) or {}
+    faults = report.get("faults", {}) or {}
+    safety = report.get("safety", {}) or {}
+    return {
+        "tasks_completed": int(m.get("tasks_completed", 0)),
+        "recovery_ok": faults.get("recovery_ok", True),
+        "time_to_recovery_ms": m.get("time_to_recovery_ms"),
+        "ponr_violation_count": int(safety.get("ponr_violation_count", 0) or 0),
+        "safety_violation_count": int(safety.get("safety_violation_count", 0) or 0),
+    }
+
+
+def _effective_meta_outcome(
+    meta_trace: dict,
+    maestro_report: dict,
+    threshold: int,
+    *,
+    use_fallback_when_switched: bool,
+) -> tuple[int, bool, dict]:
+    md = meta_trace.get("metadata") or {}
+    switched = int(md.get("regime_switch_count", 0)) > 0
+    fb_tasks = md.get("fallback_tasks_completed")
+    if use_fallback_when_switched and switched and fb_tasks is not None:
+        tasks = int(fb_tasks)
+        recovery_ok = md.get("fallback_recovery_ok", True)
+        if recovery_ok is None:
+            recovery_ok = True
+        collapse = (tasks < threshold) or (recovery_ok is False)
+        detail = {
+            "recovery_ok": recovery_ok,
+            "time_to_recovery_ms": md.get("fallback_time_to_recovery_ms"),
+            "ponr_violation_count": int(md.get("fallback_ponr_violation_count", 0) or 0),
+            "safety_violation_count": int(md.get("fallback_safety_violation_count", 0) or 0),
+            "outcome_source": "fallback_regime_after_switch",
+        }
+        return tasks, collapse, detail
+    base = _metrics_from_report(maestro_report)
+    tasks = base["tasks_completed"]
+    recovery_ok = base["recovery_ok"]
+    collapse = (tasks < threshold) or (recovery_ok is False)
+    detail = {
+        "recovery_ok": recovery_ok,
+        "time_to_recovery_ms": base["time_to_recovery_ms"],
+        "ponr_violation_count": base["ponr_violation_count"],
+        "safety_violation_count": base["safety_violation_count"],
+        "outcome_source": "primary_thin_slice",
+    }
+    return tasks, collapse, detail
+
+
+def _mean_skip_none(vals: list) -> float | None:
+    xs = [
+        float(x)
+        for x in vals
+        if x is not None and not (isinstance(x, float) and math.isnan(x))
+    ]
+    if not xs:
+        return None
+    return statistics.mean(xs)
 
 
 def main() -> int:
@@ -120,6 +185,22 @@ def main() -> int:
         default="",
         help="When set, meta run uses fallback adapter when switch is decided (two coordination paths). Use retry_heavy for architecturally distinct regimes (Centralized vs RetryHeavy).",
     )
+    ap.add_argument(
+        "--non-vacuous-select",
+        type=str,
+        choices=("min_drop_first_collapse", "max_drop_any_collapse"),
+        default="min_drop_first_collapse",
+        help=(
+            "Stress grid selection when --non-vacuous: min = smallest drop with any fixed "
+            "collapse; max = largest drop in sweep with any fixed collapse (stronger stress)."
+        ),
+    )
+    ap.add_argument(
+        "--calibration-seeds",
+        type=str,
+        default="",
+        help="Optional seeds used only for sweep calibration; recorded in run_manifest.",
+    )
     args = ap.parse_args()
     if args.scenario not in ALLOWED_META_SCENARIOS:
         print(
@@ -131,6 +212,10 @@ def main() -> int:
         args.drop_prob = 0.25
     elif args.stress_preset == "very_high":
         args.drop_prob = 0.35
+
+    calibration_seed_list = [
+        int(s.strip()) for s in (args.calibration_seeds or "").split(",") if s.strip()
+    ]
 
     stress_selection_policy: dict | None = None
     if args.non_vacuous:
@@ -144,6 +229,8 @@ def main() -> int:
                 "--out", str(args.out),
                 "--scenario", args.scenario,
             ]
+            if calibration_seed_list:
+                cmd.extend(["--seeds", ",".join(str(s) for s in calibration_seed_list)])
             r = subprocess.run(cmd, cwd=str(REPO_ROOT), env=os.environ, timeout=600)
             if r.returncode != 0:
                 print("meta_collapse_sweep.py failed; cannot determine non-vacuous drop_prob", file=sys.stderr)
@@ -159,10 +246,16 @@ def main() -> int:
             if r.get("collapsed", False):
                 by_drop[dp]["collapsed"] += 1
         chosen = None
-        for dp in sorted(by_drop.keys()):
-            if by_drop[dp]["collapsed"] > 0:
-                chosen = dp
-                break
+        if args.non_vacuous_select == "min_drop_first_collapse":
+            for dp in sorted(by_drop.keys()):
+                if by_drop[dp]["collapsed"] > 0:
+                    chosen = dp
+                    break
+        else:
+            for dp in sorted(by_drop.keys(), reverse=True):
+                if by_drop[dp]["collapsed"] > 0:
+                    chosen = dp
+                    break
         if chosen is None:
             print(
                 "Non-vacuous: no drop_prob in sweep had collapse_count > 0. "
@@ -171,17 +264,32 @@ def main() -> int:
             )
             return 1
         args.drop_prob = chosen
-        print(f"Non-vacuous: using drop_prob={chosen} (collapse_count > 0 in sweep)", file=sys.stderr)
+        print(
+            f"Non-vacuous ({args.non_vacuous_select}): using drop_prob={chosen}",
+            file=sys.stderr,
+        )
         try:
             sweep_rel = sweep_path.resolve().relative_to(REPO_ROOT.resolve())
         except ValueError:
             sweep_rel = sweep_path
+        rule_id = (
+            "smallest_drop_prob_with_any_collapse"
+            if args.non_vacuous_select == "min_drop_first_collapse"
+            else "largest_drop_prob_with_any_collapse"
+        )
+        desc = (
+            "Choose the minimum drop_completion_prob such that the fixed (centralized) "
+            "regime has at least one collapsed run in collapse_sweep.json per_run."
+            if args.non_vacuous_select == "min_drop_first_collapse"
+            else (
+                "Choose the maximum drop_completion_prob in the sweep grid such that the "
+                "fixed (centralized) regime still has at least one collapsed run in "
+                "collapse_sweep.json per_run (stronger compound-fault stress)."
+            )
+        )
         stress_selection_policy = {
-            "rule_id": "smallest_drop_prob_with_any_collapse",
-            "description": (
-                "Choose the minimum drop_completion_prob such that the fixed (centralized) "
-                "regime has at least one collapsed run in collapse_sweep.json per_run."
-            ),
+            "rule_id": rule_id,
+            "description": desc,
             "source_path": str(sweep_path),
             "source_path_repo_relative": str(sweep_rel).replace("\\", "/"),
             "chosen_drop_completion_prob": chosen,
@@ -207,6 +315,13 @@ def main() -> int:
             fallback_adapter = RetryHeavyAdapter()
 
     seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
+    if stress_selection_policy is not None and calibration_seed_list:
+        stress_selection_policy["calibration_seeds"] = calibration_seed_list
+        stress_selection_policy["evaluation_seeds"] = seeds
+        stress_selection_policy["calibration_note"] = (
+            "drop_completion_prob was chosen from collapse_sweep.json produced using "
+            "calibration_seeds only; meta_eval paired evaluation used evaluation_seeds."
+        )
     scenario_id = args.scenario
     fault_params = {
         "drop_completion_prob": args.drop_prob,
@@ -225,6 +340,7 @@ def main() -> int:
 
     centralized = CentralizedAdapter()
     meta = MetaAdapter()
+    use_fallback_outcome = fallback_adapter is not None
 
     for seed in seeds:
         fix_dir = args.out / "fixed" / f"seed_{seed}"
@@ -242,54 +358,70 @@ def main() -> int:
             meta, scenario_id, meta_dir, seed=seed, **meta_kw
         )
 
-        m_fix = fix_res.maestro_report.get("metrics", {})
-        m_meta = meta_res.maestro_report.get("metrics", {})
-        fix_tasks = m_fix.get("tasks_completed", 0)
-        meta_tasks = m_meta.get("tasks_completed", 0)
+        fix_m = _metrics_from_report(fix_res.maestro_report)
+        fix_tasks = fix_m["tasks_completed"]
+        fix_recovery_ok = fix_m["recovery_ok"]
+        fix_collapse = (fix_tasks < threshold) or (fix_recovery_ok is False)
+
+        meta_tasks, meta_collapse, meta_detail = _effective_meta_outcome(
+            meta_res.trace,
+            meta_res.maestro_report,
+            threshold,
+            use_fallback_when_switched=use_fallback_outcome,
+        )
         meta_switches = meta_res.trace.get("metadata", {}).get("regime_switch_count", 0)
         fallback_tasks = meta_res.trace.get("metadata", {}).get("fallback_tasks_completed")
-        # Optional collapse dimension: recovery_ok false (from report.faults)
-        fix_recovery_ok = fix_res.maestro_report.get("faults", {}).get("recovery_ok", True)
-        meta_recovery_ok = meta_res.maestro_report.get("faults", {}).get("recovery_ok", True)
-        fix_collapse = (fix_tasks < threshold) or (fix_recovery_ok is False)
-        meta_collapse = (meta_tasks < threshold) or (meta_recovery_ok is False)
 
         fixed_results.append({
             "seed": seed,
             "tasks_completed": fix_tasks,
             "collapse": fix_collapse,
             "recovery_ok": fix_recovery_ok,
+            "time_to_recovery_ms": fix_m["time_to_recovery_ms"],
+            "ponr_violation_count": fix_m["ponr_violation_count"],
+            "safety_violation_count": fix_m["safety_violation_count"],
         })
         meta_results.append({
             "seed": seed,
             "tasks_completed": meta_tasks,
             "regime_switch_count": meta_switches,
             "collapse": meta_collapse,
-            "recovery_ok": meta_recovery_ok,
+            "recovery_ok": meta_detail["recovery_ok"],
             "fallback_tasks_completed": fallback_tasks,
+            "outcome_source": meta_detail["outcome_source"],
+            "time_to_recovery_ms": meta_detail["time_to_recovery_ms"],
+            "ponr_violation_count": meta_detail["ponr_violation_count"],
+            "safety_violation_count": meta_detail["safety_violation_count"],
         })
 
         if args.run_naive:
             naive_params = {**fault_params, "fault_threshold": 0}
+            if fallback_adapter is not None:
+                naive_params["fallback_adapter"] = fallback_adapter
             naive_dir = args.out / "naive" / f"seed_{seed}"
             naive_dir.mkdir(parents=True, exist_ok=True)
             naive_res = run_adapter(
                 meta, scenario_id, naive_dir, seed=seed, **naive_params
             )
-            n_tasks = naive_res.maestro_report.get("metrics", {}).get(
-                "tasks_completed", 0
+            n_tasks, n_collapse, n_detail = _effective_meta_outcome(
+                naive_res.trace,
+                naive_res.maestro_report,
+                threshold,
+                use_fallback_when_switched=use_fallback_outcome,
             )
             n_switches = naive_res.trace.get("metadata", {}).get(
                 "regime_switch_count", 0
             )
-            n_recovery_ok = naive_res.maestro_report.get("faults", {}).get("recovery_ok", True)
-            n_collapse = (n_tasks < threshold) or (n_recovery_ok is False)
             naive_results.append({
                 "seed": seed,
                 "tasks_completed": n_tasks,
                 "regime_switch_count": n_switches,
                 "collapse": n_collapse,
-                "recovery_ok": n_recovery_ok,
+                "recovery_ok": n_detail["recovery_ok"],
+                "outcome_source": n_detail["outcome_source"],
+                "time_to_recovery_ms": n_detail["time_to_recovery_ms"],
+                "ponr_violation_count": n_detail["ponr_violation_count"],
+                "safety_violation_count": n_detail["safety_violation_count"],
             })
 
     from labtrust_portfolio.stats import (
@@ -330,6 +462,13 @@ def main() -> int:
     meta_non_worse_collapse = meta_collapses <= fixed_collapses
     meta_strictly_reduces_collapse = meta_collapses < fixed_collapses
 
+    fixed_tt = [r["time_to_recovery_ms"] for r in fixed_results]
+    meta_tt = [r["time_to_recovery_ms"] for r in meta_results]
+    fixed_ponr_total = sum(int(r["ponr_violation_count"]) for r in fixed_results)
+    meta_ponr_total = sum(int(r["ponr_violation_count"]) for r in meta_results)
+    fixed_safety_total = sum(int(r["safety_violation_count"]) for r in fixed_results)
+    meta_safety_total = sum(int(r["safety_violation_count"]) for r in meta_results)
+
     collapse_paired_analysis = {
         "method": "paired_seeds_same_order",
         "paired_binary_note": (
@@ -350,7 +489,10 @@ def main() -> int:
         "non_worse_on_counts": meta_non_worse_collapse,
     }
 
-    collapse_def = f"tasks_completed < {threshold} or recovery_ok false"
+    collapse_def = (
+        f"tasks_completed < {threshold} or recovery_ok false; meta arm uses fallback "
+        "metrics after switch when --fallback-adapter is set (see outcome_attribution_note)."
+    )
     comparison = {
         "schema_version": SCHEMA_VERSION,
         "scenario_id": scenario_id,
@@ -359,9 +501,21 @@ def main() -> int:
         "seeds": seeds,
         "collapse_definition": collapse_def,
         "collapse_threshold": threshold,
+        "outcome_attribution_note": (
+            "When --fallback-adapter is set and the meta-controller switches, evaluated "
+            "tasks_completed, recovery_ok, time_to_recovery_ms, and safety counters for "
+            "the meta arm are taken from the fallback adapter run; the fixed arm is "
+            "always the centralized thin-slice run only."
+        ),
+        "recovery_latency_note": (
+            "time_to_recovery_ms is the MAESTRO metric from the evaluated regime's report "
+            "(fault-to-recovery latency in the thin-slice harness); null when no recovery "
+            "event is recorded."
+        ),
         "run_manifest": {
             "seeds": seeds,
             "seed_count": len(seeds),
+            "calibration_seeds": calibration_seed_list if calibration_seed_list else None,
             "scenario_id": scenario_id,
             "drop_completion_prob": args.drop_prob,
             "collapse_threshold": threshold,
@@ -372,6 +526,7 @@ def main() -> int:
             "script": "meta_eval.py",
             "schema_version": SCHEMA_VERSION,
             "non_vacuous": getattr(args, "non_vacuous", False),
+            "non_vacuous_select": getattr(args, "non_vacuous_select", None),
             "fallback_adapter": getattr(args, "fallback_adapter", "") or None,
             "stress_selection_policy": stress_selection_policy,
         },
@@ -381,6 +536,9 @@ def main() -> int:
             "tasks_completed_ci95": fixed_ci95,
             "tasks_completed_ci95_method": "student_t_equal_tailed_95",
             "collapse_count": fixed_collapses,
+            "time_to_recovery_ms_mean": _mean_skip_none(fixed_tt),
+            "ponr_violation_count_total": fixed_ponr_total,
+            "safety_violation_count_total": fixed_safety_total,
             "per_seed": fixed_results,
         },
         "meta_controller": {
@@ -389,6 +547,9 @@ def main() -> int:
             "tasks_completed_ci95": meta_ci95,
             "tasks_completed_ci95_method": "student_t_equal_tailed_95",
             "collapse_count": meta_collapses,
+            "time_to_recovery_ms_mean": _mean_skip_none(meta_tt),
+            "ponr_violation_count_total": meta_ponr_total,
+            "safety_violation_count_total": meta_safety_total,
             "per_seed": meta_results,
         },
         "collapse_paired_analysis": collapse_paired_analysis,

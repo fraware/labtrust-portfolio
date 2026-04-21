@@ -19,7 +19,15 @@ if "LABTRUST_KERNEL_DIR" not in os.environ:
     os.environ["LABTRUST_KERNEL_DIR"] = str(REPO_ROOT / "kernel")
 
 META_EVAL_SCENARIO_DEFAULT = "regime_stress_v0"
-ALLOWED_META_SCENARIOS = frozenset({"regime_stress_v0", "regime_stress_v1"})
+ALLOWED_META_SCENARIOS = frozenset(
+    {
+        "regime_stress_v0",
+        "regime_stress_v1",
+        "lab_profile_v0",
+        "warehouse_v0",
+        "traffic_v0",
+    }
+)
 DEFAULT_COLLAPSE_THRESHOLD = 2
 
 

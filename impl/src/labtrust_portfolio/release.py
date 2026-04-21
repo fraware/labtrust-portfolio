@@ -4,7 +4,7 @@ import json
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from .conformance import check_conformance, write_conformance_artifact
 from .evidence import rewrite_evidence_bundle_artifact_paths
@@ -25,7 +25,11 @@ def build_release_manifest(
     kernel_version: str,
     artifacts: List[Path],
     path_base: Path | None = None,
+    artifact_hashes: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
+    if artifact_hashes is not None and len(artifact_hashes) != len(artifacts):
+        raise ValueError("artifact_hashes must have same length as artifacts")
+
     def _path_for_manifest(p: Path) -> str:
         if path_base is None:
             return str(p.as_posix())
@@ -33,6 +37,11 @@ def build_release_manifest(
             return str(p.relative_to(path_base).as_posix())
         except ValueError:
             return str(p.as_posix())
+
+    def _digest(i: int, p: Path) -> str:
+        if artifact_hashes is not None:
+            return artifact_hashes[i]
+        return sha256_file(p)
 
     return {
         "version": "0.1",
@@ -42,8 +51,8 @@ def build_release_manifest(
         ),
         "kernel_version": kernel_version,
         "artifacts": [
-            {"path": _path_for_manifest(p), "sha256": sha256_file(p)}
-            for p in artifacts
+            {"path": _path_for_manifest(p), "sha256": _digest(i, p)}
+            for i, p in enumerate(artifacts)
         ],
     }
 

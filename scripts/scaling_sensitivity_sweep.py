@@ -64,7 +64,14 @@ def main() -> int:
                 "--max-seed",
                 str(cap),
             ]
-            r = subprocess.run(cmd, cwd=str(REPO), env=env, capture_output=True, text=True, timeout=300)
+            r = subprocess.run(
+                cmd,
+                cwd=str(REPO),
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=1200,
+            )
             if r.returncode != 0:
                 print(r.stderr or r.stdout, file=sys.stderr)
                 return 1

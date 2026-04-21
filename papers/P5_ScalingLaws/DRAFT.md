@@ -7,14 +7,14 @@
 
 We stress MAESTRO thin-slice runs across **six** `real_world` scenario ids, **five** coordination regimes, **four** agent-count levels (1, 2, 4, 8), and **two** fault labels (`no_drop`, `drop_005`), with **30** seeds (**7200** rows). Features combine scenario YAML fields with trace metadata (`agent_count`, `regime_id`, contention proxies, etc.). Linear predictors use **ridge-stabilized** normal equations when the default P5 feature vector has six or more columns (`impl/src/labtrust_portfolio/scaling.py`).
 
-**Frozen snapshot (eval manifest commit `d2532be`):**
+**Frozen snapshot** (headline numbers match `datasets/runs/scaling_eval/heldout_results.json` `run_manifest.commit` **5b280e800ff309c215bbe52f7854805176a632bc**):
 
-- **Leave-one-scenario-out (`tasks_completed`):** `overall_regression_mae` **0.5105**, `overall_feat_baseline_mae` **0.3899**, `overall_baseline_mae` **0.7367**, `mean_regression_pi_coverage_95` **0.771**, `overall_collapse_rate` **0.00292**, **`trigger_met` false** (regression does not beat the num-tasks bucket baseline). The hardest single fold remains **`lab_profile_v0`** (high regression MAE vs other scenarios; see Table 1).
+- **Leave-one-scenario-out (`tasks_completed`):** `overall_regression_mae` **0.5105**, `overall_feat_baseline_mae` **0.3899**, `overall_baseline_mae` **0.7367**, `mean_regression_pi_coverage_95` **0.7707**, `overall_collapse_rate` **0.00292**, **`trigger_met` false** (regression does not beat the num-tasks bucket baseline). The hardest single fold remains **`lab_profile_v0`** (high regression MAE vs other scenarios; see Table 1).
 - **Leave-one-family-out:** `overall_regression_mae` **0.5185**, **`trigger_met` true** (beats global, num-tasks bucket, and regime train-mean baselines on this protocol).
 - **Leave-one-regime-out:** `overall_regression_mae` **0.2370**, **`trigger_met` false** (fails vs num-tasks bucket).
 - **Leave-one-agent-count-out / leave-one-fault-setting-out:** `overall_regression_mae` **0.2157** / **0.2264**, **`trigger_met` false** in both cases.
-- **Sensitivity (scenario LOO, seed caps 10 / 20 / 30):** regression MAE **0.5528 → 0.5351 → 0.5105**; **`trigger_met` false** at every cap.
-- **Recommendation eval:** regime match rate **0.0285**, mean regret **0.1049**, collapse Brier **0.0030** (sparse collapse signal).
+- **Sensitivity (scenario LOO, seed caps 10 / 20 / 30):** `overall_regression_mae` **0.5528 → 0.5351 → 0.5105**; **`trigger_met` false** at every cap (`scaling_sensitivity.json`).
+- **Recommendation eval:** `regime_selection_accuracy` **0.0257**, `mean_regret_tasks_completed` **0.1049**, `brier_collapse_on_test_rows` **0.0030** (sparse signal; see Table 3).
 
 **Title grounding:** Table 8 and `datasets/runs/scaling_summary/regime_agent_summary.json` give explicit **1→8** agent deltas by family × regime (e.g. decentralized **traffic** / **warehouse**: about **−3.4%** mean `tasks_completed` with large coordination-tax increases; **centralized** shows near-flat throughput with very large coordination-tax growth).
 
@@ -28,7 +28,7 @@ Then refresh markdown tables:
 
 `PYTHONPATH=impl/src python scripts/export_scaling_regime_agent_summary.py --runs-dir datasets/runs/multiscenario_runs --out-json datasets/runs/scaling_summary/regime_agent_summary.json --out-md papers/P5_ScalingLaws/regime_agent_summary.md`
 
-If `datasets/runs/**` is ignored, track the summary with `git add -f datasets/runs/scaling_summary/regime_agent_summary.json`.
+If `datasets/runs/**` is ignored, track frozen JSONs with `git add -f` on each path listed in `papers/P5_ScalingLaws/README.md` (including `scaling_eval*/heldout_results.json` when negated in `.gitignore`).
 
 ## Main tables
 

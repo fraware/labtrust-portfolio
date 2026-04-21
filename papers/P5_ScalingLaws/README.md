@@ -7,7 +7,9 @@ P5 measures how **agent count** and **coordination regime** change MAESTRO thin-
 `PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experiments.py --paper P5`
 
 - **`--quick`:** small seed count, `core` scenarios, `--p5-lite` coordination grid (CI smoke).
-- **Default (publishable):** 30 seeds, `real_world` scenarios, **all** `VALID_REGIMES` × **{1,2,4,8}** agents, fault labels **`no_drop`** and **`drop_005`** only (runtime bound), `--clean` on the multiscenario output directory.
+- **Default (publishable):** 30 seeds, `real_world` scenarios (six ids; no `toy_lab_v0`), **all** `VALID_REGIMES` × **{1,2,4,8}** agents, fault labels **`no_drop`** and **`drop_005`** only (runtime bound), `--clean` on the multiscenario output directory.
+
+After a full run, headline metrics and the Git commit recorded in each `heldout_results.json` `run_manifest.commit` must match `DRAFT.md`, `AUTHORING_PACKET.md`, and the HTML comment atop `generated_tables.md` (regenerate tables with `export_scaling_tables.py` so the comment updates).
 
 ## Artifacts (under `datasets/runs/` unless noted)
 

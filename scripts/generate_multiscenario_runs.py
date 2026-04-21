@@ -108,6 +108,16 @@ def main() -> int:
         action="store_true",
         help="Delete output directory before generating (avoids mixed layout / stale traces)",
     )
+    ap.add_argument(
+        "--fault-settings",
+        type=str,
+        default="",
+        metavar="LABEL1,LABEL2,...",
+        help=(
+            "After building the fault list, keep only these setting labels "
+            "(e.g. no_drop,drop_005). Use to narrow the grid for publishable P5."
+        ),
+    )
     args = ap.parse_args()
 
     if args.clean and args.out.exists():
@@ -213,6 +223,19 @@ def main() -> int:
                 "label": "delay_01",
             }
         )
+    if args.fault_settings.strip():
+        allowed = {
+            x.strip()
+            for x in args.fault_settings.split(",")
+            if x.strip()
+        }
+        settings = [s for s in settings if s["label"] in allowed]
+        if not settings:
+            print(
+                "Error: --fault-settings matches no fault entries.",
+                file=sys.stderr,
+            )
+            return 1
     if args.coordination_grid:
         if args.p5_lite:
             agent_list = [1, 4]
@@ -276,6 +299,12 @@ def main() -> int:
                             fault_setting_label=s["label"],
                         )
                         count += 1
+                        if count % 500 == 0:
+                            print(
+                                f"P5 grid progress: {count} runs written "
+                                f"({scenario_id}/{s['label']}/{regime}/agents_{ac}/seed_{seed})",
+                                flush=True,
+                            )
     print(f"Generated {count} runs under {args.out}")
     return 0
 

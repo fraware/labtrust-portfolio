@@ -7,7 +7,7 @@ This document interprets the current evaluation outputs across the portfolio and
 ## Executive summary
 
 - **P2 REP-CPS:** Safety-gated profile; offline bias reduction; scoped adapter parity on non-scheduling scenarios; **rep_cps_scheduling_v0** links gate to scheduling (`scheduling_dependent_eval`); freshness_replay_evidence, sybil_vs_spoofing_evidence, messaging_sim, dynamic_aggregation_series in summary.json. Eval writes to `rep_cps_eval/`. See DRAFT §5.1 (two evaluation modes) and CONDITIONAL_TRIGGERS (P2).
-- **P5 Scaling:** Leave-one-scenario-out (default) or leave-one-family-out (`--holdout-mode family`); global-mean, per-scenario-oracle, same-num_tasks, and linear regression baselines; optional `secondary_targets` (coordination_tax_proxy, error_amplification_proxy); `mean_regression_pi_coverage_95`; 95% CI for MAE and for mean regression MAE across folds; `scaling_fit` (exploratory). Scripts: `generate_multiscenario_runs.py` (`--profile all|real_world|core`, `--fault-mix`), `scaling_heldout_eval.py`, `export_scaling_tables.py`. Outputs: `scaling_eval/heldout_results.json`, optional `scaling_eval_family/heldout_results.json`. Publishable: 12--20+ seeds and `--fault-mix`. Spec: [P5_SCALING_SPEC.md](P5_SCALING_SPEC.md).
+- **P5 Scaling:** Publishable default is **30 seeds**, **`--profile real_world`**, coordination grid (**`--coordination-grid`**), narrow faults **`--fault-settings no_drop,drop_005`**, agent counts **1,2,4,8** → **7200** thin-slice rows; held-out eval modes **scenario, family, regime, agent_count, fault_setting**; `scaling_sensitivity_sweep.py` → `sensitivity_sweep/scaling_sensitivity.json`; `scaling_recommend_eval.py` → `scaling_recommend/recommendation_eval.json`; `export_scaling_regime_agent_summary.py` → `scaling_summary/regime_agent_summary.json`. **`trigger_met` is per protocol** (admissible baselines only); see `papers/P5_ScalingLaws/DRAFT.md` and [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md). Spec: [P5_SCALING_SPEC.md](P5_SCALING_SPEC.md).
 - **P6 LLM:** Expanded red-team, confusable deputy, jailbreak-style, `ponr_gate`, adaptive suite (`p6_adaptive_results.json`); confusable_deputy_results.json; e2e_denial_trace.json; adapter latency with `--run-adapter` and optional `--latency-decomposition`; run_manifest, layer attribution, cross_model_summary when 2+ models; baseline 3-way (tool-level, args_unsafe, benign). Synthetic plans by default; optional `--real-llm` with `--real-llm-suite full|core` and `--real-llm-runs` (default 10). Eval writes to `llm_eval/` (and optional separate dirs for Prime matrix runs).
 - **P8 Meta:** `meta_eval.py` with `--scenario regime_stress_v0|regime_stress_v1`, optional `--run-naive --fault-threshold 0`, `--non-vacuous` + documented `stress_selection_policy`, optional `--fallback-adapter retry_heavy`. Outputs `comparison.json` (`schema_version`, `collapse_paired_analysis`, non-inferior vs strict collapse fields), `collapse_sweep.json` (`schema_version`). Publishable runner: `run_paper_experiments.py --paper P8` (v0 + v1). Verify: `verify_p8_meta_artifacts.py`. Figure 1: `plot_meta_collapse.py` (t-CI + Wilson intervals).
 - **Core (P0, P3, P4, P1, P5, P7):** Eval scripts run in CI; results under `datasets/runs/` (P0 E1: p0_conformance_corpus/, corpus_manifest.json; P0 E2: e2_redaction_demo/; P0 E3: e3_summary.json, p0_e3_variance.json; P0 E4: p0_e4_summary.json; P0 conformance summary: build_p0_conformance_summary.py -> datasets/releases/portfolio_v0.1/p0_conformance_summary.json; **P3:** `replay_eval/summary.json` with `schema_version: p3_replay_eval_v0.2`, `baseline_overhead`, `multi_seed_overhead`, `corpus_outcome_wilson_ci95`, witness slices, optional `overhead_curve`; `verify_p3_replay_summary.py`; maestro_fault_sweep, maestro_antigaming/antigaming_results.json with scoring_proof; contracts_eval, P1_TRACE_DERIVABILITY.md; assurance_eval, audit_bundle --release; scaling_eval with trigger_met). **Conditional (P2, P5, P6, P8):** success_criteria_met includes trigger_met where applicable; see docs/CONDITIONAL_TRIGGERS.md for required evidence. **Real eval launches:** P1, P2, P3, P4, P5, P6, P7, and P8 each have an integration test; see tests/test_contracts_p1.py, test_rep_cps_p2.py, test_replay_p3.py, test_maestro_p4.py, test_scaling_p5.py, test_llm_p6.py, test_assurance_p7.py, test_meta_p8.py. P5: test_scaling_p5.py runs generate_multiscenario_runs then scaling_heldout_eval and asserts on heldout_results.json. CI runs generate_multiscenario_runs --seeds 2 and scaling_heldout_eval.
@@ -58,37 +58,35 @@ This document interprets the current evaluation outputs across the portfolio and
 
 Integration test: `tests/test_scaling_p5.py` runs `generate_multiscenario_runs` (2 seeds) then `scaling_heldout_eval` and asserts `heldout_results.json` structure (including CI keys, `scaling_fit`, `success_criteria_met`). CI uses reduced seeds for speed.
 
-### Results (representative publishable-style run)
+### Results (publishable freeze; refresh JSON after every regen)
 
-Regenerate numbers from your machine: `generate_multiscenario_runs.py --seeds 12 --fault-mix` then `scaling_heldout_eval.py`. A recent full run used **seven** scenario ids, **528** rows, **12** seeds per (scenario, fault setting), **four** fault settings with `--fault-mix`. Snapshot (see [RUN_RESULTS_SUMMARY.md](../datasets/runs/RUN_RESULTS_SUMMARY.md)):
+Orchestrated run: `PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experiments.py --paper P5`. One checked-in freeze (see `papers/P5_ScalingLaws/DRAFT.md`) used **7200** rows, **six** `real_world` scenario ids, **five** regimes, **`run_manifest.commit` 5b280e800ff309c215bbe52f7854805176a632bc**. Headline **`tasks_completed`** values (scenario LOO): `overall_baseline_mae` **0.7367**, `overall_feat_baseline_mae` **0.3899**, `overall_regression_mae` **0.5105**, `mean_regression_pi_coverage_95` **0.7707**, **`trigger_met` false** (does not beat num-tasks bucket). Family LOO: **`trigger_met` true** on the same freeze. Do not quote older lite-grid or seven-scenario fault-mix numbers here.
 
-| Metric | Typical range (refresh JSON for exact) |
-|--------|----------------------------------------|
-| overall_baseline_mae | ~0.6 |
-| overall_regression_mae | ~0.08 |
-| overall_per_scenario_baseline_mae | ~0.08 |
-| mean_regression_pi_coverage_95 | ~0.96 |
-| scenario_coverage (folds) | 7 (scenario mode) or 3 (family mode) |
-| success_criteria_met.trigger_met | true when regression/feat beats global mean OOS |
+| Metric | Where to read it |
+|--------|------------------|
+| Per-protocol triggers and MAEs | `scaling_eval/heldout_results.json`, `scaling_eval_family/heldout_results.json`, etc. |
+| Seed-cap sensitivity | `sensitivity_sweep/scaling_sensitivity.json` |
+| Recommendation / regret | `scaling_recommend/recommendation_eval.json` |
+| Title grounding (1→8 deltas) | `scaling_summary/regime_agent_summary.json` + Table 8 in `generated_tables.md` |
 
-**Optional artifact:** `scaling_eval_family/heldout_results.json` from `--holdout-mode family` (hold out all runs in one YAML `family`: lab, warehouse, traffic). Stricter than leave-one-scenario-out; some folds may skip regression if `train_n` is small.
+**Family artifact:** `scaling_eval_family/heldout_results.json` (leave-one-taxonomy-family-out: lab / traffic / warehouse). Strict rule: if any fold has `regression_mae: null`, protocol-level regression MAE is null and `trigger_met` is false unless you implement an explicit comparable-fold block (see `scaling_heldout_eval.py`).
 
 ### Interpretation
 
-- **Baselines:** Global mean predicts a single number for the whole test fold; it is **weakest** when scenarios are heterogeneous. **Per-scenario oracle** (`per_scenario_baseline_mae`) uses scenario identity on the full dataset (strong upper bound). **Regression** uses compact features (`num_tasks`, `num_faults`, `tool_density`) without scenario id — **trigger_met** is true when regression or num_tasks-group mean beats global mean OOS.
+- **Baselines:** Global mean, num-tasks bucket, regime and agent-count train means (admissible); oracle per-scenario mean is **not** part of `trigger_met`. **trigger_met** requires beating global mean, num-tasks bucket, and regime train mean on the primary target (see `success_criteria_met` in JSON).
 - **Secondary targets:** `secondary_targets` in `heldout_results.json` summarizes MAE for `coordination_tax_proxy` and `error_amplification_proxy` (see [P5_SCALING_SPEC.md](P5_SCALING_SPEC.md)).
 - **Calibration (exploratory):** `mean_regression_pi_coverage_95` — fraction of test points inside train-residual 95% intervals, averaged over folds; near 0.95 supports narrative for calibration (not a formal guarantee).
 
 ### Follow-up experiments (P5)
 
-1. **Larger N:** `--seeds 20` or `30` for narrower CIs across folds.
-2. **Profile:** `--profile real_world` to exclude toy lab from generation (deployment-shaped mix).
-3. **Sensitivity:** `sensitivity_seed_sweep.py --eval scaling --ns 10,20,30`.
-4. **Collapse / richer responses:** Already have report-derived `collapse`; optional future: MTTR or explicit failure events if the trace schema gains them.
+1. **Larger N / narrower CIs:** default publishable already uses **30** seeds; increase only if runtime allows.
+2. **Fault breadth:** optional `--fault-mix` adds settings beyond `no_drop` / `drop_005`; keep publishable tables on the narrow grid unless the paper explicitly widens scope.
+3. **Sensitivity:** `scaling_sensitivity_sweep.py` (invoked from `--paper P5`) reproduces `scaling_sensitivity.json` caps 10 / 20 / 30.
+4. **Collapse / richer responses:** report-derived `collapse_rate` fields in scaling rows; optional future: MTTR if the trace schema gains it.
 
-**P5 verification (implementation, tests):** `scripts/export_scaling_tables.py`, `scripts/plot_scaling_mae.py`, `papers/P5_ScalingLaws/DRAFT.md`, `claims.yaml`. Spec: [P5_SCALING_SPEC.md](P5_SCALING_SPEC.md).
+**P5 verification (implementation, tests):** `scripts/export_scaling_tables.py`, `scripts/plot_scaling_paper.py`, `papers/P5_ScalingLaws/DRAFT.md`, `claims.yaml`. Spec: [P5_SCALING_SPEC.md](P5_SCALING_SPEC.md).
 
-- **Validity and robustness:** `run_manifest` includes `runs_dir`, `scenario_ids`, `held_out_scenarios`, `holdout_mode`, `train_n_total`, `test_n_total`, `script`; `success_criteria_met` (beat_baseline_out_of_sample, beat_per_scenario_baseline, trigger_met). Conditional paper: see [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md). Publishable: `--fault-mix` and 12+ seeds per (scenario, setting).
+- **Validity and robustness:** `run_manifest` includes `commit`, `scenario_ids`, `coordination_regimes`, `agent_counts`, `fault_setting_labels`, `seeds`, and paths; top-level `total_rows` is the scaling row count. `success_criteria_met` uses admissible baselines only. Conditional paper: see [CONDITIONAL_TRIGGERS.md](CONDITIONAL_TRIGGERS.md). Publishable default: `run_paper_experiments.py --paper P5` (real_world six scenarios, 7200 rows, narrow fault pair).
 
 ---
 

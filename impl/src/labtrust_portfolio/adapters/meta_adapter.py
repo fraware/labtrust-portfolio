@@ -105,8 +105,21 @@ class MetaAdapter:
             fallback_result = run_adapter(
                 fallback_adapter, scenario_id, fallback_dir, seed=seed, **fault_params
             )
-            fb_metrics = fallback_result.maestro_report.get("metrics", {})
+            fb_rep = fallback_result.maestro_report
+            fb_metrics = fb_rep.get("metrics", {})
+            fb_faults = fb_rep.get("faults", {})
+            fb_safety = fb_rep.get("safety", {})
             trace["metadata"]["fallback_tasks_completed"] = fb_metrics.get("tasks_completed")
+            trace["metadata"]["fallback_recovery_ok"] = fb_faults.get("recovery_ok", True)
+            trace["metadata"]["fallback_time_to_recovery_ms"] = fb_metrics.get(
+                "time_to_recovery_ms"
+            )
+            trace["metadata"]["fallback_ponr_violation_count"] = int(
+                fb_safety.get("ponr_violation_count", 0) or 0
+            )
+            trace["metadata"]["fallback_safety_violation_count"] = int(
+                fb_safety.get("safety_violation_count", 0) or 0
+            )
             trace["metadata"]["fallback_run_recorded"] = True
         trace_path.write_text(json.dumps(trace, indent=2) + "\n", encoding="utf-8")
 

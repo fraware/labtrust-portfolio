@@ -18,7 +18,7 @@ When agent count and coordination regime vary across realistic CPS scenarios, wh
 
 Six `real_world` scenarios × five regimes × agent counts `{1,2,4,8}` × fault labels `{no_drop, drop_005}` × 30 seeds → **7200** rows in `datasets/runs/multiscenario_runs/`.
 
-## 4) Frozen evidence (sync to JSON; values from commit `d2532be` artifacts)
+## 4) Frozen evidence (sync to JSON; `run_manifest.commit` **5b280e800ff309c215bbe52f7854805176a632bc** on `scaling_eval/heldout_results.json`)
 
 | Artifact | `tasks_completed` headline |
 |----------|-----------------------------|
@@ -28,7 +28,7 @@ Six `real_world` scenarios × five regimes × agent counts `{1,2,4,8}` × fault 
 | `datasets/runs/scaling_eval_agent_count/heldout_results.json` | `overall_regression_mae` **0.2157**, `trigger_met` **false**. |
 | `datasets/runs/scaling_eval_fault/heldout_results.json` | `overall_regression_mae` **0.2264**, `trigger_met` **false**. |
 | `datasets/runs/sensitivity_sweep/scaling_sensitivity.json` | Scenario LOO, caps 10 / 20 / 30: `overall_regression_mae` **0.5528** → **0.5351** → **0.5105**; all caps **`trigger_met` false**. |
-| `datasets/runs/scaling_recommend/recommendation_eval.json` | `regime_selection_accuracy` **0.0285**, `mean_regret_tasks_completed` **0.1049**, `brier_collapse_on_test_rows` **0.0030**. |
+| `datasets/runs/scaling_recommend/recommendation_eval.json` | `regime_selection_accuracy` **0.0257**, `mean_regret_tasks_completed` **0.1049**, `brier_collapse_on_test_rows` **0.0030** (four decimals in Table 3). |
 | `datasets/runs/scaling_summary/regime_agent_summary.json` | **7200** rows; Table 8 / `regime_agent_summary.md` for regime × agent deltas (1→8). |
 
 ## 5) Writing guidance

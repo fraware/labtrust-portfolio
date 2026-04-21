@@ -78,6 +78,35 @@ def table1(data: dict) -> list[str]:
     return lines
 
 
+def recovery_safety_lines(data: dict) -> list[str]:
+    fix = data.get("fixed") or {}
+    meta = data.get("meta_controller") or {}
+    if "ponr_violation_count_total" not in fix and "ponr_violation_count_total" not in meta:
+        return []
+    lines = [
+        "## Recovery latency proxy and explicit safety counts",
+        "",
+        "`time_to_recovery_ms_mean` is from MAESTRO metrics on the evaluated regime.",
+        "",
+        "| Arm | time_to_recovery_ms_mean | ponr_violation_count_total | "
+        "safety_violation_count_total |",
+        "|-----|---------------------------|------------------------------|"
+        "------------------------------|",
+        (
+            f"| fixed (Centralized) | {_fmt(fix.get('time_to_recovery_ms_mean'))} | "
+            f"{_fmt(fix.get('ponr_violation_count_total'))} | "
+            f"{_fmt(fix.get('safety_violation_count_total'))} |"
+        ),
+        (
+            f"| meta_controller | {_fmt(meta.get('time_to_recovery_ms_mean'))} | "
+            f"{_fmt(meta.get('ponr_violation_count_total'))} | "
+            f"{_fmt(meta.get('safety_violation_count_total'))} |"
+        ),
+        "",
+    ]
+    return lines
+
+
 def interpretation_lines(data: dict) -> list[str]:
     """Camera-ready semantics: strict vs non-inferior collapse (ties allowed)."""
     cpa = data.get("collapse_paired_analysis")
@@ -207,6 +236,8 @@ def main() -> int:
         return 1
     data = json.loads(path.read_text(encoding="utf-8"))
     for line in table1(data):
+        print(line)
+    for line in recovery_safety_lines(data):
         print(line)
     for line in interpretation_lines(data):
         print(line)

@@ -9,6 +9,7 @@ from .trace import TraceEvent, build_trace, state_hash
 from .maestro import maestro_report_from_trace
 from .replay import replay_trace
 from .evidence import build_evidence_bundle
+from .hashing import sha256_bytes
 from .release import build_release_manifest
 from .schema import validate
 from .scenario import load_scenario, get_scenario_task_names, get_resource_graph
@@ -490,10 +491,16 @@ def run_thin_slice(
     evidence_path = out_dir / "evidence_bundle.json"
     release_path = out_dir / "release_manifest.json"
 
-    trace_path.write_text(json.dumps(trace, indent=2) + "\n", encoding="utf-8")
+    trace_text = json.dumps(trace, indent=2) + "\n"
+    trace_bytes = trace_text.encode("utf-8")
+    trace_path.write_bytes(trace_bytes)
+    h_trace = sha256_bytes(trace_bytes)
 
     maestro = maestro_report_from_trace(run_id, sid, trace)
-    maestro_path.write_text(json.dumps(maestro, indent=2) + "\n", encoding="utf-8")
+    maestro_text = json.dumps(maestro, indent=2) + "\n"
+    maestro_bytes = maestro_text.encode("utf-8")
+    maestro_path.write_bytes(maestro_bytes)
+    h_maestro = sha256_bytes(maestro_bytes)
 
     replay_ok, replay_diag = replay_trace(trace)
 
@@ -513,6 +520,7 @@ def run_thin_slice(
         replay_ok=replay_ok,
         replay_diag=replay_diag,
         verification_mode="evaluator",
+        artifact_hashes=[h_trace, h_maestro],
     )
 
     try:
@@ -521,12 +529,16 @@ def run_thin_slice(
         schema_ok = False
         evidence["verification"]["schema_validation_ok"] = False
 
-    evidence_path.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+    evidence_text = json.dumps(evidence, indent=2) + "\n"
+    evidence_bytes = evidence_text.encode("utf-8")
+    evidence_path.write_bytes(evidence_bytes)
+    h_evidence = sha256_bytes(evidence_bytes)
 
     release = build_release_manifest(
         release_id=f"release_{run_id}",
         kernel_version=KERNEL_VERSION,
         artifacts=[trace_path, maestro_path, evidence_path],
+        artifact_hashes=[h_trace, h_maestro, h_evidence],
     )
     try:
         validate(release, SCHEMA_RELEASE)

@@ -3,137 +3,95 @@
   "holdout_mode": "fault_setting",
   "held_out_results": [
     {
-      "held_out_scenario": "calibration_invalid_01",
-      "holdout_label": "calibration_invalid_01",
-      "train_n": 3240,
-      "test_n": 1080,
-      "global_baseline_pred": 3.7666666666666666,
-      "baseline_mae": 0.5777777777777777,
-      "oracle_per_scenario_baseline_mae": 0.04999999999999989,
-      "admissible_per_scenario_train_mae": 0.0666666666666668,
-      "regime_train_mean_baseline_mae": 0.5777777777777777,
-      "agent_count_train_mean_baseline_mae": 0.5777777777777777,
-      "num_tasks_held_out": 3,
-      "feat_baseline_mae": 0.0666666666666668,
-      "prior_model_mae": 0.3916666666666666,
-      "regression_mae": 0.06666666666665932,
-      "stump_mae": 0.42395061728395067,
-      "actuals_mean": 3.8333333333333335,
-      "test_collapse_rate": 0.0,
-      "train_collapse_rate": 0.0,
-      "regression_pi_coverage_95": 1.0
-    },
-    {
-      "held_out_scenario": "delay_01",
-      "holdout_label": "delay_01",
-      "train_n": 3240,
-      "test_n": 1080,
-      "global_baseline_pred": 3.7666666666666666,
-      "baseline_mae": 0.5777777777777777,
-      "oracle_per_scenario_baseline_mae": 0.04999999999999989,
-      "admissible_per_scenario_train_mae": 0.0666666666666668,
-      "regime_train_mean_baseline_mae": 0.5777777777777777,
-      "agent_count_train_mean_baseline_mae": 0.5777777777777777,
-      "num_tasks_held_out": 3,
-      "feat_baseline_mae": 0.0666666666666668,
-      "prior_model_mae": 0.3916666666666666,
-      "regression_mae": 0.06666666666665932,
-      "stump_mae": 0.42395061728395067,
-      "actuals_mean": 3.8333333333333335,
-      "test_collapse_rate": 0.0,
-      "train_collapse_rate": 0.0,
-      "regression_pi_coverage_95": 1.0
-    },
-    {
       "held_out_scenario": "drop_005",
       "holdout_label": "drop_005",
-      "train_n": 3240,
-      "test_n": 1080,
+      "train_n": 3600,
+      "test_n": 3600,
       "global_baseline_pred": 3.8333333333333335,
-      "baseline_mae": 0.6503086419753087,
-      "oracle_per_scenario_baseline_mae": 0.23043981481481476,
-      "admissible_per_scenario_train_mae": 0.2,
-      "regime_train_mean_baseline_mae": 0.6503086419753087,
-      "agent_count_train_mean_baseline_mae": 0.6503086419753087,
-      "num_tasks_held_out": 3,
-      "feat_baseline_mae": 0.2,
-      "prior_model_mae": 0.4387962962962963,
-      "regression_mae": 0.20000000000000143,
-      "stump_mae": 0.5155555555555555,
-      "actuals_mean": 3.6333333333333333,
-      "test_collapse_rate": 0.0,
+      "baseline_mae": 0.6599074074074074,
+      "oracle_per_scenario_baseline_mae": 0.2917041666666666,
+      "admissible_per_scenario_train_mae": 0.22527777777777777,
+      "regime_train_mean_baseline_mae": 0.6599074074074074,
+      "agent_count_train_mean_baseline_mae": 0.6599074074074074,
+      "num_tasks_held_out": 5,
+      "feat_baseline_mae": 0.22527777777777777,
+      "prior_model_mae": 0.45186111111111105,
+      "regression_mae": 0.22750646749738296,
+      "stump_mae": 0.5432777777777777,
+      "actuals_mean": 3.6080555555555556,
+      "test_collapse_rate": 0.005833333333333334,
       "train_collapse_rate": 0.0,
-      "regression_pi_coverage_95": 0.8083333333333333
+      "regression_pi_coverage_95": 0.8
     },
     {
       "held_out_scenario": "no_drop",
       "holdout_label": "no_drop",
-      "train_n": 3240,
-      "test_n": 1080,
-      "global_baseline_pred": 3.7666666666666666,
-      "baseline_mae": 0.5777777777777777,
-      "oracle_per_scenario_baseline_mae": 0.04999999999999989,
-      "admissible_per_scenario_train_mae": 0.0666666666666668,
-      "regime_train_mean_baseline_mae": 0.5777777777777777,
-      "agent_count_train_mean_baseline_mae": 0.5777777777777777,
-      "num_tasks_held_out": 3,
-      "feat_baseline_mae": 0.0666666666666668,
+      "train_n": 3600,
+      "test_n": 3600,
+      "global_baseline_pred": 3.6080555555555556,
+      "baseline_mae": 0.6306481481481482,
+      "oracle_per_scenario_baseline_mae": 0.11263888888888882,
+      "admissible_per_scenario_train_mae": 0.2252777777777779,
+      "regime_train_mean_baseline_mae": 0.6306481481481482,
+      "agent_count_train_mean_baseline_mae": 0.6306481481481482,
+      "num_tasks_held_out": 5,
+      "feat_baseline_mae": 0.2252777777777779,
       "prior_model_mae": 0.3916666666666666,
-      "regression_mae": 0.06666666666665932,
-      "stump_mae": 0.42395061728395067,
+      "regression_mae": 0.22527777777834954,
+      "stump_mae": 0.4839444444444445,
       "actuals_mean": 3.8333333333333335,
       "test_collapse_rate": 0.0,
-      "train_collapse_rate": 0.0,
+      "train_collapse_rate": 0.005833333333333334,
       "regression_pi_coverage_95": 1.0
     }
   ],
-  "overall_baseline_mae": 0.5959104938271604,
-  "overall_oracle_per_scenario_baseline_mae": 0.0951099537037036,
-  "overall_admissible_per_scenario_train_mae": 0.1000000000000001,
-  "overall_regime_train_mean_baseline_mae": 0.5959104938271604,
-  "overall_agent_count_train_mean_baseline_mae": 0.5959104938271604,
-  "overall_feat_baseline_mae": 0.1000000000000001,
-  "overall_regression_mae": 0.09999999999999484,
-  "overall_prior_model_mae": 0.40344907407407404,
-  "overall_stump_mae": 0.4468518518518519,
+  "overall_baseline_mae": 0.6452777777777778,
+  "overall_oracle_per_scenario_baseline_mae": 0.2021715277777777,
+  "overall_admissible_per_scenario_train_mae": 0.22527777777777785,
+  "overall_regime_train_mean_baseline_mae": 0.6452777777777778,
+  "overall_agent_count_train_mean_baseline_mae": 0.6452777777777778,
+  "overall_feat_baseline_mae": 0.22527777777777785,
+  "overall_regression_mae": 0.22639212263786623,
+  "overall_prior_model_mae": 0.4217638888888888,
+  "overall_stump_mae": 0.5136111111111111,
   "admissible_baselines": {
-    "global_mean_mae": 0.5959104938271604,
-    "per_scenario_train_only_mae": 0.1000000000000001,
-    "num_tasks_bucket_mae": 0.1000000000000001,
-    "regime_train_mean_mae": 0.5959104938271604,
-    "agent_count_train_mean_mae": 0.5959104938271604,
-    "regression_mae": 0.09999999999999484,
-    "stump_mae": 0.4468518518518519
+    "global_mean_mae": 0.6452777777777778,
+    "per_scenario_train_only_mae": 0.22527777777777785,
+    "num_tasks_bucket_mae": 0.22527777777777785,
+    "regime_train_mean_mae": 0.6452777777777778,
+    "agent_count_train_mean_mae": 0.6452777777777778,
+    "regression_mae": 0.22639212263786623,
+    "stump_mae": 0.5136111111111111
   },
   "oracle_baselines": {
-    "per_scenario_mean_including_test_mae": 0.0951099537037036
+    "per_scenario_mean_including_test_mae": 0.2021715277777777
   },
   "regression_skipped_reason": null,
-  "overall_collapse_rate": 0.0,
-  "overall_baseline_mae_ci95_lower": 0.5651318440599449,
-  "overall_baseline_mae_ci95_upper": 0.626689143594376,
-  "overall_feat_baseline_mae_ci95_lower": 0.043419673619416836,
-  "overall_feat_baseline_mae_ci95_upper": 0.15658032638058336,
-  "overall_regression_mae_ci95_lower": 0.043419673619407795,
-  "overall_regression_mae_ci95_upper": 0.1565803263805819,
-  "mean_regression_pi_coverage_95": 0.9520833333333334,
+  "overall_collapse_rate": 0.002916666666666667,
+  "overall_baseline_mae_ci95_lower": 0.6250021455557547,
+  "overall_baseline_mae_ci95_upper": 0.665553409999801,
+  "overall_feat_baseline_mae_ci95_lower": 0.22527777777777774,
+  "overall_feat_baseline_mae_ci95_upper": 0.22527777777777797,
+  "overall_regression_mae_ci95_lower": 0.22484771945664675,
+  "overall_regression_mae_ci95_upper": 0.22793652581908572,
+  "mean_regression_pi_coverage_95": 0.9,
   "scaling_fit": {
-    "scaling_exponent": 1.0025393402138,
-    "scaling_r2": 0.8634413328692845,
-    "n_used": 4320
+    "scaling_exponent": 1.0095802474446356,
+    "scaling_r2": 0.6856735234110645,
+    "n_used": 7200
   },
   "feature_ablation": [
     {
       "features": [
         "num_tasks"
       ],
-      "mae": 0.1
+      "mae": 0.2253
     },
     {
       "features": [
         "num_faults"
       ],
-      "mae": 0.5932
+      "mae": 0.6432
     },
     {
       "features": [
@@ -147,7 +105,7 @@
         "queue_contention_index",
         "shared_state_contention"
       ],
-      "mae": 0.1
+      "mae": 0.2264
     }
   ],
   "success_criteria_met": {
@@ -158,6 +116,8 @@
     "beat_oracle_per_scenario_baseline": false,
     "trigger_met": false,
     "negative_result": true,
+    "regression_protocol_valid": true,
+    "regression_missing_fold_labels": [],
     "legacy_beat_baseline_out_of_sample": true
   },
   "run_manifest": {
@@ -170,19 +130,15 @@
       "warehouse_v0"
     ],
     "held_out_labels": [
-      "calibration_invalid_01",
-      "delay_01",
       "drop_005",
       "no_drop"
     ],
     "held_out_scenarios": [
-      "calibration_invalid_01",
-      "delay_01",
       "drop_005",
       "no_drop"
     ],
-    "train_n_total": 12960,
-    "test_n_total": 4320,
+    "train_n_total": 7200,
+    "test_n_total": 7200,
     "script": "scaling_heldout_eval.py",
     "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
     "holdout_mode": "fault_setting",
@@ -219,24 +175,26 @@
       30
     ],
     "coordination_regimes": [
+      "blackboard",
       "centralized",
       "decentralized",
-      "hierarchical"
+      "hierarchical",
+      "market"
     ],
     "agent_counts": [
       1,
-      4
+      2,
+      4,
+      8
     ],
     "fault_setting_labels": [
-      "calibration_invalid_01",
-      "delay_01",
       "drop_005",
       "no_drop"
     ],
-    "commit": "efa2bc12c94796d51232ceb7b6356683271b904f"
+    "commit": "5b280e800ff309c215bbe52f7854805176a632bc"
   },
   "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
-  "total_rows": 4320,
+  "total_rows": 7200,
   "scenario_ids": [
     "lab_profile_v0",
     "regime_stress_v0",
@@ -247,35 +205,37 @@
   ],
   "secondary_targets": {
     "coordination_tax_proxy": {
-      "overall_baseline_mae": 4.374183406207132,
-      "overall_regression_mae": 4.37417883835633,
-      "overall_feat_baseline_mae": 4.37416473765432,
-      "mean_regression_pi_coverage_95": 0.9946759259259259,
+      "overall_baseline_mae": 7.581833333333334,
+      "overall_regression_mae": 1.5146316886796625,
+      "overall_feat_baseline_mae": 7.581833333333334,
+      "mean_regression_pi_coverage_95": 0.9268055555555555,
       "scaling_fit": {
-        "scaling_exponent": 0.015674372436663697,
-        "scaling_r2": 8.990035618494652e-06,
-        "n_used": 4320
+        "scaling_exponent": -0.00891260740273713,
+        "scaling_r2": 3.009967019851345e-06,
+        "n_used": 7200
       },
       "success_criteria_met": {
         "beat_global_mean_out_of_sample": true,
-        "beat_feature_baseline_out_of_sample": false,
-        "beat_regime_baseline_out_of_sample": false,
-        "beat_agent_count_baseline_out_of_sample": false,
-        "beat_oracle_per_scenario_baseline": false,
-        "trigger_met": false,
-        "negative_result": true,
+        "beat_feature_baseline_out_of_sample": true,
+        "beat_regime_baseline_out_of_sample": true,
+        "beat_agent_count_baseline_out_of_sample": true,
+        "beat_oracle_per_scenario_baseline": true,
+        "trigger_met": true,
+        "negative_result": false,
+        "regression_protocol_valid": true,
+        "regression_missing_fold_labels": [],
         "legacy_beat_baseline_out_of_sample": true
       }
     },
     "error_amplification_proxy": {
-      "overall_baseline_mae": 5.2656726876349484,
-      "overall_regression_mae": 5.2417247087144805,
-      "overall_feat_baseline_mae": 5.233760090505283,
-      "mean_regression_pi_coverage_95": 0.9423611111111111,
+      "overall_baseline_mae": 4.251663495426923,
+      "overall_regression_mae": 4.23053376973761,
+      "overall_feat_baseline_mae": 4.2165564386907395,
+      "mean_regression_pi_coverage_95": 0.9459722222222222,
       "scaling_fit": {
-        "scaling_exponent": -0.35972531456658724,
-        "scaling_r2": 0.010174404827340777,
-        "n_used": 4320
+        "scaling_exponent": -0.42225816152901324,
+        "scaling_r2": 0.016830207218440973,
+        "n_used": 7200
       },
       "success_criteria_met": {
         "beat_global_mean_out_of_sample": true,
@@ -285,23 +245,25 @@
         "beat_oracle_per_scenario_baseline": false,
         "trigger_met": false,
         "negative_result": true,
+        "regression_protocol_valid": true,
+        "regression_missing_fold_labels": [],
         "legacy_beat_baseline_out_of_sample": true
       }
     }
   },
   "excellence_metrics": {
-    "out_of_sample_margin_vs_global_baseline": 0.4959,
-    "ci_width_95_baseline_mae": 0.0616,
+    "out_of_sample_margin_vs_global_baseline": 0.42,
+    "ci_width_95_baseline_mae": 0.0406,
     "trigger_met": false,
     "legacy_beat_baseline_out_of_sample": true,
-    "fold_coverage": 4,
-    "difference_mean": 0.4959,
+    "fold_coverage": 2,
+    "difference_mean": 0.42,
     "difference_ci95": [
-      0.4655,
-      0.5111
+      0.4054,
+      0.4346
     ],
-    "difference_ci_width": 0.0456,
-    "paired_t_p_value": 0.0252,
+    "difference_ci_width": 0.0293,
+    "paired_t_p_value": 0.2894,
     "power_post_hoc": 1.0,
     "alpha": 0.05
   }
