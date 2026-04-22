@@ -1,0 +1,290 @@
+{
+  "version": "0.1",
+  "run_id": "run_bb05700e47",
+  "scenario_id": "rep_cps_scheduling_v0",
+  "seed": 4,
+  "start_time_utc": "2026-04-22T09:50:30.498427Z",
+  "events": [
+    {
+      "seq": 0,
+      "ts": 0.005212924216778624,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "scheduler"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "receive_sample:0",
+        "regime": "centralized"
+      },
+      "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
+    },
+    {
+      "seq": 1,
+      "ts": 0.007321024129670039,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "receive_sample:0",
+        "name": "receive_sample"
+      },
+      "state_hash_after": "b399f7cb3095b80e85ed05b05cce725373eca0dd73aa93672da0ef38ab30240c"
+    },
+    {
+      "seq": 2,
+      "ts": 0.017262462749497047,
+      "type": "fault_injected",
+      "actor": {
+        "kind": "system",
+        "id": "fault_injector"
+      },
+      "payload": {
+        "fault": "delay",
+        "task_id": "receive_sample:0"
+      },
+      "state_hash_after": "e33de90be0479679d481b8d19e4f51aa87abd0a78134abb77f6205c7f0e31ff1"
+    },
+    {
+      "seq": 3,
+      "ts": 0.12898077883489098,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "lab_device_1"
+      },
+      "payload": {
+        "task_id": "receive_sample:0",
+        "name": "receive_sample"
+      },
+      "state_hash_after": "7819e74e93808d99226657d5500b7ebfd052a827de71f206a3f31b07d4694e5a"
+    },
+    {
+      "seq": 4,
+      "ts": 0.13525190602863854,
+      "type": "recovery_succeeded",
+      "actor": {
+        "kind": "system",
+        "id": "supervisor"
+      },
+      "payload": {
+        "task_id": "receive_sample:0",
+        "detail": "task_completed_after_fault"
+      },
+      "state_hash_after": "7819e74e93808d99226657d5500b7ebfd052a827de71f206a3f31b07d4694e5a"
+    },
+    {
+      "seq": 5,
+      "ts": 0.1389216635587168,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "scheduler"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "centrifuge:1",
+        "regime": "centralized"
+      },
+      "state_hash_after": "e33e235e23082d8f7518f6266c6e3abd3f7e427489d7c48eaaea144b76e64d87"
+    },
+    {
+      "seq": 6,
+      "ts": 0.14109500993978558,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "centrifuge:1",
+        "name": "centrifuge"
+      },
+      "state_hash_after": "27b94dec21e88808f9743b6f7e0ded3c2fd98f51868ef3211e228cb08cc4a295"
+    },
+    {
+      "seq": 7,
+      "ts": 0.14827491810336668,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "lab_device_1"
+      },
+      "payload": {
+        "task_id": "centrifuge:1",
+        "name": "centrifuge"
+      },
+      "state_hash_after": "0dc22a1a09ba939202f4c379005418947000c0ad498450a6ba6452917cc563b2"
+    },
+    {
+      "seq": 8,
+      "ts": 0.1673668993007358,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "scheduler"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "analyze:2",
+        "regime": "centralized"
+      },
+      "state_hash_after": "e8eb0d9d6afb4cbe41cb3097b8e371f4a82131bf0d6f74b811d4753ba323b73f"
+    },
+    {
+      "seq": 9,
+      "ts": 0.19285308161947587,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "analyze:2",
+        "name": "analyze"
+      },
+      "state_hash_after": "ef0c1dfd0f67ba4eb559e2cb221dac9eb1bb4b703669aa9b38afdba65f151d9e"
+    },
+    {
+      "seq": 10,
+      "ts": 0.2108786088324119,
+      "type": "fault_injected",
+      "actor": {
+        "kind": "system",
+        "id": "fault_injector"
+      },
+      "payload": {
+        "fault": "delay",
+        "task_id": "analyze:2"
+      },
+      "state_hash_after": "a6acc226bd9b1bedb45554bb9b4e7df4461c963ff304827032d4e99318481ba5"
+    },
+    {
+      "seq": 11,
+      "ts": 0.25582016272646013,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "lab_device_1"
+      },
+      "payload": {
+        "task_id": "analyze:2",
+        "name": "analyze"
+      },
+      "state_hash_after": "dc1b40b1f6d7eecd84b679395b6c5addaf6556ebbed6f3ec4463ed0c6799f94f"
+    },
+    {
+      "seq": 12,
+      "ts": 0.30861833765923985,
+      "type": "recovery_succeeded",
+      "actor": {
+        "kind": "system",
+        "id": "supervisor"
+      },
+      "payload": {
+        "task_id": "analyze:2",
+        "detail": "task_completed_after_fault"
+      },
+      "state_hash_after": "dc1b40b1f6d7eecd84b679395b6c5addaf6556ebbed6f3ec4463ed0c6799f94f"
+    },
+    {
+      "seq": 13,
+      "ts": 0.34745767514792714,
+      "type": "coordination_message",
+      "actor": {
+        "kind": "system",
+        "id": "scheduler"
+      },
+      "payload": {
+        "detail": "assign_task",
+        "task_id": "report_results:3",
+        "regime": "centralized"
+      },
+      "state_hash_after": "a30bfabd157bdfc033504b178cbeaa11118330d2c4f729a281a9a9839da71d9a"
+    },
+    {
+      "seq": 14,
+      "ts": 0.3628161632596929,
+      "type": "task_start",
+      "actor": {
+        "kind": "agent",
+        "id": "agent_1"
+      },
+      "payload": {
+        "task_id": "report_results:3",
+        "name": "report_results"
+      },
+      "state_hash_after": "6c26947f9b61eb6c1b66928c5ecb187ca4188398d928609c65afd027cc44511d"
+    },
+    {
+      "seq": 15,
+      "ts": 0.37316151970694744,
+      "type": "task_end",
+      "actor": {
+        "kind": "tool",
+        "id": "lab_device_1"
+      },
+      "payload": {
+        "task_id": "report_results:3",
+        "name": "report_results"
+      },
+      "state_hash_after": "021819ae752bb4e2295b1d1079e95e85a5996b8c34f72ad7a3b33f65c3b3ae15"
+    },
+    {
+      "seq": 16,
+      "ts": 0.3908491433185982,
+      "type": "safe_state_reached",
+      "actor": {
+        "kind": "system",
+        "id": "supervisor"
+      },
+      "payload": {
+        "detail": "all_tasks_terminal_safe"
+      },
+      "state_hash_after": "021819ae752bb4e2295b1d1079e95e85a5996b8c34f72ad7a3b33f65c3b3ae15"
+    }
+  ],
+  "final_state_hash": "021819ae752bb4e2295b1d1079e95e85a5996b8c34f72ad7a3b33f65c3b3ae15",
+  "metadata": {
+    "delay_p95_ms": 58.0,
+    "drop_completion_prob": 0.12,
+    "delay_fault_prob": 0.14,
+    "calibration_invalid_prob": 0.0,
+    "max_retries_per_task": 0,
+    "rep_cps_scheduling_dependent": true,
+    "rep_cps_safety_gate_ok": true,
+    "planned_task_count": 4,
+    "timeout_fault_prob": 0.0,
+    "partial_result_fault_prob": 0.03,
+    "reordered_event_fault_prob": 0.08,
+    "resource_contention_spike_prob": 0.0,
+    "invalid_action_injection_prob": 0.0,
+    "agent_nonresponse_fault_prob": 0.0,
+    "duplicate_completion_prob": 0.0,
+    "conflicting_action_prob": 0.0,
+    "constraint_guard_trigger_prob": 0.0,
+    "sensor_stale_prob": 0.0,
+    "shutdown_after_first_fault": false,
+    "deadline_miss_prob": 0.0,
+    "fault_setting_label": "unknown",
+    "agent_count": 1,
+    "coordination_regime": "centralized",
+    "coordination_topology": "centralized",
+    "hierarchy_depth": 2,
+    "fan_out": 1,
+    "handoff_factor": 1,
+    "shared_state_contention": 0.25,
+    "deadline_tightness": 1.0,
+    "critical_path_length": 4,
+    "branching_factor": 1.0,
+    "queue_contention_index": 0.25,
+    "regime_fault_interaction": 0.0,
+    "regime_id": 0,
+    "effective_drop_completion_prob": 0.12,
+    "latency_stress_multiplier": 1.0,
+    "drop_stress_multiplier": 1.0
+  }
+}

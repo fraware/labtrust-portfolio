@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_c5e1c14488",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/p0_e4_matrix/raw/moderate/rep_cps_scheduling_v0/centralized/seed_12/trace.json",
+      "sha256": "e5286bbd0661ffbaa15d8747d3f923e9d0cf91ba2b655a6654f31a4bfeb0a223",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/p0_e4_matrix/raw/moderate/rep_cps_scheduling_v0/centralized/seed_12/maestro_report.json",
+      "sha256": "17995f05737ac76972778d18684412c51edc534ad18443ef2a53c9724451cbbe",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": true,
+    "replay_diagnostics": "replay ok"
+  },
+  "verification_mode": "evaluator"
+}
