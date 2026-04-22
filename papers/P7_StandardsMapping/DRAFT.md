@@ -1,19 +1,49 @@
 # From Coordination to Safety Case: A Traceable Assurance Argument for Multi-Agent CPS
 
-**Draft (v0.2). Paper ID: P7_StandardsMapping.**
+**Draft (v0.3). Paper ID: P7_StandardsMapping.**
 
 **Reproducibility.** From repo root, set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel` for eval scripts. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). **No certification claim**; mapping is a translation and audit-support layer only (section 2 Non-goals).
 
-## Full evidence run (baseline + robust + tables + figures)
+## Governance problem (framing)
 
-Use this sequence to regenerate committed artifacts and `generated_tables.md`:
+The governance failure mode is not only **lack** of evidence files, but **inability to distinguish** admissible, scenario-consistent, commitment-complete evidence from well-packaged but unsupported or misleading claims. Existing pipelines can produce governance theater: many artifacts, little **reviewability**. This paper defines a **reviewability interface**: runtime artifacts plus an assurance pack are converted into checkable governance claims with **stable failure codes** ([docs/P7_REVIEW_FAILURE_CODES.md](../docs/P7_REVIEW_FAILURE_CODES.md)) so that rejection is **attributable** (auditor-usable diagnosis), not a single opaque boolean.
+
+## Empirical questions
+
+- **Q1 — Stability (positive controls):** Does the review layer continue to accept **valid** evidence under runtime stress? Answered by the **400-run** robust matrix (`robust_results.json`); high pass rates here are informative **only** as positive controls, not as proof of real-world trustworthiness alone.
+- **Q2 — Discrimination (negative controls):** Does the review layer **reject** invalid, incomplete, inconsistent, or misleading evidence? Answered by `negative_results.json` from `run_assurance_negative_eval.py` (families: pack structure, artifact admissibility, scenario consistency, adversarial/misleading).
+- **Q3 — Attribution:** When a case is rejected, is the **reason** consistent with the injected fault (localization)? Rows include `failure_reason_codes`, `failure_stage`, and `reason_matches_expected`.
+
+## Threat model (what we check vs out of scope)
+
+**In scope (mechanical):** malformed or missing JSON; schema-invalid trace/bundle/manifest; structurally invalid packs; **trace `scenario_id` vs declared review scenario**; missing PONR-aligned commitment tasks for the scenario; **control evidence types not all satisfied** by artifacts present in the run; **SHA256 mismatch** between evidence bundle / release manifest and files on disk (swapped or stale bundles, tampered manifest).
+
+**Out of scope:** semantic correctness of hazard text; domain ontology completeness; collusion that replaces the entire artifact chain coherently; cryptographic proof of non-repudiation; regulator-ready sufficiency; any **compliance** or **certification** claim.
+
+## Reviewer ablations
+
+`review_assurance_run.py` supports `--review-mode`:
+
+| Mode | Intent |
+|------|--------|
+| `schema_only` | Pack validation + optional trace/bundle **schema** if files exist (may **miss** missing files or governance inconsistencies). |
+| `schema_plus_presence` | Pack + required artifacts **present** and schema-valid (still **misses** PONR/scenario/provenance rules). |
+| `full_review` | Governance path: presence, schemas, scenario alignment, PONR coverage, **all** declared evidence types per control, bundle and release **provenance** checks. |
+
+Ablation CSV: `papers/P7_StandardsMapping/p7_ablation_summary.csv` (from `export_p7_negative_tables.py`). Example committed profile: `schema_only` shows **higher false-accept** on injected negatives than `full_review` — the full pipeline is **necessary** for governance-relevant checks, not incremental ornamentation.
+
+## Full evidence run (baseline + robust + negative + tables + figures)
+
+Use this sequence to regenerate committed artifacts, `generated_tables.md`, and negative CSVs:
 
 ```bash
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_robust_eval.py --out datasets/runs/assurance_eval
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval
 python scripts/export_p7_mapping_flow.py
 python scripts/export_assurance_gsn.py --out docs/figures/p7_gsn.mmd
 python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/results.json
+python scripts/export_p7_negative_tables.py
 python scripts/render_p7_mermaid_figures.py
 ```
 
@@ -30,6 +60,9 @@ python scripts/render_p7_mermaid_figures.py
 | Table 3 | Same export loads `robust_results.json` when present (robust aggregate) |
 | Figure 1 | `export_assurance_gsn.py` → `docs/figures/p7_gsn.mmd`; render with `render_p7_mermaid_figures.py` |
 | Audit | `audit_bundle.py --run-dir <path>` or `audit_bundle.py --release datasets/releases/portfolio_v0.1` |
+| Negative controls + ablations | `run_assurance_negative_eval.py` → `negative_results.json`; `export_p7_negative_tables.py` → `p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv` |
+
+**Admissible evidence package (informal definition).** For a declared scenario and pack, a run directory is **admissible** under `full_review` when: the pack passes structure checks; required artifacts exist and validate; trace scenario matches the review scenario; every control’s **full** set of `evidence_artifact_types` is satisfied by artifacts in the run; required PONR tasks appear in the trace; bundle and release manifest digests match on-disk files.
 
 ## 1. Why standards mappings often fail
 
@@ -86,9 +119,15 @@ Three JSON instantiations: **lab** (`profiles/lab/v0.1/assurance_pack_instantiat
 |------------------|-------------------------|---------------|--------------------------|-----------------------------|----------------------|
 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 47.53 |
 
+**Table 4 — Negative-control families (`full_review`).** Source: `p7_negative_family_summary.csv` (per-family reject rate and localization accuracy on injected negatives). Regenerate: `export_p7_negative_tables.py`.
+
+**Table 5 — Ablation: reviewer mode vs discrimination.** Source: `p7_ablation_summary.csv`. Columns include `valid_accept_rate`, `invalid_reject_rate`, `false_accept_rate`, `false_reject_rate`, `localization_accuracy`. **Interpretation:** `schema_only` and `schema_plus_presence` **must** show higher false accepts than `full_review` on the same negative suite, or the ablation is not doing its job.
+
+**Table 6 — Failure reason breakdown (`full_review` rejections).** Source: `p7_failure_reason_breakdown.csv`.
+
 **Figure 1 — GSN-lite.** `scripts/export_assurance_gsn.py` from lab `assurance_pack_instantiation.json`.
 
-**Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust:** `robust_results.json` reports pass rates and latency median; `run_manifest.scenario_profile_alignment` and `scenario_profile_note` document traffic↔medical proxy. (4) **Non-claim:** no certification. Regenerate tables: `generated_tables.md` or stdout from `export_assurance_tables.py`. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
+**Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust (Q1):** `robust_results.json` — positive-control stability under stress; not claimed as discriminative power. (4) **Negative suite (Q2–Q3):** `negative_results.json` with `aggregate.governance_evidence_discrimination_accuracy` and per-mode rates. (5) **Non-claim:** no certification. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
 
 ## 7. Comparison to other assurance frameworks
 
@@ -108,14 +147,15 @@ See [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md).
 - **Coverage metrics** are defined per run and scenario, not global completeness.
 - **Standards:** structural analogy and documentation pattern only ([P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md)).
 - **K7:** No template theater—claims must tie to schema or script.
+- **Negative suite:** Perturbations are **not** tuned for a perfect scorecard; some false accepts under weak modes are expected and informative. Sensitivity depends on perturbation family; semantic sufficiency remains out of scope.
 
 ## 9. Methodology and reproducibility
 
-**Metrics:** Schema validation, mapping completeness, PONR coverage (where scenario tasks are defined), review JSON (`evidence_bundle_ok`, `trace_ok`, ratios). **Kill criterion:** mapping not checkable by script or PONR chain not reconstructible from trace → approach fails for this paper’s claims. Portfolio bar: [STATE_OF_THE_ART_CRITERIA.md](../docs/STATE_OF_THE_ART_CRITERIA.md).
+**Metrics:** (Positive) schema/mapping, robust pass rates. (Negative) `valid_accept_rate`, `invalid_reject_rate`, `false_accept_rate`, `false_reject_rate`, per-family reject rate, localization accuracy, `governance_evidence_discrimination_accuracy` in `negative_results.json`. **Kill criterion:** mapping not checkable by script, or discrimination suite shows **no** gap between `full_review` and weaker modes on governance-relevant negatives. Portfolio bar: [STATE_OF_THE_ART_CRITERIA.md](../docs/STATE_OF_THE_ART_CRITERIA.md).
 
-**Commands:** `run_assurance_eval.py`; `check_assurance_mapping.py`; `review_assurance_run.py <run_dir> --scenario-id lab_profile_v0`; `tests/test_assurance_p7.py`; `docs/P7_REVIEW_CHECKLIST.md`.
+**Commands:** `run_assurance_eval.py`; `run_assurance_negative_eval.py`; `check_assurance_mapping.py`; `review_assurance_run.py <run_dir> --scenario-id lab_profile_v0 --review-mode full_review`; `tests/test_assurance_p7.py`, `tests/test_assurance_negative_eval.py`; `docs/P7_REVIEW_CHECKLIST.md`.
 
-**Submission note.** Ship `results.json` and `robust_results.json` with successful mapping and review checks; Table 1 must reflect **`lab_profile_v0`** primary review; default robust run uses **20 seeds** unless justified.
+**Submission note.** Ship `results.json`, `robust_results.json`, and **`negative_results.json`** with the negative eval and exports; Table 1 must reflect **`lab_profile_v0`** primary review; default robust run uses **20 seeds** unless justified.
 
 ## 10. Non-claims
 
@@ -130,4 +170,5 @@ No certification. No compliance claim with 21 CFR Part 11 or OECD GLP. Auditable
 | C1 Traceable mapping | Schema, instantiations, `results.json`, `robust_results.json`, [P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md) |
 | C2 Mechanically checkable | `check_assurance_mapping.py`, `review_assurance_run.py`, `audit_bundle.py` |
 | C3 Stress / proxy scenarios | `robust_results.json`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md` |
+| C4 Discrimination + ablations | `negative_results.json`, `run_assurance_negative_eval.py`, `export_p7_negative_tables.py`, CSV Tables 4–6 |
 | No certification | This section; Limitations |

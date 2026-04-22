@@ -435,7 +435,7 @@ def p7(quick: bool) -> bool:
     )
     if not ok:
         return False
-    robust_seeds = "1,2,3" if quick else "1,2,3,4,5,6,7,8,9,10"
+    robust_seeds = "1,2,3" if quick else ",".join(str(i) for i in range(1, 21))
     ok = run(
         [
             sys.executable,
@@ -444,9 +444,18 @@ def p7(quick: bool) -> bool:
             "--seeds", robust_seeds,
         ],
         "P7 Robust assurance matrix",
-        timeout=600 if not quick else 240,
+        timeout=1200 if not quick else 240,
     )
     if not ok:
+        return False
+    neg_cmd = [
+        sys.executable,
+        str(REPO / "scripts" / "run_assurance_negative_eval.py"),
+        "--out", str(RUNS / "assurance_eval"),
+    ]
+    if quick:
+        neg_cmd.append("--quick")
+    if not run(neg_cmd, "P7 Negative controls + ablations", timeout=180 if not quick else 120):
         return False
     run(
         [
@@ -464,6 +473,15 @@ def p7(quick: bool) -> bool:
         ],
         "P7 Export assurance tables",
         timeout=15,
+    )
+    run(
+        [
+            sys.executable,
+            str(REPO / "scripts" / "export_p7_negative_tables.py"),
+            "--input", str(RUNS / "assurance_eval" / "negative_results.json"),
+        ],
+        "P7 Export negative-control CSV tables",
+        timeout=30,
     )
     return True
 

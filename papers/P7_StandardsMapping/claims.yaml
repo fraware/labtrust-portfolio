@@ -1,5 +1,4 @@
 # P7 Standards Mapping claim table (Draft conversion checklist 2.1)
-# Each claim maps to release_id, artifact_paths, table_id, figure_id.
 # See docs/DRAFT_CONVERSION_CHECKLIST.md and docs/STATE_OF_THE_ART_CRITERIA.md.
 
 paper_id: "P7_StandardsMapping"
@@ -22,23 +21,25 @@ claims:
       confidence: high
 
   - id: "C2"
-    statement: "The mapping is mechanically checkable (artifact presence + trace reconstruction), not narrative."
+    statement: "The mapping is mechanically checkable (artifact presence + trace reconstruction + governance review modes), not narrative."
     evidence:
       release_id: "assurance_eval"
       artifact_paths:
         - "scripts/check_assurance_mapping.py"
         - "scripts/audit_bundle.py"
         - "scripts/review_assurance_run.py"
+        - "impl/src/labtrust_portfolio/assurance_review_pipeline.py"
         - "scripts/run_assurance_robust_eval.py"
         - "datasets/runs/assurance_eval/results.json"
         - "datasets/runs/assurance_eval/robust_results.json"
         - "docs/PART11_AUDIT_TRAIL_ALIGNMENT.md"
-      table_ids: ["Table 1", "Table 2"]
+        - "docs/P7_REVIEW_FAILURE_CODES.md"
+      table_ids: ["Table 1", "Table 2", "Table 5"]
       figure_ids: []
       confidence: high
 
   - id: "C3"
-    statement: "Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions (20-seed robust matrix)."
+    statement: "Worked examples across lab and real-world proxy scenarios (warehouse, traffic) demonstrate audit completeness and replayability under stressed conditions (20-seed robust matrix; positive-control stability)."
     evidence:
       release_id: "assurance_eval"
       artifact_paths:
@@ -60,6 +61,20 @@ claims:
       figure_ids: ["Figure 0", "Figure 1"]
       confidence: high
 
-# Tables: export_assurance_tables.py (Table 3 from robust_results.json when present).
-# Figures: export_p7_mapping_flow.py (Figure 0), export_assurance_gsn.py (Figure 1); PNG/PDF via render_p7_mermaid_figures.py.
-# One-command audit: audit_bundle.py --release. K7: no template theater. No certification claim.
+  - id: "C4"
+    statement: "The full governance reviewer rejects structurally invalid packs, inadmissible artifacts, scenario/trace mismatches, missing commitment tasks, and provenance inconsistencies; weaker schema-only and presence-only modes exhibit higher false accepts on the same negative suite (discrimination + ablation)."
+    evidence:
+      release_id: "assurance_eval"
+      artifact_paths:
+        - "datasets/runs/assurance_eval/negative_results.json"
+        - "scripts/run_assurance_negative_eval.py"
+        - "scripts/export_p7_negative_tables.py"
+        - "impl/src/labtrust_portfolio/assurance_negative_controls.py"
+        - "papers/P7_StandardsMapping/p7_ablation_summary.csv"
+        - "papers/P7_StandardsMapping/p7_negative_family_summary.csv"
+        - "papers/P7_StandardsMapping/p7_failure_reason_breakdown.csv"
+      table_ids: ["Table 4", "Table 5", "Table 6"]
+      figure_ids: []
+      confidence: high
+
+# Tables 1–3: export_assurance_tables.py. Tables 4–6: export_p7_negative_tables.py. K7: no template theater. No certification claim.

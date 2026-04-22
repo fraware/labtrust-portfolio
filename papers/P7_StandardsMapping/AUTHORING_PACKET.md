@@ -18,8 +18,9 @@ How do we translate the portfolio’s executable artifacts (gates, traces, evide
 ## 3) Claims (see `claims.yaml`)
 
 - **C1:** Structured assurance pack enables traceable mapping: hazards → controls → evidence artifact types → reviewable traces/bundles.
-- **C2:** Mapping is **mechanically checkable** (schema + `check_assurance_mapping.py` + `audit_bundle.py` + scripted `review_assurance_run.py`), not narrative-only.
-- **C3:** Lab + warehouse + traffic-proxy scenarios under a **20-seed × 5 fault-regime** robust matrix demonstrate stable mechanical pass rates and replay/review pipeline behavior under stress (see `robust_results.json`). **Non-claim:** traffic↔medical pack pairing is a documented pipeline/proxy test, not semantic alignment of domains.
+- **C2:** Mapping is **mechanically checkable** (schema + `check_assurance_mapping.py` + `audit_bundle.py` + scripted `review_assurance_run.py` with review modes), not narrative-only.
+- **C3:** Lab + warehouse + traffic-proxy scenarios under a **20-seed × 5 fault-regime** robust matrix demonstrate **positive-control** stability under stress (`robust_results.json`). **Non-claim:** traffic↔medical pack pairing is a documented pipeline/proxy test, not semantic alignment of domains.
+- **C4:** **Discrimination:** injected negatives (pack, artifact, scenario, misleading families) are rejected under `full_review` with attributable codes; `schema_only` / `schema_plus_presence` show **higher false accepts** on the same suite (`negative_results.json`, Tables 4–6).
 
 ## 4) Outline (manuscript)
 

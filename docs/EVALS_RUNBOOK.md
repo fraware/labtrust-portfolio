@@ -150,15 +150,19 @@ Exit code 1 if any red-team case fails (expected_block not satisfied).
 - **Check:** `scripts/check_assurance_mapping.py` (--inst, --profile-dir); schema + mapping completeness + PONR coverage.
 - **Auditor walk-through:** `scripts/audit_bundle.py [--run-dir DIR] [--inst path] [--profile-dir path] [--scenario-id toy_lab_v0]` prints pass/fail for mapping completeness and PONR coverage (and optional run review); outputs JSON + human-readable. **One-command audit over release:** `scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` runs mapping + PONR; if the release dir contains evidence_bundle.json, review runs there too.
 - **Part 11:** See `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` for evidence-bundle/trace mapping to Part 11-style audit trail (each requirement mapped to artifact path and field; machine-checkable). Non-goals: no certification claim; translation layer only. **Three profiles:** lab v0.1, warehouse v0.1, medical v0.1; results include per_profile (P7 DRAFT, kernel/assurance_pack/README.md, profiles/). Standards mapping table: `docs/P7_STANDARDS_MAPPING.md`. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
-- **Review:** `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>]`; PONR coverage uses --scenario-id and `SCENARIO_PONR_TASK_NAMES` (lab, warehouse, traffic scenarios have defined final-commit tasks; toy_lab_v0 has none). Scripted review is partial; no certification claim.
+- **Review:** `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>] [--review-mode schema_only|schema_plus_presence|full_review]`. Default `full_review`: scenario/trace alignment, PONR tasks, **all** evidence types per control, bundle+release SHA vs files. Weaker modes are **ablation baselines** for discrimination experiments. Failure codes: `docs/P7_REVIEW_FAILURE_CODES.md`. Scripted review is partial; no certification claim.
 - **Robust matrix:** `scripts/run_assurance_robust_eval.py` (default seeds 1..20, 400 runs). `run_manifest.scenario_profile_alignment` documents scenario→pack pairing; see note for traffic_v0↔medical_v0.1.
-- **Export:** `scripts/export_assurance_tables.py [--results path]` prints Table 1–2; Table 3 from `datasets/runs/assurance_eval/robust_results.json` when that file exists. GSN-lite: `python scripts/export_assurance_gsn.py`. Camera-ready Mermaid: `python scripts/render_p7_mermaid_figures.py` (PNG/PDF next to `.mmd` when `mmdc`/`npx` available).
-- **Integration test:** tests/test_assurance_p7.py runs run_assurance_eval --out <temp>, asserts results and export script; TestAuditBundle runs audit_bundle (mapping + PONR; optional run-dir review).
+- **Negative controls:** `scripts/run_assurance_negative_eval.py [--quick]` writes `datasets/runs/assurance_eval/negative_results.json` (per-family perturbations, expected vs observed outcome, localization). `scripts/export_p7_negative_tables.py` emits CSVs under `papers/P7_StandardsMapping/` for Tables 4–6 in the draft.
+- **Export:** `scripts/export_assurance_tables.py [--results path]` prints Table 1–2; Table 3 from `robust_results.json` when present. GSN-lite: `export_assurance_gsn.py`. Camera-ready Mermaid: `render_p7_mermaid_figures.py`.
+- **Integration tests:** `tests/test_assurance_p7.py`; `tests/test_assurance_negative_eval.py`.
 
 ```bash
 PYTHONPATH=impl/src python scripts/run_assurance_eval.py [--out datasets/runs/assurance_eval]
+PYTHONPATH=impl/src python scripts/run_assurance_robust_eval.py [--out datasets/runs/assurance_eval]
+PYTHONPATH=impl/src python scripts/run_assurance_negative_eval.py [--quick]
 PYTHONPATH=impl/src python scripts/audit_bundle.py [--run-dir path/to/run] [--release datasets/releases/portfolio_v0.1] [--json-only]
 PYTHONPATH=impl/src python scripts/export_assurance_tables.py
+python scripts/export_p7_negative_tables.py
 python scripts/export_assurance_gsn.py
 ```
 

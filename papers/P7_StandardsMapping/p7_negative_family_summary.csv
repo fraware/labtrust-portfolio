@@ -1,0 +1,5 @@
+failure_family,n_negative_cases,reject_rate,localization_accuracy,example_perturbation_ids
+adversarial_misleading,3,1.0,1.0,remove_final_commit_event_keep_structure;partial_control_omission;manifest_points_to_foreign_artifact
+artifact_admissibility,6,1.0,1.0,missing_trace_file;missing_bundle_file;trace_schema_invalid
+pack_structure,6,1.0,1.0,hazard_missing_control_ids;hazard_references_unknown_control;control_missing_evidence_types
+scenario_consistency,5,1.0,1.0,wrong_pack_for_scenario;missing_required_ponr_event;cross_run_trace_bundle_swap
