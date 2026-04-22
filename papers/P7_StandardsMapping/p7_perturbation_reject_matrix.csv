@@ -22,7 +22,7 @@ swapped_scenario_id_in_trace,scenario_consistency,0,0,1
 trace_schema_invalid,artifact_admissibility,1,1,1
 trace_truncated,artifact_admissibility,1,1,1
 traffic_manifest_points_to_foreign_artifact,adversarial_misleading,0,0,1
-traffic_wrong_pack_for_scenario,scenario_consistency,0,0,0
+traffic_wrong_pack_for_scenario,scenario_consistency,0,0,1
 warehouse_manifest_points_to_foreign_artifact,adversarial_misleading,0,0,1
 warehouse_missing_required_ponr_event,scenario_consistency,0,0,1
 wellformed_but_incomplete_evidence,adversarial_misleading,0,0,1

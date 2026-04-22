@@ -2,7 +2,8 @@
   "version": "0.1",
   "system": {
     "boundary": "lab_profile_v0.1",
-    "assumptions": "Robot-centric autonomous lab; PONRs from ponrs.yaml"
+    "assumptions": "Robot-centric autonomous lab; PONRs from ponrs.yaml",
+    "compatible_scenarios": ["lab_profile_v0", "toy_lab_v0"]
   },
   "hazards": [
     {

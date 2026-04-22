@@ -257,6 +257,10 @@ def review_assurance_pipeline(
         outcome["exit_ok"] = False
         return outcome
 
+    pack = _load_json(pack_path)
+    system = pack.get("system") if isinstance(pack, dict) else {}
+    compatible = system.get("compatible_scenarios") if isinstance(system, dict) else None
+
     trace_exists = (run_dir / "trace.json").exists()
     bundle_exists = (run_dir / "evidence_bundle.json").exists()
 
@@ -317,6 +321,10 @@ def review_assurance_pipeline(
         outcome["exit_ok"] = False
         return outcome
 
+    # Explicit pack scope check: reviewed scenario must be declared compatible.
+    if not isinstance(compatible, list) or scenario_id not in {str(x) for x in compatible}:
+        fail("scenario_alignment", [FC.SCENARIO_PACK_MISMATCH])
+
     try:
         trace = _load_json(run_dir / "trace.json")
     except Exception:
@@ -372,7 +380,6 @@ def review_assurance_pipeline(
         evidence_present.add("trace")
     if outcome.get("evidence_bundle_ok"):
         evidence_present.add("evidence_bundle")
-    pack = _load_json(pack_path)
     controls = pack.get("controls", [])
     covered = 0
     controls_covered: List[Dict[str, Any]] = []

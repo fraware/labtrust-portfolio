@@ -221,3 +221,32 @@ class TestAuditBundle(unittest.TestCase):
             self.assertEqual(data.get("mapping_completeness"), "pass")
             self.assertEqual(data.get("ponr_coverage"), "pass")
             self.assertTrue(data.get("review_exit_ok"), "review must pass on valid run dir")
+
+
+class TestScenarioPackCompatibility(unittest.TestCase):
+    """full_review must reject scenarios outside pack-declared compatibility."""
+
+    def setUp(self) -> None:
+        os.environ["LABTRUST_KERNEL_DIR"] = str(repo_root() / "kernel")
+
+    def test_full_review_rejects_incompatible_scenario_pack(self) -> None:
+        sys.path.insert(0, str(repo_root() / "impl" / "src"))
+        from labtrust_portfolio.assurance_review_pipeline import review_assurance_pipeline  # noqa: E402
+        from labtrust_portfolio.thinslice import run_thin_slice  # noqa: E402
+
+        with tempfile.TemporaryDirectory() as td:
+            run_dir = Path(td) / "run_traffic"
+            run_dir.mkdir(parents=True)
+            run_thin_slice(run_dir, seed=7, scenario_id="traffic_v0", drop_completion_prob=0.0)
+
+            wh_pack = repo_root() / "profiles" / "warehouse" / "v0.1" / "assurance_pack_instantiation.json"
+            out = review_assurance_pipeline(
+                run_dir,
+                wh_pack,
+                "traffic_v0",
+                "full_review",
+                profile_dir=repo_root() / "profiles" / "medical_v0.1",
+                repo_root=repo_root(),
+            )
+            self.assertFalse(out.get("exit_ok"), out)
+            self.assertIn("SCENARIO_PACK_MISMATCH", out.get("failure_reason_codes") or [])

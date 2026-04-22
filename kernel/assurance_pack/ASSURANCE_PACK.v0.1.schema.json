@@ -17,7 +17,19 @@
     },
     "system": {
       "type": "object",
-      "description": "System boundary + assumptions (placeholder)"
+      "required": ["boundary", "compatible_scenarios"],
+      "properties": {
+        "boundary": {"type": "string"},
+        "assumptions": {"type": "string"},
+        "compatible_scenarios": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string"},
+          "description": "Scenario ids this assurance pack explicitly supports."
+        }
+      },
+      "additionalProperties": true,
+      "description": "System boundary + declared scenario compatibility scope"
     },
     "hazards": {
       "type": "array",

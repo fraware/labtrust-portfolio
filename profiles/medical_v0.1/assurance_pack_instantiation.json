@@ -2,7 +2,8 @@
   "version": "0.1",
   "system": {
     "boundary": "medical_device_v0.1",
-    "assumptions": "Software as medical device; traceability to IEC 62304 / regulatory checklist"
+    "assumptions": "Software as medical device; traceability to IEC 62304 / regulatory checklist",
+    "compatible_scenarios": ["traffic_v0"]
   },
   "hazards": [
     {

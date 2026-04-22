@@ -2,7 +2,8 @@
   "version": "0.1",
   "system": {
     "boundary": "warehouse_profile_v0.1",
-    "assumptions": "Warehouse automation; PONRs from scenario"
+    "assumptions": "Warehouse automation; PONRs from scenario",
+    "compatible_scenarios": ["warehouse_v0"]
   },
   "hazards": [
     {
