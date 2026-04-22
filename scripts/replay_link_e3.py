@@ -127,6 +127,8 @@ def _run_replay_block(
                     "tasks_completed": recomputed["metrics"]["tasks_completed"],
                     "coordination_messages": recomputed["metrics"]["coordination_messages"],
                     "p95_latency_ms": recomputed["metrics"]["task_latency_ms_p95"],
+                    "weak_match": weak,
+                    "strong_match": strong,
                     "weak_replay_match": weak,
                     "strong_replay_match": strong,
                     "match": weak,
@@ -144,8 +146,13 @@ def _run_replay_block(
         p95_ci = _ci95(p95_mean, p95_stdev, n)
         p99_idx = min(int(0.99 * len(p95s)), len(p95s) - 1) if p95s else -1
         p99_latency = sorted(p95s)[p99_idx] if p99_idx >= 0 else 0.0
-        scenario_weak = all(r["weak_replay_match"] for r in results)
-        scenario_strong = all(r["strong_replay_match"] for r in results)
+        scenario_weak = all(r["weak_match"] for r in results)
+        scenario_strong = all(r["strong_match"] for r in results)
+        strong_rate = (
+            sum(1 for r in results if r["strong_match"]) / len(results)
+            if results
+            else 0.0
+        )
         if not scenario_weak:
             all_weak = False
         if not scenario_strong:
@@ -159,6 +166,8 @@ def _run_replay_block(
                 "p95_latency_ms_stdev": p95_stdev,
                 "all_match": scenario_weak,
                 "all_strong_match": scenario_strong,
+                "all_weak_match": scenario_weak,
+                "strong_match_rate": strong_rate,
                 "tasks_completed_ci_95": list(tc_ci),
                 "p95_latency_ms_ci_95": list(p95_ci),
                 "p99_latency_ms": p99_latency,
@@ -285,7 +294,15 @@ def main() -> int:
         "runs": args.runs,
         "scenarios": scenario_ids,
         "all_match": all_match_overall,
+        "all_weak_match": all_match_overall,
         "all_strong_match": all_strong_match_overall,
+        "strong_match_rate": (
+            sum(
+                sum(1 for r in (p.get("per_run") or []) if r.get("strong_match"))
+                for p in per_scenario
+            )
+            / max(1, sum(len(p.get("per_run") or []) for p in per_scenario))
+        ),
         "all_match_per_scenario": [p["all_match"] for p in per_scenario],
         "all_strong_match_per_scenario": [p.get("all_strong_match") for p in per_scenario],
         "run_manifest": run_manifest,
@@ -309,7 +326,7 @@ def main() -> int:
     print(json.dumps(summary, indent=2))
     if args.out:
         args.out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    return 0 if summary["all_match"] else 1
+    return 0 if summary["all_strong_match"] else 1
 
 
 if __name__ == "__main__":

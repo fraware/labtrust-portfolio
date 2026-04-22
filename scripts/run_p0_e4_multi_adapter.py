@@ -56,6 +56,8 @@ def _matrix_paths(repo: Path) -> object:
         normalization_diff=parent / "p0_e4_normalization_diff.json",
         controller_matrix=parent / "p0_e4_controller_matrix.json",
         diagnostics=parent / "p0_e4_diagnostics.json",
+        controller_pairs_jsonl=parent / "p0_e4_controller_pairs.jsonl",
+        raw_failure_reasons=parent / "p0_e4_raw_failure_reasons.json",
     )
 
 

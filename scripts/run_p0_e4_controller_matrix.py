@@ -4,14 +4,15 @@ P0 E4 controller matrix: raw vs normalized conformance, weak/strong replay, mult
 
 Writes (default under datasets/runs/):
   p0_e4_per_seed.jsonl, p0_e4_raw_summary.json, p0_e4_normalized_summary.json,
-  p0_e4_normalization_diff.json, p0_e4_controller_matrix.json, p0_e4_diagnostics.json
+  p0_e4_normalization_diff.json, p0_e4_controller_matrix.json, p0_e4_diagnostics.json,
+  p0_e4_controller_pairs.jsonl, p0_e4_raw_failure_reasons.json
 
 Usage:
   PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \\
     python scripts/run_p0_e4_controller_matrix.py \\
       --seeds 30 \\
-      --scenarios toy_lab_v0,lab_profile_v0 \\
-      --regimes baseline,moderate,stress \\
+      --scenarios toy_lab_v0,lab_profile_v0,rep_cps_scheduling_v0 \\
+      --regimes baseline,moderate,stress,coordination_shock \\
       --out datasets/runs/p0_e4_controller_matrix.json
 """
 from __future__ import annotations
@@ -60,6 +61,8 @@ def _paths_for_out(repo: Path, out: Path) -> object:
         normalization_diff=parent / "p0_e4_normalization_diff.json",
         controller_matrix=out,
         diagnostics=parent / "p0_e4_diagnostics.json",
+        controller_pairs_jsonl=parent / "p0_e4_controller_pairs.jsonl",
+        raw_failure_reasons=parent / "p0_e4_raw_failure_reasons.json",
     )
 
 
@@ -74,13 +77,13 @@ def main() -> int:
     ap.add_argument(
         "--scenarios",
         type=str,
-        default="toy_lab_v0,lab_profile_v0",
+        default="toy_lab_v0,lab_profile_v0,rep_cps_scheduling_v0",
         help="Comma-separated scenario ids",
     )
     ap.add_argument(
         "--regimes",
         type=str,
-        default="baseline,moderate,stress",
+        default="baseline,moderate,stress,coordination_shock",
         help=f"Comma-separated regimes (known: {', '.join(sorted(REGIME_FAULT_PARAMS))})",
     )
     ap.add_argument(

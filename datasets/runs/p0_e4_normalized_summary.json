@@ -31,6 +31,34 @@
     },
     {
       "regime": "baseline",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "regime": "baseline",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
       "n_seeds": 20,
@@ -58,6 +86,90 @@
       ]
     },
     {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 156.47029211205114,
+      "p95_latency_ms_ci_95": [
+        127.09096513517935,
+        185.84961908892294
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 156.47029211205114,
+      "p95_latency_ms_ci_95": [
+        127.09096513517935,
+        185.84961908892294
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 0.0,
+      "p95_latency_ms_ci_95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
@@ -83,6 +195,34 @@
       "p95_latency_ms_ci_95": [
         27.986093595949235,
         51.74298344383461
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 34.94317766032185,
+      "p95_latency_ms_ci_95": [
+        21.487726201924513,
+        48.398629118719185
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 34.94317766032185,
+      "p95_latency_ms_ci_95": [
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
@@ -139,6 +279,34 @@
       "p95_latency_ms_ci_95": [
         48.39942952240531,
         84.71121502892802
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 73.62470511513062,
+      "p95_latency_ms_ci_95": [
+        48.738221021237806,
+        98.51118920902344
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 73.62470511513062,
+      "p95_latency_ms_ci_95": [
+        48.738221021237806,
+        98.51118920902344
       ]
     },
     {
@@ -195,11 +363,13 @@
   "regimes": [
     "baseline",
     "moderate",
-    "stress"
+    "stress",
+    "coordination_shock"
   ],
   "scenarios": [
     "toy_lab_v0",
-    "lab_profile_v0"
+    "lab_profile_v0",
+    "rep_cps_scheduling_v0"
   ],
   "controllers": [
     "centralized",

@@ -1,6 +1,6 @@
 {
   "version": "0.2",
-  "run_id": "run_63dfd1af29",
+  "run_id": "run_0b41669fc7",
   "scenario_id": "toy_lab_v0",
   "run_outcome": "partial_safe",
   "metrics": {
@@ -47,5 +47,5 @@
     ],
     "recovery_ok": true
   },
-  "notes": "MAESTRO_REPORT v0.2; thin-slice synthetic trace times (ts) are scenario simulation timestamps in seconds, not wall-clock unless the harness records wall time in ts."
+  "notes": "MAESTRO_REPORT v0.2; thin-slice synthetic trace times (ts) are scenario simulation timestamps in seconds, not wall-clock unless the harness records wall time in ts. Adapter provenance: controller=rep_cps."
 }

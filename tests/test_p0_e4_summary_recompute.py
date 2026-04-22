@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from labtrust_portfolio.adapters import CentralizedAdapter, run_adapter
 from labtrust_portfolio.p0_e4_matrix import MatrixPaths, recompute_raw_summary_from_jsonl, run_controller_matrix
@@ -24,6 +25,8 @@ def test_recompute_matches_written_raw_summary(tmp_path: Path) -> None:
         normalization_diff=runs / "p0_e4_normalization_diff.json",
         controller_matrix=runs / "p0_e4_controller_matrix.json",
         diagnostics=runs / "p0_e4_diagnostics.json",
+        controller_pairs_jsonl=runs / "p0_e4_controller_pairs.jsonl",
+        raw_failure_reasons=runs / "p0_e4_raw_failure_reasons.json",
     )
     run_controller_matrix(
         repo_root=repo,

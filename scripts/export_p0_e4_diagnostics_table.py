@@ -34,15 +34,17 @@ def main() -> int:
     lines = [
         f"## P0 E4 — Diagnostics ({a} vs {b})",
         "",
-        "| Regime | Scenario | Paired seeds | Trace hash = | MAESTRO hash = | Evidence hash = | Final state = | Mean |Δp95| ms | Seeds divergent (trace/maestro) |",
-        "|--------|----------|--------------|--------------|----------------|-----------------|---------------|----------------|----------------------------------|",
+        "| Regime | Scenario | Paired seeds | Trace hash = | MAESTRO hash = | Core hash = | Hist = | PONR set = | Final state = | Mean |Δp95| ms | Mean |Δevents| | Mean |Δcoord-msg| | Seeds divergent (trace/maestro) |",
+        "|--------|----------|--------------|--------------|----------------|-----------|--------|-----------|---------------|----------------|----------------|--------------------|----------------------------------|",
     ]
     for p in pairs:
         lines.append(
             f"| {p['regime']} | {p['scenario']} | {p['n_paired_seeds']} | "
             f"{p['trace_hash_equality_rate']:.2f} | {p['maestro_hash_equality_rate']:.2f} | "
-            f"{p['evidence_hash_equality_rate']:.2f} | {p['final_state_hash_equality_rate']:.2f} | "
-            f"{p['mean_abs_p95_latency_diff_ms']:.4f} | {p['n_seeds_with_divergence']} |"
+            f"{p['maestro_core_hash_equality_rate']:.2f} | {p['event_type_histogram_equality_rate']:.2f} | "
+            f"{p['ponr_witness_set_equality_rate']:.2f} | {p['final_state_hash_equality_rate']:.2f} | "
+            f"{p['mean_abs_p95_latency_diff_ms']:.4f} | {p['mean_abs_event_count_diff']:.4f} | "
+            f"{p['mean_abs_coordination_message_diff']:.4f} | {p['n_seeds_with_divergence']} |"
         )
     lines.append("")
     for line in lines:

@@ -98,6 +98,16 @@ REGIME_FAULT_PARAMS: dict[str, dict[str, Any]] = {
         "reordered_event_fault_prob": 0.08,
         "partial_result_fault_prob": 0.03,
     },
+    "coordination_shock": {
+        "drop_completion_prob": 0.18,
+        "delay_fault_prob": 0.22,
+        "delay_p95_ms": 80.0,
+        "reordered_event_fault_prob": 0.22,
+        "partial_result_fault_prob": 0.12,
+        "resource_contention_spike_prob": 0.14,
+        "conflicting_action_prob": 0.1,
+        "use_compromised": True,
+    },
 }
 
 
@@ -285,6 +295,8 @@ class MatrixPaths:
     normalization_diff: Path
     controller_matrix: Path
     diagnostics: Path
+    controller_pairs_jsonl: Path
+    raw_failure_reasons: Path
 
 
 def default_matrix_paths(repo_root: Path, runs_dir: Path | None = None) -> MatrixPaths:
@@ -301,6 +313,8 @@ def default_matrix_paths(repo_root: Path, runs_dir: Path | None = None) -> Matri
         normalization_diff=base / "p0_e4_normalization_diff.json",
         controller_matrix=base / "p0_e4_controller_matrix.json",
         diagnostics=base / "p0_e4_diagnostics.json",
+        controller_pairs_jsonl=base / "p0_e4_controller_pairs.jsonl",
+        raw_failure_reasons=base / "p0_e4_raw_failure_reasons.json",
     )
 
 
@@ -332,6 +346,7 @@ def run_controller_matrix(
 
     per_seed_lines: list[dict[str, Any]] = []
     norm_diff_records: list[dict[str, Any]] = []
+    raw_failure_rows: list[dict[str, Any]] = []
 
     for regime in regimes:
         fault_params = dict(REGIME_FAULT_PARAMS.get(regime, REGIME_FAULT_PARAMS["baseline"]))
@@ -401,7 +416,20 @@ def run_controller_matrix(
                         "weak_replay_match": weak,
                         "strong_replay_match": strong,
                         "canonical_maestro_replay_sha256": canonical_maestro_replay_hash(stored),
+                        "canonical_maestro_core_sha256": canonical_maestro_replay_hash(stored),
+                        "maestro_core_slice": _strong_maestro_slice(stored),
                     }
+                    if not raw_conf.passed:
+                        raw_failure_rows.append(
+                            _raw_failure_reason_record(
+                                regime=regime,
+                                scenario=scenario_id,
+                                controller=controller_name,
+                                seed=seed,
+                                raw_conformance=raw_conf.to_dict(),
+                                strong_replay_match=strong,
+                            )
+                        )
 
                     norm_dir = (
                         paths.norm_runs_root
@@ -442,6 +470,17 @@ def run_controller_matrix(
 
     paths.per_seed_jsonl.write_text(
         "\n".join(json.dumps(r, sort_keys=True) for r in per_seed_lines) + ("\n" if per_seed_lines else ""),
+        encoding="utf-8",
+    )
+    paths.raw_failure_reasons.write_text(
+        json.dumps(
+            {
+                "failures": raw_failure_rows,
+                "n_failures": len(raw_failure_rows),
+            },
+            indent=2,
+        )
+        + "\n",
         encoding="utf-8",
     )
 
@@ -543,9 +582,14 @@ def run_controller_matrix(
         encoding="utf-8",
     )
 
-    diagnostics = build_controller_pair_diagnostics(
+    diagnostics, controller_pair_lines = build_controller_pair_diagnostics(
         per_seed_lines,
         controllers=[c[0] for c in controllers],
+    )
+    paths.controller_pairs_jsonl.write_text(
+        "\n".join(json.dumps(r, sort_keys=True) for r in controller_pair_lines)
+        + ("\n" if controller_pair_lines else ""),
+        encoding="utf-8",
     )
 
     matrix_bundle = {
@@ -561,6 +605,8 @@ def run_controller_matrix(
             "raw_summary": _rel(paths.raw_summary, repo_root),
             "normalized_summary": _rel(paths.normalized_summary, repo_root),
             "normalization_diff": _rel(paths.normalization_diff, repo_root),
+            "raw_failure_reasons": _rel(paths.raw_failure_reasons, repo_root),
+            "controller_pairs_jsonl": _rel(paths.controller_pairs_jsonl, repo_root),
             "raw_runs_root": _rel(paths.raw_runs_root, repo_root),
             "normalized_runs_root": _rel(paths.norm_runs_root, repo_root),
         },
@@ -576,16 +622,50 @@ def run_controller_matrix(
     return matrix_bundle
 
 
+def _raw_failure_reason_record(
+    *,
+    regime: str,
+    scenario: str,
+    controller: str,
+    seed: int,
+    raw_conformance: dict[str, Any],
+    strong_replay_match: bool,
+) -> dict[str, Any]:
+    reasons = list(raw_conformance.get("reasons", []))
+    tier = int(raw_conformance.get("tier", 0))
+    schema_reason = next(
+        (r for r in reasons if "schema validation failed" in str(r)),
+        reasons[0] if reasons else "unknown_failure",
+    )
+    offending = None
+    if "Additional properties are not allowed" in str(schema_reason):
+        offending = "maestro_report.json:<additionalProperties>"
+    return {
+        "regime": regime,
+        "scenario": scenario,
+        "controller": controller,
+        "seed": seed,
+        "failed_tier": tier,
+        "schema_failure_reason": str(schema_reason),
+        "offending_path_or_key": offending,
+        "replay_also_failed": (not bool(strong_replay_match)),
+    }
+
+
 def build_controller_pair_diagnostics(
     per_seed: list[dict[str, Any]],
     *,
     controllers: list[str],
-) -> dict[str, Any]:
+) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Pairwise diagnostics for the first two controllers (expected: centralized vs rep_cps)."""
     if len(controllers) < 2:
-        return {"pairs": [], "note": "Need at least two controllers for pairwise diagnostics."}
+        return (
+            {"pairs": [], "note": "Need at least two controllers for pairwise diagnostics."},
+            [],
+        )
     a, b = controllers[0], controllers[1]
     pairs_out: list[dict[str, Any]] = []
+    pair_lines: list[dict[str, Any]] = []
     by_reg_sc: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for r in per_seed:
         by_reg_sc.setdefault((r["regime"], r["scenario"]), []).append(r)
@@ -599,7 +679,12 @@ def build_controller_pair_diagnostics(
         maestro_same = 0
         evidence_same = 0
         final_same = 0
+        event_hist_same = 0
+        ponr_set_same = 0
+        core_hash_same = 0
         latency_diffs: list[float] = []
+        event_count_diffs: list[float] = []
+        coord_msg_diffs: list[float] = []
         divergent_seeds: list[int] = []
         for seed, mp in sorted(by_seed.items()):
             ra, rb = mp.get(a), mp.get(b)
@@ -618,9 +703,57 @@ def build_controller_pair_diagnostics(
             fb = rb.get("final_state_hash_after")
             if fa and fb and fa == fb:
                 final_same += 1
+            hist_same = ra.get("event_type_histogram") == rb.get("event_type_histogram")
+            if hist_same:
+                event_hist_same += 1
+            ponr_same = sorted(ra.get("ponr_witness_task_names") or []) == sorted(
+                rb.get("ponr_witness_task_names") or []
+            )
+            if ponr_same:
+                ponr_set_same += 1
+            core_same = (
+                ra.get("canonical_maestro_core_sha256")
+                == rb.get("canonical_maestro_core_sha256")
+            )
+            if core_same:
+                core_hash_same += 1
             la = float(ra.get("task_latency_ms_p95") or 0.0)
             lb = float(rb.get("task_latency_ms_p95") or 0.0)
             latency_diffs.append(abs(la - lb))
+            event_count_diffs.append(
+                abs(float(ra.get("trace_event_count") or 0.0) - float(rb.get("trace_event_count") or 0.0))
+            )
+            coord_msg_diffs.append(
+                abs(float(ra.get("coordination_messages") or 0.0) - float(rb.get("coordination_messages") or 0.0))
+            )
+            diff_metrics: list[str] = []
+            a_core = dict(ra.get("maestro_core_slice") or {})
+            b_core = dict(rb.get("maestro_core_slice") or {})
+            for mk in ("run_outcome", "metrics", "safety", "coordination_efficiency", "faults"):
+                if a_core.get(mk) != b_core.get(mk):
+                    diff_metrics.append(mk)
+            pair_lines.append(
+                {
+                    "regime": regime,
+                    "scenario": scenario,
+                    "seed": seed,
+                    "controller_a": a,
+                    "controller_b": b,
+                    "controller_a_trace_sha": ra.get("raw_trace_sha256"),
+                    "controller_b_trace_sha": rb.get("raw_trace_sha256"),
+                    "controller_a_maestro_core_sha": ra.get("canonical_maestro_core_sha256"),
+                    "controller_b_maestro_core_sha": rb.get("canonical_maestro_core_sha256"),
+                    "same_final_state_hash": bool(fa and fb and fa == fb),
+                    "same_event_histogram": hist_same,
+                    "same_ponr_witness_set": ponr_same,
+                    "abs_latency_diff": abs(la - lb),
+                    "abs_coordination_message_diff": abs(
+                        float(ra.get("coordination_messages") or 0.0)
+                        - float(rb.get("coordination_messages") or 0.0)
+                    ),
+                    "core_metrics_differ": sorted(set(diff_metrics)),
+                }
+            )
             if (
                 ra["raw_trace_sha256"] != rb["raw_trace_sha256"]
                 or ra["raw_maestro_sha256"] != rb["raw_maestro_sha256"]
@@ -636,12 +769,17 @@ def build_controller_pair_diagnostics(
                 "maestro_hash_equality_rate": maestro_same / n if n else 0.0,
                 "evidence_hash_equality_rate": evidence_same / n if n else 0.0,
                 "final_state_hash_equality_rate": final_same / n if n else 0.0,
+                "event_type_histogram_equality_rate": event_hist_same / n if n else 0.0,
+                "ponr_witness_set_equality_rate": ponr_set_same / n if n else 0.0,
+                "maestro_core_hash_equality_rate": core_hash_same / n if n else 0.0,
+                "mean_abs_event_count_diff": statistics.mean(event_count_diffs) if event_count_diffs else 0.0,
+                "mean_abs_coordination_message_diff": statistics.mean(coord_msg_diffs) if coord_msg_diffs else 0.0,
                 "mean_abs_p95_latency_diff_ms": statistics.mean(latency_diffs) if latency_diffs else 0.0,
                 "seeds_with_trace_or_maestro_divergence": divergent_seeds,
                 "n_seeds_with_divergence": len(set(divergent_seeds)),
             }
         )
-    return {"controller_a": a, "controller_b": b, "pairs": pairs_out}
+    return {"controller_a": a, "controller_b": b, "pairs": pairs_out}, pair_lines
 
 
 def raw_summary_has_non_baseline_regimes(raw_summary_path: Path) -> bool:

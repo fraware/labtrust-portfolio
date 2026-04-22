@@ -28,6 +28,8 @@ def test_raw_maestro_unstripped_after_matrix(controller: str, tmp_path: Path) ->
         normalization_diff=runs / "p0_e4_normalization_diff.json",
         controller_matrix=runs / "p0_e4_controller_matrix.json",
         diagnostics=runs / "p0_e4_diagnostics.json",
+        controller_pairs_jsonl=runs / "p0_e4_controller_pairs.jsonl",
+        raw_failure_reasons=runs / "p0_e4_raw_failure_reasons.json",
     )
     adapters = [
         ("centralized", CentralizedAdapter()),
@@ -47,7 +49,8 @@ def test_raw_maestro_unstripped_after_matrix(controller: str, tmp_path: Path) ->
     raw_maestro = paths.raw_runs_root / "baseline" / "toy_lab_v0" / controller / "seed_1" / "maestro_report.json"
     data = json.loads(raw_maestro.read_text(encoding="utf-8"))
     if controller == "rep_cps":
-        assert data.get("metadata_rep_cps") is True
+        assert "metadata_rep_cps" not in data
+        assert "controller=rep_cps" in str(data.get("notes") or "")
     norm_maestro = paths.norm_runs_root / "baseline" / "toy_lab_v0" / controller / "seed_1" / "maestro_report.json"
     nd = json.loads(norm_maestro.read_text(encoding="utf-8"))
     assert "metadata_rep_cps" not in nd

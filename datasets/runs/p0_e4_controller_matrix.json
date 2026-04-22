@@ -1,7 +1,7 @@
 {
   "version": 1,
   "experiment": "P0_E4_controller_matrix",
-  "git_sha": "1f40c6e8a27b7f5b806d29ab0922690c369fa544",
+  "git_sha": "c3917199c1b8cd3e791e4c61135bf479822583d5",
   "seeds": [
     1,
     2,
@@ -27,11 +27,13 @@
   "regimes": [
     "baseline",
     "moderate",
-    "stress"
+    "stress",
+    "coordination_shock"
   ],
   "scenarios": [
     "toy_lab_v0",
-    "lab_profile_v0"
+    "lab_profile_v0",
+    "rep_cps_scheduling_v0"
   ],
   "controllers": [
     "centralized",
@@ -42,6 +44,8 @@
     "raw_summary": "datasets/runs/p0_e4_raw_summary.json",
     "normalized_summary": "datasets/runs/p0_e4_normalized_summary.json",
     "normalization_diff": "datasets/runs/p0_e4_normalization_diff.json",
+    "raw_failure_reasons": "datasets/runs/p0_e4_raw_failure_reasons.json",
+    "controller_pairs_jsonl": "datasets/runs/p0_e4_controller_pairs.jsonl",
     "raw_runs_root": "datasets/runs/p0_e4_matrix/raw",
     "normalized_runs_root": "datasets/runs/p0_e4_matrix/normalized"
   },
@@ -65,7 +69,7 @@
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
       "n_seeds": 20,
-      "raw_conformance_rate": 0.0,
+      "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
       "p95_latency_ms_mean": 50.3729249665883,
@@ -76,6 +80,34 @@
     },
     {
       "regime": "baseline",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "regime": "baseline",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
       "n_seeds": 20,
@@ -93,13 +125,97 @@
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
       "n_seeds": 20,
-      "raw_conformance_rate": 0.0,
+      "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
       "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
         26.73035578025035,
         44.00555230833085
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "raw_conformance_rate": 0.85,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 156.47029211205114,
+      "p95_latency_ms_ci_95": [
+        127.09096513517935,
+        185.84961908892294
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "raw_conformance_rate": 0.85,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 156.47029211205114,
+      "p95_latency_ms_ci_95": [
+        127.09096513517935,
+        185.84961908892294
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 0.0,
+      "p95_latency_ms_ci_95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
       ]
     },
     {
@@ -121,13 +237,41 @@
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
       "n_seeds": 20,
-      "raw_conformance_rate": 0.0,
+      "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
       "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
         27.986093595949235,
         51.74298344383461
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 34.94317766032185,
+      "p95_latency_ms_ci_95": [
+        21.487726201924513,
+        48.398629118719185
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 34.94317766032185,
+      "p95_latency_ms_ci_95": [
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
@@ -149,7 +293,7 @@
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
       "n_seeds": 20,
-      "raw_conformance_rate": 0.0,
+      "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
       "p95_latency_ms_mean": 34.94317766032185,
@@ -177,13 +321,41 @@
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
       "n_seeds": 20,
-      "raw_conformance_rate": 0.0,
+      "raw_conformance_rate": 0.85,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 0.85,
       "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
         48.39942952240531,
         84.71121502892802
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 73.62470511513062,
+      "p95_latency_ms_ci_95": [
+        48.738221021237806,
+        98.51118920902344
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 73.62470511513062,
+      "p95_latency_ms_ci_95": [
+        48.738221021237806,
+        98.51118920902344
       ]
     },
     {
@@ -205,7 +377,7 @@
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
       "n_seeds": 20,
-      "raw_conformance_rate": 0.0,
+      "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
       "p95_latency_ms_mean": 73.62470511513062,
@@ -246,6 +418,34 @@
     },
     {
       "regime": "baseline",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "regime": "baseline",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_ci_95": [
+        26.73035578025035,
+        44.00555230833085
+      ]
+    },
+    {
+      "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
       "n_seeds": 20,
@@ -273,6 +473,90 @@
       ]
     },
     {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 156.47029211205114,
+      "p95_latency_ms_ci_95": [
+        127.09096513517935,
+        185.84961908892294
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 156.47029211205114,
+      "p95_latency_ms_ci_95": [
+        127.09096513517935,
+        185.84961908892294
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 0.0,
+      "p95_latency_ms_ci_95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 147.2510473491014,
+      "p95_latency_ms_ci_95": [
+        117.00918905147543,
+        177.4929056467274
+      ]
+    },
+    {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
@@ -298,6 +582,34 @@
       "p95_latency_ms_ci_95": [
         27.986093595949235,
         51.74298344383461
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 34.94317766032185,
+      "p95_latency_ms_ci_95": [
+        21.487726201924513,
+        48.398629118719185
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 34.94317766032185,
+      "p95_latency_ms_ci_95": [
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
@@ -354,6 +666,34 @@
       "p95_latency_ms_ci_95": [
         48.39942952240531,
         84.71121502892802
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "centralized",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 73.62470511513062,
+      "p95_latency_ms_ci_95": [
+        48.738221021237806,
+        98.51118920902344
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "rep_cps_scheduling_v0",
+      "controller": "rep_cps",
+      "n_seeds": 20,
+      "normalized_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 73.62470511513062,
+      "p95_latency_ms_ci_95": [
+        48.738221021237806,
+        98.51118920902344
       ]
     },
     {
@@ -401,6 +741,53 @@
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
         "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
+        "mean_abs_p95_latency_diff_ms": 0.0,
+        "seeds_with_trace_or_maestro_divergence": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "n_seeds_with_divergence": 20
+      },
+      {
+        "regime": "baseline",
+        "scenario": "rep_cps_scheduling_v0",
+        "controller_pair": [
+          "centralized",
+          "rep_cps"
+        ],
+        "n_paired_seeds": 20,
+        "trace_hash_equality_rate": 0.0,
+        "maestro_hash_equality_rate": 0.0,
+        "evidence_hash_equality_rate": 0.0,
+        "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
         "mean_abs_p95_latency_diff_ms": 0.0,
         "seeds_with_trace_or_maestro_divergence": [
           1,
@@ -438,6 +825,137 @@
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
         "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
+        "mean_abs_p95_latency_diff_ms": 0.0,
+        "seeds_with_trace_or_maestro_divergence": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "n_seeds_with_divergence": 20
+      },
+      {
+        "regime": "coordination_shock",
+        "scenario": "lab_profile_v0",
+        "controller_pair": [
+          "centralized",
+          "rep_cps"
+        ],
+        "n_paired_seeds": 20,
+        "trace_hash_equality_rate": 0.0,
+        "maestro_hash_equality_rate": 0.0,
+        "evidence_hash_equality_rate": 0.0,
+        "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
+        "mean_abs_p95_latency_diff_ms": 0.0,
+        "seeds_with_trace_or_maestro_divergence": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "n_seeds_with_divergence": 20
+      },
+      {
+        "regime": "coordination_shock",
+        "scenario": "rep_cps_scheduling_v0",
+        "controller_pair": [
+          "centralized",
+          "rep_cps"
+        ],
+        "n_paired_seeds": 20,
+        "trace_hash_equality_rate": 0.0,
+        "maestro_hash_equality_rate": 0.0,
+        "evidence_hash_equality_rate": 0.0,
+        "final_state_hash_equality_rate": 0.0,
+        "event_type_histogram_equality_rate": 0.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 0.0,
+        "mean_abs_event_count_diff": 10.75,
+        "mean_abs_coordination_message_diff": 0.0,
+        "mean_abs_p95_latency_diff_ms": 147.2510473491014,
+        "seeds_with_trace_or_maestro_divergence": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "n_seeds_with_divergence": 20
+      },
+      {
+        "regime": "coordination_shock",
+        "scenario": "toy_lab_v0",
+        "controller_pair": [
+          "centralized",
+          "rep_cps"
+        ],
+        "n_paired_seeds": 20,
+        "trace_hash_equality_rate": 0.0,
+        "maestro_hash_equality_rate": 0.0,
+        "evidence_hash_equality_rate": 0.0,
+        "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
         "mean_abs_p95_latency_diff_ms": 0.0,
         "seeds_with_trace_or_maestro_divergence": [
           1,
@@ -475,6 +993,53 @@
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
         "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
+        "mean_abs_p95_latency_diff_ms": 0.0,
+        "seeds_with_trace_or_maestro_divergence": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "n_seeds_with_divergence": 20
+      },
+      {
+        "regime": "moderate",
+        "scenario": "rep_cps_scheduling_v0",
+        "controller_pair": [
+          "centralized",
+          "rep_cps"
+        ],
+        "n_paired_seeds": 20,
+        "trace_hash_equality_rate": 0.0,
+        "maestro_hash_equality_rate": 0.0,
+        "evidence_hash_equality_rate": 0.0,
+        "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
         "mean_abs_p95_latency_diff_ms": 0.0,
         "seeds_with_trace_or_maestro_divergence": [
           1,
@@ -512,6 +1077,11 @@
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
         "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
         "mean_abs_p95_latency_diff_ms": 0.0,
         "seeds_with_trace_or_maestro_divergence": [
           1,
@@ -549,6 +1119,53 @@
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
         "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
+        "mean_abs_p95_latency_diff_ms": 0.0,
+        "seeds_with_trace_or_maestro_divergence": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
+        ],
+        "n_seeds_with_divergence": 20
+      },
+      {
+        "regime": "stress",
+        "scenario": "rep_cps_scheduling_v0",
+        "controller_pair": [
+          "centralized",
+          "rep_cps"
+        ],
+        "n_paired_seeds": 20,
+        "trace_hash_equality_rate": 0.0,
+        "maestro_hash_equality_rate": 0.0,
+        "evidence_hash_equality_rate": 0.0,
+        "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
         "mean_abs_p95_latency_diff_ms": 0.0,
         "seeds_with_trace_or_maestro_divergence": [
           1,
@@ -586,6 +1203,11 @@
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
         "final_state_hash_equality_rate": 1.0,
+        "event_type_histogram_equality_rate": 1.0,
+        "ponr_witness_set_equality_rate": 1.0,
+        "maestro_core_hash_equality_rate": 1.0,
+        "mean_abs_event_count_diff": 0.0,
+        "mean_abs_coordination_message_diff": 0.0,
         "mean_abs_p95_latency_diff_ms": 0.0,
         "seeds_with_trace_or_maestro_divergence": [
           1,
