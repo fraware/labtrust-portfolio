@@ -5,10 +5,8 @@ flowchart TD
   pack -->|fail| rej_pack["Reject<br/>failure_stage: pack"]
   pack -->|pass| mode{"review_mode?"}
 
-  mode -->|schema_only| so_trace{"trace.json exists?"}
-  so_trace --> so_val_t["Validate trace schema if present"]
-  so_val_t --> so_bundle{"evidence_bundle.json exists?"}
-  so_bundle --> so_val_b["Validate bundle schema if present"]
+  mode -->|schema_only| so_val_t["If trace present:<br/>validate trace schema"]
+  so_val_t --> so_val_b["If bundle present:<br/>validate bundle schema"]
   so_val_b --> so_done{failures?}
   so_done -->|yes| rej_so["Reject<br/>artifact_schema"]
   so_done -->|no| acc_so["Accept"]
