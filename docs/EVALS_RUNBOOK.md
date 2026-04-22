@@ -192,8 +192,8 @@ python scripts/plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sw
 - **E1 (conformance corpus):** `scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus` builds challenge set (case_* dirs, corpus_manifest.json). `scripts/export_e1_corpus_table.py` produces Table 1. Conformance: `labtrust_portfolio check-conformance <run_dir>`; each run dir may have `conformance.json`.
 - **E2:** `scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo` writes `trace_redacted.json` and `evidence_bundle_redacted.json`. `scripts/export_e2_admissibility_matrix.py` produces Table 2 (4-col verification-mode admissibility matrix).
 - **E3:** `scripts/produce_p0_e3_release.py --runs N`; E3 multi-scenario: `scripts/replay_link_e3.py --scenarios toy_lab_v0,lab_profile_v0 --runs N`. Use `--standalone-verifier` to run verifier as separate process (`scripts/verify_maestro_from_trace.py`). Output: `datasets/runs/e3_summary.json`, `p0_e3_variance.json`; release: `datasets/releases/p0_e3_release`. Evidence bundle: `verification_mode` (public | evaluator | regulator). See `kernel/mads/VERIFICATION_MODES.v0.1.md`.
-- **E4:** `scripts/run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0` runs centralized and rep_cps adapters on both scenarios (publishable default); `scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json` contributes Table 3 rows.
-- **P0 tables/figures:** Table 1: build_p0_conformance_corpus, export_e1_corpus_table. Table 2: e2_redaction_demo, export_e2_admissibility_matrix. Table 3: run_p0_e4_multi_adapter, export_p0_table3. Figure 1: export_p0_assurance_pipeline. Figure 2: export_p0_tier_lattice. Figure 3: export_p0_redaction_figure. Per-seed E3: export_e3_table. plot_e3_latency. build_p0_conformance_summary → `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. See `papers/P0_MADS-CPS/DRAFT.md` Appendix.
+- **E4:** `scripts/run_p0_e4_controller_matrix.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0 --regimes baseline,moderate,stress --out datasets/runs/p0_e4_controller_matrix.json` runs the controller matrix on both scenarios (publishable default); `scripts/export_p0_table3.py` prefers strong replay from P0 E4 raw baseline rows and E3 strong replay when present.
+- **P0 tables/figures:** Table 1: build_p0_conformance_corpus, export_e1_corpus_table. Table 2: e2_redaction_demo, export_e2_admissibility_matrix. Table 3: run_p0_e4_controller_matrix, export_p0_table3 (strong replay preference from E4 raw baseline rows, then E3 strong replay). Figure 1: export_p0_assurance_pipeline. Figure 2: export_p0_tier_lattice. Figure 3: export_p0_redaction_figure. Per-seed E3: export_e3_table. plot_e3_latency. build_p0_conformance_summary → `datasets/releases/portfolio_v0.1/p0_conformance_summary.json`. See `papers/P0_MADS-CPS/DRAFT.md` Appendix.
 
 ```bash
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/build_p0_conformance_corpus.py --out datasets/runs/p0_conformance_corpus
@@ -201,8 +201,8 @@ python scripts/export_e1_corpus_table.py --corpus datasets/runs/p0_conformance_c
 PYTHONPATH=impl/src python scripts/e2_redaction_demo.py --out datasets/runs/e2_redaction_demo
 python scripts/export_e2_admissibility_matrix.py
 PYTHONPATH=impl/src python scripts/produce_p0_e3_release.py --runs 10
-PYTHONPATH=impl/src python scripts/run_p0_e4_multi_adapter.py --seeds 10
-python scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_summary.json
+PYTHONPATH=impl/src python scripts/run_p0_e4_controller_matrix.py --seeds 10 --scenarios toy_lab_v0,lab_profile_v0 --regimes baseline,moderate,stress --out datasets/runs/p0_e4_controller_matrix.json
+python scripts/export_p0_table3.py --e4 datasets/runs/p0_e4_raw_summary.json
 python scripts/export_p0_assurance_pipeline.py
 python scripts/export_p0_tier_lattice.py
 python scripts/export_p0_redaction_figure.py

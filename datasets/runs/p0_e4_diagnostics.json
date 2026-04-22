@@ -9,7 +9,7 @@
         "centralized",
         "rep_cps"
       ],
-      "n_paired_seeds": 5,
+      "n_paired_seeds": 20,
       "trace_hash_equality_rate": 0.0,
       "maestro_hash_equality_rate": 0.0,
       "evidence_hash_equality_rate": 0.0,
@@ -20,9 +20,24 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
       ],
-      "n_seeds_with_divergence": 5
+      "n_seeds_with_divergence": 20
     },
     {
       "regime": "baseline",
@@ -31,7 +46,7 @@
         "centralized",
         "rep_cps"
       ],
-      "n_paired_seeds": 5,
+      "n_paired_seeds": 20,
       "trace_hash_equality_rate": 0.0,
       "maestro_hash_equality_rate": 0.0,
       "evidence_hash_equality_rate": 0.0,
@@ -42,9 +57,24 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
       ],
-      "n_seeds_with_divergence": 5
+      "n_seeds_with_divergence": 20
     },
     {
       "regime": "moderate",
@@ -53,7 +83,7 @@
         "centralized",
         "rep_cps"
       ],
-      "n_paired_seeds": 5,
+      "n_paired_seeds": 20,
       "trace_hash_equality_rate": 0.0,
       "maestro_hash_equality_rate": 0.0,
       "evidence_hash_equality_rate": 0.0,
@@ -64,9 +94,24 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
       ],
-      "n_seeds_with_divergence": 5
+      "n_seeds_with_divergence": 20
     },
     {
       "regime": "moderate",
@@ -75,7 +120,7 @@
         "centralized",
         "rep_cps"
       ],
-      "n_paired_seeds": 5,
+      "n_paired_seeds": 20,
       "trace_hash_equality_rate": 0.0,
       "maestro_hash_equality_rate": 0.0,
       "evidence_hash_equality_rate": 0.0,
@@ -86,9 +131,24 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
       ],
-      "n_seeds_with_divergence": 5
+      "n_seeds_with_divergence": 20
     },
     {
       "regime": "stress",
@@ -97,7 +157,7 @@
         "centralized",
         "rep_cps"
       ],
-      "n_paired_seeds": 5,
+      "n_paired_seeds": 20,
       "trace_hash_equality_rate": 0.0,
       "maestro_hash_equality_rate": 0.0,
       "evidence_hash_equality_rate": 0.0,
@@ -108,9 +168,24 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
       ],
-      "n_seeds_with_divergence": 5
+      "n_seeds_with_divergence": 20
     },
     {
       "regime": "stress",
@@ -119,7 +194,7 @@
         "centralized",
         "rep_cps"
       ],
-      "n_paired_seeds": 5,
+      "n_paired_seeds": 20,
       "trace_hash_equality_rate": 0.0,
       "maestro_hash_equality_rate": 0.0,
       "evidence_hash_equality_rate": 0.0,
@@ -130,9 +205,24 @@
         2,
         3,
         4,
-        5
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
       ],
-      "n_seeds_with_divergence": 5
+      "n_seeds_with_divergence": 20
     }
   ]
 }

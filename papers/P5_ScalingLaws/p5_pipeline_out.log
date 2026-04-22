@@ -1,0 +1,43 @@
+﻿python : Traceback (most recent call last):
+At C:\Users\mateo\AppData\Local\Temp\ps-script-3ebf1ae8-10fa-44f5-bfc6-fa1b96ed6ec0.ps1:105 char:102
++ ... R="kernel"; python scripts/run_paper_experiments.py --paper P5 2>&1 | ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Traceback (most recent call last)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  File "C:\Users\mateo\labtrust-portfolio\scripts\generate_multiscenario_runs.py", line 307, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "C:\Users\mateo\labtrust-portfolio\scripts\generate_multiscenario_runs.py", line 288, in main
+    run_thin_slice(
+    ~~~~~~~~~~~~~~^
+        run_dir,
+        ^^^^^^^^
+    ...<9 lines>...
+        fault_setting_label=s["label"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\mateo\labtrust-portfolio\impl\src\labtrust_portfolio\thinslice.py", line 507, in run_thin_slice
+    evidence = build_evidence_bundle(
+        run_id=run_id,
+    ...<6 lines>...
+        verification_mode="evaluator",
+    )
+  File "C:\Users\mateo\labtrust-portfolio\impl\src\labtrust_portfolio\evidence.py", line 65, in build_evidence_bundle
+    "sha256": sha256_file(p),
+              ~~~~~~~~~~~^^^
+  File "C:\Users\mateo\labtrust-portfolio\impl\src\labtrust_portfolio\hashing.py", line 13, in sha256_file
+    with path.open("rb") as f:
+         ~~~~~~~~~^^^^^^
+  File "C:\Users\mateo\miniconda3\Lib\pathlib\_local.py", line 537, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multisce
+nario_runs\\warehouse_v0\\drop_005\\decentralized\\agents_8\\seed_13\\trace.json'
+
+--- P5 Generate multi-scenario runs (coordination grid) ---
+C:\Users\mateo\miniconda3\python.exe C:\Users\mateo\labtrust-portfolio\scripts\generate_multiscenario_runs.py --out C:\Users\mateo\labtrust-portfolio\datasets\runs\multiscenario_runs --seeds 30 --coordination-grid --clean --profile real_world --agent-counts 1,2,4,8 --fault-settings no_drop,drop_005
+FAILED exit 1: P5 Generate multi-scenario runs (coordination grid)
+
+Failed: P5

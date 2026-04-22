@@ -1,16 +1,16 @@
 {
   "version": "0.1",
-  "run_id": "run_fda249564c",
+  "run_id": "run_7e8830216f",
   "kernel_version": "0.1",
   "artifacts": [
     {
-      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.2/seed_3/trace.json",
-      "sha256": "be74e457303aaa3a26a5ff0b9ff08d4883a24cd67dbd275632a781db0bb35cb6",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.2/seed_3/trace.json",
+      "sha256": "4d858ab7c1b6e9ed64242356a714ce0d5bddbaae28cc73b5f41a6eaa3657b9a1",
       "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
     },
     {
-      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.2/seed_3/maestro_report.json",
-      "sha256": "8e428cfb03c1d7de6cee4ce9085297f5917eba80809a016cbeb1e4c8f46ef175",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.2/seed_3/maestro_report.json",
+      "sha256": "af1f1888da8207fc3554882a83d48249b62653f18b1f093dd481dc1decdd4fdb",
       "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     }
   ],

@@ -1,0 +1,23 @@
+{
+  "version": "0.1",
+  "run_id": "run_8491c50090",
+  "kernel_version": "0.1",
+  "artifacts": [
+    {
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/p0_e4_matrix/raw/baseline/toy_lab_v0/rep_cps/seed_17/trace.json",
+      "sha256": "b6d7b7a93a5918e3d377bce2876008d73254e588fa4ec36b51f549e0b6bb17a7",
+      "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
+    },
+    {
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/p0_e4_matrix/raw/baseline/toy_lab_v0/rep_cps/seed_17/maestro_report.json",
+      "sha256": "97fe884c9ec03b009bf1c184a8367e52a0eada75bac1c9b0dcf95438f9f17dbe",
+      "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
+    }
+  ],
+  "verification": {
+    "schema_validation_ok": true,
+    "replay_ok": true,
+    "replay_diagnostics": "replay ok"
+  },
+  "verification_mode": "evaluator"
+}

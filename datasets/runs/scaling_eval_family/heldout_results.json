@@ -13,7 +13,7 @@
       "admissible_per_scenario_train_mae": 1.2366291666666667,
       "regime_train_mean_baseline_mae": 1.2365833333333334,
       "agent_count_train_mean_baseline_mae": 1.2365597222222222,
-      "num_tasks_held_out": 5,
+      "num_tasks_held_out": 4,
       "feat_baseline_mae": 1.2366291666666667,
       "prior_model_mae": 0.46239583333333334,
       "regression_mae": 1.2381281312933734,
@@ -214,7 +214,7 @@
       "drop_005",
       "no_drop"
     ],
-    "commit": "5b280e800ff309c215bbe52f7854805176a632bc"
+    "commit": "d3700fc8816522cc47720fd166a7bf8256297efe"
   },
   "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
   "total_rows": 7200,

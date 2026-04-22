@@ -4,8 +4,6 @@ Regenerate from repo root (`PYTHONPATH=impl/src`, `LABTRUST_KERNEL_DIR=kernel`):
 
 Tier 1 includes `maestro_report.json` validation against `kernel/eval/MAESTRO_REPORT.v0.2.schema.json`.
 
-Canonical frozen release witness is `lab_profile_v0`; release artifact paths in `datasets/releases/p0_e3_release/` are release-local relative paths.
-
 ## From export_e1_corpus_table.py
 
 ## Table 1 — E1 conformance corpus
@@ -40,34 +38,6 @@ Full mode: all artifacts present and unredacted; all predicates checkable. Evalu
 
 Per-seed rows for trace-to-report replay check; aggregate replay match and latency CIs appear in **Table 3**. Full manifest: `datasets/runs/e3_summary.json` (`run_manifest`).
 
-## Scenario: lab_profile_v0
-
-| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
-|------|----------------|----------------------|----------------|-------|
-| 1 | 5 | 5 | 41.08 | yes |
-| 2 | 5 | 5 | 20.40 | yes |
-| 3 | 5 | 5 | 34.94 | yes |
-| 4 | 5 | 5 | 31.24 | yes |
-| 5 | 5 | 5 | 49.30 | yes |
-| 6 | 5 | 5 | 52.13 | yes |
-| 7 | 5 | 5 | 42.31 | yes |
-| 8 | 5 | 5 | 49.89 | yes |
-| 9 | 5 | 5 | 45.28 | yes |
-| 10 | 5 | 5 | 54.72 | yes |
-| 11 | 5 | 5 | 50.84 | yes |
-| 12 | 5 | 5 | 100.07 | yes |
-| 13 | 5 | 5 | 35.31 | yes |
-| 14 | 5 | 5 | 26.80 | yes |
-| 15 | 5 | 5 | 42.48 | yes |
-| 16 | 5 | 5 | 18.79 | yes |
-| 17 | 5 | 5 | 90.42 | yes |
-| 18 | 5 | 5 | 71.00 | yes |
-| 19 | 5 | 5 | 78.56 | yes |
-| 20 | 5 | 5 | 71.90 | yes |
-| **Summary (n=20)** | mean 5.00, stdev 0.00 | - | mean 50.37, stdev 22.13 | true |
-
-95% CI: tasks_completed [5, 5]; p95_latency_ms [40.476976268464604, 60.268873664712]
-
 ## Scenario: toy_lab_v0
 
 | Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
@@ -82,32 +52,75 @@ Per-seed rows for trace-to-report replay check; aggregate replay match and laten
 | 8 | 4 | 4 | 19.02 | yes |
 | 9 | 4 | 4 | 29.77 | yes |
 | 10 | 4 | 4 | 45.64 | yes |
-| 11 | 4 | 4 | 11.74 | yes |
-| 12 | 4 | 4 | 37.70 | yes |
-| 13 | 4 | 4 | 29.20 | yes |
-| 14 | 4 | 4 | 43.76 | yes |
-| 15 | 4 | 4 | 17.26 | yes |
-| 16 | 4 | 4 | 46.90 | yes |
-| 17 | 4 | 4 | 42.05 | yes |
-| 18 | 4 | 4 | 42.43 | yes |
-| 19 | 4 | 4 | 13.74 | yes |
-| 20 | 4 | 4 | 78.08 | yes |
-| **Summary (n=20)** | mean 4.00, stdev 0.00 | - | mean 35.37, stdev 18.46 | true |
+| **Summary (n=10)** | mean 4.00, stdev 0.00 | - | mean 34.45, stdev 18.08 | true |
 
-95% CI: tasks_completed [4, 4]; p95_latency_ms [27.11415732757751, 43.62175076100369]
+95% CI: tasks_completed [4, 4]; p95_latency_ms [21.512040242650986, 47.383492004789645]
+
+## Scenario: lab_profile_v0
+
+| Seed | tasks_completed | coordination_messages | p95_latency_ms | match |
+|------|----------------|----------------------|----------------|-------|
+| 1 | 5 | 5 | 41.08 | yes |
+| 2 | 5 | 5 | 20.40 | yes |
+| 3 | 5 | 5 | 34.94 | yes |
+| 4 | 5 | 5 | 31.24 | yes |
+| 5 | 5 | 5 | 49.30 | yes |
+| 6 | 5 | 5 | 52.13 | yes |
+| 7 | 5 | 5 | 42.31 | yes |
+| 8 | 5 | 5 | 49.89 | yes |
+| 9 | 5 | 5 | 45.28 | yes |
+| 10 | 5 | 5 | 54.72 | yes |
+| **Summary (n=10)** | mean 5.00, stdev 0.00 | - | mean 42.13, stdev 10.66 | true |
+
+95% CI: tasks_completed [5, 5]; p95_latency_ms [34.500820989131796, 49.75828767450659]
+
+## From export_p0_e4_main_table.py
+
+## P0 E4 — Main table (raw conformance, normalized conformance, strong replay)
+
+Strong replay uses the full MAESTRO core slice plus PONR witness coverage when the scenario declares PONR tasks.
+
+| Scenario | Regime | Controller | Raw conf. rate | Norm. conf. rate | Strong replay | Weak replay | p95 mean (95% CI) ms |
+|----------|--------|------------|----------------|------------------|----------------|-------------|----------------------|
+| lab_profile_v0 | baseline | centralized | 1.00 | 1.00 | 1.00 | 1.00 | 35.39 [21.97, 48.82] |
+| lab_profile_v0 | baseline | rep_cps | 0.00 | 1.00 | 1.00 | 1.00 | 35.39 [21.97, 48.82] |
+| lab_profile_v0 | moderate | centralized | 1.00 | 1.00 | 1.00 | 1.00 | 28.97 [13.82, 44.11] |
+| lab_profile_v0 | moderate | rep_cps | 0.00 | 1.00 | 1.00 | 1.00 | 28.97 [13.82, 44.11] |
+| lab_profile_v0 | stress | centralized | 1.00 | 1.00 | 1.00 | 1.00 | 66.65 [27.53, 105.78] |
+| lab_profile_v0 | stress | rep_cps | 0.00 | 1.00 | 1.00 | 1.00 | 66.65 [27.53, 105.78] |
+| toy_lab_v0 | baseline | centralized | 1.00 | 1.00 | 1.00 | 1.00 | 42.57 [17.73, 67.40] |
+| toy_lab_v0 | baseline | rep_cps | 0.00 | 1.00 | 1.00 | 1.00 | 42.57 [17.73, 67.40] |
+| toy_lab_v0 | moderate | centralized | 1.00 | 1.00 | 1.00 | 1.00 | 30.65 [-4.75, 66.06] |
+| toy_lab_v0 | moderate | rep_cps | 0.00 | 1.00 | 1.00 | 1.00 | 30.65 [-4.75, 66.06] |
+| toy_lab_v0 | stress | centralized | 1.00 | 1.00 | 1.00 | 1.00 | 71.02 [26.20, 115.84] |
+| toy_lab_v0 | stress | rep_cps | 0.00 | 1.00 | 1.00 | 1.00 | 71.02 [26.20, 115.84] |
+
+## From export_p0_e4_diagnostics_table.py
+
+## P0 E4 — Diagnostics (centralized vs rep_cps)
+
+| Regime | Scenario | Paired seeds | Trace hash = | MAESTRO hash = | Evidence hash = | Final state = | Mean |Δp95| ms | Seeds divergent (trace/maestro) |
+|--------|----------|--------------|--------------|----------------|-----------------|---------------|----------------|----------------------------------|
+| baseline | lab_profile_v0 | 5 | 0.00 | 0.00 | 0.00 | 1.00 | 0.0000 | 5 |
+| baseline | toy_lab_v0 | 5 | 0.00 | 0.00 | 0.00 | 1.00 | 0.0000 | 5 |
+| moderate | lab_profile_v0 | 5 | 0.00 | 0.00 | 0.00 | 1.00 | 0.0000 | 5 |
+| moderate | toy_lab_v0 | 5 | 0.00 | 0.00 | 0.00 | 1.00 | 0.0000 | 5 |
+| stress | lab_profile_v0 | 5 | 0.00 | 0.00 | 0.00 | 1.00 | 0.0000 | 5 |
+| stress | toy_lab_v0 | 5 | 0.00 | 0.00 | 0.00 | 1.00 | 0.0000 | 5 |
 
 ## From export_p0_table3.py
 
 ## Table 3 — E3 + E4 summary (replay-link and controller-independence)
 
 Latency column: mean of per-seed **task_latency_ms_p95** with 95% CI (t-interval on seed-level samples).
+Replay match rate: **strong** replay (E3 when present in summary; E4 from p0_e4_raw_summary baseline rows, else legacy summary).
 
 | Scenario | Controller | Seeds | Replay match rate | p95 latency mean (95% CI) ms | Conformance rate |
 |----------|-------------|-------|-------------------|------------------------------|------------------|
-| lab_profile_v0 | thinslice | 20 | 1.00 | 50.37 [40.48, 60.27] | 1.00 |
-| toy_lab_v0 | thinslice | 20 | 1.00 | 35.37 [27.11, 43.62] | 1.00 |
-| toy_lab_v0 | centralized | 20 | 1.00 | 35.37 [26.73, 44.01] | 1.00 |
-| toy_lab_v0 | rep_cps | 20 | 1.00 | 35.37 [26.73, 44.01] | 1.00 |
-| lab_profile_v0 | centralized | 20 | 1.00 | 50.37 [40.02, 60.73] | 1.00 |
-| lab_profile_v0 | rep_cps | 20 | 1.00 | 50.37 [40.02, 60.73] | 1.00 |
+| toy_lab_v0 | thinslice | 10 | 1.00 | 34.45 [21.51, 47.38] | 1.00 |
+| lab_profile_v0 | thinslice | 10 | 1.00 | 42.13 [34.50, 49.76] | 1.00 |
+| lab_profile_v0 | centralized | 5 | 1.00 | 35.39 [21.97, 48.82] | 1.00 |
+| lab_profile_v0 | rep_cps | 5 | 1.00 | 35.39 [21.97, 48.82] | 0.00 |
+| toy_lab_v0 | centralized | 5 | 1.00 | 42.57 [17.73, 67.40] | 1.00 |
+| toy_lab_v0 | rep_cps | 5 | 1.00 | 42.57 [17.73, 67.40] | 0.00 |
 

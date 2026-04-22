@@ -1,16 +1,16 @@
 {
   "version": "0.1",
-  "run_id": "run_820959590b",
+  "run_id": "run_2a32816af2",
   "kernel_version": "0.1",
   "artifacts": [
     {
-      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_14/trace.json",
-      "sha256": "2553f985ed829e72202a628bb629864a4ef39178b897b6a0eebb6f8943cc881f",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_14/trace.json",
+      "sha256": "345b9a1de27cc5a406f7308530b1090faec7272559f3e5fcb947cd510bd40c86",
       "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
     },
     {
-      "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_14/maestro_report.json",
-      "sha256": "e7704651ccf76f4accaf1f59efebad5effb36b15cd52236ea78784882a2f1975",
+      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_14/maestro_report.json",
+      "sha256": "e139975c86db615743fdd618e6bd85ea634187453922b62e11adba5b7ff2384c",
       "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     }
   ],

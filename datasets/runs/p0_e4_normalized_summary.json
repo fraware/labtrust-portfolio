@@ -5,168 +5,168 @@
       "regime": "baseline",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_mean": 50.3729249665883,
       "p95_latency_ms_ci_95": [
-        21.96567752434563,
-        48.8163402270817
+        40.01681465400185,
+        60.72903527917475
       ]
     },
     {
       "regime": "baseline",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_mean": 50.3729249665883,
       "p95_latency_ms_ci_95": [
-        21.96567752434563,
-        48.8163402270817
+        40.01681465400185,
+        60.72903527917475
       ]
     },
     {
       "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
-        17.72932831525616,
-        67.40489309336124
+        26.73035578025035,
+        44.00555230833085
       ]
     },
     {
       "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
-        17.72932831525616,
-        67.40489309336124
+        26.73035578025035,
+        44.00555230833085
       ]
     },
     {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
-        13.819780283923206,
-        44.1133381736793
+        27.986093595949235,
+        51.74298344383461
       ]
     },
     {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
-        13.819780283923206,
-        44.1133381736793
+        27.986093595949235,
+        51.74298344383461
       ]
     },
     {
       "regime": "moderate",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_mean": 34.94317766032185,
       "p95_latency_ms_ci_95": [
-        -4.753417720172401,
-        66.06113795557368
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
       "regime": "moderate",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_mean": 34.94317766032185,
       "p95_latency_ms_ci_95": [
-        -4.753417720172401,
-        66.06113795557368
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
       "regime": "stress",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
-      "normalized_conformance_rate": 1.0,
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
       "weak_replay_match_rate": 1.0,
-      "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 66.65466309774095,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
-        27.525389179112736,
-        105.78393701636917
+        48.39942952240531,
+        84.71121502892802
       ]
     },
     {
       "regime": "stress",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
-      "normalized_conformance_rate": 1.0,
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
       "weak_replay_match_rate": 1.0,
-      "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 66.65466309774095,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
-        27.525389179112736,
-        105.78393701636917
+        48.39942952240531,
+        84.71121502892802
       ]
     },
     {
       "regime": "stress",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_mean": 73.62470511513062,
       "p95_latency_ms_ci_95": [
-        26.201046042988118,
-        115.83901585942175
+        48.738221021237806,
+        98.51118920902344
       ]
     },
     {
       "regime": "stress",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_mean": 73.62470511513062,
       "p95_latency_ms_ci_95": [
-        26.201046042988118,
-        115.83901585942175
+        48.738221021237806,
+        98.51118920902344
       ]
     }
   ],
@@ -175,7 +175,22 @@
     2,
     3,
     4,
-    5
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
   ],
   "regimes": [
     "baseline",

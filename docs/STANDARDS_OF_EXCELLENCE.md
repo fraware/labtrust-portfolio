@@ -27,7 +27,7 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 | Conformance coverage (%) | Fraction of required artifacts present and valid across runs. | conformance.json; build_p0_conformance_summary. |
 | PONR coverage ratio | For lab_profile_v0: ratio of PONR tasks with at least one task_end in trace. | Tier 3; lab profile. |
 | E3 variance (95% CI width) | Tighter CI = more precise estimate; report CI width for p95_latency_ms. | e3_summary / p0_e3_variance. |
-| E4 conformance rate per adapter | Conformance rate (passed/total) per controller in multi-adapter run. | p0_e4_summary.json; run_p0_e4_multi_adapter, export_p0_table3. |
+| E4 conformance rate per controller matrix row | Conformance rate (passed/total) per controller/scenario/regime row in the controller-matrix run. | p0_e4_raw_summary.json, p0_e4_normalized_summary.json, p0_e4_per_seed.jsonl, p0_e4_diagnostics.json, p0_e4_controller_matrix.json; run_p0_e4_controller_matrix, export_p0_table3 (strong replay preference from raw baseline rows, then E3 strong replay). |
 | Redaction completeness | E2: all payloads redacted; evidence_bundle_redacted has redaction_manifest. | e2_redaction_demo output. |
 
 ### P1 — Coordination Contracts

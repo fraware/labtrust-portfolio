@@ -1,13 +1,28 @@
 {
   "version": 1,
   "experiment": "P0_E4_controller_matrix",
-  "git_sha": "a58fc4bcd96b0f6b4c3371a541af77619a5c1676",
+  "git_sha": "1f40c6e8a27b7f5b806d29ab0922690c369fa544",
   "seeds": [
     1,
     2,
     3,
     4,
-    5
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
   ],
   "regimes": [
     "baseline",
@@ -35,168 +50,168 @@
       "regime": "baseline",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_mean": 50.3729249665883,
       "p95_latency_ms_ci_95": [
-        21.96567752434563,
-        48.8163402270817
+        40.01681465400185,
+        60.72903527917475
       ]
     },
     {
       "regime": "baseline",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 0.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_mean": 50.3729249665883,
       "p95_latency_ms_ci_95": [
-        21.96567752434563,
-        48.8163402270817
+        40.01681465400185,
+        60.72903527917475
       ]
     },
     {
       "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
-        17.72932831525616,
-        67.40489309336124
+        26.73035578025035,
+        44.00555230833085
       ]
     },
     {
       "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 0.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
-        17.72932831525616,
-        67.40489309336124
+        26.73035578025035,
+        44.00555230833085
       ]
     },
     {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
-        13.819780283923206,
-        44.1133381736793
+        27.986093595949235,
+        51.74298344383461
       ]
     },
     {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 0.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
-        13.819780283923206,
-        44.1133381736793
+        27.986093595949235,
+        51.74298344383461
       ]
     },
     {
       "regime": "moderate",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_mean": 34.94317766032185,
       "p95_latency_ms_ci_95": [
-        -4.753417720172401,
-        66.06113795557368
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
       "regime": "moderate",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 0.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_mean": 34.94317766032185,
       "p95_latency_ms_ci_95": [
-        -4.753417720172401,
-        66.06113795557368
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
       "regime": "stress",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
-      "raw_conformance_rate": 1.0,
+      "n_seeds": 20,
+      "raw_conformance_rate": 0.85,
       "weak_replay_match_rate": 1.0,
-      "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 66.65466309774095,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
-        27.525389179112736,
-        105.78393701636917
+        48.39942952240531,
+        84.71121502892802
       ]
     },
     {
       "regime": "stress",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 0.0,
       "weak_replay_match_rate": 1.0,
-      "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 66.65466309774095,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
-        27.525389179112736,
-        105.78393701636917
+        48.39942952240531,
+        84.71121502892802
       ]
     },
     {
       "regime": "stress",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_mean": 73.62470511513062,
       "p95_latency_ms_ci_95": [
-        26.201046042988118,
-        115.83901585942175
+        48.738221021237806,
+        98.51118920902344
       ]
     },
     {
       "regime": "stress",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "raw_conformance_rate": 0.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_mean": 73.62470511513062,
       "p95_latency_ms_ci_95": [
-        26.201046042988118,
-        115.83901585942175
+        48.738221021237806,
+        98.51118920902344
       ]
     }
   ],
@@ -205,168 +220,168 @@
       "regime": "baseline",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_mean": 50.3729249665883,
       "p95_latency_ms_ci_95": [
-        21.96567752434563,
-        48.8163402270817
+        40.01681465400185,
+        60.72903527917475
       ]
     },
     {
       "regime": "baseline",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_mean": 50.3729249665883,
       "p95_latency_ms_ci_95": [
-        21.96567752434563,
-        48.8163402270817
+        40.01681465400185,
+        60.72903527917475
       ]
     },
     {
       "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
-        17.72932831525616,
-        67.40489309336124
+        26.73035578025035,
+        44.00555230833085
       ]
     },
     {
       "regime": "baseline",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_mean": 35.3679540442906,
       "p95_latency_ms_ci_95": [
-        17.72932831525616,
-        67.40489309336124
+        26.73035578025035,
+        44.00555230833085
       ]
     },
     {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
-        13.819780283923206,
-        44.1133381736793
+        27.986093595949235,
+        51.74298344383461
       ]
     },
     {
       "regime": "moderate",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_mean": 39.86453851989192,
       "p95_latency_ms_ci_95": [
-        13.819780283923206,
-        44.1133381736793
+        27.986093595949235,
+        51.74298344383461
       ]
     },
     {
       "regime": "moderate",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_mean": 34.94317766032185,
       "p95_latency_ms_ci_95": [
-        -4.753417720172401,
-        66.06113795557368
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
       "regime": "moderate",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_mean": 34.94317766032185,
       "p95_latency_ms_ci_95": [
-        -4.753417720172401,
-        66.06113795557368
+        21.487726201924513,
+        48.398629118719185
       ]
     },
     {
       "regime": "stress",
       "scenario": "lab_profile_v0",
       "controller": "centralized",
-      "n_seeds": 5,
-      "normalized_conformance_rate": 1.0,
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
       "weak_replay_match_rate": 1.0,
-      "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 66.65466309774095,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
-        27.525389179112736,
-        105.78393701636917
+        48.39942952240531,
+        84.71121502892802
       ]
     },
     {
       "regime": "stress",
       "scenario": "lab_profile_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
-      "normalized_conformance_rate": 1.0,
+      "n_seeds": 20,
+      "normalized_conformance_rate": 0.85,
       "weak_replay_match_rate": 1.0,
-      "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 66.65466309774095,
+      "strong_replay_match_rate": 0.85,
+      "p95_latency_ms_mean": 66.55532227566667,
       "p95_latency_ms_ci_95": [
-        27.525389179112736,
-        105.78393701636917
+        48.39942952240531,
+        84.71121502892802
       ]
     },
     {
       "regime": "stress",
       "scenario": "toy_lab_v0",
       "controller": "centralized",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_mean": 73.62470511513062,
       "p95_latency_ms_ci_95": [
-        26.201046042988118,
-        115.83901585942175
+        48.738221021237806,
+        98.51118920902344
       ]
     },
     {
       "regime": "stress",
       "scenario": "toy_lab_v0",
       "controller": "rep_cps",
-      "n_seeds": 5,
+      "n_seeds": 20,
       "normalized_conformance_rate": 1.0,
       "weak_replay_match_rate": 1.0,
       "strong_replay_match_rate": 1.0,
-      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_mean": 73.62470511513062,
       "p95_latency_ms_ci_95": [
-        26.201046042988118,
-        115.83901585942175
+        48.738221021237806,
+        98.51118920902344
       ]
     }
   ],
@@ -381,7 +396,7 @@
           "centralized",
           "rep_cps"
         ],
-        "n_paired_seeds": 5,
+        "n_paired_seeds": 20,
         "trace_hash_equality_rate": 0.0,
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
@@ -392,9 +407,24 @@
           2,
           3,
           4,
-          5
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
         ],
-        "n_seeds_with_divergence": 5
+        "n_seeds_with_divergence": 20
       },
       {
         "regime": "baseline",
@@ -403,7 +433,7 @@
           "centralized",
           "rep_cps"
         ],
-        "n_paired_seeds": 5,
+        "n_paired_seeds": 20,
         "trace_hash_equality_rate": 0.0,
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
@@ -414,9 +444,24 @@
           2,
           3,
           4,
-          5
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
         ],
-        "n_seeds_with_divergence": 5
+        "n_seeds_with_divergence": 20
       },
       {
         "regime": "moderate",
@@ -425,7 +470,7 @@
           "centralized",
           "rep_cps"
         ],
-        "n_paired_seeds": 5,
+        "n_paired_seeds": 20,
         "trace_hash_equality_rate": 0.0,
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
@@ -436,9 +481,24 @@
           2,
           3,
           4,
-          5
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
         ],
-        "n_seeds_with_divergence": 5
+        "n_seeds_with_divergence": 20
       },
       {
         "regime": "moderate",
@@ -447,7 +507,7 @@
           "centralized",
           "rep_cps"
         ],
-        "n_paired_seeds": 5,
+        "n_paired_seeds": 20,
         "trace_hash_equality_rate": 0.0,
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
@@ -458,9 +518,24 @@
           2,
           3,
           4,
-          5
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
         ],
-        "n_seeds_with_divergence": 5
+        "n_seeds_with_divergence": 20
       },
       {
         "regime": "stress",
@@ -469,7 +544,7 @@
           "centralized",
           "rep_cps"
         ],
-        "n_paired_seeds": 5,
+        "n_paired_seeds": 20,
         "trace_hash_equality_rate": 0.0,
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
@@ -480,9 +555,24 @@
           2,
           3,
           4,
-          5
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
         ],
-        "n_seeds_with_divergence": 5
+        "n_seeds_with_divergence": 20
       },
       {
         "regime": "stress",
@@ -491,7 +581,7 @@
           "centralized",
           "rep_cps"
         ],
-        "n_paired_seeds": 5,
+        "n_paired_seeds": 20,
         "trace_hash_equality_rate": 0.0,
         "maestro_hash_equality_rate": 0.0,
         "evidence_hash_equality_rate": 0.0,
@@ -502,9 +592,24 @@
           2,
           3,
           4,
-          5
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20
         ],
-        "n_seeds_with_divergence": 5
+        "n_seeds_with_divergence": 20
       }
     ]
   }

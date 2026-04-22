@@ -80,7 +80,7 @@
     "stress_selection_policy": {
       "rule_id": "largest_drop_prob_with_any_collapse",
       "description": "Choose the maximum drop_completion_prob in the sweep grid such that the fixed (centralized) regime still has at least one collapsed run in collapse_sweep.json per_run (stronger compound-fault stress).",
-      "source_path": "datasets\\runs\\meta_eval\\scenario_regime_stress_v1\\collapse_sweep.json",
+      "source_path": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\meta_eval\\scenario_regime_stress_v1\\collapse_sweep.json",
       "source_path_repo_relative": "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep.json",
       "chosen_drop_completion_prob": 0.4,
       "calibration_note": "drop_completion_prob was chosen from collapse_sweep.json produced using calibration_seeds only; meta_eval paired evaluation used evaluation_seeds.",

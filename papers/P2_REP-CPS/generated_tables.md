@@ -8,10 +8,10 @@
 
 | Policy | tasks_completed_mean | tasks_stdev | aggregate_load (in-loop) |
 |--------|----------------------|-------------|---------------------------|
-| REP-CPS (trimmed, auth) | 4.24 | 0.55 | 1.4 |
-| Naive-in-loop (mean, auth) | 2.93 | 2.13 | 1.4 |
-| Unsecured (mean, no auth, compromised) | 2.93 | 2.13 | 5.48 |
-| Centralized | 4.24 | 0.55 | — |
+| REP-CPS (trimmed, auth) | 4.22 | 0.57 | 1.4 |
+| Naive-in-loop (mean, auth) | 2.92 | 2.13 | 1.4 |
+| Unsecured (mean, no auth, compromised) | 2.92 | 2.13 | 5.48 |
+| Centralized | 4.22 | 0.57 | — |
 
 
 **Table 2 — Aggregation under compromise (offline; source: summary.json aggregation_under_compromise).** Robust aggregation reduces observed compromise-induced bias relative to naive averaging.
@@ -49,14 +49,14 @@
 
 | Policy / metric | Mean (s) | p95 (s) | Overhead vs centralized (ms) |
 |------------------|----------|---------|-------------------------------|
-| REP-CPS | 0.1173 | 0.1882 | -0.08 |
-| Naive-in-loop | 0.1178 | 0.1959 | 0.41 |
-| Unsecured | 0.1201 | 0.1995 | 2.7 |
-| Centralized | 0.1174 | 0.1769 | 0 |
+| REP-CPS | 0.1321 | 0.1558 | 8.72 |
+| Naive-in-loop | 0.1242 | 0.1624 | 0.81 |
+| Unsecured | 0.124 | 0.1576 | 0.55 |
+| Centralized | 0.1234 | 0.1507 | 0 |
 
 | Aggregation compute | Mean (ms) | p95 (ms) | p99 (ms) |
 |----------------------|-----------|----------|----------|
-| aggregate() (trimmed_mean) | 0.0016 | 0.0018 | 0.0116 |
+| aggregate() (trimmed_mean) | 0.0019 | 0.0031 | 0.0061 |
 
 
 **Table 6 — Profile ablation (source: summary.json profile_ablation).** Each row disables one profile component; bias and aggregate vs honest-only.
@@ -76,9 +76,9 @@
 | Metric | Value |
 |--------|-------|
 | scenario_id | rep_cps_scheduling_v0 |
-| rep_cps_tasks_mean | 3.91 |
+| rep_cps_tasks_mean | 3.89 |
 | naive_in_loop_tasks_mean | 0.0 |
-| centralized_tasks_mean | 3.91 |
+| centralized_tasks_mean | 3.89 |
 | rep_beats_naive_tasks | True |
 
 
@@ -133,9 +133,9 @@
 
 | Scenario | REP-CPS mean | REP stdev | Naive mean | Naive stdev | Unsecured mean | Centralized mean |
 |----------|-------------|-----------|------------|-------------|----------------|------------------|
-| toy_lab_v0 | 3.91 | 0.28 | 3.91 | 0.28 | 3.91 | 3.91 |
-| lab_profile_v0 | 4.89 | 0.32 | 4.89 | 0.32 | 4.89 | 4.89 |
-| rep_cps_scheduling_v0 | 3.91 | 0.28 | 0.0 | 0.0 | 0.0 | 3.91 |
+| toy_lab_v0 | 3.89 | 0.32 | 3.89 | 0.32 | 3.89 | 3.89 |
+| lab_profile_v0 | 4.88 | 0.33 | 4.88 | 0.33 | 4.88 | 4.88 |
+| rep_cps_scheduling_v0 | 3.89 | 0.32 | 0.0 | 0.0 | 0.0 | 3.89 |
 
 
 **Offline aggregation comparators (source: summary.json aggregation_variants).** Same honest+compromised multiset as Table 2; robust operators vs plain mean.
@@ -171,6 +171,15 @@
 | paired_t_p_value | 1.0 |
 | power_post_hoc | 0.0 |
 | alpha | 0.05 |
+
+
+**Gate-threshold sensitivity (source: summary.json gate_threshold_sweep_results).** Scheduling scenario sweep of `safety_gate_max_load`; shows where naive trips gate while REP-CPS remains admissible.
+
+| safety_gate_max_load | REP-CPS tasks_mean | naive_in_loop tasks_mean | unsecured tasks_mean | REP-CPS gate_deny_rate | unsecured gate_deny_rate | rep_beats_naive_tasks |
+|----------------------|--------------------|--------------------------|---------------------|------------------------|--------------------------|-----------------------|
+| 1.5 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
+| 2.0 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
+| 2.5 | 3.95 | 0.0 | 0.0 | 0.0 | 1.0 | True |
 
 
 **Safety-gate campaign (source: summary.json safety_gate_denial).** Pass/deny counts from adapter runs; denial when aggregate exceeds threshold.
