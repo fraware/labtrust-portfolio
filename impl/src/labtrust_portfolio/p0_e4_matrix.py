@@ -529,6 +529,12 @@ def run_controller_matrix(
             strong_m = sum(1 for x in rs if x["strong_replay_match"])
             productive_success_n = sum(1 for x in rs if bool(x.get("productive_success")))
             safe_nonproductive_n = sum(1 for x in rs if bool(x.get("safe_nonproductive")))
+            tasks_completed_vals = [float(x.get("tasks_completed") or 0.0) for x in rs]
+            planned_vals = [
+                float(x.get("planned_task_count") or 0.0)
+                for x in rs
+                if x.get("planned_task_count") is not None
+            ]
             p95s = [float(x.get("task_latency_ms_p95") or 0.0) for x in rs]
             mean_lat = statistics.mean(p95s) if p95s else 0.0
             stdev_lat = statistics.stdev(p95s) if len(p95s) > 1 else 0.0
@@ -544,6 +550,12 @@ def run_controller_matrix(
                     "strong_replay_match_rate": strong_m / n if n else 0.0,
                     "productive_success_rate": productive_success_n / n if n else 0.0,
                     "safe_nonproductive_rate": safe_nonproductive_n / n if n else 0.0,
+                    "mean_tasks_completed": (
+                        statistics.mean(tasks_completed_vals) if tasks_completed_vals else 0.0
+                    ),
+                    "mean_planned_task_count": (
+                        statistics.mean(planned_vals) if planned_vals else 0.0
+                    ),
                     "p95_latency_ms_mean": mean_lat,
                     "p95_latency_ms_ci_95": list(ci),
                 }
@@ -939,6 +951,12 @@ def recompute_raw_summary_from_jsonl(
         strong_m = sum(1 for x in rs if x["strong_replay_match"])
         productive_success_n = sum(1 for x in rs if bool(x.get("productive_success")))
         safe_nonproductive_n = sum(1 for x in rs if bool(x.get("safe_nonproductive")))
+        tasks_completed_vals = [float(x.get("tasks_completed") or 0.0) for x in rs]
+        planned_vals = [
+            float(x.get("planned_task_count") or 0.0)
+            for x in rs
+            if x.get("planned_task_count") is not None
+        ]
         p95s = [float(x.get("task_latency_ms_p95") or 0.0) for x in rs]
         mean_lat = statistics.mean(p95s) if p95s else 0.0
         stdev_lat = statistics.stdev(p95s) if len(p95s) > 1 else 0.0
@@ -954,6 +972,12 @@ def recompute_raw_summary_from_jsonl(
                 "strong_replay_match_rate": strong_m / n if n else 0.0,
                 "productive_success_rate": productive_success_n / n if n else 0.0,
                 "safe_nonproductive_rate": safe_nonproductive_n / n if n else 0.0,
+                "mean_tasks_completed": (
+                    statistics.mean(tasks_completed_vals) if tasks_completed_vals else 0.0
+                ),
+                "mean_planned_task_count": (
+                    statistics.mean(planned_vals) if planned_vals else 0.0
+                ),
                 "p95_latency_ms_mean": mean_lat,
                 "p95_latency_ms_ci_95": list(ci),
             }

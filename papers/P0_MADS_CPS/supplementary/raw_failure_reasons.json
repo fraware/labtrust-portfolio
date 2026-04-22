@@ -1,0 +1,125 @@
+{
+  "failures": [
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 10,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 12,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 14,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 10,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 12,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 14,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 8,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 9,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 18,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 8,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 9,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    },
+    {
+      "regime": "coordination_shock",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 18,
+      "failed_tier": 3,
+      "schema_failure_reason": "PONR coverage: trace missing task_end for: disposition_commit",
+      "offending_path_or_key": null,
+      "replay_also_failed": true
+    }
+  ],
+  "n_failures": 12
+}

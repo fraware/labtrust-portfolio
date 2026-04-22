@@ -1,16 +1,16 @@
 {
   "version": "0.1",
-  "run_id": "run_1e26e78afc",
+  "run_id": "run_878f908fb5",
   "kernel_version": "0.1",
   "artifacts": [
     {
       "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_1/trace.json",
-      "sha256": "cb81ab8f385a9fc36156dc0d94d122d0fda8ebe4a0927fe13d378d6f02f07486",
+      "sha256": "245d364cd329053b174510cfe15209b315a74e0b83e51b6118c19f4094537bad",
       "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
     },
     {
       "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_1/maestro_report.json",
-      "sha256": "8be9739d05a7818135813787e8d6fcbc2908d3f8791f45416793d0a0ce327bbb",
+      "sha256": "569bcb19cd2a29e99eddc0359845dcbd33e4f32390f2316a6c0dc6726abdbeee",
       "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     }
   ],

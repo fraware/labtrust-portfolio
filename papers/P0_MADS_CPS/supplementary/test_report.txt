@@ -1,0 +1,10 @@
+﻿P0 E4 Test Report
+Timestamp: 2026-04-22T04:17:30.1613465-07:00
+Commit SHA: e946a373bd8cdc75b5923308dffdba86f589c7f9
+Python: 3.13.11 | packaged by Anaconda, Inc. | (main, Dec 10 2025, 21:21:58) [MSC v.1929 64 bit (AMD64)]
+
+Tests:
+- tests/test_p0_e4_raw_preservation.py :: PASS
+- tests/test_p0_e4_summary_recompute.py :: PASS
+- tests/test_p0_e4_strong_replay_equivalence.py :: PASS
+- tests/test_p0_e4_zero_latency_semantics.py :: PASS
