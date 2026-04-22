@@ -21,9 +21,7 @@ Refresh stamp: 2026-04-22T11:30:15Z
   - **Export artifact:** `papers/P0_MADS_CPS/artifacts/controller_divergence_table.md`
 
 - **Claim text:** "Safe-nonproductive outcomes can remain assurance-valid."
-  - **Evidence artifacts:** `datasets/runs/p0_e4_per_seed.jsonl`, `datasets/runs/p0_e4_raw_summary.json`
-  - **Semantics note:** `docs/P0_E4_COORDINATION_SHOCK_NOTE.md`
-  - **Paper short note:** `papers/P0_MADS_CPS/artifacts/coordination_shock_note_short.md`
+  - **Evidence artifacts:** `papers/P0_MADS_CPS/artifacts/controller_divergence_table.md`, `docs/P0_E4_COORDINATION_SHOCK_NOTE.md`, `papers/P0_MADS_CPS/artifacts/coordination_shock_note_short.md`
 
 - **Claim text:** "Raw universal invariance across all regimes is not claimed."
   - **Evidence artifacts:** `papers/P0_MADS_CPS/artifacts/claim_matrix.md`, `datasets/runs/p0_e4_raw_failure_reasons.json`
