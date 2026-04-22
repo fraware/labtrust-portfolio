@@ -31,6 +31,8 @@ Implementation: `impl/src/labtrust_portfolio/assurance_negative_controls.py` (`p
 |------------|-------------------|--------|
 | wrong pack for scenario / run | `wrong_pack_for_scenario` | implemented |
 | trace missing required PONR task | `missing_required_ponr_event` | implemented (strips `disposition_commit`) |
+| warehouse trace missing required PONR task | `warehouse_missing_required_ponr_event` | implemented (strips `place`) |
+| traffic scenario reviewed with wrong pack | `traffic_wrong_pack_for_scenario` | implemented |
 | trace from other scenario (wrong scenario_id) | `trace_from_other_scenario` | **merged into eval suite** — same materialization as `swapped_scenario_id_in_trace`; only `swapped_scenario_id_in_trace` appears in `all_case_ids()` to avoid duplicate rows. `materialize_case(..., "trace_from_other_scenario", ...)` is still supported. |
 | wrong required task name (misnamed PONR) | `wrong_required_task_name` | implemented |
 | trace from run A + bundle from run B | `cross_run_trace_bundle_swap` | implemented |
@@ -42,14 +44,28 @@ Implementation: `impl/src/labtrust_portfolio/assurance_negative_controls.py` (`p
 |------------|-------------------|--------|
 | remove final commitment event, structure valid | `remove_final_commit_event_keep_structure` | implemented (same strip as `missing_required_ponr_event`; family D vs C) |
 | release manifest mismatched artifact SHA | `manifest_points_to_foreign_artifact` | implemented |
+| release manifest mismatched artifact SHA (warehouse) | `warehouse_manifest_points_to_foreign_artifact` | implemented |
+| release manifest mismatched artifact SHA (traffic) | `traffic_manifest_points_to_foreign_artifact` | implemented |
 | partial / impossible control evidence claim | `partial_control_omission` | implemented |
 | well-formed artifacts, pack over-claims evidence | `wellformed_but_incomplete_evidence` | implemented (pack adds `conformance` type; reviewer `evidence_present` does not treat it as satisfied) |
 
-## Positive control
+## Family E — boundary cases / hard negatives
 
-| Role | `perturbation_id` |
-|------|-------------------|
-| valid lab path | `positive_valid_lab` |
+| Boundary intent | `perturbation_id` | Expected |
+|----------------|-------------------|----------|
+| schema-valid but under-specified control set (assurance argument weakened) | `boundary_under_specified_pack_still_admissible` | expected `reject` (can be missed) |
+| locally consistent cross-run lineage swap (external lineage not represented) | `boundary_locally_consistent_cross_run_lineage` | expected `reject` (can be missed) |
+
+## Positive controls
+
+Positive controls are generated directly in `run_assurance_negative_eval.py` (not via `all_case_ids`):
+
+- `lab_profile_v0`: seeds `7,11,19`
+- `warehouse_v0`: seeds `7,11,19`
+- `traffic_v0`: seeds `7,11,19`
+- `toy_lab_v0`: seeds `7,11,19`
+
+Total default valid controls: **12** (quick mode: 4).
 
 ## Notes
 

@@ -67,6 +67,7 @@ def materialize_case(
     case_id: str,
     base_lab_run: Path,
     base_wh_run: Path,
+    base_traffic_run: Path,
     lab_pack: Path,
     warehouse_pack: Path,
     medical_pack: Path,
@@ -91,8 +92,10 @@ def materialize_case(
 
     run_lab = work / "run_lab"
     run_wh = work / "run_wh"
+    run_traffic = work / "run_traffic"
     _copy_run(base_lab_run, run_lab)
     _copy_run(base_wh_run, run_wh)
+    _copy_run(base_traffic_run, run_traffic)
 
     # ---- Positive control (valid lab path) ----
     if case_id == "positive_valid_lab":
@@ -280,6 +283,87 @@ def materialize_case(
         (r / "release_manifest.json").write_text(json.dumps(rm, indent=2) + "\n", encoding="utf-8")
         return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PROVENANCE_MISMATCH}), "adversarial_misleading"
 
+    # ---- Scenario spread additions ----
+    if case_id == "warehouse_missing_required_ponr_event":
+        r = work / "run_wh_no_ponr"
+        _copy_run(base_wh_run, r)
+        tr = json.loads((r / "trace.json").read_text(encoding="utf-8"))
+        evs: List[dict] = []
+        for ev in tr.get("events", []):
+            if ev.get("type") == "task_end":
+                name = (ev.get("payload") or {}).get("name", "")
+                if name == "place":
+                    continue
+            evs.append(ev)
+        tr["events"] = evs
+        (r / "trace.json").write_text(json.dumps(tr, indent=2) + "\n", encoding="utf-8")
+        return r, wh_pack_w, "warehouse_v0", "reject", frozenset({FC.PONR_MISSING}), "scenario_consistency"
+
+    if case_id == "warehouse_manifest_points_to_foreign_artifact":
+        r = work / "run_wh_bad_manifest"
+        _copy_run(base_wh_run, r)
+        rm = json.loads((r / "release_manifest.json").read_text(encoding="utf-8"))
+        if rm.get("artifacts"):
+            rm["artifacts"][0]["sha256"] = "0" * 64
+        (r / "release_manifest.json").write_text(json.dumps(rm, indent=2) + "\n", encoding="utf-8")
+        return r, wh_pack_w, "warehouse_v0", "reject", frozenset({FC.PROVENANCE_MISMATCH}), "adversarial_misleading"
+
+    if case_id == "traffic_wrong_pack_for_scenario":
+        # traffic trace reviewed as traffic scenario, but with warehouse assurance pack
+        return run_traffic, wh_pack_w, "traffic_v0", "reject", frozenset({FC.SCENARIO_PACK_MISMATCH}), "scenario_consistency"
+
+    if case_id == "traffic_manifest_points_to_foreign_artifact":
+        r = work / "run_traffic_bad_manifest"
+        _copy_run(base_traffic_run, r)
+        rm = json.loads((r / "release_manifest.json").read_text(encoding="utf-8"))
+        if rm.get("artifacts"):
+            rm["artifacts"][0]["sha256"] = "0" * 64
+        (r / "release_manifest.json").write_text(json.dumps(rm, indent=2) + "\n", encoding="utf-8")
+        return r, med_pack_w, "traffic_v0", "reject", frozenset({FC.PROVENANCE_MISMATCH}), "adversarial_misleading"
+
+    # ---- Boundary / hard negatives (expected reject, may be accepted) ----
+    if case_id == "boundary_under_specified_pack_still_admissible":
+        # Drops one critical control while preserving schema and internal map consistency.
+        p = work / "pack_boundary_under_specified.json"
+        d = _load_pack(lab_pack_w)
+        d["hazards"][0]["control_ids"] = ["C-001"]
+        d["controls"] = [c for c in d.get("controls", []) if c.get("id") == "C-001"]
+        d["evidence_map"]["H-001"] = ["C-001"]
+        if "trace" in d["evidence_map"]:
+            d["evidence_map"]["trace"] = ["C-001"]
+        if "evidence_bundle" in d["evidence_map"]:
+            d["evidence_map"]["evidence_bundle"] = ["C-001"]
+        _write_pack(p, d)
+        return (
+            run_lab,
+            p,
+            "lab_profile_v0",
+            "reject",
+            frozenset({FC.INCOMPLETE_EVIDENCE}),
+            "boundary_cases",
+        )
+
+    if case_id == "boundary_locally_consistent_cross_run_lineage":
+        # Copies full artifact set from a different seed; local SHA checks pass but external lineage is stale.
+        r = work / "run_boundary_lineage"
+        _copy_run(base_lab_run, r)
+        other = work / "run_boundary_other_seed"
+        from labtrust_portfolio.thinslice import run_thin_slice
+
+        other.mkdir(parents=True)
+        run_thin_slice(other, seed=seed + 200, scenario_id="lab_profile_v0", drop_completion_prob=0.0)
+        for name in ("trace.json", "evidence_bundle.json", "release_manifest.json", "maestro_report.json"):
+            shutil.copy2(other / name, r / name)
+        shutil.rmtree(other, ignore_errors=True)
+        return (
+            r,
+            lab_pack_w,
+            "lab_profile_v0",
+            "reject",
+            frozenset({FC.PROVENANCE_MISMATCH}),
+            "boundary_cases",
+        )
+
     raise KeyError(f"Unknown negative case id: {case_id}")
 
 
@@ -310,6 +394,12 @@ def all_case_ids(quick: bool = False) -> List[str]:
         "partial_control_omission",
         "wellformed_but_incomplete_evidence",
         "manifest_points_to_foreign_artifact",
+        "warehouse_missing_required_ponr_event",
+        "warehouse_manifest_points_to_foreign_artifact",
+        "traffic_wrong_pack_for_scenario",
+        "traffic_manifest_points_to_foreign_artifact",
+        "boundary_under_specified_pack_still_admissible",
+        "boundary_locally_consistent_cross_run_lineage",
     ]
     if quick:
         return [

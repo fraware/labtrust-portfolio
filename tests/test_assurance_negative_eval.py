@@ -29,6 +29,7 @@ class TestAssuranceNegativeEval(unittest.TestCase):
                     sys.executable,
                     str(script),
                     "--quick",
+                    "--submission-mode",
                     "--out",
                     str(out),
                 ],
@@ -44,11 +45,26 @@ class TestAssuranceNegativeEval(unittest.TestCase):
             data = json.loads(p.read_text(encoding="utf-8"))
             self.assertIn("aggregate", data)
             self.assertIn("by_mode", data)
+            self.assertIn("by_scenario", data)
             self.assertIn("by_perturbation", data)
             self.assertIn("rows", data)
             self.assertGreater(len(data["rows"]), 0)
+            self.assertEqual(data.get("run_manifest", {}).get("repo_root"), "<redacted>")
             for m in ("schema_only", "schema_plus_presence", "full_review"):
                 self.assertIn(m, data["by_mode"])
+            # Regression: schema_only must still false-accept at least one invalid case.
+            self.assertGreater(
+                float(data["by_mode"]["schema_only"]["false_accept_rate"] or 0.0),
+                0.0,
+            )
+            # Regression: known full-review rejections remain enforced.
+            by_pid = {x["perturbation_id"]: x for x in data.get("by_perturbation", [])}
+            prov = by_pid["cross_run_trace_bundle_swap"]["by_mode"]["full_review"]
+            self.assertFalse(bool(prov["review_exit_ok"]))
+            self.assertIn("PROVENANCE_MISMATCH", prov["failure_reason_codes"])
+            ponr = by_pid["missing_required_ponr_event"]["by_mode"]["full_review"]
+            self.assertFalse(bool(ponr["review_exit_ok"]))
+            self.assertIn("PONR_MISSING", ponr["failure_reason_codes"])
 
     def test_export_negative_tables(self) -> None:
         env = os.environ.copy()
@@ -66,6 +82,7 @@ class TestAssuranceNegativeEval(unittest.TestCase):
                     str(neg_json),
                     "--out-dir",
                     str(outd),
+                    "--submission-mode",
                 ],
                 cwd=str(repo_root()),
                 env={**env, "PYTHONPATH": pypath},
@@ -81,5 +98,8 @@ class TestAssuranceNegativeEval(unittest.TestCase):
                 "p7_perturbation_reject_matrix.csv",
                 "p7_aggregate_lift_metrics.csv",
                 "p7_latency_by_mode.csv",
+                "p7_negative_by_scenario.csv",
+                "p7_boundary_case_summary.csv",
+                "p7_submission_manifest_redacted.json",
             ):
                 self.assertTrue((outd / name).exists(), name)

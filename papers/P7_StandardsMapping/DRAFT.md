@@ -120,41 +120,42 @@ Three JSON instantiations: **lab** (`profiles/lab/v0.1/assurance_pack_instantiat
 |------------------|-------------------------|---------------|--------------------------|-----------------------------|----------------------|
 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 47.53 |
 
-**Table 4 — Negative-control families (`full_review`).** Source: `p7_negative_family_summary.csv` (committed run: **n_invalid = 23** injected negatives + **n_valid = 1** positive control; family counts below are negatives only under `full_review`). Regenerate: `export_p7_negative_tables.py`.
+**Table 4 — Negative-control families (`full_review`).** Source: `p7_negative_family_summary.csv` (committed run: **n_invalid = 29** injected negatives + **n_valid = 12** positive controls across four scenarios/seeds; family counts below are negatives only under `full_review`). Regenerate: `export_p7_negative_tables.py`.
 
 | failure_family | n_negative_cases | reject_rate | localization_accuracy |
 |----------------|------------------|------------|------------------------|
-| adversarial_misleading | 4 | 1.00 | 1.00 |
+| adversarial_misleading | 6 | 1.00 | 1.00 |
 | artifact_admissibility | 7 | 1.00 | 1.00 |
+| boundary_cases | 2 | 0.00 | 0.00 |
 | pack_structure | 6 | 1.00 | 1.00 |
-| scenario_consistency | 6 | 1.00 | 1.00 |
+| scenario_consistency | 8 | 0.88 | 0.88 |
 
-Full `perturbation_id` lists per family appear in the CSV `example_perturbation_ids` column. **`p7_perturbation_reject_matrix.csv`** gives, for each invalid case, whether each reviewer mode **rejects** (1) or **false-accepts** (0); this is the clearest ablation artifact for the supplement.
+Full `perturbation_id` lists per family appear in the CSV `example_perturbation_ids` column. **`p7_perturbation_reject_matrix.csv`** gives, for each invalid case, whether each reviewer mode **rejects** (1) or **false-accepts** (0); **`p7_negative_by_scenario.csv`** provides per-scenario rejection/localization and valid-case latency summaries. `boundary_cases` are intentional hard negatives used to characterize limits.
 
-**Table 5 — Ablation: reviewer mode vs discrimination (same 23 negatives + 1 valid).** Source: `p7_ablation_summary.csv` + `p7_aggregate_lift_metrics.csv`.
+**Table 5 — Ablation: reviewer mode vs discrimination (same 29 negatives + 12 valids).** Source: `p7_ablation_summary.csv` + `p7_aggregate_lift_metrics.csv`.
 
 | review_mode | valid_accept_rate | invalid_reject_rate | false_accept_rate | false_reject_rate | localization_accuracy |
 |-------------|-------------------|---------------------|-------------------|-------------------|------------------------|
-| schema_only | 1.00 | 0.43 | **0.57** | 0.00 | 0.43 |
-| schema_plus_presence | 1.00 | 0.52 | **0.48** | 0.00 | 0.52 |
-| full_review | 1.00 | **1.00** | **0.00** | 0.00 | **1.00** |
+| schema_only | 1.00 | 0.34 | **0.66** | 0.00 | 0.34 |
+| schema_plus_presence | 1.00 | 0.41 | **0.59** | 0.00 | 0.41 |
+| full_review | 1.00 | **0.90** | **0.10** | 0.00 | **0.90** |
 
-**Lift (full_review minus baseline, same suite):** invalid-reject lift vs `schema_only` = **+0.57**; vs `schema_plus_presence` = **+0.48**; false-accept drop vs `schema_only` = **+0.57** (see `p7_aggregate_lift_metrics.csv`). **Interpretation:** weaker modes are not “almost as good”: they **systematically false-accept** governance-relevant faults that `full_review` rejects, which is the paper’s ablation claim.
+**Lift (full_review minus baseline, same suite):** invalid-reject lift vs `schema_only` = **+0.55**; vs `schema_plus_presence` = **+0.48**; false-accept drop vs `schema_only` = **+0.55** (see `p7_aggregate_lift_metrics.csv`). **Interpretation:** weaker modes are not “almost as good”: they **systematically false-accept** governance-relevant faults that `full_review` rejects. The residual `full_review` false-accepts are concentrated in the explicit `boundary_cases` family, which is reported as a scope boundary rather than hidden.
 
 **Latency (mean ms, same run).** Source: `p7_latency_by_mode.csv`.
 
 | review_mode | mean_latency_ms_valid_cases | mean_latency_ms_invalid_cases | median_latency_ms_all_cases |
 |-------------|----------------------------|------------------------------|----------------------------|
-| schema_only | 49.1 | 29.5 | 36.1 |
-| schema_plus_presence | 96.7 | 55.2 | 67.6 |
-| full_review | 86.8 | 56.2 | 66.1 |
+| schema_only | 37.0 | 34.1 | 36.0 |
+| schema_plus_presence | 71.1 | 63.7 | 67.7 |
+| full_review | 76.5 | 65.1 | 75.2 |
 
-**Table 6 — Failure reason code counts (`full_review` rejections).** Source: `p7_failure_reason_breakdown.csv`. Counts are **per emitted code** on failing rows; one invalid case can surface **multiple** codes, so the sum of counts can exceed 23.
+**Table 6 — Failure reason code counts (`full_review` rejections).** Source: `p7_failure_reason_breakdown.csv`. Counts are **per emitted code** on failing rows; one invalid case can surface **multiple** codes, so the sum of counts can exceed 29.
 
 | failure_reason_code | count |
 |---------------------|------:|
-| PROVENANCE_MISMATCH | 8 |
-| PONR_MISSING | 4 |
+| PROVENANCE_MISMATCH | 11 |
+| PONR_MISSING | 5 |
 | CONTROL_REFERENCE_MISSING | 2 |
 | EVIDENCE_MAP_INCONSISTENT | 2 |
 | TRACE_SCHEMA_INVALID | 2 |
@@ -173,7 +174,7 @@ Full `perturbation_id` lists per family appear in the CSV `example_perturbation_
 
 Perturbation ids vs empirical brief: [P7_PERTURBATION_CHECKLIST.md](../docs/P7_PERTURBATION_CHECKLIST.md). Table index: [generated_tables.md](generated_tables.md).
 
-**Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust (Q1):** `robust_results.json` — positive-control stability under stress; not claimed as discriminative power. (4) **Negative suite (Q2–Q3):** `negative_results.json` with `aggregate.governance_evidence_discrimination_accuracy` (here **1.00** = mean of valid accept and invalid reject under `full_review` on this suite) **and** the stronger story in **Table 5 / lift metrics**: baselines leave **47–57%** of injected faults undetected (`false_accept_rate`). (5) **Non-claim:** no certification. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
+**Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust (Q1):** `robust_results.json` — positive-control stability under stress; not claimed as discriminative power. (4) **Expanded positives:** 12 valid controls across 4 scenarios × 3 seeds preserve acceptance (`valid_accept_rate = 1.00` across all modes; per-scenario valid summaries in `by_scenario` / `p7_negative_by_scenario.csv`). (5) **Negative suite (Q2–Q3):** `negative_results.json` with `aggregate.governance_evidence_discrimination_accuracy` (**0.9483**) and strong ablation gaps: baselines leave **59–66%** of injected faults undetected (`false_accept_rate`), while `full_review` rejects most negatives and localizes failures. (6) **Boundary transparency:** `boundary_cases` intentionally surface checker limits (2/2 accepted), making scope limits explicit instead of implicit. (7) **Non-claim:** no certification. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
 
 ## 7. Comparison to other assurance frameworks
 

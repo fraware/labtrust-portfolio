@@ -10,6 +10,8 @@ Writes under papers/P7_StandardsMapping/:
   p7_failure_reason_breakdown.csv
   p7_perturbation_reject_matrix.csv (invalid cases: 1 = reviewer rejects)
   p7_latency_by_mode.csv
+  p7_negative_by_scenario.csv
+  p7_boundary_case_summary.csv (when boundary cases exist)
 """
 from __future__ import annotations
 
@@ -29,6 +31,16 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Export P7 negative-control CSV tables")
     ap.add_argument("--input", type=Path, default=DEFAULT_JSON)
     ap.add_argument("--out-dir", type=Path, default=OUT_DIR)
+    ap.add_argument(
+        "--submission-mode",
+        action="store_true",
+        help="Redact machine-local paths in copied manifest fields",
+    )
+    ap.add_argument(
+        "--redact-paths",
+        action="store_true",
+        help="Alias for --submission-mode",
+    )
     args = ap.parse_args()
     if not args.input.exists():
         print(f"Missing {args.input}; run scripts/run_assurance_negative_eval.py", file=sys.stderr)
@@ -199,6 +211,81 @@ def main() -> int:
                 ]
             )
 
+    # By-scenario summary for full_review negatives
+    scen_path = args.out_dir / "p7_negative_by_scenario.csv"
+    by_scenario = data.get("by_scenario") or {}
+    with scen_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(
+            [
+                "scenario_id",
+                "n_negative_cases",
+                "reject_rate_full_review",
+                "localization_accuracy_full_review",
+                "valid_accept_rate_full_review",
+                "mean_latency_ms_valid_full_review",
+            ]
+        )
+        for sid in sorted({str(r.get("scenario_id")) for r in rows}):
+            fr_neg = [
+                r
+                for r in rows
+                if r.get("scenario_id") == sid
+                and r.get("review_mode") == "full_review"
+                and r.get("expected_outcome") == "reject"
+            ]
+            n_neg = len(fr_neg)
+            rej = sum(1 for r in fr_neg if not r.get("review_exit_ok"))
+            loc = sum(1 for r in fr_neg if r.get("reason_matches_expected"))
+            s_full = (by_scenario.get(sid) or {}).get("full_review") or {}
+            w.writerow(
+                [
+                    sid,
+                    n_neg,
+                    round(rej / n_neg, 4) if n_neg else None,
+                    round(loc / n_neg, 4) if n_neg else None,
+                    s_full.get("valid_accept_rate"),
+                    s_full.get("mean_latency_ms_valid_cases"),
+                ]
+            )
+
+    # Boundary-case summary (optional; may intentionally contain misses)
+    boundary_rows = [
+        r
+        for r in rows
+        if r.get("review_mode") == "full_review" and str(r.get("family")) == "boundary_cases"
+    ]
+    boundary_path = args.out_dir / "p7_boundary_case_summary.csv"
+    with boundary_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(
+            [
+                "perturbation_id",
+                "expected_outcome",
+                "observed_outcome_full_review",
+                "missed_by_full_review",
+                "failure_reason_codes_full_review",
+            ]
+        )
+        for r in sorted(boundary_rows, key=lambda x: str(x.get("perturbation_id"))):
+            w.writerow(
+                [
+                    r.get("perturbation_id"),
+                    r.get("expected_outcome"),
+                    r.get("observed_outcome"),
+                    int(r.get("expected_outcome") == "reject" and bool(r.get("review_exit_ok"))),
+                    ";".join(r.get("failure_reason_codes") or []),
+                ]
+            )
+
+    # Optional anonymized copy of manifest metadata for submission bundles
+    if args.submission_mode or args.redact_paths:
+        manifest = dict(data.get("run_manifest") or {})
+        if "repo_root" in manifest:
+            manifest["repo_root"] = "<redacted>"
+        m_path = args.out_dir / "p7_submission_manifest_redacted.json"
+        m_path.write_text(json.dumps({"run_manifest": manifest}, indent=2) + "\n", encoding="utf-8")
+
     def _rel(p: Path) -> str:
         try:
             return str(p.relative_to(REPO))
@@ -211,6 +298,11 @@ def main() -> int:
     print(f"Wrote {_rel(d_path)}")
     print(f"Wrote {_rel(lift_path)}")
     print(f"Wrote {_rel(lat_path)}")
+    print(f"Wrote {_rel(scen_path)}")
+    if boundary_rows:
+        print(f"Wrote {_rel(boundary_path)}")
+    if args.submission_mode or args.redact_paths:
+        print(f"Wrote {_rel(m_path)}")
     return 0
 
 

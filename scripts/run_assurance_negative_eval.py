@@ -23,7 +23,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "impl" / "src"))
@@ -32,12 +32,30 @@ if "LABTRUST_KERNEL_DIR" not in os.environ:
 
 DEFAULT_OUT = REPO / "datasets" / "runs" / "assurance_eval"
 PROFILE_LAB = REPO / "profiles" / "lab" / "v0.1"
+PROFILE_WH = REPO / "profiles" / "warehouse" / "v0.1"
+PROFILE_MED = REPO / "profiles" / "medical_v0.1"
 LAB_PACK = PROFILE_LAB / "assurance_pack_instantiation.json"
 WH_PACK = REPO / "profiles" / "warehouse" / "v0.1" / "assurance_pack_instantiation.json"
 MED_PACK = REPO / "profiles" / "medical_v0.1" / "assurance_pack_instantiation.json"
 
 from labtrust_portfolio.assurance_negative_controls import all_case_ids, materialize_case  # noqa: E402
 from labtrust_portfolio.assurance_review_pipeline import REVIEW_MODES, review_assurance_pipeline  # noqa: E402
+
+
+def _profile_for_scenario(scenario_id: str) -> Path:
+    if scenario_id == "warehouse_v0":
+        return PROFILE_WH
+    if scenario_id == "traffic_v0":
+        return PROFILE_MED
+    return PROFILE_LAB
+
+
+def _pack_profile_name(scenario_id: str) -> str:
+    if scenario_id == "warehouse_v0":
+        return "warehouse_v0.1"
+    if scenario_id == "traffic_v0":
+        return "medical_v0.1"
+    return "lab_v0.1"
 
 
 def _localization_ok(
@@ -60,12 +78,23 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--quick", action="store_true", help="Subset of cases for CI")
     ap.add_argument(
+        "--submission-mode",
+        action="store_true",
+        help="Redact machine-local paths in emitted manifests",
+    )
+    ap.add_argument(
+        "--redact-paths",
+        action="store_true",
+        help="Alias for --submission-mode",
+    )
+    ap.add_argument(
         "--mode",
         choices=[*REVIEW_MODES, "all"],
         default="all",
         help="Reviewer mode (default all three)",
     )
     args = ap.parse_args()
+    redact_paths = bool(args.submission_mode or args.redact_paths)
     out_dir = args.out
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -74,16 +103,88 @@ def main() -> int:
     from labtrust_portfolio.thinslice import run_thin_slice
 
     rows: List[Dict[str, Any]] = []
+
+    positive_specs: List[Tuple[str, int, str]] = [
+        ("lab_profile_v0", 7, "positive_valid_lab_s7"),
+        ("lab_profile_v0", 11, "positive_valid_lab_s11"),
+        ("lab_profile_v0", 19, "positive_valid_lab_s19"),
+        ("warehouse_v0", 7, "positive_valid_warehouse_s7"),
+        ("warehouse_v0", 11, "positive_valid_warehouse_s11"),
+        ("warehouse_v0", 19, "positive_valid_warehouse_s19"),
+        ("traffic_v0", 7, "positive_valid_traffic_s7"),
+        ("traffic_v0", 11, "positive_valid_traffic_s11"),
+        ("traffic_v0", 19, "positive_valid_traffic_s19"),
+        ("toy_lab_v0", 7, "positive_valid_toy_lab_s7"),
+        ("toy_lab_v0", 11, "positive_valid_toy_lab_s11"),
+        ("toy_lab_v0", 19, "positive_valid_toy_lab_s19"),
+    ]
+    if args.quick:
+        positive_specs = [
+            ("lab_profile_v0", 7, "positive_valid_lab_s7"),
+            ("warehouse_v0", 7, "positive_valid_warehouse_s7"),
+            ("traffic_v0", 7, "positive_valid_traffic_s7"),
+            ("toy_lab_v0", 7, "positive_valid_toy_lab_s7"),
+        ]
     with tempfile.TemporaryDirectory() as td:
         base = Path(td)
         lab_run = base / "base_lab"
         wh_run = base / "base_wh"
+        traffic_run = base / "base_traffic"
         lab_run.mkdir(parents=True)
         wh_run.mkdir(parents=True)
+        traffic_run.mkdir(parents=True)
         run_thin_slice(lab_run, seed=7, scenario_id="lab_profile_v0", drop_completion_prob=0.0)
         run_thin_slice(wh_run, seed=7, scenario_id="warehouse_v0", drop_completion_prob=0.0)
+        run_thin_slice(traffic_run, seed=7, scenario_id="traffic_v0", drop_completion_prob=0.0)
 
-        case_ids = all_case_ids(quick=args.quick)
+        # Expanded positive controls across scenarios and seeds.
+        pos_root = base / "positives"
+        pos_root.mkdir(parents=True)
+        for scenario_id, seed, pos_id in positive_specs:
+            run_dir = pos_root / f"{scenario_id}_s{seed}"
+            run_dir.mkdir(parents=True)
+            run_thin_slice(run_dir, seed=seed, scenario_id=scenario_id, drop_completion_prob=0.0)
+            if scenario_id == "warehouse_v0":
+                pack_path = WH_PACK
+            elif scenario_id == "traffic_v0":
+                pack_path = MED_PACK
+            else:
+                pack_path = LAB_PACK
+            profile_dir = _profile_for_scenario(scenario_id)
+            for mode in modes:
+                t0 = time.perf_counter()
+                outcome = review_assurance_pipeline(
+                    run_dir,
+                    pack_path,
+                    scenario_id,
+                    mode,
+                    profile_dir=profile_dir,
+                    repo_root=REPO,
+                )
+                latency_ms = round((time.perf_counter() - t0) * 1000.0, 3)
+                codes = outcome.get("failure_reason_codes") or []
+                exit_ok = bool(outcome.get("exit_ok"))
+                observed = "accept" if exit_ok else "reject"
+                loc = _localization_ok("accept", frozenset(), exit_ok, codes)
+                rows.append(
+                    {
+                        "scenario_id": scenario_id,
+                        "profile": _pack_profile_name(scenario_id),
+                        "family": "positive_control",
+                        "perturbation_id": pos_id,
+                        "review_mode": mode,
+                        "seed": seed,
+                        "expected_outcome": "accept",
+                        "observed_outcome": observed,
+                        "review_exit_ok": exit_ok,
+                        "failure_stage": outcome.get("failure_stage"),
+                        "failure_reason_codes": codes,
+                        "reason_matches_expected": loc,
+                        "review_latency_ms": latency_ms,
+                    }
+                )
+
+        case_ids = [c for c in all_case_ids(quick=args.quick) if not c.startswith("positive_")]
         work_root = base / "cases"
         work_root.mkdir(parents=True)
 
@@ -95,11 +196,13 @@ def main() -> int:
                 case_id,
                 lab_run,
                 wh_run,
+                traffic_run,
                 LAB_PACK,
                 WH_PACK,
                 MED_PACK,
                 seed,
             )
+            profile_dir = _profile_for_scenario(scenario_id)
             for mode in modes:
                 t0 = time.perf_counter()
                 outcome = review_assurance_pipeline(
@@ -107,7 +210,7 @@ def main() -> int:
                     pack_path,
                     scenario_id,
                     mode,
-                    profile_dir=PROFILE_LAB,
+                    profile_dir=profile_dir,
                     repo_root=REPO,
                 )
                 latency_ms = round((time.perf_counter() - t0) * 1000.0, 3)
@@ -118,7 +221,7 @@ def main() -> int:
                 rows.append(
                     {
                         "scenario_id": scenario_id,
-                        "profile": "lab_v0.1",
+                        "profile": _pack_profile_name(scenario_id),
                         "family": family,
                         "perturbation_id": case_id,
                         "review_mode": mode,
@@ -138,6 +241,7 @@ def main() -> int:
 
     valid_rows = _subset(lambda r: r["expected_outcome"] == "accept")
     invalid_rows = _subset(lambda r: r["expected_outcome"] == "reject")
+    scenario_ids = sorted({str(r.get("scenario_id")) for r in rows})
 
     def _rates(mode: str) -> Dict[str, Any]:
         vr = [r for r in valid_rows if r["review_mode"] == mode]
@@ -188,6 +292,19 @@ def main() -> int:
             if exp_rej
             else None,
         }
+
+    by_scenario: Dict[str, Any] = {}
+    for sid in scenario_ids:
+        by_scenario[sid] = {}
+        for mode in REVIEW_MODES:
+            sv = [r for r in valid_rows if r["scenario_id"] == sid and r["review_mode"] == mode]
+            accepted = sum(1 for r in sv if r["review_exit_ok"])
+            lat_v = [float(r["review_latency_ms"]) for r in sv]
+            by_scenario[sid][mode] = {
+                "n_valid": len(sv),
+                "valid_accept_rate": round(accepted / len(sv), 4) if sv else None,
+                "mean_latency_ms_valid_cases": round(statistics.mean(lat_v), 3) if lat_v else None,
+            }
 
     by_mode_dict = {m: _rates(m) for m in REVIEW_MODES}
     aggregate_full = dict(by_mode_dict["full_review"])
@@ -242,13 +359,16 @@ def main() -> int:
         "run_manifest": {
             "script": "run_assurance_negative_eval.py",
             "cases": case_ids,
+            "positive_control_cases": [x[2] for x in positive_specs],
             "review_modes": modes,
             "quick": args.quick,
-            "repo_root": str(REPO),
+            "repo_root": "<redacted>" if redact_paths else ".",
+            "path_redaction": "submission_mode" if redact_paths else "none",
         },
         "aggregate": aggregate_block,
         "by_mode": by_mode_dict,
         "by_family": by_family,
+        "by_scenario": by_scenario,
         "by_perturbation": by_perturbation_list,
         "rows": rows,
     }

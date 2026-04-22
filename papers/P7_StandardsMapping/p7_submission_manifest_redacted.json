@@ -1,0 +1,58 @@
+{
+  "run_manifest": {
+    "script": "run_assurance_negative_eval.py",
+    "cases": [
+      "hazard_missing_control_ids",
+      "hazard_references_unknown_control",
+      "control_missing_evidence_types",
+      "missing_required_field",
+      "ponr_ids_missing_for_profile",
+      "evidence_map_inconsistent",
+      "missing_trace_file",
+      "missing_bundle_file",
+      "trace_schema_invalid",
+      "bundle_schema_invalid",
+      "trace_truncated",
+      "bundle_corrupted_field",
+      "bundle_broken_trace_hash",
+      "wrong_pack_for_scenario",
+      "missing_required_ponr_event",
+      "remove_final_commit_event_keep_structure",
+      "cross_run_trace_bundle_swap",
+      "stale_bundle_reused",
+      "swapped_scenario_id_in_trace",
+      "wrong_required_task_name",
+      "partial_control_omission",
+      "wellformed_but_incomplete_evidence",
+      "manifest_points_to_foreign_artifact",
+      "warehouse_missing_required_ponr_event",
+      "warehouse_manifest_points_to_foreign_artifact",
+      "traffic_wrong_pack_for_scenario",
+      "traffic_manifest_points_to_foreign_artifact",
+      "boundary_under_specified_pack_still_admissible",
+      "boundary_locally_consistent_cross_run_lineage"
+    ],
+    "positive_control_cases": [
+      "positive_valid_lab_s7",
+      "positive_valid_lab_s11",
+      "positive_valid_lab_s19",
+      "positive_valid_warehouse_s7",
+      "positive_valid_warehouse_s11",
+      "positive_valid_warehouse_s19",
+      "positive_valid_traffic_s7",
+      "positive_valid_traffic_s11",
+      "positive_valid_traffic_s19",
+      "positive_valid_toy_lab_s7",
+      "positive_valid_toy_lab_s11",
+      "positive_valid_toy_lab_s19"
+    ],
+    "review_modes": [
+      "schema_only",
+      "schema_plus_presence",
+      "full_review"
+    ],
+    "quick": false,
+    "repo_root": "<redacted>",
+    "path_redaction": "submission_mode"
+  }
+}
