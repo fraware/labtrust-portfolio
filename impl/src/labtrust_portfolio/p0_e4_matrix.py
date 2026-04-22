@@ -192,6 +192,26 @@ def canonical_maestro_replay_hash(report: Mapping[str, Any]) -> str:
     return sha256_bytes(payload.encode("utf-8"))
 
 
+def _planned_task_count(trace: Mapping[str, Any]) -> int | None:
+    meta = trace.get("metadata") or {}
+    v = meta.get("planned_task_count")
+    if isinstance(v, bool):
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, float):
+        return int(v)
+    return None
+
+
+def productive_success(run_outcome: str | None, tasks_completed: int) -> bool:
+    return run_outcome == "success_safe" and tasks_completed > 0
+
+
+def safe_nonproductive(run_outcome: str | None, tasks_completed: int) -> bool:
+    return run_outcome in {"partial_safe", "safe_fail"} and tasks_completed == 0
+
+
 def strip_maestro_to_v02(
     maestro: dict[str, Any],
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -394,6 +414,9 @@ def run_controller_matrix(
                     h_release = file_sha256(release_path) if release_path.exists() else None
 
                     sm = stored.get("metrics") or {}
+                    tasks_completed = int(sm.get("tasks_completed") or 0)
+                    run_outcome = str(stored.get("run_outcome") or "")
+                    planned_task_count = _planned_task_count(trace)
                     record: dict[str, Any] = {
                         "regime": regime,
                         "scenario": scenario_id,
@@ -405,7 +428,11 @@ def run_controller_matrix(
                         "raw_maestro_sha256": h_maestro,
                         "raw_evidence_bundle_sha256": h_evidence,
                         "raw_release_manifest_sha256": h_release,
-                        "tasks_completed": sm.get("tasks_completed"),
+                        "run_outcome": run_outcome,
+                        "tasks_completed": tasks_completed,
+                        "planned_task_count": planned_task_count,
+                        "productive_success": productive_success(run_outcome, tasks_completed),
+                        "safe_nonproductive": safe_nonproductive(run_outcome, tasks_completed),
                         "coordination_messages": sm.get("coordination_messages"),
                         "task_latency_ms_p95": sm.get("task_latency_ms_p95"),
                         "trace_event_count": len(trace.get("events") or []),
@@ -500,6 +527,8 @@ def run_controller_matrix(
             conf_pass = sum(1 for x in rs if (x.get(conformance_field) or {}).get("pass"))
             weak_m = sum(1 for x in rs if x["weak_replay_match"])
             strong_m = sum(1 for x in rs if x["strong_replay_match"])
+            productive_success_n = sum(1 for x in rs if bool(x.get("productive_success")))
+            safe_nonproductive_n = sum(1 for x in rs if bool(x.get("safe_nonproductive")))
             p95s = [float(x.get("task_latency_ms_p95") or 0.0) for x in rs]
             mean_lat = statistics.mean(p95s) if p95s else 0.0
             stdev_lat = statistics.stdev(p95s) if len(p95s) > 1 else 0.0
@@ -513,6 +542,8 @@ def run_controller_matrix(
                     conformance_rate_key: conf_pass / n if n else 0.0,
                     "weak_replay_match_rate": weak_m / n if n else 0.0,
                     "strong_replay_match_rate": strong_m / n if n else 0.0,
+                    "productive_success_rate": productive_success_n / n if n else 0.0,
+                    "safe_nonproductive_rate": safe_nonproductive_n / n if n else 0.0,
                     "p95_latency_ms_mean": mean_lat,
                     "p95_latency_ms_ci_95": list(ci),
                 }
@@ -906,6 +937,8 @@ def recompute_raw_summary_from_jsonl(
         raw_pass = sum(1 for x in rs if x["raw_conformance"].get("pass"))
         weak_m = sum(1 for x in rs if x["weak_replay_match"])
         strong_m = sum(1 for x in rs if x["strong_replay_match"])
+        productive_success_n = sum(1 for x in rs if bool(x.get("productive_success")))
+        safe_nonproductive_n = sum(1 for x in rs if bool(x.get("safe_nonproductive")))
         p95s = [float(x.get("task_latency_ms_p95") or 0.0) for x in rs]
         mean_lat = statistics.mean(p95s) if p95s else 0.0
         stdev_lat = statistics.stdev(p95s) if len(p95s) > 1 else 0.0
@@ -919,6 +952,8 @@ def recompute_raw_summary_from_jsonl(
                 "raw_conformance_rate": raw_pass / n if n else 0.0,
                 "weak_replay_match_rate": weak_m / n if n else 0.0,
                 "strong_replay_match_rate": strong_m / n if n else 0.0,
+                "productive_success_rate": productive_success_n / n if n else 0.0,
+                "safe_nonproductive_rate": safe_nonproductive_n / n if n else 0.0,
                 "p95_latency_ms_mean": mean_lat,
                 "p95_latency_ms_ci_95": list(ci),
             }

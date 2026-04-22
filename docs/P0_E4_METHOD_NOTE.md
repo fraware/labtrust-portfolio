@@ -39,6 +39,8 @@ Answer this using **`datasets/runs/p0_e4_per_seed.jsonl`**, **`datasets/runs/p0_
 
 Current publishable run highlights: `coordination_shock` on `rep_cps_scheduling_v0` yields `maestro_core_hash_equality_rate = 0.0` with nonzero mean event-count difference, providing controller-separating evidence while easy-regime raw conformance remains 1.0 for both controllers.
 
+For semantic interpretation of the anomaly row (`rep_cps` zero completed tasks with high assurance checks), see `docs/P0_E4_COORDINATION_SHOCK_NOTE.md`.
+
 Identical aggregate table rows with divergent hashes indicate **weak metrics**; identical hashes across controllers indicate genuinely identical artifacts under the chosen envelope (or insufficient stress to separate controllers).
 
 ## Repair steps

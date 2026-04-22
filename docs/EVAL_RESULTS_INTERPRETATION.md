@@ -254,7 +254,7 @@ Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run;
 | P5 | scaling_eval/heldout_results.json (+ optional scaling_eval_family/) | Seven scenarios, fault-mix, secondary_targets, PI coverage, family OOS; trigger_met | Draft; refresh seeds as needed |
 | P6 | llm_eval/red_team_results.json | Red-team + confusable + jailbreak-style suites; adapter latency; optional real-LLM matrix | Draft |
 | P8 | meta_eval/comparison.json (+ optional scenario_regime_stress_v1/) | Non-inferior collapse vs fixed, paired stats, auditable switches; publishable dual-scenario + non-vacuous stress policy | Draft; verify_p8_meta_artifacts |
-| P0 | p0_conformance_corpus/, e3_summary.json, p0_e4_raw_summary.json, p0_e4_normalized_summary.json, p0_e4_per_seed.jsonl, p0_e4_diagnostics.json, p0_e4_controller_matrix.json, e2_redaction_demo/, p0_conformance_summary.json | E1 corpus; E2 4-col matrix; E3 replay link (optional standalone verifier); E4 controller matrix; Table 1/2/3, Figures 1-3; repro in DRAFT Appendix | Claim table + Appendix |
+| P0 | p0_conformance_corpus/, e3_summary.json, p0_e4_raw_summary.json, p0_e4_normalized_summary.json, p0_e4_per_seed.jsonl, p0_e4_diagnostics.json, p0_e4_controller_pairs.jsonl, p0_e4_raw_failure_reasons.json, p0_e4_controller_matrix.json, e2_redaction_demo/, p0_conformance_summary.json | E1 corpus; E2 4-col matrix; E3 replay link (optional standalone verifier); E4 controller matrix + controller-separating evidence + raw-failure causal accounting; Table 1/2/3, Figures 1-3; repro in DRAFT Appendix | Claim table + Appendix |
 | P3 | replay_eval/summary.json | L0 + corpus + baselines + multi-seed; schema v0.2; verify script | Draft |
 | P4 | maestro_fault_sweep/ (multi_sweep.json) | Multi-scenario; drop + delay_fault_prob sweep | Draft |
 | P1 | contracts_eval/eval.json (+ transport_parity.json) | Exact corpus verdicts; comparators + per-class metrics; boundary parity artifact; P1_TRACE_DERIVABILITY; export_contracts_corpus_table, export_p1_contract_flow, plot_contracts_scale | Claim table + repro block |
@@ -273,7 +273,7 @@ The following were run and written under `datasets/runs/`:
 | P0 | `build_p0_conformance_corpus.py` (CI) | `p0_conformance_corpus/`, `corpus_manifest.json` |
 | P0 | `produce_p0_e3_release.py --runs 10 --no-release` (CI) | `e3_summary.json`, `p0_e3_variance.json` |
 | P0 | `e2_redaction_demo.py` (CI) | `e2_redaction_demo/trace_redacted.json` |
-| P0 | `run_p0_e4_controller_matrix.py` | `p0_e4_raw_summary.json`, `p0_e4_normalized_summary.json`, `p0_e4_per_seed.jsonl`, `p0_e4_diagnostics.json`, `p0_e4_controller_matrix.json` |
+| P0 | `run_p0_e4_controller_matrix.py` | `p0_e4_raw_summary.json`, `p0_e4_normalized_summary.json`, `p0_e4_per_seed.jsonl`, `p0_e4_diagnostics.json`, `p0_e4_controller_pairs.jsonl`, `p0_e4_raw_failure_reasons.json`, `p0_e4_controller_matrix.json` |
 | P3 | `replay_eval.py` (default out) | `replay_eval/summary.json` |
 | P4 | `maestro_fault_sweep.py --seeds 5` (multi-scenario) | `maestro_fault_sweep/{toy_lab_v0,lab_profile_v0}/sweep.json`, `multi_sweep.json` |
 | P1 | `contracts_eval.py`; `contracts_transport_parity.py` | `contracts_eval/eval.json`; `transport_parity.json` |
