@@ -1,6 +1,6 @@
 # Phase 3 passed
 
-Submission-readiness checklist (`docs/STATE_OF_THE_ART_CRITERIA.md` section 3) verified on **2026-04-20** against freshly regenerated artifacts (`run_assurance_eval.py`, `run_assurance_robust_eval.py`, `export_assurance_tables.py`, `tests/test_assurance_p7.py`, `render_p7_mermaid_figures.py`).
+Submission-readiness checklist (`docs/STATE_OF_THE_ART_CRITERIA.md` section 3) verified on **2026-04-22** against freshly regenerated artifacts (`run_assurance_eval.py`, `run_assurance_robust_eval.py`, `run_assurance_negative_eval.py --submission-mode`, `export_assurance_tables.py`, `export_p7_negative_tables.py --submission-mode`, `tests/test_assurance_p7.py`, `tests/test_assurance_negative_eval.py`, `render_p7_mermaid_figures.py`).
 
 - **Claim-evidence:** All claims in `claims.yaml` have `artifact_paths` and at least one `table_id` or `figure_id` (C3 includes Table 3 and Figure 0/1 sources).
 - **Repro:** Documented one-shot sequence in `DRAFT.md` and `README.md`: baseline eval, mapping flow + GSN Mermaid, export tables, robust matrix (default 20 seeds), optional Mermaid render to PNG/PDF.
@@ -16,4 +16,4 @@ Submission-readiness checklist (`docs/STATE_OF_THE_ART_CRITERIA.md` section 3) v
 - **No kernel redefinition:** Draft cites ASSURANCE_PACK schema and portfolio artifacts; does not redefine tiers or trace semantics.
 - **Overclaim guard:** No certification claim; non-goals and K7 (no template theater) in draft; mapping is translation and audit-support only.
 - **Figures:** `docs/figures/p7_mapping_flow.mmd`, `p7_gsn.mmd`, `p7_review_stages.mmd` (+ `.png`, `.pdf` when `render_p7_mermaid_figures.py` / mmdc available).
-- **Discrimination (C4):** `negative_results.json` (includes `by_perturbation`, lift metrics in `aggregate`) from `run_assurance_negative_eval.py`; Tables 4–6 plus `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv` from `export_p7_negative_tables.py`; `review_assurance_run.py --review-mode` documented; failure codes in `docs/P7_REVIEW_FAILURE_CODES.md`.
+- **Discrimination (C4):** `negative_results.json` (includes `by_scenario`, `by_perturbation`, lift metrics in `aggregate`) from `run_assurance_negative_eval.py`; Tables 4–6 plus `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, and `p7_submission_manifest_redacted.json` from `export_p7_negative_tables.py`; `review_assurance_run.py --review-mode` documented; failure codes in `docs/P7_REVIEW_FAILURE_CODES.md`.

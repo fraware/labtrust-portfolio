@@ -43,10 +43,11 @@ Total default runs: `4 scenarios x 5 regimes x 20 seeds = 400`.
 
 ### Negative suite and ablations (C4)
 
-- **Script:** `scripts/run_assurance_negative_eval.py` → `datasets/runs/assurance_eval/negative_results.json` (`aggregate`, `by_mode`, `by_family`, `by_perturbation`, per-mode latency means, lift fields vs `schema_only` / `schema_plus_presence`).
-- **Export:** `scripts/export_p7_negative_tables.py` → `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift row + latency-by-mode).
+- **Script:** `scripts/run_assurance_negative_eval.py` → `datasets/runs/assurance_eval/negative_results.json` (`aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, per-mode latency means, lift fields vs `schema_only` / `schema_plus_presence`).
+- **Export:** `scripts/export_p7_negative_tables.py` → `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift row + latency-by-mode + by-scenario summary + boundary-case summary + redacted manifest helper).
 - **Perturbation ids:** `docs/P7_PERTURBATION_CHECKLIST.md` maps the empirical brief to implementation ids.
 - **Quick CI subset:** `run_assurance_negative_eval.py --quick`.
+- **Blind-review hygiene:** run with `--submission-mode` (or `--redact-paths`) to redact machine-local paths in `run_manifest`.
 
 ## Success Criteria
 
@@ -68,8 +69,8 @@ PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
 # Default robust seeds are 1..20. Override only with an explicit methodological note.
 python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/robust_results.json
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
-  python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval
-python scripts/export_p7_negative_tables.py --input datasets/runs/assurance_eval/negative_results.json
+  python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval --submission-mode
+python scripts/export_p7_negative_tables.py --input datasets/runs/assurance_eval/negative_results.json --submission-mode
 ```
 
 Primary artifact outputs:

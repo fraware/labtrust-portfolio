@@ -205,7 +205,7 @@ Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run;
 
 ### P7 (Standards mapping)
 
-- **Existing:** `run_assurance_eval.py` runs `check_assurance_mapping` and scripted review on toy_lab_v0 and lab_profile_v0; writes `results.json` (`mapping_check`, `reviews`, scenario-matched `per_profile`, `run_manifest`, `success_criteria_met`). **`run_assurance_robust_eval.py`** writes `robust_results.json` (default 20 seeds, 400 runs). **`run_assurance_negative_eval.py`** writes `negative_results.json` (ablations `schema_only` / `schema_plus_presence` / `full_review`, `by_perturbation`, lift metrics). **`export_p7_negative_tables.py`** emits `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift + latency). **Auditor:** `audit_bundle.py` (optional `--release datasets/releases/portfolio_v0.1`). **Part 11:** `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md`. **GSN / figures:** `export_assurance_gsn.py`, `export_p7_mapping_flow.py`, `p7_review_stages.mmd`, `render_p7_mermaid_figures.py`. Docs: `P7_STANDARDS_MAPPING.md`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md`, `P7_REVIEW_FAILURE_CODES.md`, `P7_PERTURBATION_CHECKLIST.md`. Non-goals and K7 as in DRAFT.
+- **Existing:** `run_assurance_eval.py` runs `check_assurance_mapping` and scripted review on toy_lab_v0 and lab_profile_v0; writes `results.json` (`mapping_check`, `reviews`, scenario-matched `per_profile`, `run_manifest`, `success_criteria_met`). **`run_assurance_robust_eval.py`** writes `robust_results.json` (default 20 seeds, 400 runs). **`run_assurance_negative_eval.py`** writes `negative_results.json` (ablations `schema_only` / `schema_plus_presence` / `full_review`, `by_scenario`, `by_perturbation`, lift metrics); use `--submission-mode` for blind-review-safe manifests. **`export_p7_negative_tables.py`** emits `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift + latency + by-scenario + boundary summary + redacted manifest). **Auditor:** `audit_bundle.py` (optional `--release datasets/releases/portfolio_v0.1`). **Part 11:** `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md`. **GSN / figures:** `export_assurance_gsn.py`, `export_p7_mapping_flow.py`, `p7_review_stages.mmd`, `render_p7_mermaid_figures.py`. Docs: `P7_STANDARDS_MAPPING.md`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md`, `P7_REVIEW_FAILURE_CODES.md`, `P7_PERTURBATION_CHECKLIST.md`. Non-goals and K7 as in DRAFT.
 - **Validity and robustness:** Deterministic mapping checks; robust matrix for positive-control stability; negative suite for **discrimination** (false-accept gap under baselines vs `full_review`).
 - **Integration tests:** `tests/test_assurance_p7.py` (baseline eval + export_assurance_tables); **`tests/test_assurance_negative_eval.py`** (quick negative eval + export_p7_negative_tables).
 - **Unit test:** `TestAssuranceMappingCheck` asserts `check_assurance_mapping` JSON has `mapping_ok` and `ponr_coverage_ok`.
@@ -220,7 +220,7 @@ Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run;
 | Assert ponr_coverage_ok, ponr_coverage, control_coverage_ratio | Done |
 | Assert export_assurance_tables.py succeeds | Done |
 | Unit test for check_assurance_mapping | Done |
-| Draft: standard link, tables 1–6, comparison, limitations, threat model | Done (DRAFT v0.4+) |
+| Draft: standard link, tables 1–6 (+ boundary/by-scenario supplements), comparison, limitations, threat model | Done (DRAFT v0.4+) |
 
 ---
 
@@ -257,7 +257,7 @@ Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run;
 | P3 | replay_eval/summary.json | L0 + corpus + baselines + multi-seed; schema v0.2; verify script | Draft |
 | P4 | maestro_fault_sweep/ (multi_sweep.json) | Multi-scenario; drop + delay_fault_prob sweep | Draft |
 | P1 | contracts_eval/eval.json (+ transport_parity.json) | Exact corpus verdicts; comparators + per-class metrics; boundary parity artifact; P1_TRACE_DERIVABILITY; export_contracts_corpus_table, export_p1_contract_flow, plot_contracts_scale | Claim table + repro block |
-| P7 | assurance_eval/results.json, robust_results.json, negative_results.json, papers/P7_StandardsMapping/p7_*.csv | Mapping + PONR + robust matrix + negative suite / ablations; audit_bundle; Part 11; export_assurance_gsn; export_p7_negative_tables | Claim table + repro block |
+| P7 | assurance_eval/results.json, robust_results.json, negative_results.json, papers/P7_StandardsMapping/p7_*.csv | Mapping + PONR + robust matrix + negative suite / ablations + boundary cases; audit_bundle; Part 11; export_assurance_gsn; export_p7_negative_tables | Claim table + repro block |
 
 Using this document you can interpret existing results, plug in new result files as they appear, and launch the suggested follow-up tests and experiments for all papers in a consistent way.
 

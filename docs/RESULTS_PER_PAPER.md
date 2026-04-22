@@ -193,8 +193,8 @@ This document explains what each paper (P0–P8) measures, where its results are
 **Result locations:**
 - `datasets/runs/assurance_eval/results.json` — mapping_check, review, reviews
 - `datasets/runs/assurance_eval/robust_results.json` — positive-control stability matrix (`aggregate`, `rows`, `run_manifest`)
-- `datasets/runs/assurance_eval/negative_results.json` — discrimination: `aggregate`, `by_mode`, `by_family`, `by_perturbation`, `rows`
-- `papers/P7_StandardsMapping/p7_*.csv` — Tables 4–6 + `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv` (`export_p7_negative_tables.py`)
+- `datasets/runs/assurance_eval/negative_results.json` — discrimination: `aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, `rows` (run with `--submission-mode` for path redaction in release bundles)
+- `papers/P7_StandardsMapping/p7_*.csv` — Tables 4–6 + `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_submission_manifest_redacted.json` (`export_p7_negative_tables.py`)
 - **Auditor script:** `scripts/audit_bundle.py` — pass/fail mapping completeness and PONR coverage; `--run-dir` for optional run review; `--release datasets/releases/portfolio_v0.1` for one-command audit over a release dir (runs mapping + PONR; if release contains evidence_bundle.json, runs review there too). JSON + human output.
 - **Part 11:** `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` — each requirement mapped to artifact path and field/event (machine-checkable; no prose-only).
 
@@ -203,10 +203,10 @@ This document explains what each paper (P0–P8) measures, where its results are
 - `mapping_check.ok`: schema and mapping complete; `mapping_check.ponr_coverage_ok`: every profile PONR in at least one hazard.
 - `reviews.<scenario_id>`: `evidence_bundle_ok`, `trace_ok`, `ponr_events[]`, `controls_covered[]`, `ponr_coverage.ratio`, `control_coverage_ratio`, `exit_ok`.
 - `review`: backward-compat alias for toy_lab_v0. For lab_profile_v0, `ponr_coverage.required_task_names` typically includes `disposition_commit`.
-- **Negative JSON:** `by_mode.*.false_accept_rate` vs `full_review`; `aggregate.invalid_reject_lift_full_minus_schema_only`, `false_accept_drop_full_vs_schema_only`; `by_perturbation` for per-case reject under each mode.
+- **Negative JSON:** `by_mode.*.false_accept_rate` vs `full_review`; `aggregate.invalid_reject_lift_full_minus_schema_only`, `false_accept_drop_full_vs_schema_only`; `by_scenario` for valid acceptance/latency; `by_perturbation` for per-case reject under each mode.
 - **Auditor:** Run `audit_bundle.py [--run-dir path]`; output includes `mapping_completeness`, `ponr_coverage`, `review_exit_ok` (if run-dir given).
 
-**Tables and figures:** `scripts/export_assurance_tables.py` (Tables 1–3). `scripts/export_assurance_gsn.py`, `scripts/export_p7_mapping_flow.py` (Figure 0), `docs/figures/p7_review_stages.mmd` (Figure 2), `scripts/render_p7_mermaid_figures.py`. `scripts/run_assurance_negative_eval.py` + `scripts/export_p7_negative_tables.py` (Tables 4–6 + supplements). Non-goals: P7 DRAFT, kernel/assurance_pack/README.md, profiles/lab/v0.1/README.md. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
+**Tables and figures:** `scripts/export_assurance_tables.py` (Tables 1–3). `scripts/export_assurance_gsn.py`, `scripts/export_p7_mapping_flow.py` (Figure 0), `docs/figures/p7_review_stages.mmd` (Figure 2), `scripts/render_p7_mermaid_figures.py`. `scripts/run_assurance_negative_eval.py --submission-mode` + `scripts/export_p7_negative_tables.py --submission-mode` (Tables 4–6 + supplements). Non-goals: P7 DRAFT, kernel/assurance_pack/README.md, profiles/lab/v0.1/README.md. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
 
 ---
 

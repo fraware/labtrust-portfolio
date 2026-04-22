@@ -39,11 +39,11 @@ Use this sequence to regenerate committed artifacts, `generated_tables.md`, and 
 ```bash
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_robust_eval.py --out datasets/runs/assurance_eval
-PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval --submission-mode
 python scripts/export_p7_mapping_flow.py
 python scripts/export_assurance_gsn.py --out docs/figures/p7_gsn.mmd
 python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/results.json
-python scripts/export_p7_negative_tables.py
+python scripts/export_p7_negative_tables.py --input datasets/runs/assurance_eval/negative_results.json --submission-mode
 python scripts/render_p7_mermaid_figures.py
 ```
 
@@ -61,7 +61,7 @@ python scripts/render_p7_mermaid_figures.py
 | Figure 1 | `export_assurance_gsn.py` → `docs/figures/p7_gsn.mmd`; render with `render_p7_mermaid_figures.py` |
 | Figure 2 | `docs/figures/p7_review_stages.mmd` (hand-authored; mirrors `assurance_review_pipeline.py`); render with `render_p7_mermaid_figures.py` |
 | Audit | `audit_bundle.py --run-dir <path>` or `audit_bundle.py --release datasets/releases/portfolio_v0.1` |
-| Negative controls + ablations | `run_assurance_negative_eval.py` → `negative_results.json`; `export_p7_negative_tables.py` → `p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv` |
+| Negative controls + ablations | `run_assurance_negative_eval.py --submission-mode` → `negative_results.json`; `export_p7_negative_tables.py --submission-mode` → `p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv` |
 
 **Admissible evidence package (informal definition).** For a declared scenario and pack, a run directory is **admissible** under `full_review` when: the pack passes structure checks; required artifacts exist and validate; trace scenario matches the review scenario; every control’s **full** set of `evidence_artifact_types` is satisfied by artifacts in the run; required PONR tasks appear in the trace; bundle and release manifest digests match on-disk files.
 
@@ -200,7 +200,7 @@ See [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md).
 
 **Metrics:** (Positive) schema/mapping, robust pass rates. (Negative) `valid_accept_rate`, `invalid_reject_rate`, `false_accept_rate`, `false_reject_rate`, per-family reject rate, localization accuracy (expected-code intersection on rejects), mean/median review latency by mode, `governance_evidence_discrimination_accuracy` (= average of valid accept rate and invalid reject rate under `full_review` on the suite), and **lift fields** in `negative_results.json` → `p7_aggregate_lift_metrics.csv` (`invalid_reject_lift_full_minus_schema_only`, `false_accept_drop_full_vs_schema_only`, etc.). **Kill criterion:** mapping not checkable by script, or discrimination suite shows **no** economically meaningful gap between `full_review` and weaker modes on governance-relevant negatives (here: **>0.45** absolute false-accept rate on `schema_plus_presence` and **>0.55** on `schema_only`). Portfolio bar: [STATE_OF_THE_ART_CRITERIA.md](../docs/STATE_OF_THE_ART_CRITERIA.md).
 
-**Commands:** `run_assurance_eval.py`; `run_assurance_negative_eval.py`; `check_assurance_mapping.py`; `review_assurance_run.py <run_dir> --scenario-id lab_profile_v0 --review-mode full_review`; `tests/test_assurance_p7.py`, `tests/test_assurance_negative_eval.py`; `docs/P7_REVIEW_CHECKLIST.md`.
+**Commands:** `run_assurance_eval.py`; `run_assurance_negative_eval.py --submission-mode`; `check_assurance_mapping.py`; `review_assurance_run.py <run_dir> --scenario-id lab_profile_v0 --review-mode full_review`; `tests/test_assurance_p7.py`, `tests/test_assurance_negative_eval.py`; `docs/P7_REVIEW_CHECKLIST.md`.
 
 **Submission note.** Ship `results.json`, `robust_results.json`, and **`negative_results.json`** with the negative eval and exports; Table 1 must reflect **`lab_profile_v0`** primary review; default robust run uses **20 seeds** unless justified.
 
@@ -217,5 +217,5 @@ No certification. No compliance claim with 21 CFR Part 11 or OECD GLP. Auditable
 | C1 Traceable mapping | Schema, instantiations, `results.json`, `robust_results.json`, [P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md) |
 | C2 Mechanically checkable | `check_assurance_mapping.py`, `review_assurance_run.py`, `audit_bundle.py`, Figure 2 (`p7_review_stages.mmd`) |
 | C3 Stress / proxy scenarios | `robust_results.json`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md` |
-| C4 Discrimination + ablations | `negative_results.json`, `run_assurance_negative_eval.py`, `export_p7_negative_tables.py`, CSV Tables 4–6, Figure 2 (`p7_review_stages.mmd`), [P7_PERTURBATION_CHECKLIST.md](../docs/P7_PERTURBATION_CHECKLIST.md) |
+| C4 Discrimination + ablations | `negative_results.json`, `run_assurance_negative_eval.py --submission-mode`, `export_p7_negative_tables.py --submission-mode`, CSV Tables 4–6 + by-scenario/boundary supplements, Figure 2 (`p7_review_stages.mmd`), [P7_PERTURBATION_CHECKLIST.md](../docs/P7_PERTURBATION_CHECKLIST.md) |
 | No certification | This section; Limitations |
