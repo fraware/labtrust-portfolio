@@ -1,3 +1,5 @@
+Refresh stamp: 2026-04-22T11:30:15Z
+
 # P0 E4 method note (controller matrix)
 
 This note documents how we evaluate **controller-independence** and **replay-link** evidence for P0 E4 after the controller-matrix upgrade.
@@ -5,16 +7,16 @@ This note documents how we evaluate **controller-independence** and **replay-lin
 ## Raw versus normalized evaluation
 
 - **Raw (E4a):** After `run_adapter`, we **do not** rewrite `trace.json`, `maestro_report.json`, or the original `evidence_bundle.json` in the raw run directory. Conformance is `check_conformance(raw_dir)` on exactly those artifacts, and `conformance.json` is then rewritten so it matches that outcome (the thin-slice harness may have written an earlier `conformance.json` before an adapter appended adapter-only MAESTRO fields such as `metadata_rep_cps`, which are rejected at Tier 1 by `MAESTRO_REPORT.v0.2` under strict JSON Schema). Replay checks recompute MAESTRO from the stored trace and compare to the stored report.
-- **Normalized (E4b):** We **copy** the raw tree to a parallel `datasets/runs/p0_e4_matrix/normalized/...` directory. Normalization is **only** stripping non–MAESTRO_REPORT.v0.2 top-level keys from `maestro_report.json` (for example adapter-only fields such as `metadata_rep_cps`). We then **rebuild** `evidence_bundle.json`, `release_manifest.json`, and `conformance.json` from the copied trace plus the stripped MAESTRO so evidence reflects the normalized MAESTRO honestly (including real schema validation and replay flags).
+- **Normalized (E4b):** We **copy** the raw tree to a parallel `datasets/runs/p0_e4_matrix/normalized/...` directory. Normalization is **only** stripping non-MAESTRO_REPORT.v0.2 top-level keys from `maestro_report.json` (for example adapter-only fields such as `metadata_rep_cps`). We then **rebuild** `evidence_bundle.json`, `release_manifest.json`, and `conformance.json` from the copied trace plus the stripped MAESTRO so evidence reflects the normalized MAESTRO honestly (including real schema validation and replay flags).
 
-There is **no** hidden `schema_validation_ok = true` repair on the raw path. Any adapter-only MAESTRO fields must not be counted as “raw conformance success” if they cause schema or replay failures; the normalized path isolates interface-level predicates.
+There is **no** hidden `schema_validation_ok = true` repair on the raw path. Any adapter-only MAESTRO fields must not be counted as "raw conformance success" if they cause schema or replay failures; the normalized path isolates interface-level predicates.
 
 ## Replay-match definitions
 
 - **Weak replay match:** `tasks_completed` and `coordination_messages` in recomputed metrics equal the stored MAESTRO metrics (legacy diagnostic).
 - **Strong replay match:** Equality of the full MAESTRO **core slice** (`run_outcome`, `metrics`, `safety`, `coordination_efficiency`, `faults`) plus **PONR witness coverage** when the scenario declares PONR tasks (see `conformance.SCENARIO_PONR_TASK_NAMES`): every declared PONR task name must appear as a `task_end` payload in the trace.
 
-Table 3’s E4 rows prefer **strong** replay when `datasets/runs/p0_e4_raw_summary.json` exists (`export_p0_table3.py --e4-raw-summary` default).
+Table 3's E4 rows prefer **strong** replay when `datasets/runs/p0_e4_raw_summary.json` exists (`export_p0_table3.py --e4-raw-summary` default).
 
 ## Regimes
 
@@ -45,7 +47,7 @@ Identical aggregate table rows with divergent hashes indicate **weak metrics**; 
 
 ## Repair steps
 
-**None** in raw evaluation. Normalized runs only perform declared stripping of adapter-only MAESTRO keys and a full evidence/release rebuild from the copied trace plus stripped MAESTRO. That rebuild may set `schema_validation_ok` from real validation; it is **not** a silent “force true” on raw bundles. Raw-failure causal accounting is exported explicitly in `datasets/runs/p0_e4_raw_failure_reasons.json` (scenario/regime/controller/seed, failed tier, reason, replay failure flag).
+**None** in raw evaluation. Normalized runs only perform declared stripping of adapter-only MAESTRO keys and a full evidence/release rebuild from the copied trace plus stripped MAESTRO. That rebuild may set `schema_validation_ok` from real validation; it is **not** a silent "force true" on raw bundles. Raw-failure causal accounting is exported explicitly in `datasets/runs/p0_e4_raw_failure_reasons.json` (scenario/regime/controller/seed, failed tier, reason, replay failure flag).
 
 ## Commands
 
@@ -60,3 +62,4 @@ Baseline-only legacy summary (`p0_e4_summary.json`): if `p0_e4_raw_summary.json`
 ```text
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_p0_e4_multi_adapter.py --seeds 20 --scenarios toy_lab_v0,lab_profile_v0
 ```
+

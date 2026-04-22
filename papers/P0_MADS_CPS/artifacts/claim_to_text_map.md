@@ -1,3 +1,5 @@
+Refresh stamp: 2026-04-22T11:30:15Z
+
 ## P0 Claim-To-Text Map
 
 - **Claim text:** "Replay-link is externally verifiable by an independent verifier."
@@ -26,3 +28,4 @@
 - **Claim text:** "Raw universal invariance across all regimes is not claimed."
   - **Evidence artifacts:** `papers/P0_MADS_CPS/artifacts/claim_matrix.md`, `datasets/runs/p0_e4_raw_failure_reasons.json`
   - **Status:** explicitly `not supported` in claim matrix export.
+

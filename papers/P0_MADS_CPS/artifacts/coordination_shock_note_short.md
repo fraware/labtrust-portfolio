@@ -1,1 +1,4 @@
+Refresh stamp: 2026-04-22T11:30:15Z
+
 Under `coordination_shock` in `rep_cps_scheduling_v0`, the `rep_cps` row (`tasks_completed = 0`, `task_latency_ms_p95 = 0.0`, `run_outcome = partial_safe`) is interpreted as an assurance-valid safe-nonproductive outcome rather than an evidence-layer failure: raw conformance and strong replay remain high because artifacts are schema-valid, integrity-consistent, and replay-consistent, while productivity can collapse under a safe-fail policy path in a harder coordination regime. See `docs/P0_E4_COORDINATION_SHOCK_NOTE.md` for full semantics.
+

@@ -1,4 +1,6 @@
-﻿## Table 3a ΓÇö E3 replay-link (strong)
+Refresh stamp: 2026-04-22T11:30:15Z
+
+## Table 3a - E3 replay-link (strong)
 
 E3 row uses strong replay fields only (`all_strong_match` required).
 
@@ -7,7 +9,7 @@ E3 row uses strong replay fields only (`all_strong_match` required).
 | lab_profile_v0 | thinslice | 20 | 1.00 | 50.37 [40.48, 60.27] | 1.00 |
 | toy_lab_v0 | thinslice | 20 | 1.00 | 35.37 [27.11, 43.62] | 1.00 |
 
-## Table 3b ΓÇö E4 raw vs normalized controller invariance
+## Table 3b - E4 raw vs normalized controller invariance
 
 Replay rate is strong replay from controller-matrix summaries.
 
@@ -37,4 +39,5 @@ Replay rate is strong replay from controller-matrix summaries.
 | toy_lab_v0 | moderate | rep_cps | 20 | 1.00 | 1.00 | 1.00 | 34.94 [21.49, 48.40] |
 | toy_lab_v0 | stress | centralized | 20 | 1.00 | 1.00 | 1.00 | 73.62 [48.74, 98.51] |
 | toy_lab_v0 | stress | rep_cps | 20 | 1.00 | 1.00 | 1.00 | 73.62 [48.74, 98.51] |
+
 

@@ -1,3 +1,5 @@
+Refresh stamp: 2026-04-22T11:30:15Z
+
 # P0 Repro Run (Frozen)
 
 Environment used:
@@ -34,3 +36,4 @@ Paper-facing exports:
 Reviewer-facing test bundle:
 
 - `python -m pytest tests/test_p0_e4_raw_preservation.py tests/test_p0_e4_summary_recompute.py tests/test_p0_e4_strong_replay_equivalence.py tests/test_p0_e4_zero_latency_semantics.py -q`
+

@@ -1,3 +1,5 @@
+Refresh stamp: 2026-04-22T11:30:15Z
+
 # P0 E4 coordination_shock note
 
 This note explains the `coordination_shock` + `rep_cps_scheduling_v0` row where `rep_cps` can show:
@@ -40,3 +42,4 @@ rather than a pure controller malfunction. It demonstrates that admissibility ca
 ## One-sentence paper wording
 
 Under `coordination_shock` in `rep_cps_scheduling_v0`, `rep_cps` exhibits an assurance-valid safe-nonproductive outcome (`partial_safe`, zero completed tasks) whose artifacts remain raw-conformant and strongly replay-equivalent, showing divergence in productivity without loss of evidence-layer admissibility.
+

@@ -1,3 +1,5 @@
+Refresh stamp: 2026-04-22T11:30:15Z
+
 # P0 Supplementary Package
 
 This package contains the frozen evidence and paper-facing exports for P0 (MADS-CPS), with claims bounded by the claim matrix.
@@ -24,3 +26,4 @@ This package contains the frozen evidence and paper-facing exports for P0 (MADS-
 ## What is not claimed
 
 Per `claim_matrix.md`, raw universal invariance across all regimes is not supported and is explicitly not claimed.
+
