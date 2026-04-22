@@ -3,7 +3,9 @@
 P7 negative-control and ablation evaluation.
 
 Produces datasets/runs/assurance_eval/negative_results.json with discrimination
-metrics across reviewer modes (schema_only, schema_plus_presence, full_review).
+metrics across reviewer modes (schema_only, schema_plus_presence, full_review),
+per-mode latency means, `by_perturbation` (outcome per case per mode), and
+aggregate lift fields (full_review minus baselines) for paper tables.
 
 Usage:
   PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \\
@@ -16,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import statistics
 import sys
 import tempfile
 import time
@@ -149,7 +152,11 @@ def main() -> int:
             if loc_ok
             else None
         )
-        return {
+        mr = [r for r in rows if r["review_mode"] == mode]
+        lat_v = [float(r["review_latency_ms"]) for r in mr if r["expected_outcome"] == "accept"]
+        lat_i = [float(r["review_latency_ms"]) for r in mr if r["expected_outcome"] == "reject"]
+        lat_all = [float(r["review_latency_ms"]) for r in mr]
+        out: Dict[str, Any] = {
             "valid_accept_rate": round(va / len(vr), 4) if vr else None,
             "invalid_reject_rate": round(ir_rej / len(ir), 4) if ir else None,
             "false_accept_rate": round(fa / len(ir), 4) if ir else None,
@@ -157,7 +164,11 @@ def main() -> int:
             "localization_accuracy": round(loc_acc, 4) if loc_acc is not None else None,
             "n_valid": len(vr),
             "n_invalid": len(ir),
+            "mean_latency_ms_valid_cases": round(statistics.mean(lat_v), 3) if lat_v else None,
+            "mean_latency_ms_invalid_cases": round(statistics.mean(lat_i), 3) if lat_i else None,
+            "median_latency_ms_all_cases": round(statistics.median(lat_all), 3) if lat_all else None,
         }
+        return out
 
     by_family: Dict[str, Any] = {}
     for fam in sorted({r["family"] for r in rows}):
@@ -178,10 +189,54 @@ def main() -> int:
             else None,
         }
 
-    aggregate_full = _rates("full_review")
+    by_mode_dict = {m: _rates(m) for m in REVIEW_MODES}
+    aggregate_full = dict(by_mode_dict["full_review"])
     v_ar = aggregate_full.get("valid_accept_rate") or 0.0
     ir_rr = aggregate_full.get("invalid_reject_rate") or 0.0
     disc = round((v_ar + ir_rr) / 2.0, 4) if aggregate_full.get("n_invalid") else v_ar
+    so = by_mode_dict["schema_only"]
+    sp = by_mode_dict["schema_plus_presence"]
+    aggregate_block = {
+        **aggregate_full,
+        "governance_evidence_discrimination_accuracy": disc,
+        "invalid_reject_lift_full_minus_schema_only": round(
+            (aggregate_full.get("invalid_reject_rate") or 0.0) - (so.get("invalid_reject_rate") or 0.0),
+            4,
+        ),
+        "false_accept_drop_full_vs_schema_only": round(
+            (so.get("false_accept_rate") or 0.0) - (aggregate_full.get("false_accept_rate") or 0.0),
+            4,
+        ),
+        "localization_accuracy_lift_full_minus_schema_only": round(
+            (aggregate_full.get("localization_accuracy") or 0.0) - (so.get("localization_accuracy") or 0.0),
+            4,
+        ),
+        "invalid_reject_lift_full_minus_schema_plus_presence": round(
+            (aggregate_full.get("invalid_reject_rate") or 0.0) - (sp.get("invalid_reject_rate") or 0.0),
+            4,
+        ),
+    }
+
+    by_perturbation: Dict[str, Dict[str, Any]] = {}
+    for r in rows:
+        pid = str(r["perturbation_id"])
+        if pid not in by_perturbation:
+            by_perturbation[pid] = {
+                "perturbation_id": pid,
+                "family": r.get("family"),
+                "expected_outcome": r.get("expected_outcome"),
+                "by_mode": {},
+            }
+        by_perturbation[pid]["by_mode"][str(r["review_mode"])] = {
+            "review_exit_ok": bool(r.get("review_exit_ok")),
+            "failure_stage": r.get("failure_stage"),
+            "failure_reason_codes": list(r.get("failure_reason_codes") or []),
+            "review_latency_ms": r.get("review_latency_ms"),
+        }
+    by_perturbation_list = sorted(
+        by_perturbation.values(),
+        key=lambda x: (str(x.get("family")), str(x.get("perturbation_id"))),
+    )
 
     result = {
         "run_manifest": {
@@ -191,12 +246,10 @@ def main() -> int:
             "quick": args.quick,
             "repo_root": str(REPO),
         },
-        "aggregate": {
-            **aggregate_full,
-            "governance_evidence_discrimination_accuracy": disc,
-        },
-        "by_mode": {m: _rates(m) for m in REVIEW_MODES},
+        "aggregate": aggregate_block,
+        "by_mode": by_mode_dict,
         "by_family": by_family,
+        "by_perturbation": by_perturbation_list,
         "rows": rows,
     }
 

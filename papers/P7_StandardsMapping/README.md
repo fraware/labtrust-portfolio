@@ -9,7 +9,7 @@ P7 argues for a **traceable, mechanically checkable** mapping from hazards to co
 | `datasets/runs/assurance_eval/results.json` | Baseline: `mapping_check`, Table 1 primary review (`lab_profile_v0` / `disposition_commit`), `reviews`, scenario-matched `per_profile`, `run_manifest` |
 | `datasets/runs/assurance_eval/robust_results.json` | Robust matrix: 400 runs, `aggregate`, `by_scenario`, `real_world_proxy`, `rows`, `run_manifest` (20 seeds, scenario↔profile alignment + proxy note) |
 | `datasets/runs/assurance_eval/negative_results.json` | Negative controls + ablations: `valid_accept_rate`, `invalid_reject_rate`, false accepts by mode, per-row `failure_reason_codes` ([P7_REVIEW_FAILURE_CODES.md](../../docs/P7_REVIEW_FAILURE_CODES.md)) |
-| `papers/P7_StandardsMapping/p7_*_summary.csv` | Tables 4–6 (family summary, ablation, failure breakdown) via `export_p7_negative_tables.py` |
+| `papers/P7_StandardsMapping/p7_negative_family_summary.csv` … `p7_latency_by_mode.csv` | Tables 4–6 plus supplement: per-perturbation reject matrix, aggregate lift metrics, latency-by-mode (`export_p7_negative_tables.py`) |
 | `docs/figures/p7_mapping_flow.mmd` | Figure 0 source (Mermaid) |
 | `docs/figures/p7_gsn.mmd` | Figure 1 source (GSN-lite) |
 | `docs/figures/p7_mapping_flow.png`, `.pdf` | Camera-ready Figure 0 |

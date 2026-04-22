@@ -43,7 +43,14 @@
     "localization_accuracy": 1.0,
     "n_valid": 1,
     "n_invalid": 23,
-    "governance_evidence_discrimination_accuracy": 1.0
+    "mean_latency_ms_valid_cases": 86.819,
+    "mean_latency_ms_invalid_cases": 56.165,
+    "median_latency_ms_all_cases": 66.084,
+    "governance_evidence_discrimination_accuracy": 1.0,
+    "invalid_reject_lift_full_minus_schema_only": 0.5652,
+    "false_accept_drop_full_vs_schema_only": 0.5652,
+    "localization_accuracy_lift_full_minus_schema_only": 0.5652,
+    "invalid_reject_lift_full_minus_schema_plus_presence": 0.4783
   },
   "by_mode": {
     "schema_only": {
@@ -53,7 +60,10 @@
       "false_reject_rate": 0.0,
       "localization_accuracy": 0.4348,
       "n_valid": 1,
-      "n_invalid": 23
+      "n_invalid": 23,
+      "mean_latency_ms_valid_cases": 49.103,
+      "mean_latency_ms_invalid_cases": 29.491,
+      "median_latency_ms_all_cases": 36.145
     },
     "schema_plus_presence": {
       "valid_accept_rate": 1.0,
@@ -62,7 +72,10 @@
       "false_reject_rate": 0.0,
       "localization_accuracy": 0.5217,
       "n_valid": 1,
-      "n_invalid": 23
+      "n_invalid": 23,
+      "mean_latency_ms_valid_cases": 96.739,
+      "mean_latency_ms_invalid_cases": 55.216,
+      "median_latency_ms_all_cases": 67.626
     },
     "full_review": {
       "valid_accept_rate": 1.0,
@@ -71,7 +84,10 @@
       "false_reject_rate": 0.0,
       "localization_accuracy": 1.0,
       "n_valid": 1,
-      "n_invalid": 23
+      "n_invalid": 23,
+      "mean_latency_ms_valid_cases": 86.819,
+      "mean_latency_ms_invalid_cases": 56.165,
+      "median_latency_ms_all_cases": 66.084
     }
   },
   "by_family": {
@@ -101,6 +117,706 @@
       "localization_accuracy": 1.0
     }
   },
+  "by_perturbation": [
+    {
+      "perturbation_id": "manifest_points_to_foreign_artifact",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 39.47
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 64.907
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 66.34
+        }
+      }
+    },
+    {
+      "perturbation_id": "partial_control_omission",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 35.924
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 62.992
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "control_coverage",
+          "failure_reason_codes": [
+            "INCOMPLETE_EVIDENCE"
+          ],
+          "review_latency_ms": 87.756
+        }
+      }
+    },
+    {
+      "perturbation_id": "remove_final_commit_event_keep_structure",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 38.957
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 75.423
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 101.026
+        }
+      }
+    },
+    {
+      "perturbation_id": "wellformed_but_incomplete_evidence",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 49.637
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 70.032
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "control_coverage",
+          "failure_reason_codes": [
+            "INCOMPLETE_EVIDENCE"
+          ],
+          "review_latency_ms": 75.681
+        }
+      }
+    },
+    {
+      "perturbation_id": "bundle_broken_trace_hash",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 43.936
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 78.513
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 90.632
+        }
+      }
+    },
+    {
+      "perturbation_id": "bundle_corrupted_field",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 36.917
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 73.215
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 68.446
+        }
+      }
+    },
+    {
+      "perturbation_id": "bundle_schema_invalid",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 39.348
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 78.54
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 74.136
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_bundle_file",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 21.613
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "BUNDLE_MISSING"
+          ],
+          "review_latency_ms": 67.301
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "BUNDLE_MISSING"
+          ],
+          "review_latency_ms": 62.624
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_trace_file",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 22.316
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "TRACE_MISSING"
+          ],
+          "review_latency_ms": 63.052
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "TRACE_MISSING"
+          ],
+          "review_latency_ms": 62.765
+        }
+      }
+    },
+    {
+      "perturbation_id": "trace_schema_invalid",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 26.836
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 61.257
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 66.813
+        }
+      }
+    },
+    {
+      "perturbation_id": "trace_truncated",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 25.328
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 63.328
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 59.254
+        }
+      }
+    },
+    {
+      "perturbation_id": "control_missing_evidence_types",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_EVIDENCE_TYPES_MISSING"
+          ],
+          "review_latency_ms": 10.1
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_EVIDENCE_TYPES_MISSING"
+          ],
+          "review_latency_ms": 10.414
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_EVIDENCE_TYPES_MISSING"
+          ],
+          "review_latency_ms": 13.185
+        }
+      }
+    },
+    {
+      "perturbation_id": "evidence_map_inconsistent",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 11.796
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 8.771
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 12.915
+        }
+      }
+    },
+    {
+      "perturbation_id": "hazard_missing_control_ids",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING"
+          ],
+          "review_latency_ms": 11.38
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING"
+          ],
+          "review_latency_ms": 10.167
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING"
+          ],
+          "review_latency_ms": 11.959
+        }
+      }
+    },
+    {
+      "perturbation_id": "hazard_references_unknown_control",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING",
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 12.529
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING",
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 13.05
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING",
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 10.453
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_required_field",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PACK_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 11.315
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PACK_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 9.043
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PACK_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 10.051
+        }
+      }
+    },
+    {
+      "perturbation_id": "ponr_ids_missing_for_profile",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PROFILE_PONR_UNCOVERED"
+          ],
+          "review_latency_ms": 13.672
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PROFILE_PONR_UNCOVERED"
+          ],
+          "review_latency_ms": 12.172
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PROFILE_PONR_UNCOVERED"
+          ],
+          "review_latency_ms": 14.72
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_lab",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 49.103
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 96.739
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 86.819
+        }
+      }
+    },
+    {
+      "perturbation_id": "cross_run_trace_bundle_swap",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 34.661
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 68.962
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 61.898
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_required_ponr_event",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 36.367
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 67.95
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 64.342
+        }
+      }
+    },
+    {
+      "perturbation_id": "stale_bundle_reused",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 37.914
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 69.672
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 68.979
+        }
+      }
+    },
+    {
+      "perturbation_id": "swapped_scenario_id_in_trace",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 36.945
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 79.286
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "scenario_alignment",
+          "failure_reason_codes": [
+            "SCENARIO_PACK_MISMATCH",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 67.5
+        }
+      }
+    },
+    {
+      "perturbation_id": "wrong_pack_for_scenario",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 43.614
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 79.794
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "scenario_alignment",
+          "failure_reason_codes": [
+            "SCENARIO_PACK_MISMATCH",
+            "PONR_MISSING"
+          ],
+          "review_latency_ms": 65.829
+        }
+      }
+    },
+    {
+      "perturbation_id": "wrong_required_task_name",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 37.709
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 82.136
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 74.495
+        }
+      }
+    }
+  ],
   "rows": [
     {
       "scenario_id": "lab_profile_v0",
@@ -115,7 +831,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": true,
-      "review_latency_ms": 24.609
+      "review_latency_ms": 49.103
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -130,7 +846,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": true,
-      "review_latency_ms": 45.884
+      "review_latency_ms": 96.739
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -145,7 +861,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": true,
-      "review_latency_ms": 46.617
+      "review_latency_ms": 86.819
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -162,7 +878,7 @@
         "CONTROL_REFERENCE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.647
+      "review_latency_ms": 11.38
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -179,7 +895,7 @@
         "CONTROL_REFERENCE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.398
+      "review_latency_ms": 10.167
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -196,7 +912,7 @@
         "CONTROL_REFERENCE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.317
+      "review_latency_ms": 11.959
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -214,7 +930,7 @@
         "EVIDENCE_MAP_INCONSISTENT"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.413
+      "review_latency_ms": 12.529
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -232,7 +948,7 @@
         "EVIDENCE_MAP_INCONSISTENT"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.19
+      "review_latency_ms": 13.05
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -250,7 +966,7 @@
         "EVIDENCE_MAP_INCONSISTENT"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.274
+      "review_latency_ms": 10.453
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -267,7 +983,7 @@
         "CONTROL_EVIDENCE_TYPES_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.222
+      "review_latency_ms": 10.1
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -284,7 +1000,7 @@
         "CONTROL_EVIDENCE_TYPES_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.269
+      "review_latency_ms": 10.414
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -301,7 +1017,7 @@
         "CONTROL_EVIDENCE_TYPES_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.146
+      "review_latency_ms": 13.185
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -318,7 +1034,7 @@
         "PACK_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.105
+      "review_latency_ms": 11.315
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -335,7 +1051,7 @@
         "PACK_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.232
+      "review_latency_ms": 9.043
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -352,7 +1068,7 @@
         "PACK_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.137
+      "review_latency_ms": 10.051
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -369,7 +1085,7 @@
         "PROFILE_PONR_UNCOVERED"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 7.364
+      "review_latency_ms": 13.672
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -386,7 +1102,7 @@
         "PROFILE_PONR_UNCOVERED"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 7.117
+      "review_latency_ms": 12.172
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -403,7 +1119,7 @@
         "PROFILE_PONR_UNCOVERED"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 8.418
+      "review_latency_ms": 14.72
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -420,7 +1136,7 @@
         "EVIDENCE_MAP_INCONSISTENT"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.592
+      "review_latency_ms": 11.796
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -437,7 +1153,7 @@
         "EVIDENCE_MAP_INCONSISTENT"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.244
+      "review_latency_ms": 8.771
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -454,7 +1170,7 @@
         "EVIDENCE_MAP_INCONSISTENT"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 6.237
+      "review_latency_ms": 12.915
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -469,7 +1185,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 15.609
+      "review_latency_ms": 22.316
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -486,7 +1202,7 @@
         "TRACE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 38.022
+      "review_latency_ms": 63.052
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -503,7 +1219,7 @@
         "TRACE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 36.88
+      "review_latency_ms": 62.765
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -518,7 +1234,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 16.091
+      "review_latency_ms": 21.613
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -535,7 +1251,7 @@
         "BUNDLE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 39.223
+      "review_latency_ms": 67.301
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -552,7 +1268,7 @@
         "BUNDLE_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 38.214
+      "review_latency_ms": 62.624
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -569,7 +1285,7 @@
         "TRACE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 15.445
+      "review_latency_ms": 26.836
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -586,7 +1302,7 @@
         "TRACE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 36.993
+      "review_latency_ms": 61.257
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -603,7 +1319,7 @@
         "TRACE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 37.014
+      "review_latency_ms": 66.813
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -620,7 +1336,7 @@
         "BUNDLE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 25.166
+      "review_latency_ms": 39.348
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -637,7 +1353,7 @@
         "BUNDLE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 45.721
+      "review_latency_ms": 78.54
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -654,7 +1370,7 @@
         "BUNDLE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 48.457
+      "review_latency_ms": 74.136
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -671,7 +1387,7 @@
         "TRACE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 15.726
+      "review_latency_ms": 25.328
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -688,7 +1404,7 @@
         "TRACE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 53.552
+      "review_latency_ms": 63.328
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -705,7 +1421,7 @@
         "TRACE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 40.979
+      "review_latency_ms": 59.254
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -722,7 +1438,7 @@
         "BUNDLE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 23.101
+      "review_latency_ms": 36.917
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -739,7 +1455,7 @@
         "BUNDLE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 52.208
+      "review_latency_ms": 73.215
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -756,7 +1472,7 @@
         "BUNDLE_SCHEMA_INVALID"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 61.416
+      "review_latency_ms": 68.446
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -771,7 +1487,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 29.65
+      "review_latency_ms": 43.936
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -786,7 +1502,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 52.675
+      "review_latency_ms": 78.513
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -803,7 +1519,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 55.081
+      "review_latency_ms": 90.632
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -818,7 +1534,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 34.732
+      "review_latency_ms": 43.614
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -833,7 +1549,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 55.239
+      "review_latency_ms": 79.794
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -851,7 +1567,7 @@
         "PONR_MISSING"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 53.395
+      "review_latency_ms": 65.829
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -866,7 +1582,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 23.75
+      "review_latency_ms": 36.367
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -881,7 +1597,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 57.033
+      "review_latency_ms": 67.95
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -899,7 +1615,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 63.583
+      "review_latency_ms": 64.342
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -914,7 +1630,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 32.889
+      "review_latency_ms": 38.957
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -929,7 +1645,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 76.63
+      "review_latency_ms": 75.423
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -947,7 +1663,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 62.864
+      "review_latency_ms": 101.026
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -962,7 +1678,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 27.965
+      "review_latency_ms": 34.661
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -977,7 +1693,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 56.956
+      "review_latency_ms": 68.962
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -994,7 +1710,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 63.345
+      "review_latency_ms": 61.898
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1009,7 +1725,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 26.336
+      "review_latency_ms": 37.914
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1024,7 +1740,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 55.142
+      "review_latency_ms": 69.672
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1041,7 +1757,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 61.837
+      "review_latency_ms": 68.979
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1056,7 +1772,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 28.674
+      "review_latency_ms": 36.945
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1071,7 +1787,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 67.764
+      "review_latency_ms": 79.286
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1089,7 +1805,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 70.899
+      "review_latency_ms": 67.5
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1104,7 +1820,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 27.351
+      "review_latency_ms": 37.709
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1119,7 +1835,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 60.227
+      "review_latency_ms": 82.136
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1137,7 +1853,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 54.684
+      "review_latency_ms": 74.495
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1152,7 +1868,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 32.087
+      "review_latency_ms": 35.924
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1167,7 +1883,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 71.344
+      "review_latency_ms": 62.992
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1184,7 +1900,7 @@
         "INCOMPLETE_EVIDENCE"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 52.259
+      "review_latency_ms": 87.756
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1199,7 +1915,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 37.087
+      "review_latency_ms": 49.637
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1214,7 +1930,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 52.989
+      "review_latency_ms": 70.032
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1231,7 +1947,7 @@
         "INCOMPLETE_EVIDENCE"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 54.731
+      "review_latency_ms": 75.681
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1246,7 +1962,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 35.214
+      "review_latency_ms": 39.47
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1261,7 +1977,7 @@
       "failure_stage": null,
       "failure_reason_codes": [],
       "reason_matches_expected": false,
-      "review_latency_ms": 50.203
+      "review_latency_ms": 64.907
     },
     {
       "scenario_id": "lab_profile_v0",
@@ -1278,7 +1994,7 @@
         "PROVENANCE_MISMATCH"
       ],
       "reason_matches_expected": true,
-      "review_latency_ms": 52.124
+      "review_latency_ms": 66.34
     }
   ]
 }

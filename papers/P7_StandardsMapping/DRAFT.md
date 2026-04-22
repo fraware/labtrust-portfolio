@@ -1,6 +1,6 @@
 # From Coordination to Safety Case: A Traceable Assurance Argument for Multi-Agent CPS
 
-**Draft (v0.3). Paper ID: P7_StandardsMapping.**
+**Draft (v0.4). Paper ID: P7_StandardsMapping.**
 
 **Reproducibility.** From repo root, set `PYTHONPATH=impl/src` and `LABTRUST_KERNEL_DIR=kernel` for eval scripts. See [REPORTING_STANDARD.md](../docs/REPORTING_STANDARD.md) and [RESULTS_PER_PAPER.md](../docs/RESULTS_PER_PAPER.md). **No certification claim**; mapping is a translation and audit-support layer only (section 2 Non-goals).
 
@@ -120,11 +120,52 @@ Three JSON instantiations: **lab** (`profiles/lab/v0.1/assurance_pack_instantiat
 |------------------|-------------------------|---------------|--------------------------|-----------------------------|----------------------|
 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 47.53 |
 
-**Table 4 — Negative-control families (`full_review`).** Source: `p7_negative_family_summary.csv` (per-family reject rate and localization accuracy on injected negatives). Regenerate: `export_p7_negative_tables.py`.
+**Table 4 — Negative-control families (`full_review`).** Source: `p7_negative_family_summary.csv` (committed run: **n_invalid = 23** injected negatives + **n_valid = 1** positive control; family counts below are negatives only under `full_review`). Regenerate: `export_p7_negative_tables.py`.
 
-**Table 5 — Ablation: reviewer mode vs discrimination.** Source: `p7_ablation_summary.csv`. Columns include `valid_accept_rate`, `invalid_reject_rate`, `false_accept_rate`, `false_reject_rate`, `localization_accuracy`. **Interpretation:** `schema_only` and `schema_plus_presence` **must** show higher false accepts than `full_review` on the same negative suite, or the ablation is not doing its job.
+| failure_family | n_negative_cases | reject_rate | localization_accuracy |
+|----------------|------------------|------------|------------------------|
+| adversarial_misleading | 4 | 1.00 | 1.00 |
+| artifact_admissibility | 7 | 1.00 | 1.00 |
+| pack_structure | 6 | 1.00 | 1.00 |
+| scenario_consistency | 6 | 1.00 | 1.00 |
 
-**Table 6 — Failure reason breakdown (`full_review` rejections).** Source: `p7_failure_reason_breakdown.csv`.
+Full `perturbation_id` lists per family appear in the CSV `example_perturbation_ids` column. **`p7_perturbation_reject_matrix.csv`** gives, for each invalid case, whether each reviewer mode **rejects** (1) or **false-accepts** (0); this is the clearest ablation artifact for the supplement.
+
+**Table 5 — Ablation: reviewer mode vs discrimination (same 23 negatives + 1 valid).** Source: `p7_ablation_summary.csv` + `p7_aggregate_lift_metrics.csv`.
+
+| review_mode | valid_accept_rate | invalid_reject_rate | false_accept_rate | false_reject_rate | localization_accuracy |
+|-------------|-------------------|---------------------|-------------------|-------------------|------------------------|
+| schema_only | 1.00 | 0.43 | **0.57** | 0.00 | 0.43 |
+| schema_plus_presence | 1.00 | 0.52 | **0.48** | 0.00 | 0.52 |
+| full_review | 1.00 | **1.00** | **0.00** | 0.00 | **1.00** |
+
+**Lift (full_review minus baseline, same suite):** invalid-reject lift vs `schema_only` = **+0.57**; vs `schema_plus_presence` = **+0.48**; false-accept drop vs `schema_only` = **+0.57** (see `p7_aggregate_lift_metrics.csv`). **Interpretation:** weaker modes are not “almost as good”: they **systematically false-accept** governance-relevant faults that `full_review` rejects, which is the paper’s ablation claim.
+
+**Latency (mean ms, same run).** Source: `p7_latency_by_mode.csv`.
+
+| review_mode | mean_latency_ms_valid_cases | mean_latency_ms_invalid_cases | median_latency_ms_all_cases |
+|-------------|----------------------------|------------------------------|----------------------------|
+| schema_only | 49.1 | 29.5 | 36.1 |
+| schema_plus_presence | 96.7 | 55.2 | 67.6 |
+| full_review | 86.8 | 56.2 | 66.1 |
+
+**Table 6 — Failure reason code counts (`full_review` rejections).** Source: `p7_failure_reason_breakdown.csv`. Counts are **per emitted code** on failing rows; one invalid case can surface **multiple** codes, so the sum of counts can exceed 23.
+
+| failure_reason_code | count |
+|---------------------|------:|
+| PROVENANCE_MISMATCH | 8 |
+| PONR_MISSING | 4 |
+| CONTROL_REFERENCE_MISSING | 2 |
+| EVIDENCE_MAP_INCONSISTENT | 2 |
+| TRACE_SCHEMA_INVALID | 2 |
+| BUNDLE_SCHEMA_INVALID | 2 |
+| SCENARIO_PACK_MISMATCH | 2 |
+| INCOMPLETE_EVIDENCE | 2 |
+| CONTROL_EVIDENCE_TYPES_MISSING | 1 |
+| PACK_SCHEMA_INVALID | 1 |
+| PROFILE_PONR_UNCOVERED | 1 |
+| TRACE_MISSING | 1 |
+| BUNDLE_MISSING | 1 |
 
 **Figure 1 — GSN-lite.** `scripts/export_assurance_gsn.py` from lab `assurance_pack_instantiation.json`.
 
@@ -132,7 +173,7 @@ Three JSON instantiations: **lab** (`profiles/lab/v0.1/assurance_pack_instantiat
 
 Perturbation ids vs empirical brief: [P7_PERTURBATION_CHECKLIST.md](../docs/P7_PERTURBATION_CHECKLIST.md). Table index: [generated_tables.md](generated_tables.md).
 
-**Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust (Q1):** `robust_results.json` — positive-control stability under stress; not claimed as discriminative power. (4) **Negative suite (Q2–Q3):** `negative_results.json` with `aggregate.governance_evidence_discrimination_accuracy` and per-mode rates. (5) **Non-claim:** no certification. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
+**Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust (Q1):** `robust_results.json` — positive-control stability under stress; not claimed as discriminative power. (4) **Negative suite (Q2–Q3):** `negative_results.json` with `aggregate.governance_evidence_discrimination_accuracy` (here **1.00** = mean of valid accept and invalid reject under `full_review` on this suite) **and** the stronger story in **Table 5 / lift metrics**: baselines leave **47–57%** of injected faults undetected (`false_accept_rate`). (5) **Non-claim:** no certification. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
 
 ## 7. Comparison to other assurance frameworks
 
@@ -156,7 +197,7 @@ See [EXPERIMENTS_AND_LIMITATIONS.md](../docs/EXPERIMENTS_AND_LIMITATIONS.md).
 
 ## 9. Methodology and reproducibility
 
-**Metrics:** (Positive) schema/mapping, robust pass rates. (Negative) `valid_accept_rate`, `invalid_reject_rate`, `false_accept_rate`, `false_reject_rate`, per-family reject rate, localization accuracy, `governance_evidence_discrimination_accuracy` in `negative_results.json`. **Kill criterion:** mapping not checkable by script, or discrimination suite shows **no** gap between `full_review` and weaker modes on governance-relevant negatives. Portfolio bar: [STATE_OF_THE_ART_CRITERIA.md](../docs/STATE_OF_THE_ART_CRITERIA.md).
+**Metrics:** (Positive) schema/mapping, robust pass rates. (Negative) `valid_accept_rate`, `invalid_reject_rate`, `false_accept_rate`, `false_reject_rate`, per-family reject rate, localization accuracy (expected-code intersection on rejects), mean/median review latency by mode, `governance_evidence_discrimination_accuracy` (= average of valid accept rate and invalid reject rate under `full_review` on the suite), and **lift fields** in `negative_results.json` → `p7_aggregate_lift_metrics.csv` (`invalid_reject_lift_full_minus_schema_only`, `false_accept_drop_full_vs_schema_only`, etc.). **Kill criterion:** mapping not checkable by script, or discrimination suite shows **no** economically meaningful gap between `full_review` and weaker modes on governance-relevant negatives (here: **>0.45** absolute false-accept rate on `schema_plus_presence` and **>0.55** on `schema_only`). Portfolio bar: [STATE_OF_THE_ART_CRITERIA.md](../docs/STATE_OF_THE_ART_CRITERIA.md).
 
 **Commands:** `run_assurance_eval.py`; `run_assurance_negative_eval.py`; `check_assurance_mapping.py`; `review_assurance_run.py <run_dir> --scenario-id lab_profile_v0 --review-mode full_review`; `tests/test_assurance_p7.py`, `tests/test_assurance_negative_eval.py`; `docs/P7_REVIEW_CHECKLIST.md`.
 

@@ -16,4 +16,4 @@ Submission-readiness checklist (`docs/STATE_OF_THE_ART_CRITERIA.md` section 3) v
 - **No kernel redefinition:** Draft cites ASSURANCE_PACK schema and portfolio artifacts; does not redefine tiers or trace semantics.
 - **Overclaim guard:** No certification claim; non-goals and K7 (no template theater) in draft; mapping is translation and audit-support only.
 - **Figures:** `docs/figures/p7_mapping_flow.mmd`, `p7_gsn.mmd`, `p7_review_stages.mmd` (+ `.png`, `.pdf` when `render_p7_mermaid_figures.py` / mmdc available).
-- **Discrimination (C4):** `negative_results.json` from `run_assurance_negative_eval.py`; ablation CSVs from `export_p7_negative_tables.py`; `review_assurance_run.py --review-mode` documented; failure codes in `docs/P7_REVIEW_FAILURE_CODES.md`.
+- **Discrimination (C4):** `negative_results.json` (includes `by_perturbation`, lift metrics in `aggregate`) from `run_assurance_negative_eval.py`; Tables 4–6 plus `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv` from `export_p7_negative_tables.py`; `review_assurance_run.py --review-mode` documented; failure codes in `docs/P7_REVIEW_FAILURE_CODES.md`.

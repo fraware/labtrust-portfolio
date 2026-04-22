@@ -1,0 +1,4 @@
+review_mode,mean_latency_ms_valid_cases,mean_latency_ms_invalid_cases,median_latency_ms_all_cases,n_valid,n_invalid
+schema_only,49.103,29.491,36.145,1,23
+schema_plus_presence,96.739,55.216,67.626,1,23
+full_review,86.819,56.165,66.084,1,23

@@ -44,6 +44,7 @@ class TestAssuranceNegativeEval(unittest.TestCase):
             data = json.loads(p.read_text(encoding="utf-8"))
             self.assertIn("aggregate", data)
             self.assertIn("by_mode", data)
+            self.assertIn("by_perturbation", data)
             self.assertIn("rows", data)
             self.assertGreater(len(data["rows"]), 0)
             for m in ("schema_only", "schema_plus_presence", "full_review"):
@@ -73,4 +74,12 @@ class TestAssuranceNegativeEval(unittest.TestCase):
                 timeout=30,
             )
             self.assertEqual(proc.returncode, 0, (proc.stdout, proc.stderr))
-            self.assertTrue((outd / "p7_ablation_summary.csv").exists())
+            for name in (
+                "p7_ablation_summary.csv",
+                "p7_negative_family_summary.csv",
+                "p7_failure_reason_breakdown.csv",
+                "p7_perturbation_reject_matrix.csv",
+                "p7_aggregate_lift_metrics.csv",
+                "p7_latency_by_mode.csv",
+            ):
+                self.assertTrue((outd / name).exists(), name)
