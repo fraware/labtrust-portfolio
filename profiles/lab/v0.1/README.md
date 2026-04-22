@@ -30,5 +30,7 @@ This profile anchors on a **resource graph** (robots, stations, instruments, buf
 The MAESTRO scenario **toy_lab_v0** (`bench/maestro/scenarios/toy_lab_v0.yaml`) is the thin-slice scenario for this profile. Its task list (receive_sample, centrifuge, analyze, report_results) and fault model (e.g. drop_completion for synthetic thin-slice) are the reference for the minimal runnable pipeline.
 
 ## Assurance mapping (P7) and non-goals
-The lab profile is used with the assurance pack instantiation (`assurance_pack_instantiation.json`) for standards mapping (P7). **Non-goals:** No certification claim; the mapping is a translation layer only. It does not constitute regulatory certification (e.g. 21 CFR Part 11 or OECD GLP).
+The lab profile is used with the assurance pack instantiation (`assurance_pack_instantiation.json`) for standards mapping (P7). Scripted review defaults to scenario **`lab_profile_v0`** with kernel PONR task **`disposition_commit`** when using `scripts/review_assurance_run.py` / `audit_bundle.py` with `--profile-dir` pointing at this directory. Failure codes and review modes are documented under **`docs/P7_REVIEW_FAILURE_CODES.md`** and **`docs/P7_REVIEW_CHECKLIST.md`**. Negative-control suite and perturbation ids: **`docs/P7_PERTURBATION_CHECKLIST.md`**.
+
+**Non-goals:** No certification claim; the mapping is a translation layer only. It does not constitute regulatory certification (e.g. 21 CFR Part 11 or OECD GLP).
 

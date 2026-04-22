@@ -55,6 +55,10 @@ The warehouse profile reuses the same pack *pattern* with different ids (e.g. H-
 - **Medical profile** (`profiles/medical_v0.1/assurance_pack_instantiation.json`): Minimal SaMD-style template; in robust eval it is paired with `traffic_v0` runs to stress the review pipeline—**not** a claim that traffic semantics match medical device hazards (see `run_manifest.scenario_profile_note` in `robust_results.json`).
 - Review and audit scripts (`audit_bundle.py`, `review_assurance_run.py`) operate on the pack structure; this document is for human and standards-expert review only.
 
+## Empirical discrimination suite (P7)
+
+Mechanical traceability (this document) is necessary but not sufficient for governance **reviewability**. The portfolio also runs a scripted **negative-control** suite and reviewer **ablations** (`schema_only`, `schema_plus_presence`, `full_review`): see `scripts/run_assurance_negative_eval.py`, `datasets/runs/assurance_eval/negative_results.json`, `docs/P7_PERTURBATION_CHECKLIST.md`, and `docs/P7_REVIEW_FAILURE_CODES.md`. Exported CSVs under `papers/P7_StandardsMapping/p7_*.csv` support Tables 4–6 in `papers/P7_StandardsMapping/DRAFT.md`.
+
 ## Distinctions (summary)
 
 | Concept | What we claim |

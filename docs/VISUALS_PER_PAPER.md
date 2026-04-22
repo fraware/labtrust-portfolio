@@ -13,7 +13,7 @@ This document defines the **full set of tables and figures** expected for each p
 | P4 MAESTRO | Figure 0: Scenario → Adapter → Trace → Report flow | Table 1 fault sweep, Table 2 baselines | Figure 1 recovery curve | Table: benchmark comparison |
 | P5 Scaling | Figure 0: Baseline hierarchy (global → per-scenario → feature → regression) | Table 1 held-out, Table 2 MAE/CI | Figure 1 MAE by scenario | — |
 | P6 LLM Planning | Figure 0: Typed-plan firewall flow (plan → validate → allow/deny) | Table 1 red-team (15 cases + confusable + jailbreak table), Table 1b real-LLM (default 10 runs/case, full-suite, pass_rate, Wilson CI; multi-model cross_model_summary), Table 2 adapter latency, Baseline (gated/weak/ungated; tool-level, args_unsafe, benign) | Figure 1 adapter latency by scenario | Table: comparison to OWASP/benchmarks; layer attribution; failure analysis; reproducibility table |
-| P7 Standards | Figure 0: Mapping flow (hazards → controls → evidence → audit) | Table 1 mapping/review, Table 2 per-scenario | Figure 1 GSN-lite graph | Table: framework comparison |
+| P7 Standards | Figure 0: Mapping flow; **Figure 2:** review-stage decision flow (`p7_review_stages.mmd`) | Tables 1–3 baseline/robust; **Tables 4–6** negative families, ablation, failure codes (+ CSV supplements) | Figure 1 GSN-lite graph | Table: framework comparison |
 | P8 Meta | Figure 0: Meta-controller state and switch criterion | Table 1 fixed vs meta vs naive, Table 2 per-seed | Figure 1 collapse sweep | Table: comparison to related work |
 
 ## Scripts that produce each visual
@@ -25,7 +25,7 @@ This document defines the **full set of tables and figures** expected for each p
 - **P4:** `export_maestro_tables.py`, `plot_maestro_recovery.py`, `export_p4_maestro_flow.py` (Figure 0).
 - **P5:** `export_scaling_tables.py`, `plot_scaling_mae.py`, `export_p5_baseline_hierarchy.py` (Figure 0).
 - **P6:** `export_llm_redteam_table.py` (Table 1 red-team + Table 1b real-LLM + confusable deputy), `llm_redteam_eval.py --real-llm --real-llm-provider prime --real-llm-models x-ai/grok-4-fast,google/gemini-2.5-flash,openai/gpt-4.1-mini,qwen/qwen3-30b-a3b-instruct-2507 --real-llm-runs 3`, `export_p6_baseline_table.py` (3-way baseline; --baseline-file for args_unsafe or baseline_benign), `export_p6_artifact_hashes.py`, `export_p6_reproducibility_table.py`, `export_p6_layer_attribution.py`, `export_p6_failure_analysis.py`, `export_p6_cross_model_heatmap.py`, `export_p6_latency_decomposition.py`, `plot_llm_adapter_latency.py`, `export_p6_firewall_flow.py` (Figure 0).
-- **P7:** `export_assurance_tables.py`, `export_assurance_gsn.py`, `export_p7_mapping_flow.py` (Figure 0), `render_p7_mermaid_figures.py` (PNG/PDF next to `.mmd` when `mmdc` or `npx` is available).
+- **P7:** `export_assurance_tables.py`, `export_assurance_gsn.py`, `export_p7_mapping_flow.py` (Figure 0), `render_p7_mermaid_figures.py` (Figure 0/1/2 PNG/PDF when `mmdc` or `npx` is available), `run_assurance_negative_eval.py`, `export_p7_negative_tables.py` (Tables 4–6 + `p7_perturbation_reject_matrix.csv`, lift + latency CSVs).
 - **P8:** `export_meta_tables.py` (from comparison.json; interpretation blocks), `verify_p8_meta_artifacts.py`, `meta_collapse_sweep.py` then `plot_meta_collapse.py --sweep datasets/runs/meta_eval/collapse_sweep.json` (Figure 1: mean tasks_completed with t-CI, collapse rate with Wilson CI), `export_p8_meta_diagram.py` (Figure 0).
 
 ## Output paths

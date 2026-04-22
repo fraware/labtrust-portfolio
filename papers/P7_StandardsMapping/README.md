@@ -8,16 +8,15 @@ P7 argues for a **traceable, mechanically checkable** mapping from hazards to co
 |----------|------|
 | `datasets/runs/assurance_eval/results.json` | Baseline: `mapping_check`, Table 1 primary review (`lab_profile_v0` / `disposition_commit`), `reviews`, scenario-matched `per_profile`, `run_manifest` |
 | `datasets/runs/assurance_eval/robust_results.json` | Robust matrix: 400 runs, `aggregate`, `by_scenario`, `real_world_proxy`, `rows`, `run_manifest` (20 seeds, scenario↔profile alignment + proxy note) |
-| `datasets/runs/assurance_eval/negative_results.json` | Negative controls + ablations: `valid_accept_rate`, `invalid_reject_rate`, false accepts by mode, per-row `failure_reason_codes` ([P7_REVIEW_FAILURE_CODES.md](../../docs/P7_REVIEW_FAILURE_CODES.md)) |
-| `papers/P7_StandardsMapping/p7_negative_family_summary.csv` … `p7_latency_by_mode.csv` | Tables 4–6 plus supplement: per-perturbation reject matrix, aggregate lift metrics, latency-by-mode (`export_p7_negative_tables.py`) |
+| `datasets/runs/assurance_eval/negative_results.json` | Negative controls + ablations: `aggregate` (rates, lift vs baselines, `governance_evidence_discrimination_accuracy`), `by_mode`, `by_family`, `by_perturbation`, `rows` with `failure_reason_codes` ([P7_REVIEW_FAILURE_CODES.md](../../docs/P7_REVIEW_FAILURE_CODES.md)) |
+| `papers/P7_StandardsMapping/p7_*.csv` | Tables 4–6 + supplements from `export_p7_negative_tables.py`: family summary, ablation summary, failure breakdown, `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv` |
 | `docs/figures/p7_mapping_flow.mmd` | Figure 0 source (Mermaid) |
 | `docs/figures/p7_gsn.mmd` | Figure 1 source (GSN-lite) |
 | `docs/figures/p7_mapping_flow.png`, `.pdf` | Camera-ready Figure 0 |
 | `docs/figures/p7_gsn.png`, `.pdf` | Camera-ready Figure 1 |
 | `docs/figures/p7_review_stages.mmd` | Figure 2 source — review-stage decision flow (`full_review` path) |
 | `docs/figures/p7_review_stages.png`, `.pdf` | Camera-ready Figure 2 (committed when rendered; regenerate via `render_p7_mermaid_figures.py`) |
-| `papers/P7_StandardsMapping/generated_tables.md` | Index for Tables 1–6 sources and CSV paths |
-| `papers/P7_StandardsMapping/generated_tables.md` | Tables 1–3 (from `export_assurance_tables.py`) |
+| `papers/P7_StandardsMapping/generated_tables.md` | Index for Tables 1–6 (CSV paths + links to checklist); Tables 1–3 markdown from `export_assurance_tables.py` when exported to that path |
 
 ## One-shot regeneration (repo root)
 
@@ -34,7 +33,7 @@ python scripts/export_p7_negative_tables.py
 python scripts/render_p7_mermaid_figures.py
 ```
 
-Validate: `python scripts/check_assurance_mapping.py`; `python scripts/audit_bundle.py --json-only`; `tests/test_assurance_p7.py`.
+Validate: `python scripts/check_assurance_mapping.py`; `python scripts/audit_bundle.py --json-only`; `tests/test_assurance_p7.py`; `tests/test_assurance_negative_eval.py`.
 
 ## Profiles
 
@@ -46,7 +45,12 @@ Validate: `python scripts/check_assurance_mapping.py`; `python scripts/audit_bun
 
 - Standards mapping methodology and clause tables: [docs/P7_STANDARDS_MAPPING.md](../../docs/P7_STANDARDS_MAPPING.md)
 - Robust protocol and success criteria: [docs/P7_ROBUST_EXPERIMENT_PLAN.md](../../docs/P7_ROBUST_EXPERIMENT_PLAN.md)
+- Independent review checklist: [docs/P7_REVIEW_CHECKLIST.md](../../docs/P7_REVIEW_CHECKLIST.md)
+- Stable failure codes: [docs/P7_REVIEW_FAILURE_CODES.md](../../docs/P7_REVIEW_FAILURE_CODES.md)
+- Perturbation ids vs empirical brief: [docs/P7_PERTURBATION_CHECKLIST.md](../../docs/P7_PERTURBATION_CHECKLIST.md)
 - Auditor feedback protocol: [docs/P7_AUDITOR_FEEDBACK_PROTOCOL.md](../../docs/P7_AUDITOR_FEEDBACK_PROTOCOL.md)
+- Runbook (commands, CI): [docs/EVALS_RUNBOOK.md](../../docs/EVALS_RUNBOOK.md)
+- Results interpretation: [docs/RESULTS_PER_PAPER.md](../../docs/RESULTS_PER_PAPER.md#p7--standards-mapping-assurance-pack)
 
 ## Paper files
 

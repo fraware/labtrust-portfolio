@@ -1,6 +1,6 @@
 # P7 negative perturbations — checklist vs empirical brief
 
-Implementation: `impl/src/labtrust_portfolio/assurance_negative_controls.py` (`perturbation_id` = `case_id`). Eval order: `all_case_ids()`.
+Implementation: `impl/src/labtrust_portfolio/assurance_negative_controls.py` (`perturbation_id` = `case_id`). Eval order: `all_case_ids()`. **Eval output:** `scripts/run_assurance_negative_eval.py` writes `datasets/runs/assurance_eval/negative_results.json` with `by_perturbation` (per mode outcomes) and `aggregate` lift metrics vs baselines; `scripts/export_p7_negative_tables.py` emits `papers/P7_StandardsMapping/p7_*.csv` for the manuscript.
 
 ## Family A — pack structure
 

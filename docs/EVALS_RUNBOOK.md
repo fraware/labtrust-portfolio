@@ -152,9 +152,9 @@ Exit code 1 if any red-team case fails (expected_block not satisfied).
 - **Part 11:** See `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` for evidence-bundle/trace mapping to Part 11-style audit trail (each requirement mapped to artifact path and field; machine-checkable). Non-goals: no certification claim; translation layer only. **Three profiles:** lab v0.1, warehouse v0.1, medical v0.1; results include per_profile (P7 DRAFT, kernel/assurance_pack/README.md, profiles/). Standards mapping table: `docs/P7_STANDARDS_MAPPING.md`. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
 - **Review:** `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>] [--review-mode schema_only|schema_plus_presence|full_review]`. Default `full_review`: scenario/trace alignment, PONR tasks, **all** evidence types per control, bundle+release SHA vs files. Weaker modes are **ablation baselines** for discrimination experiments. Failure codes: `docs/P7_REVIEW_FAILURE_CODES.md`. Scripted review is partial; no certification claim.
 - **Robust matrix:** `scripts/run_assurance_robust_eval.py` (default seeds 1..20, 400 runs). `run_manifest.scenario_profile_alignment` documents scenario→pack pairing; see note for traffic_v0↔medical_v0.1.
-- **Negative controls:** `scripts/run_assurance_negative_eval.py [--quick]` writes `datasets/runs/assurance_eval/negative_results.json` (per-family perturbations, expected vs observed outcome, localization). `scripts/export_p7_negative_tables.py` emits CSVs under `papers/P7_StandardsMapping/` for Tables 4–6 in the draft.
+- **Negative controls:** `scripts/run_assurance_negative_eval.py [--quick]` writes `datasets/runs/assurance_eval/negative_results.json` (`aggregate`, `by_mode`, `by_family`, `by_perturbation`, per-row codes and latency). `scripts/export_p7_negative_tables.py` emits CSVs under `papers/P7_StandardsMapping/`: Tables 4–6 (`p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`) plus `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`.
 - **Export:** `scripts/export_assurance_tables.py [--results path]` prints Table 1–2; Table 3 from `robust_results.json` when present. GSN-lite: `export_assurance_gsn.py`. Camera-ready Mermaid: `render_p7_mermaid_figures.py` (includes `docs/figures/p7_review_stages.mmd` — Figure 2 review-stage flow). Table index: `papers/P7_StandardsMapping/generated_tables.md`. Perturbation brief vs ids: `docs/P7_PERTURBATION_CHECKLIST.md`.
-- **Integration tests:** `tests/test_assurance_p7.py`; `tests/test_assurance_negative_eval.py`.
+- **Integration tests:** `tests/test_assurance_p7.py`; `tests/test_assurance_negative_eval.py` (quick negative eval + export smoke).
 
 ```bash
 PYTHONPATH=impl/src python scripts/run_assurance_eval.py [--out datasets/runs/assurance_eval]
@@ -162,7 +162,7 @@ PYTHONPATH=impl/src python scripts/run_assurance_robust_eval.py [--out datasets/
 PYTHONPATH=impl/src python scripts/run_assurance_negative_eval.py [--quick]
 PYTHONPATH=impl/src python scripts/audit_bundle.py [--run-dir path/to/run] [--release datasets/releases/portfolio_v0.1] [--json-only]
 PYTHONPATH=impl/src python scripts/export_assurance_tables.py
-python scripts/export_p7_negative_tables.py
+python scripts/export_p7_negative_tables.py --input datasets/runs/assurance_eval/negative_results.json
 python scripts/export_assurance_gsn.py
 ```
 

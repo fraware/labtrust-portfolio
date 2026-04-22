@@ -205,21 +205,22 @@ Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run;
 
 ### P7 (Standards mapping)
 
-- **Existing:** run_assurance_eval.py runs check_assurance_mapping and review_assurance_run on two scenarios (toy_lab_v0, lab_profile_v0) to exercise kernel PONR (lab has disposition_commit). Writes results.json (mapping_check.ok, ponr_coverage_ok, review, reviews per scenario, run_manifest, success_criteria_met). **Auditor walk-through:** scripts/audit_bundle.py prints pass/fail for mapping completeness and PONR coverage (and optional run-dir review); one-command audit: `audit_bundle.py --release datasets/releases/portfolio_v0.1`. **Part 11:** docs/PART11_AUDIT_TRAIL_ALIGNMENT.md maps each requirement to artifact path and field (machine-checkable). **GSN-lite:** scripts/export_assurance_gsn.py (Mermaid from assurance_pack_instantiation.json). Non-goals (no certification claim; translation layer only) in P7 DRAFT, kernel/assurance_pack/README.md, profiles/lab/v0.1/README.md. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
-- **Validity and robustness:** results.json includes run_manifest (scenarios, profile_dir, script) and success_criteria_met (mapping_ok, ponr_coverage_ok); mapping is deterministic and machine-checkable.
-- **Integration test:** tests/test_assurance_p7.py runs run_assurance_eval --out <temp> and asserts: run_manifest, success_criteria_met, mapping_check.ok, ponr_coverage_ok, review.exit_ok, review.ponr_coverage.ratio, review.control_coverage_ratio, reviews.lab_profile_v0 with disposition_commit in required_task_names, and export_assurance_tables.py exit 0.
-- **Unit test:** TestAssuranceMappingCheck.test_check_assurance_mapping_exits_zero_and_outputs_json asserts check script stdout JSON has mapping_ok and ponr_coverage_ok.
-- **Export:** scripts/export_assurance_tables.py produces Table 1 (mapping/review) and Table 2 (per-scenario coverage).
+- **Existing:** `run_assurance_eval.py` runs `check_assurance_mapping` and scripted review on toy_lab_v0 and lab_profile_v0; writes `results.json` (`mapping_check`, `reviews`, scenario-matched `per_profile`, `run_manifest`, `success_criteria_met`). **`run_assurance_robust_eval.py`** writes `robust_results.json` (default 20 seeds, 400 runs). **`run_assurance_negative_eval.py`** writes `negative_results.json` (ablations `schema_only` / `schema_plus_presence` / `full_review`, `by_perturbation`, lift metrics). **`export_p7_negative_tables.py`** emits `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift + latency). **Auditor:** `audit_bundle.py` (optional `--release datasets/releases/portfolio_v0.1`). **Part 11:** `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md`. **GSN / figures:** `export_assurance_gsn.py`, `export_p7_mapping_flow.py`, `p7_review_stages.mmd`, `render_p7_mermaid_figures.py`. Docs: `P7_STANDARDS_MAPPING.md`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md`, `P7_REVIEW_FAILURE_CODES.md`, `P7_PERTURBATION_CHECKLIST.md`. Non-goals and K7 as in DRAFT.
+- **Validity and robustness:** Deterministic mapping checks; robust matrix for positive-control stability; negative suite for **discrimination** (false-accept gap under baselines vs `full_review`).
+- **Integration tests:** `tests/test_assurance_p7.py` (baseline eval + export_assurance_tables); **`tests/test_assurance_negative_eval.py`** (quick negative eval + export_p7_negative_tables).
+- **Unit test:** `TestAssuranceMappingCheck` asserts `check_assurance_mapping` JSON has `mapping_ok` and `ponr_coverage_ok`.
+- **Export:** `export_assurance_tables.py` (Tables 1–3); `export_p7_negative_tables.py` (Tables 4–6 + supplements).
 - **P7 verification (SOTA):**
 
 | Check | Status |
 |-------|--------|
 | Hermetic integration test (--out temp dir) | Done; test_assurance_p7.py |
 | Multi-scenario review (toy_lab_v0 + lab_profile_v0) | Done; kernel PONR exercised |
+| Robust matrix + negative suite + CSV exports | Done; runbooks + test_assurance_negative_eval.py |
 | Assert ponr_coverage_ok, ponr_coverage, control_coverage_ratio | Done |
 | Assert export_assurance_tables.py succeeds | Done |
 | Unit test for check_assurance_mapping | Done |
-| Draft: standard link, tables, comparison, limitations | Done |
+| Draft: standard link, tables 1–6, comparison, limitations, threat model | Done (DRAFT v0.4+) |
 
 ---
 
@@ -256,7 +257,7 @@ Example snapshot (regime_stress_v0, 20 seeds, non-vacuous publishable-style run;
 | P3 | replay_eval/summary.json | L0 + corpus + baselines + multi-seed; schema v0.2; verify script | Draft |
 | P4 | maestro_fault_sweep/ (multi_sweep.json) | Multi-scenario; drop + delay_fault_prob sweep | Draft |
 | P1 | contracts_eval/eval.json (+ transport_parity.json) | Exact corpus verdicts; comparators + per-class metrics; boundary parity artifact; P1_TRACE_DERIVABILITY; export_contracts_corpus_table, export_p1_contract_flow, plot_contracts_scale | Claim table + repro block |
-| P7 | assurance_eval/results.json | Mapping + PONR; audit_bundle --release; Part 11 mechanical; export_assurance_gsn | Claim table + repro block |
+| P7 | assurance_eval/results.json, robust_results.json, negative_results.json, papers/P7_StandardsMapping/p7_*.csv | Mapping + PONR + robust matrix + negative suite / ablations; audit_bundle; Part 11; export_assurance_gsn; export_p7_negative_tables | Claim table + repro block |
 
 Using this document you can interpret existing results, plug in new result files as they appear, and launch the suggested follow-up tests and experiments for all papers in a consistent way.
 
@@ -275,7 +276,7 @@ The following were run and written under `datasets/runs/`:
 | P3 | `replay_eval.py` (default out) | `replay_eval/summary.json` |
 | P4 | `maestro_fault_sweep.py --seeds 5` (multi-scenario) | `maestro_fault_sweep/{toy_lab_v0,lab_profile_v0}/sweep.json`, `multi_sweep.json` |
 | P1 | `contracts_eval.py`; `contracts_transport_parity.py` | `contracts_eval/eval.json`; `transport_parity.json` |
-| P7 | `run_assurance_eval.py` | `assurance_eval/results.json` |
+| P7 | `run_assurance_eval.py`, `run_assurance_robust_eval.py`, `run_assurance_negative_eval.py` | `assurance_eval/results.json`, `robust_results.json`, `negative_results.json` |
 | P2 | `rep_cps_eval.py --delay-sweep 0,0.05,0.1` (CI) | `rep_cps_eval/summary.json` |
 | P5 | `generate_multiscenario_runs.py`, `scaling_heldout_eval.py` (optional `--holdout-mode family`) | `scaling_eval/heldout_results.json`, optional `scaling_eval_family/`; tables: `export_scaling_tables.py` |
 | P6 | `llm_redteam_eval.py --run-adapter` (5 red-team cases) | `llm_eval/red_team_results.json`, `adapter_latency.json` |

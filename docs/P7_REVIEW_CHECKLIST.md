@@ -26,6 +26,13 @@ Document outcome: PASS (all items checked, evidence supports mapping) or FAIL (i
 
 ## Scripted review (optional)
 
-Run `scripts/review_assurance_run.py <run_dir> [--pack path] [--scenario-id <id>]` to produce a machine-readable review outcome (evidence_bundle_ok, trace_ok, ponr_events, controls_covered, ponr_coverage, control_coverage_ratio). PONR events use kernel PONR task names from conformance for known scenario IDs. If scenario support is missing, the script reports known scenario IDs and returns no PONR coverage ratio for that case. Use output as "review outcome" attachment.
+Run `scripts/review_assurance_run.py <run_dir> [--pack path] [--scenario-id <id>] [--review-mode schema_only|schema_plus_presence|full_review] [--profile-dir profiles/lab/v0.1]` to produce a machine-readable review outcome (`evidence_bundle_ok`, `trace_ok`, `ponr_events`, `controls_covered`, `ponr_coverage`, `control_coverage_ratio`, `failure_stage`, `failure_reason_codes`). Default mode is **`full_review`** (scenario/trace alignment, PONR task coverage, **all** `evidence_artifact_types` per control, bundle trace SHA, release manifest artifact SHAs). Weaker modes are **ablation baselines** for discrimination experiments.
+
+- **Failure codes:** Stable strings documented in [P7_REVIEW_FAILURE_CODES.md](P7_REVIEW_FAILURE_CODES.md).
+- **Implementation:** `impl/src/labtrust_portfolio/assurance_review_pipeline.py` (shared with `run_assurance_negative_eval.py`).
+
+PONR events use kernel PONR task names from conformance for known scenario IDs. If scenario support is missing, the script reports known scenario IDs and returns no PONR coverage ratio for that case. Use output as "review outcome" attachment.
+
+**Negative controls (suite):** `scripts/run_assurance_negative_eval.py` materializes deterministic invalid cases and writes `datasets/runs/assurance_eval/negative_results.json` (see [P7_PERTURBATION_CHECKLIST.md](P7_PERTURBATION_CHECKLIST.md)). **`tests/test_assurance_negative_eval.py`** smoke-tests quick mode and CSV export.
 
 **Auditor walk-through:** Run `scripts/audit_bundle.py [--run-dir <run_dir>] [--inst path] [--profile-dir path]` for a single pass/fail report on mapping completeness and PONR coverage; with `--run-dir`, also runs review_assurance_run and reports review_exit_ok. For one-command audit over a release directory: `scripts/audit_bundle.py --release datasets/releases/portfolio_v0.1` (runs mapping + PONR; if the release dir contains evidence_bundle.json, review runs there). Output is human-readable and optionally JSON (`--json-only`). See [EVALS_RUNBOOK.md](EVALS_RUNBOOK.md). For Part 11-style audit trail alignment (each requirement mapped to artifact path and field), see [PART11_AUDIT_TRAIL_ALIGNMENT.md](PART11_AUDIT_TRAIL_ALIGNMENT.md).

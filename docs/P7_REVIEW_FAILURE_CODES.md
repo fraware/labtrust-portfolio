@@ -1,6 +1,6 @@
 # P7 review failure codes (stable identifiers)
 
-These codes appear in `review_assurance_run.py` / `assurance_review_pipeline` JSON output and in `negative_results.json` rows. They support **failure localization** (Q3: attribution) for governance-evidence discrimination experiments.
+These codes appear in `review_assurance_run.py` / `assurance_review_pipeline` JSON output and in `negative_results.json` rows (`failure_reason_codes` on each row; `by_perturbation[].by_mode` for per-mode codes). They support **failure localization** (Q3: attribution) for governance-evidence discrimination experiments. Aggregate **lift** vs reviewer baselines is reported in `negative_results.json` → `aggregate` (see also `p7_aggregate_lift_metrics.csv` from `export_p7_negative_tables.py`).
 
 | Code | Meaning |
 |------|---------|

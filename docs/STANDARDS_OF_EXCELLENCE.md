@@ -112,6 +112,11 @@ Add these to the relevant eval summary JSON and, where useful, to the draft. Scr
 | Mapping completeness (%) | All hazards have control_ids; all controls have evidence_artifact_types. | check_assurance_mapping; results.json mapping_ok. |
 | PONR coverage ratio | review output: ponr_coverage.ratio or equivalent (target 1.0 for lab profile). | results.json; review_assurance_run. |
 | Review pass (binary) | review exit_ok; evidence_bundle_ok, trace_ok. | results.json reviews. |
+| Robust review pass rate | Positive-control stability under stressed matrix. | robust_results.json aggregate. |
+| Invalid reject rate (full_review) | Share of injected negatives rejected under full governance review. | negative_results.json by_mode / aggregate. |
+| False accept rate (baseline modes) | Share of injected negatives incorrectly accepted under schema-only or presence+schema modes. | negative_results.json by_mode; p7_ablation_summary.csv. |
+| Lift vs baseline | e.g. invalid_reject_lift_full_minus_schema_only; false_accept_drop_full_vs_schema_only. | negative_results.json aggregate; p7_aggregate_lift_metrics.csv. |
+| Localization accuracy | Rejection codes intersect expected set for injected fault. | negative_results.json rows. |
 | No certification claim | Documented in draft; no compliance/certification language. | Limitations / Non-goals. |
 
 ### P8 — Meta-Coordination

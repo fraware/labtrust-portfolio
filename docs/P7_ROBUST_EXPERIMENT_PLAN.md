@@ -9,6 +9,7 @@ Strengthen `P7_StandardsMapping` from a single worked example to a broad, mechan
 - `C1` (traceable structure): validate assurance-pack structure and mapping completeness with explicit schema and hazard-control-evidence checks.
 - `C2` (mechanically checkable): run scripted review over a large matrix and quantify pass/failure rates, not only narrative examples.
 - `C3` (worked example and replayability): extend worked examples beyond lab to domain-proxy scenarios (`warehouse_v0`, `traffic_v0`) and report aggregate replayability outcomes.
+- `C4` (discrimination + ablations): injected invalid evidence (pack, artifact, scenario, misleading families); **`full_review`** should reject with attributable failure codes; weaker modes should show **higher false-accept rates** on the same suite (`negative_results.json`, `p7_ablation_summary.csv`, `p7_perturbation_reject_matrix.csv`).
 
 ## Experiment Matrix
 
@@ -40,6 +41,13 @@ Total default runs: `4 scenarios x 5 regimes x 20 seeds = 400`.
 - Real-world proxy:
   - pass-rate restricted to `warehouse_v0` and `traffic_v0`
 
+### Negative suite and ablations (C4)
+
+- **Script:** `scripts/run_assurance_negative_eval.py` → `datasets/runs/assurance_eval/negative_results.json` (`aggregate`, `by_mode`, `by_family`, `by_perturbation`, per-mode latency means, lift fields vs `schema_only` / `schema_plus_presence`).
+- **Export:** `scripts/export_p7_negative_tables.py` → `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift row + latency-by-mode).
+- **Perturbation ids:** `docs/P7_PERTURBATION_CHECKLIST.md` maps the empirical brief to implementation ids.
+- **Quick CI subset:** `run_assurance_negative_eval.py --quick`.
+
 ## Success Criteria
 
 - `mapping_check.ok = true`
@@ -47,6 +55,8 @@ Total default runs: `4 scenarios x 5 regimes x 20 seeds = 400`.
 - `trace_ok_rate = 1.0`
 - `review_pass_rate >= 0.95` in full matrix
 - `real_world_proxy.review_pass_rate >= 0.95`
+
+**Discrimination (publishable bar):** On the committed negative suite, `full_review` achieves high **invalid_reject_rate** and **localization_accuracy** on injected faults; at least one baseline mode exhibits **materially higher false_accept_rate** than `full_review` on the same cases (see `aggregate.false_accept_drop_full_vs_schema_only` in `negative_results.json`). Do not tune perturbations to force a perfect scorecard; report lift metrics honestly.
 
 ## Execution
 
@@ -57,15 +67,21 @@ PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
   python scripts/run_assurance_robust_eval.py --out datasets/runs/assurance_eval
 # Default robust seeds are 1..20. Override only with an explicit methodological note.
 python scripts/export_assurance_tables.py --results datasets/runs/assurance_eval/robust_results.json
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel \
+  python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval
+python scripts/export_p7_negative_tables.py --input datasets/runs/assurance_eval/negative_results.json
 ```
 
 Primary artifact outputs:
 
 - `datasets/runs/assurance_eval/results.json`
 - `datasets/runs/assurance_eval/robust_results.json`
+- `datasets/runs/assurance_eval/negative_results.json`
+- `papers/P7_StandardsMapping/p7_negative_family_summary.csv` (and sibling exports from `export_p7_negative_tables.py`)
 
 ## Reporting Guidance
 
 - Use `results.json` for baseline submission tables.
 - Use `robust_results.json` for robustness appendix and claim-strengthening discussion.
+- Use `negative_results.json` and `p7_*.csv` for discrimination (Q2–Q3), ablations, and supplement tables; cite **lift** and **false-accept** gaps, not only headline `governance_evidence_discrimination_accuracy`.
 - Keep explicit non-claim text: this is a traceability and audit-support framework, not a certification claim.
