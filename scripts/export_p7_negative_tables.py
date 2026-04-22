@@ -48,6 +48,7 @@ def main() -> int:
     data = json.loads(args.input.read_text(encoding="utf-8"))
     rows = data.get("rows") or []
     args.out_dir.mkdir(parents=True, exist_ok=True)
+    generation = dict(data.get("generation") or {})
 
     # Table A: per family (full_review only)
     fam_rows: dict[str, dict] = defaultdict(
@@ -286,6 +287,20 @@ def main() -> int:
         m_path = args.out_dir / "p7_submission_manifest_redacted.json"
         m_path.write_text(json.dumps({"run_manifest": manifest}, indent=2) + "\n", encoding="utf-8")
 
+    # Provenance sidecar for manuscript artifact traceability.
+    generation_path = args.out_dir / "p7_generation_metadata.json"
+    generation_path.write_text(
+        json.dumps(
+            {
+                "generation": generation,
+                "source_negative_results": str(args.input),
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
     def _rel(p: Path) -> str:
         try:
             return str(p.relative_to(REPO))
@@ -303,6 +318,7 @@ def main() -> int:
         print(f"Wrote {_rel(boundary_path)}")
     if args.submission_mode or args.redact_paths:
         print(f"Wrote {_rel(m_path)}")
+    print(f"Wrote {_rel(generation_path)}")
     return 0
 
 

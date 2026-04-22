@@ -61,7 +61,7 @@ python scripts/render_p7_mermaid_figures.py
 | Figure 1 | `export_assurance_gsn.py` → `docs/figures/p7_gsn.mmd`; render with `render_p7_mermaid_figures.py` |
 | Figure 2 | `docs/figures/p7_review_stages.mmd` (hand-authored; mirrors `assurance_review_pipeline.py`); render with `render_p7_mermaid_figures.py` |
 | Audit | `audit_bundle.py --run-dir <path>` or `audit_bundle.py --release datasets/releases/portfolio_v0.1` |
-| Negative controls + ablations | `run_assurance_negative_eval.py --submission-mode` → `negative_results.json`; `export_p7_negative_tables.py --submission-mode` → `p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv` |
+| Negative controls + ablations | `run_assurance_negative_eval.py --submission-mode` → `negative_results.json` (+ `generation` metadata); `export_p7_negative_tables.py --submission-mode` → `p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_generation_metadata.json` |
 
 **Admissible evidence package (informal definition).** For a declared scenario and pack, a run directory is **admissible** under `full_review` when: the pack passes structure checks; required artifacts exist and validate; trace scenario matches the review scenario; every control’s **full** set of `evidence_artifact_types` is satisfied by artifacts in the run; required PONR tasks appear in the trace; bundle and release manifest digests match on-disk files.
 

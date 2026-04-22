@@ -57,7 +57,7 @@ The warehouse profile reuses the same pack *pattern* with different ids (e.g. H-
 
 ## Empirical discrimination suite (P7)
 
-Mechanical traceability (this document) is necessary but not sufficient for governance **reviewability**. The portfolio also runs a scripted **negative-control** suite and reviewer **ablations** (`schema_only`, `schema_plus_presence`, `full_review`): see `scripts/run_assurance_negative_eval.py` (`--submission-mode` for redacted manifests), `datasets/runs/assurance_eval/negative_results.json`, `docs/P7_PERTURBATION_CHECKLIST.md`, and `docs/P7_REVIEW_FAILURE_CODES.md`. Exported CSVs under `papers/P7_StandardsMapping/p7_*.csv` support Tables 4–6 plus by-scenario and boundary-case supplements in `papers/P7_StandardsMapping/DRAFT.md`.
+Mechanical traceability (this document) is necessary but not sufficient for governance **reviewability**. The portfolio also runs a scripted **negative-control** suite and reviewer **ablations** (`schema_only`, `schema_plus_presence`, `full_review`): see `scripts/run_assurance_negative_eval.py` (`--submission-mode` for redacted manifests), `datasets/runs/assurance_eval/negative_results.json` (includes `generation` metadata), `docs/P7_PERTURBATION_CHECKLIST.md`, and `docs/P7_REVIEW_FAILURE_CODES.md`. Exported CSVs under `papers/P7_StandardsMapping/p7_*.csv` plus `p7_generation_metadata.json` support Tables 4–6 and by-scenario/boundary supplements in `papers/P7_StandardsMapping/DRAFT.md`.
 
 ## Distinctions (summary)
 

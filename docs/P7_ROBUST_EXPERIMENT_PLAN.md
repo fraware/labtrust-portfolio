@@ -43,8 +43,8 @@ Total default runs: `4 scenarios x 5 regimes x 20 seeds = 400`.
 
 ### Negative suite and ablations (C4)
 
-- **Script:** `scripts/run_assurance_negative_eval.py` → `datasets/runs/assurance_eval/negative_results.json` (`aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, per-mode latency means, lift fields vs `schema_only` / `schema_plus_presence`).
-- **Export:** `scripts/export_p7_negative_tables.py` → `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift row + latency-by-mode + by-scenario summary + boundary-case summary + redacted manifest helper).
+- **Script:** `scripts/run_assurance_negative_eval.py` → `datasets/runs/assurance_eval/negative_results.json` (`generation`, `aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, per-mode latency means, lift fields vs `schema_only` / `schema_plus_presence`).
+- **Export:** `scripts/export_p7_negative_tables.py` → `papers/P7_StandardsMapping/p7_*.csv` (Tables 4–6 + reject matrix + lift row + latency-by-mode + by-scenario summary + boundary-case summary + provenance sidecars: redacted manifest and generation metadata).
 - **Perturbation ids:** `docs/P7_PERTURBATION_CHECKLIST.md` maps the empirical brief to implementation ids.
 - **Quick CI subset:** `run_assurance_negative_eval.py --quick`.
 - **Blind-review hygiene:** run with `--submission-mode` (or `--redact-paths`) to redact machine-local paths in `run_manifest`.
@@ -78,7 +78,7 @@ Primary artifact outputs:
 - `datasets/runs/assurance_eval/results.json`
 - `datasets/runs/assurance_eval/robust_results.json`
 - `datasets/runs/assurance_eval/negative_results.json`
-- `papers/P7_StandardsMapping/p7_negative_family_summary.csv` (and sibling exports from `export_p7_negative_tables.py`)
+- `papers/P7_StandardsMapping/p7_negative_family_summary.csv` (and sibling exports from `export_p7_negative_tables.py`, including `p7_generation_metadata.json`)
 
 ## Reporting Guidance
 

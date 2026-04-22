@@ -45,10 +45,10 @@ How do we translate the portfolio’s executable artifacts (gates, traces, evide
 - `scripts/check_assurance_mapping.py`, `scripts/review_assurance_run.py`, `scripts/audit_bundle.py`, `scripts/run_assurance_negative_eval.py`, `scripts/export_p7_negative_tables.py`
 - `impl/src/labtrust_portfolio/assurance_review_pipeline.py`, `assurance_negative_controls.py`, `assurance_failure_codes.py`
 - `datasets/runs/assurance_eval/results.json`, `robust_results.json`, **`negative_results.json`** (`by_perturbation`, aggregate lift metrics)
-- `papers/P7_StandardsMapping/p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`, `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_submission_manifest_redacted.json`
+- `papers/P7_StandardsMapping/p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`, `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_submission_manifest_redacted.json`, `p7_generation_metadata.json`
 - `docs/P7_STANDARDS_MAPPING.md`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md`, `P7_REVIEW_FAILURE_CODES.md`, `P7_PERTURBATION_CHECKLIST.md`
 - Figures: `docs/figures/p7_mapping_flow.*`, `p7_gsn.*`, `p7_review_stages.*` (Mermaid + optional PNG/PDF via `render_p7_mermaid_figures.py`); table index `papers/P7_StandardsMapping/generated_tables.md`
-- `tests/test_assurance_p7.py`, **`tests/test_assurance_negative_eval.py`**
+- `tests/test_assurance_p7.py`, **`tests/test_assurance_negative_eval.py`** (includes CSV export consistency checks against `negative_results.json`)
 
 ## 7) Kill criteria
 

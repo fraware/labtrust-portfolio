@@ -16,9 +16,11 @@ Usage:
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import json
 import os
 import statistics
+import subprocess
 import sys
 import tempfile
 import time
@@ -40,6 +42,19 @@ MED_PACK = REPO / "profiles" / "medical_v0.1" / "assurance_pack_instantiation.js
 
 from labtrust_portfolio.assurance_negative_controls import all_case_ids, materialize_case  # noqa: E402
 from labtrust_portfolio.assurance_review_pipeline import REVIEW_MODES, review_assurance_pipeline  # noqa: E402
+
+
+def _git_commit_sha(repo_root: Path) -> str:
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=str(repo_root),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        return out or "unknown"
+    except Exception:
+        return "unknown"
 
 
 def _profile_for_scenario(scenario_id: str) -> Path:
@@ -356,6 +371,10 @@ def main() -> int:
     )
 
     result = {
+        "generation": {
+            "generated_at_utc": datetime.now(timezone.utc).isoformat(),
+            "git_commit_sha": _git_commit_sha(REPO),
+        },
         "run_manifest": {
             "script": "run_assurance_negative_eval.py",
             "cases": case_ids,

@@ -198,7 +198,7 @@ This document explains what each paper (P0–P8) measures, where its results are
 - `datasets/runs/assurance_eval/results.json` — mapping_check, review, reviews
 - `datasets/runs/assurance_eval/robust_results.json` — positive-control stability matrix (`aggregate`, `rows`, `run_manifest`)
 - `datasets/runs/assurance_eval/negative_results.json` — discrimination: `aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, `rows` (run with `--submission-mode` for path redaction in release bundles)
-- `papers/P7_StandardsMapping/p7_*.csv` — Tables 4–6 + `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_submission_manifest_redacted.json` (`export_p7_negative_tables.py`)
+- `papers/P7_StandardsMapping/p7_*.csv` — Tables 4–6 + `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_submission_manifest_redacted.json`, `p7_generation_metadata.json` (`export_p7_negative_tables.py`)
 - **Auditor script:** `scripts/audit_bundle.py` — pass/fail mapping completeness and PONR coverage; `--run-dir` for optional run review; `--release datasets/releases/portfolio_v0.1` for one-command audit over a release dir (runs mapping + PONR; if release contains evidence_bundle.json, runs review there too). JSON + human output.
 - **Part 11:** `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` — each requirement mapped to artifact path and field/event (machine-checkable; no prose-only).
 
