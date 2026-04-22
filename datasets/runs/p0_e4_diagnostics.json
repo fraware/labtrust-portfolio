@@ -1,0 +1,138 @@
+{
+  "controller_a": "centralized",
+  "controller_b": "rep_cps",
+  "pairs": [
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller_pair": [
+        "centralized",
+        "rep_cps"
+      ],
+      "n_paired_seeds": 5,
+      "trace_hash_equality_rate": 0.0,
+      "maestro_hash_equality_rate": 0.0,
+      "evidence_hash_equality_rate": 0.0,
+      "final_state_hash_equality_rate": 1.0,
+      "mean_abs_p95_latency_diff_ms": 0.0,
+      "seeds_with_trace_or_maestro_divergence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_seeds_with_divergence": 5
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller_pair": [
+        "centralized",
+        "rep_cps"
+      ],
+      "n_paired_seeds": 5,
+      "trace_hash_equality_rate": 0.0,
+      "maestro_hash_equality_rate": 0.0,
+      "evidence_hash_equality_rate": 0.0,
+      "final_state_hash_equality_rate": 1.0,
+      "mean_abs_p95_latency_diff_ms": 0.0,
+      "seeds_with_trace_or_maestro_divergence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_seeds_with_divergence": 5
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller_pair": [
+        "centralized",
+        "rep_cps"
+      ],
+      "n_paired_seeds": 5,
+      "trace_hash_equality_rate": 0.0,
+      "maestro_hash_equality_rate": 0.0,
+      "evidence_hash_equality_rate": 0.0,
+      "final_state_hash_equality_rate": 1.0,
+      "mean_abs_p95_latency_diff_ms": 0.0,
+      "seeds_with_trace_or_maestro_divergence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_seeds_with_divergence": 5
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller_pair": [
+        "centralized",
+        "rep_cps"
+      ],
+      "n_paired_seeds": 5,
+      "trace_hash_equality_rate": 0.0,
+      "maestro_hash_equality_rate": 0.0,
+      "evidence_hash_equality_rate": 0.0,
+      "final_state_hash_equality_rate": 1.0,
+      "mean_abs_p95_latency_diff_ms": 0.0,
+      "seeds_with_trace_or_maestro_divergence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_seeds_with_divergence": 5
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller_pair": [
+        "centralized",
+        "rep_cps"
+      ],
+      "n_paired_seeds": 5,
+      "trace_hash_equality_rate": 0.0,
+      "maestro_hash_equality_rate": 0.0,
+      "evidence_hash_equality_rate": 0.0,
+      "final_state_hash_equality_rate": 1.0,
+      "mean_abs_p95_latency_diff_ms": 0.0,
+      "seeds_with_trace_or_maestro_divergence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_seeds_with_divergence": 5
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller_pair": [
+        "centralized",
+        "rep_cps"
+      ],
+      "n_paired_seeds": 5,
+      "trace_hash_equality_rate": 0.0,
+      "maestro_hash_equality_rate": 0.0,
+      "evidence_hash_equality_rate": 0.0,
+      "final_state_hash_equality_rate": 1.0,
+      "mean_abs_p95_latency_diff_ms": 0.0,
+      "seeds_with_trace_or_maestro_divergence": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "n_seeds_with_divergence": 5
+    }
+  ]
+}

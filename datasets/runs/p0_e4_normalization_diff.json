@@ -1,0 +1,790 @@
+{
+  "records": [
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 1,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/centralized/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 2,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/centralized/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 3,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/centralized/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 4,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/centralized/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 5,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/centralized/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 1,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/rep_cps/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 2,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/rep_cps/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 3,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/rep_cps/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 4,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/rep_cps/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 5,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/toy_lab_v0/rep_cps/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 1,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/centralized/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 2,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/centralized/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 3,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/centralized/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 4,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/centralized/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 5,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/centralized/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 1,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 2,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 3,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 4,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 5,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/baseline/lab_profile_v0/rep_cps/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 1,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/centralized/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 2,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/centralized/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 3,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/centralized/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 4,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/centralized/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 5,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/centralized/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 1,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/rep_cps/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 2,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/rep_cps/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 3,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/rep_cps/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 4,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/rep_cps/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 5,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/toy_lab_v0/rep_cps/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 1,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/centralized/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 2,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/centralized/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 3,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/centralized/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 4,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/centralized/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 5,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/centralized/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 1,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/rep_cps/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 2,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/rep_cps/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 3,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/rep_cps/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 4,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/rep_cps/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 5,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/moderate/lab_profile_v0/rep_cps/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 1,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/centralized/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 2,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/centralized/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 3,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/centralized/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 4,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/centralized/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "seed": 5,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/centralized/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 1,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/rep_cps/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 2,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/rep_cps/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 3,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/rep_cps/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 4,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/rep_cps/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "seed": 5,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/toy_lab_v0/rep_cps/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 1,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/centralized/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 2,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/centralized/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 3,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/centralized/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 4,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/centralized/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "seed": 5,
+      "keys_removed": [],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/centralized/seed_5/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 1,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/rep_cps/seed_1/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 2,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/rep_cps/seed_2/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 3,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/rep_cps/seed_3/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 4,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/rep_cps/seed_4/maestro_report.json"
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "seed": 5,
+      "keys_removed": [
+        {
+          "key": "metadata_rep_cps",
+          "reason_code": "adapter_only_top_level_field",
+          "detail": "Removed non\u2013MAESTRO_REPORT.v0.2 top-level key before normalized-interface evaluation."
+        }
+      ],
+      "keys_added": [],
+      "keys_modified": [],
+      "normalized_artifact": "datasets/runs/p0_e4_matrix/normalized/stress/lab_profile_v0/rep_cps/seed_5/maestro_report.json"
+    }
+  ],
+  "aggregate": {
+    "n_runs": 60,
+    "removal_reason_counts": {
+      "adapter_only_top_level_field": 30
+    }
+  }
+}

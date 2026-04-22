@@ -12,13 +12,20 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 DEFAULT_E4 = REPO / "datasets" / "runs" / "p0_e4_summary.json"
+DEFAULT_E4_RAW_SUMMARY = REPO / "datasets" / "runs" / "p0_e4_raw_summary.json"
 DEFAULT_E3 = REPO / "datasets" / "runs" / "e3_summary.json"
 
 
 def main() -> int:
     import argparse
     ap = argparse.ArgumentParser(description="Export P0 Table 3 (replay-link and conformance by scenario/controller)")
-    ap.add_argument("--e4", type=Path, default=DEFAULT_E4, help="E4 summary JSON")
+    ap.add_argument("--e4", type=Path, default=DEFAULT_E4, help="Legacy E4 summary JSON (p0_e4_summary.json)")
+    ap.add_argument(
+        "--e4-raw-summary",
+        type=Path,
+        default=DEFAULT_E4_RAW_SUMMARY,
+        help="Preferred: p0_e4_raw_summary.json from controller matrix (strong replay + baseline regime for Table 3)",
+    )
     ap.add_argument("--e3", type=Path, default=DEFAULT_E3, help="E3 summary JSON to merge (default datasets/runs/e3_summary.json)")
     args = ap.parse_args()
 
@@ -31,15 +38,31 @@ def main() -> int:
             scenario = p.get("scenario_id", e3.get("scenarios", ["—"])[0] if isinstance(e3.get("scenarios"), list) else "—")
             ci = p.get("p95_latency_ms_ci_95", [0, 0])
             ci_str = f"{p.get('p95_latency_ms_mean', 0):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]" if len(ci) == 2 else "—"
+            strong_ok = p.get("all_strong_match", p.get("all_match"))
             e3_rows.append({
                 "scenario": scenario,
                 "controller": "thinslice",
                 "seeds": e3.get("runs", 0),
-                "replay_match_rate": 1.0 if p.get("all_match") else 0.0,
+                "replay_match_rate": 1.0 if strong_ok else 0.0,
                 "latency_mean_ci": ci_str,
-                "conformance_rate": 1.0 if p.get("all_match") else 0.0,
+                "conformance_rate": 1.0 if strong_ok else 0.0,
             })
-    if args.e4.exists():
+    if args.e4_raw_summary.exists():
+        raw = json.loads(args.e4_raw_summary.read_text(encoding="utf-8"))
+        for r in raw.get("rows", []):
+            if r.get("regime") != "baseline":
+                continue
+            ci = r.get("p95_latency_ms_ci_95", [0, 0])
+            ci_str = f"{r.get('p95_latency_ms_mean', 0):.2f} [{ci[0]:.2f}, {ci[1]:.2f}]" if len(ci) == 2 else "—"
+            e4_rows.append({
+                "scenario": r.get("scenario", "—"),
+                "controller": r.get("controller", "—"),
+                "seeds": r.get("n_seeds", 0),
+                "replay_match_rate": r.get("strong_replay_match_rate", 0),
+                "latency_mean_ci": ci_str,
+                "conformance_rate": r.get("raw_conformance_rate", 0),
+            })
+    elif args.e4.exists():
         e4 = json.loads(args.e4.read_text(encoding="utf-8"))
         for r in e4.get("per_adapter", []):
             ci = r.get("p95_latency_ms_ci_95", [0, 0])
@@ -62,6 +85,7 @@ def main() -> int:
         "## Table 3 — E3 + E4 summary (replay-link and controller-independence)",
         "",
         "Latency column: mean of per-seed **task_latency_ms_p95** with 95% CI (t-interval on seed-level samples).",
+        "Replay match rate: **strong** replay (E3 when present in summary; E4 from p0_e4_raw_summary baseline rows, else legacy summary).",
         "",
         "| Scenario | Controller | Seeds | Replay match rate | p95 latency mean (95% CI) ms | Conformance rate |",
         "|----------|-------------|-------|-------------------|------------------------------|------------------|",

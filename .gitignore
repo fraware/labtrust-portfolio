@@ -15,6 +15,14 @@ datasets/releases/**
 !datasets/runs/e3_summary.json
 !datasets/runs/p0_e3_variance.json
 !datasets/runs/p0_e4_summary.json
+!datasets/runs/p0_e4_per_seed.jsonl
+!datasets/runs/p0_e4_raw_summary.json
+!datasets/runs/p0_e4_normalized_summary.json
+!datasets/runs/p0_e4_normalization_diff.json
+!datasets/runs/p0_e4_controller_matrix.json
+!datasets/runs/p0_e4_diagnostics.json
+!datasets/runs/p0_e4_matrix/
+!datasets/runs/p0_e4_matrix/**
 !datasets/releases/p0_e3_release/
 !datasets/releases/p0_e3_release/**
 # P3 Replay publishable summary

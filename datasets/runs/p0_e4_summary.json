@@ -13,29 +13,15 @@
         2,
         3,
         4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20
+        5
       ],
       "replay_match_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
       "conformance_rate": 1.0,
-      "p95_latency_ms_mean": 35.3679540442906,
+      "p95_latency_ms_mean": 42.5671107043087,
       "p95_latency_ms_ci_95": [
-        26.73035578025035,
-        44.00555230833085
+        17.72932831525616,
+        67.40489309336124
       ]
     },
     {
@@ -46,29 +32,15 @@
         2,
         3,
         4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20
+        5
       ],
       "replay_match_rate": 1.0,
-      "conformance_rate": 1.0,
-      "p95_latency_ms_mean": 35.3679540442906,
+      "weak_replay_match_rate": 1.0,
+      "conformance_rate": 0.0,
+      "p95_latency_ms_mean": 42.5671107043087,
       "p95_latency_ms_ci_95": [
-        26.73035578025035,
-        44.00555230833085
+        17.72932831525616,
+        67.40489309336124
       ]
     },
     {
@@ -79,29 +51,15 @@
         2,
         3,
         4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20
+        5
       ],
       "replay_match_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
       "conformance_rate": 1.0,
-      "p95_latency_ms_mean": 50.3729249665883,
+      "p95_latency_ms_mean": 35.391008875713666,
       "p95_latency_ms_ci_95": [
-        40.01681465400185,
-        60.72903527917475
+        21.96567752434563,
+        48.8163402270817
       ]
     },
     {
@@ -112,29 +70,15 @@
         2,
         3,
         4,
-        5,
-        6,
-        7,
-        8,
-        9,
-        10,
-        11,
-        12,
-        13,
-        14,
-        15,
-        16,
-        17,
-        18,
-        19,
-        20
+        5
       ],
       "replay_match_rate": 1.0,
-      "conformance_rate": 1.0,
-      "p95_latency_ms_mean": 50.3729249665883,
+      "weak_replay_match_rate": 1.0,
+      "conformance_rate": 0.0,
+      "p95_latency_ms_mean": 35.391008875713666,
       "p95_latency_ms_ci_95": [
-        40.01681465400185,
-        60.72903527917475
+        21.96567752434563,
+        48.8163402270817
       ]
     }
   ],
@@ -144,22 +88,7 @@
       2,
       3,
       4,
-      5,
-      6,
-      7,
-      8,
-      9,
-      10,
-      11,
-      12,
-      13,
-      14,
-      15,
-      16,
-      17,
-      18,
-      19,
-      20
+      5
     ],
     "scenario_ids": [
       "toy_lab_v0",
@@ -170,9 +99,13 @@
       "rep_cps"
     ],
     "fault_settings": {
-      "drop_completion_prob": 0.0
+      "drop_completion_prob": 0.0,
+      "delay_fault_prob": 0.0,
+      "delay_p95_ms": 50.0
     },
+    "regime": "baseline",
     "script": "run_p0_e4_multi_adapter.py",
-    "version": "e46d50507e5b50e9fa28cccd4793e722ce561753"
+    "version": "a58fc4bcd96b0f6b4c3371a541af77619a5c1676",
+    "replay_definition": "Table 3 primary row uses strong_replay_match_rate; weak_replay_match_rate is diagnostic only."
   }
 }

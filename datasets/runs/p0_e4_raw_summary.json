@@ -1,0 +1,193 @@
+{
+  "experiment": "P0_E4_raw_interface",
+  "rows": [
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "n_seeds": 5,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_ci_95": [
+        21.96567752434563,
+        48.8163402270817
+      ]
+    },
+    {
+      "regime": "baseline",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "n_seeds": 5,
+      "raw_conformance_rate": 0.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 35.391008875713666,
+      "p95_latency_ms_ci_95": [
+        21.96567752434563,
+        48.8163402270817
+      ]
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "n_seeds": 5,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_ci_95": [
+        17.72932831525616,
+        67.40489309336124
+      ]
+    },
+    {
+      "regime": "baseline",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "n_seeds": 5,
+      "raw_conformance_rate": 0.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 42.5671107043087,
+      "p95_latency_ms_ci_95": [
+        17.72932831525616,
+        67.40489309336124
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "n_seeds": 5,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_ci_95": [
+        13.819780283923206,
+        44.1133381736793
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "n_seeds": 5,
+      "raw_conformance_rate": 0.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 28.966559228801255,
+      "p95_latency_ms_ci_95": [
+        13.819780283923206,
+        44.1133381736793
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "n_seeds": 5,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_ci_95": [
+        -4.753417720172401,
+        66.06113795557368
+      ]
+    },
+    {
+      "regime": "moderate",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "n_seeds": 5,
+      "raw_conformance_rate": 0.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 30.653860117700646,
+      "p95_latency_ms_ci_95": [
+        -4.753417720172401,
+        66.06113795557368
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "centralized",
+      "n_seeds": 5,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 66.65466309774095,
+      "p95_latency_ms_ci_95": [
+        27.525389179112736,
+        105.78393701636917
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "lab_profile_v0",
+      "controller": "rep_cps",
+      "n_seeds": 5,
+      "raw_conformance_rate": 0.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 66.65466309774095,
+      "p95_latency_ms_ci_95": [
+        27.525389179112736,
+        105.78393701636917
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "centralized",
+      "n_seeds": 5,
+      "raw_conformance_rate": 1.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_ci_95": [
+        26.201046042988118,
+        115.83901585942175
+      ]
+    },
+    {
+      "regime": "stress",
+      "scenario": "toy_lab_v0",
+      "controller": "rep_cps",
+      "n_seeds": 5,
+      "raw_conformance_rate": 0.0,
+      "weak_replay_match_rate": 1.0,
+      "strong_replay_match_rate": 1.0,
+      "p95_latency_ms_mean": 71.02003095120493,
+      "p95_latency_ms_ci_95": [
+        26.201046042988118,
+        115.83901585942175
+      ]
+    }
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "regimes": [
+    "baseline",
+    "moderate",
+    "stress"
+  ],
+  "scenarios": [
+    "toy_lab_v0",
+    "lab_profile_v0"
+  ],
+  "controllers": [
+    "centralized",
+    "rep_cps"
+  ]
+}

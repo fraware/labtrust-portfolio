@@ -54,6 +54,11 @@ def main() -> int:
         help="Forward to replay_link_e3.py (separate-process verifier; recommended for publishable E3)",
     )
     ap.add_argument(
+        "--e3-stress-appendix",
+        action="store_true",
+        help="Forward --stress-appendix to replay_link_e3.py (optional faulted replay block under e3_stress/)",
+    )
+    ap.add_argument(
         "--release-scenario",
         type=str,
         default=None,
@@ -98,6 +103,8 @@ def main() -> int:
     ]
     if args.standalone_verifier:
         replay_cmd.append("--standalone-verifier")
+    if args.e3_stress_appendix:
+        replay_cmd.append("--stress-appendix")
     r = subprocess.run(
         replay_cmd,
         cwd=str(REPO),

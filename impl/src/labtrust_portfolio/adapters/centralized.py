@@ -21,9 +21,11 @@ class CentralizedAdapter:
         seed: int = 7,
         **fault_params: Any,
     ) -> AdapterResult:
-        delay_p95_ms = fault_params.get("delay_p95_ms", 50.0)
-        drop_completion_prob = fault_params.get("drop_completion_prob", 0.02)
-        delay_fault_prob = fault_params.get("delay_fault_prob", 0.0)
+        fp = dict(fault_params)
+        fp.pop("rep_cps_safety_gate_ok", None)
+        delay_p95_ms = float(fp.pop("delay_p95_ms", 50.0))
+        drop_completion_prob = float(fp.pop("drop_completion_prob", 0.02))
+        delay_fault_prob = float(fp.pop("delay_fault_prob", 0.0))
         gate_ok: bool | None = None
         if scenario_rep_cps_scheduling_dependent(scenario_id):
             # Centralized baseline does not consume REP-CPS aggregate; scheduling proceeds
@@ -40,6 +42,7 @@ class CentralizedAdapter:
             scenario_id=scenario_id,
             delay_fault_prob=delay_fault_prob,
             rep_cps_safety_gate_ok=gate_ok,
+            **fp,
         )
         trace_path = outs["trace"]
         report_path = outs["maestro_report"]

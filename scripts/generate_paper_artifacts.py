@@ -32,7 +32,7 @@ PAPER_CONFIG = {
         "P0_MADS-CPS",
         [
             RUNS / "e3_summary.json",
-            RUNS / "p0_e4_summary.json",
+            RUNS / "p0_e4_raw_summary.json",
             RUNS / "p0_conformance_corpus" / "corpus_manifest.json",
             RUNS / "e2_redaction_demo" / "trace_redacted.json",
         ],
@@ -40,6 +40,8 @@ PAPER_CONFIG = {
             ("export_e1_corpus_table.py", []),
             ("export_e2_admissibility_matrix.py", []),
             ("export_e3_table.py", []),
+            ("export_p0_e4_main_table.py", []),
+            ("export_p0_e4_diagnostics_table.py", []),
             ("export_p0_table3.py", []),
         ],
         "export_p0_assurance_pipeline.py",

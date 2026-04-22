@@ -35,18 +35,17 @@ class REPCPSAdapter:
         seed: int = 7,
         **fault_params: Any,
     ) -> AdapterResult:
-        delay_p95_ms = fault_params.get("delay_p95_ms", 50.0)
-        drop_completion_prob = fault_params.get("drop_completion_prob", 0.02)
-        delay_fault_prob = fault_params.get("delay_fault_prob", 0.0)
-        aggregation_method = fault_params.get(
-            "aggregation_method", "trimmed_mean"
-        )
-        use_compromised = fault_params.get("use_compromised", False)
-        allowed_agents = fault_params.get("allowed_agents", None)
-        aggregation_steps = int(fault_params.get("aggregation_steps", 1))
-        aggregation_epsilon = float(fault_params.get("aggregation_epsilon", 1e-6))
+        fp = dict(fault_params)
+        delay_p95_ms = float(fp.pop("delay_p95_ms", 50.0))
+        drop_completion_prob = float(fp.pop("drop_completion_prob", 0.02))
+        delay_fault_prob = float(fp.pop("delay_fault_prob", 0.0))
+        aggregation_method = str(fp.pop("aggregation_method", "trimmed_mean"))
+        use_compromised = bool(fp.pop("use_compromised", False))
+        allowed_agents = fp.pop("allowed_agents", None)
+        aggregation_steps = int(fp.pop("aggregation_steps", 1))
+        aggregation_epsilon = float(fp.pop("aggregation_epsilon", 1e-6))
         safety_gate_max_load = float(
-            fault_params.get("safety_gate_max_load", REPCPSAdapter.SAFETY_GATE_MAX_LOAD)
+            fp.pop("safety_gate_max_load", REPCPSAdapter.SAFETY_GATE_MAX_LOAD)
         )
 
         if scenario_rep_cps_scheduling_dependent(scenario_id):
@@ -63,6 +62,7 @@ class REPCPSAdapter:
                 aggregation_steps=aggregation_steps,
                 aggregation_epsilon=aggregation_epsilon,
                 safety_gate_max_load=safety_gate_max_load,
+                thin_slice_extras=fp,
             )
 
         outs = run_thin_slice(
@@ -72,6 +72,7 @@ class REPCPSAdapter:
             drop_completion_prob=drop_completion_prob,
             scenario_id=scenario_id,
             delay_fault_prob=delay_fault_prob,
+            **fp,
         )
         trace_path = outs["trace"]
         report_path = outs["maestro_report"]
@@ -124,6 +125,7 @@ class REPCPSAdapter:
         aggregation_steps: int,
         aggregation_epsilon: float,
         safety_gate_max_load: float,
+        thin_slice_extras: dict[str, Any] | None = None,
     ) -> AdapterResult:
         agg_value, converged, steps_to_convergence, step_values = (
             self._aggregate_loop(
@@ -137,6 +139,7 @@ class REPCPSAdapter:
         )
         safety_gate_ok = self._gate_ok(agg_value, safety_gate_max_load)
 
+        extras = dict(thin_slice_extras or {})
         outs = run_thin_slice(
             out_dir,
             seed=seed,
@@ -145,6 +148,7 @@ class REPCPSAdapter:
             scenario_id=scenario_id,
             delay_fault_prob=delay_fault_prob,
             rep_cps_safety_gate_ok=safety_gate_ok,
+            **extras,
         )
         trace_path = outs["trace"]
         report_path = outs["maestro_report"]
