@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "run_id": "run_cb931a0540",
+  "run_id": "run_6e3bad111e",
   "scenario_id": "lab_profile_v0",
   "seed": 6,
-  "start_time_utc": "2026-04-20T05:56:20.762433Z",
+  "start_time_utc": "2026-04-20T06:22:18.292848Z",
   "events": [
     {
       "seq": 0,
@@ -15,7 +15,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "receive_sample:0"
+        "task_id": "receive_sample:0",
+        "regime": "centralized"
       },
       "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
     },
@@ -100,7 +101,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "centrifuge:1"
+        "task_id": "centrifuge:1",
+        "regime": "centralized"
       },
       "state_hash_after": "2b2e4d3eef8b8151e61dfc81c3fb335806fb26eabb5144f9e6ed0ba5433736cf"
     },
@@ -142,7 +144,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "analyze:2"
+        "task_id": "analyze:2",
+        "regime": "centralized"
       },
       "state_hash_after": "3fa191ca956fc3033955b065539dcbe09d2227c53faec46dfba3a2b332a36418"
     },
@@ -184,7 +187,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "report_results:3"
+        "task_id": "report_results:3",
+        "regime": "centralized"
       },
       "state_hash_after": "f97b9fb9e65bd5161bcc21dfb63b64ccbe204c46d3a3112fce97db84070fade1"
     },
@@ -226,7 +230,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "disposition_commit:4"
+        "task_id": "disposition_commit:4",
+        "regime": "centralized"
       },
       "state_hash_after": "c5dd3fa5eb030f13984ee266d82c990f163a0e98f84eacc22dfdcc5b7a7070b7"
     },
@@ -280,6 +285,23 @@
     "constraint_guard_trigger_prob": 0.0,
     "sensor_stale_prob": 0.0,
     "shutdown_after_first_fault": false,
-    "deadline_miss_prob": 0.0
+    "deadline_miss_prob": 0.0,
+    "fault_setting_label": "unknown",
+    "agent_count": 1,
+    "coordination_regime": "centralized",
+    "coordination_topology": "centralized",
+    "hierarchy_depth": 2,
+    "fan_out": 1,
+    "handoff_factor": 1,
+    "shared_state_contention": 0.2,
+    "deadline_tightness": 1.0,
+    "critical_path_length": 5,
+    "branching_factor": 1.0,
+    "queue_contention_index": 0.2,
+    "regime_fault_interaction": 0.0,
+    "regime_id": 0,
+    "effective_drop_completion_prob": 0.2,
+    "latency_stress_multiplier": 1.0,
+    "drop_stress_multiplier": 1.0
   }
 }

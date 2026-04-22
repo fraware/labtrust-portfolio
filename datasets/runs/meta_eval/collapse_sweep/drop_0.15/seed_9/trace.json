@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "run_id": "run_d1ae0aff5f",
+  "run_id": "run_2080f140b3",
   "scenario_id": "regime_stress_v0",
   "seed": 9,
-  "start_time_utc": "2026-04-20T05:49:59.638155Z",
+  "start_time_utc": "2026-04-20T06:21:33.397912Z",
   "events": [
     {
       "seq": 0,
@@ -15,7 +15,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "receive_sample:0"
+        "task_id": "receive_sample:0",
+        "regime": "centralized"
       },
       "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
     },
@@ -57,7 +58,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "centrifuge:1"
+        "task_id": "centrifuge:1",
+        "regime": "centralized"
       },
       "state_hash_after": "3876ca3938ea58e020a0e0d0516a5cca789685a70771da34375aceb172ca73b5"
     },
@@ -99,7 +101,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "analyze:2"
+        "task_id": "analyze:2",
+        "regime": "centralized"
       },
       "state_hash_after": "d1673f62c33a7844c0a7dff6f9b2c2ff0efcf7262576d8d96ee144c33690399f"
     },
@@ -141,7 +144,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "report_results:3"
+        "task_id": "report_results:3",
+        "regime": "centralized"
       },
       "state_hash_after": "874467111968cccf087296733f0bd0aa3ce4633327ab708cf6ab78796c3b300e"
     },
@@ -195,6 +199,23 @@
     "constraint_guard_trigger_prob": 0.0,
     "sensor_stale_prob": 0.0,
     "shutdown_after_first_fault": false,
-    "deadline_miss_prob": 0.0
+    "deadline_miss_prob": 0.0,
+    "fault_setting_label": "unknown",
+    "agent_count": 1,
+    "coordination_regime": "centralized",
+    "coordination_topology": "centralized",
+    "hierarchy_depth": 2,
+    "fan_out": 1,
+    "handoff_factor": 1,
+    "shared_state_contention": 0.25,
+    "deadline_tightness": 1.0,
+    "critical_path_length": 4,
+    "branching_factor": 1.0,
+    "queue_contention_index": 0.25,
+    "regime_fault_interaction": 0.0,
+    "regime_id": 0,
+    "effective_drop_completion_prob": 0.15,
+    "latency_stress_multiplier": 1.0,
+    "drop_stress_multiplier": 1.0
   }
 }

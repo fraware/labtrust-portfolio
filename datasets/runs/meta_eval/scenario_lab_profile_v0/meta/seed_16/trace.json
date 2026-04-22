@@ -1,9 +1,9 @@
 {
   "version": "0.1",
-  "run_id": "run_e42820ee48",
+  "run_id": "run_6c994fb0b2",
   "scenario_id": "lab_profile_v0",
   "seed": 16,
-  "start_time_utc": "2026-04-20T05:56:41.579733Z",
+  "start_time_utc": "2026-04-20T06:22:30.165297Z",
   "events": [
     {
       "seq": 0,
@@ -15,7 +15,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "receive_sample:0"
+        "task_id": "receive_sample:0",
+        "regime": "centralized"
       },
       "state_hash_after": "b214ab65adc3ba8a83fc9daa540ff179100008a305fc4144936c77783af6d072"
     },
@@ -57,7 +58,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "centrifuge:1"
+        "task_id": "centrifuge:1",
+        "regime": "centralized"
       },
       "state_hash_after": "5a9477e5978c0c24864e01b2cc2e69fcefe663c78a339846e4c2857c3e81605c"
     },
@@ -128,7 +130,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "analyze:2"
+        "task_id": "analyze:2",
+        "regime": "centralized"
       },
       "state_hash_after": "e26e087484a5eb49207ecaa2055b0b4c940d28be970a3c7c1ed795f98234b441"
     },
@@ -170,7 +173,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "report_results:3"
+        "task_id": "report_results:3",
+        "regime": "centralized"
       },
       "state_hash_after": "00972b305435e2b5b7b498ce74e8ec390b9febd9310d3012be8fcc5bae5d531e"
     },
@@ -212,7 +216,8 @@
       },
       "payload": {
         "detail": "assign_task",
-        "task_id": "disposition_commit:4"
+        "task_id": "disposition_commit:4",
+        "regime": "centralized"
       },
       "state_hash_after": "b773bdbb7d34504ef23b0a7c4643d02b43703fd5efb16315daed68fff333bddc"
     },
@@ -291,6 +296,23 @@
     "sensor_stale_prob": 0.0,
     "shutdown_after_first_fault": false,
     "deadline_miss_prob": 0.0,
+    "fault_setting_label": "unknown",
+    "agent_count": 1,
+    "coordination_regime": "centralized",
+    "coordination_topology": "centralized",
+    "hierarchy_depth": 2,
+    "fan_out": 1,
+    "handoff_factor": 1,
+    "shared_state_contention": 0.2,
+    "deadline_tightness": 1.0,
+    "critical_path_length": 5,
+    "branching_factor": 1.0,
+    "queue_contention_index": 0.2,
+    "regime_fault_interaction": 0.0,
+    "regime_id": 0,
+    "effective_drop_completion_prob": 0.35,
+    "latency_stress_multiplier": 1.0,
+    "drop_stress_multiplier": 1.0,
     "meta_controller": true,
     "regime_switch_count": 1,
     "fallback_tasks_completed": 4,

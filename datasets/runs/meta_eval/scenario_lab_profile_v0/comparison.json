@@ -25,7 +25,7 @@
     29,
     30
   ],
-  "collapse_definition": "tasks_completed < 2 or recovery_ok false; meta arm attributes to fallback run when a switch occurs and --fallback-adapter is set (see outcome_attribution_note).",
+  "collapse_definition": "tasks_completed < 2 or recovery_ok false; meta arm uses fallback metrics after switch when --fallback-adapter is set (see outcome_attribution_note).",
   "collapse_threshold": 2,
   "outcome_attribution_note": "When --fallback-adapter is set and the meta-controller switches, evaluated tasks_completed, recovery_ok, time_to_recovery_ms, and safety counters for the meta arm are taken from the fallback adapter run; the fixed arm is always the centralized thin-slice run only.",
   "recovery_latency_note": "time_to_recovery_ms is the MAESTRO metric from the evaluated regime's report (fault-to-recovery latency in the thin-slice harness); null when no recovery event is recorded.",
@@ -83,7 +83,7 @@
       "source_path": "datasets\\runs\\meta_eval\\scenario_lab_profile_v0\\collapse_sweep.json",
       "source_path_repo_relative": "datasets/runs/meta_eval/scenario_lab_profile_v0/collapse_sweep.json",
       "chosen_drop_completion_prob": 0.35,
-      "calibration_note": "drop_completion_prob was chosen from collapse_sweep.json produced using calibration_seeds only; meta_eval paired evaluation used evaluation_seeds (disjoint from calibration when configured).",
+      "calibration_note": "drop_completion_prob was chosen from collapse_sweep.json produced using calibration_seeds only; meta_eval paired evaluation used evaluation_seeds.",
       "calibration_seeds": [
         1,
         2,

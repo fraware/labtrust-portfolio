@@ -1,20 +1,20 @@
 {
   "version": "0.1",
-  "release_id": "release_run_b47fe335ab",
-  "created_at_utc": "2026-04-20T05:51:54.613418Z",
+  "release_id": "release_run_6d60c39804",
+  "created_at_utc": "2026-04-20T06:21:57.018999Z",
   "kernel_version": "0.1",
   "artifacts": [
     {
       "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.25/seed_7/trace.json",
-      "sha256": "5d84bdad1c9dec75cc4092c64410ecd7eee75ba886cd0b72d425e7751f5eb306"
+      "sha256": "ecdb3e5eae89a7bcad99688e4240ad6658bb2e9e5849a6da34546178e6a8545e"
     },
     {
       "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.25/seed_7/maestro_report.json",
-      "sha256": "1682ae74f8bbd2b75d44e8a395ccedf55c8deb380a60f8bc3c78d3978c980f95"
+      "sha256": "93ce24ca83ee4fe0eaa60d301f96643e165b08206ca57729ed8f0d115a872cda"
     },
     {
       "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/collapse_sweep/drop_0.25/seed_7/evidence_bundle.json",
-      "sha256": "525b6895434d7ba8e587b5907cfefb8f47ddc1fddf4d6cbf9f8a9fed333b3ace"
+      "sha256": "359b94fc3f6eca44d7eb49c7e582f6b5f9272260f317e3e196b9dcae0c778ae5"
     }
   ]
 }

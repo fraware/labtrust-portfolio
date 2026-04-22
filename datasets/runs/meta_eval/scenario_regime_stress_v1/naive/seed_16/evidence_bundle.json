@@ -1,16 +1,16 @@
 {
   "version": "0.1",
-  "run_id": "run_9aa4d667cf",
+  "run_id": "run_3fb1a36649",
   "kernel_version": "0.1",
   "artifacts": [
     {
       "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_16/trace.json",
-      "sha256": "8cc6e824c3b03cf49f82e8014d0ec0e993f8352da996d80d927549f32bb63cc0",
+      "sha256": "d3bbe18138f4faa4ab372f8a71f6dc355fc2922b63d11ec5ac8acdc97c04cd6d",
       "schema_id": "https://example.org/labtrust/kernel/trace/TRACE.v0.1"
     },
     {
       "path": "datasets/runs/meta_eval/scenario_regime_stress_v1/naive/seed_16/maestro_report.json",
-      "sha256": "b108176c529a09fde1bf4f4131d1e82ad4a6850e498fba8754dc18609821c7dc",
+      "sha256": "00582f16dbea647bdd74f0b54dfc14a7a3c561ff13ea5d2c81098993fe413b26",
       "schema_id": "https://example.org/labtrust/kernel/eval/MAESTRO_REPORT.v0.2"
     }
   ],
