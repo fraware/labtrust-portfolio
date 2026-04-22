@@ -1,0 +1,28 @@
+%% P7 Figure 2 — Review-stage decision flow (full_review path; see assurance_review_pipeline.py)
+flowchart TD
+  start([Start review])
+  start --> pack["Pack: schema + structure<br/>hazards, controls, evidence_map,<br/>profile PONR coverage"]
+  pack -->|fail| rej_pack["Reject<br/>failure_stage: pack"]
+  pack -->|pass| mode{"review_mode?"}
+
+  mode -->|schema_only| so_trace{"trace.json exists?"}
+  so_trace --> so_val_t["Validate trace schema if present"]
+  so_val_t --> so_bundle{"evidence_bundle.json exists?"}
+  so_bundle --> so_val_b["Validate bundle schema if present"]
+  so_val_b --> so_done{failures?}
+  so_done -->|yes| rej_so["Reject<br/>artifact_schema"]
+  so_done -->|no| acc_so["Accept"]
+
+  mode -->|schema_plus_presence or full_review| pres["Presence + schema:<br/>trace, bundle,<br/>maestro_report,<br/>release_manifest"]
+  pres -->|fail| rej_pres["Reject<br/>artifact_presence / artifact_schema"]
+  pres -->|pass| mode2{"mode == schema_plus_presence?"}
+  mode2 -->|yes| acc_sp["Accept"]
+  mode2 -->|no| scen["Scenario alignment:<br/>trace scenario_id vs declared scenario"]
+  scen -->|fail| rej_scen["Reject<br/>scenario_alignment"]
+  scen -->|pass| ponr["PONR coverage:<br/>required task_end names for scenario"]
+  ponr -->|fail| rej_ponr["Reject<br/>ponr"]
+  ponr -->|pass| ctrl["Control evidence coverage:<br/>all evidence_artifact_types per control"]
+  ctrl -->|fail| rej_ctrl["Reject<br/>control_coverage"]
+  ctrl -->|pass| prov["Provenance:<br/>bundle trace SHA;<br/>release_manifest artifact SHAs"]
+  prov -->|fail| rej_prov["Reject<br/>provenance"]
+  prov -->|pass| acc_full["Accept"]

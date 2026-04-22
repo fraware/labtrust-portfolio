@@ -59,6 +59,7 @@ python scripts/render_p7_mermaid_figures.py
 | Table 1–2 | After baseline eval: `export_assurance_tables.py --results datasets/runs/assurance_eval/results.json` (Table 1 uses primary review for **`lab_profile_v0`** — kernel PONR **`disposition_commit`**) |
 | Table 3 | Same export loads `robust_results.json` when present (robust aggregate) |
 | Figure 1 | `export_assurance_gsn.py` → `docs/figures/p7_gsn.mmd`; render with `render_p7_mermaid_figures.py` |
+| Figure 2 | `docs/figures/p7_review_stages.mmd` (hand-authored; mirrors `assurance_review_pipeline.py`); render with `render_p7_mermaid_figures.py` |
 | Audit | `audit_bundle.py --run-dir <path>` or `audit_bundle.py --release datasets/releases/portfolio_v0.1` |
 | Negative controls + ablations | `run_assurance_negative_eval.py` → `negative_results.json`; `export_p7_negative_tables.py` → `p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv` |
 
@@ -127,6 +128,10 @@ Three JSON instantiations: **lab** (`profiles/lab/v0.1/assurance_pack_instantiat
 
 **Figure 1 — GSN-lite.** `scripts/export_assurance_gsn.py` from lab `assurance_pack_instantiation.json`.
 
+**Figure 2 — Review-stage decision flow.** Source: `docs/figures/p7_review_stages.mmd`. Stages align with `review_assurance_pipeline` (`pack` → optional early exit for `schema_only` → `schema_plus_presence` → for `full_review`: scenario alignment, PONR coverage, control evidence coverage, bundle and release-manifest provenance). Failure stages map to stable codes in [P7_REVIEW_FAILURE_CODES.md](../docs/P7_REVIEW_FAILURE_CODES.md).
+
+Perturbation ids vs empirical brief: [P7_PERTURBATION_CHECKLIST.md](../docs/P7_PERTURBATION_CHECKLIST.md). Table index: [generated_tables.md](generated_tables.md).
+
 **Key results.** (1) **Mapping:** `mapping_check.ok`, `mapping_check.ponr_coverage_ok` in `results.json`. (2) **Per-profile:** `per_profile` on scenario-matched runs. (3) **Robust (Q1):** `robust_results.json` — positive-control stability under stress; not claimed as discriminative power. (4) **Negative suite (Q2–Q3):** `negative_results.json` with `aggregate.governance_evidence_discrimination_accuracy` and per-mode rates. (5) **Non-claim:** no certification. Optional summary: [RUN_RESULTS_SUMMARY.md](../../datasets/runs/RUN_RESULTS_SUMMARY.md).
 
 ## 7. Comparison to other assurance frameworks
@@ -168,7 +173,7 @@ No certification. No compliance claim with 21 CFR Part 11 or OECD GLP. Auditable
 | Claim | Artifact / backing |
 |-------|---------------------|
 | C1 Traceable mapping | Schema, instantiations, `results.json`, `robust_results.json`, [P7_STANDARDS_MAPPING.md](../docs/P7_STANDARDS_MAPPING.md) |
-| C2 Mechanically checkable | `check_assurance_mapping.py`, `review_assurance_run.py`, `audit_bundle.py` |
+| C2 Mechanically checkable | `check_assurance_mapping.py`, `review_assurance_run.py`, `audit_bundle.py`, Figure 2 (`p7_review_stages.mmd`) |
 | C3 Stress / proxy scenarios | `robust_results.json`, `P7_ROBUST_EXPERIMENT_PLAN.md`, `P7_REVIEW_CHECKLIST.md` |
-| C4 Discrimination + ablations | `negative_results.json`, `run_assurance_negative_eval.py`, `export_p7_negative_tables.py`, CSV Tables 4–6 |
+| C4 Discrimination + ablations | `negative_results.json`, `run_assurance_negative_eval.py`, `export_p7_negative_tables.py`, CSV Tables 4–6, Figure 2 (`p7_review_stages.mmd`), [P7_PERTURBATION_CHECKLIST.md](../docs/P7_PERTURBATION_CHECKLIST.md) |
 | No certification | This section; Limitations |

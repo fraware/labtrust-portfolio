@@ -14,6 +14,9 @@ P7 argues for a **traceable, mechanically checkable** mapping from hazards to co
 | `docs/figures/p7_gsn.mmd` | Figure 1 source (GSN-lite) |
 | `docs/figures/p7_mapping_flow.png`, `.pdf` | Camera-ready Figure 0 |
 | `docs/figures/p7_gsn.png`, `.pdf` | Camera-ready Figure 1 |
+| `docs/figures/p7_review_stages.mmd` | Figure 2 source — review-stage decision flow (`full_review` path) |
+| `docs/figures/p7_review_stages.png`, `.pdf` | Camera-ready Figure 2 (committed when rendered; regenerate via `render_p7_mermaid_figures.py`) |
+| `papers/P7_StandardsMapping/generated_tables.md` | Index for Tables 1–6 sources and CSV paths |
 | `papers/P7_StandardsMapping/generated_tables.md` | Tables 1–3 (from `export_assurance_tables.py`) |
 
 ## One-shot regeneration (repo root)

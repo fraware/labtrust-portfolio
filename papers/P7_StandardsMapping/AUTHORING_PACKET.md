@@ -45,7 +45,7 @@ How do we translate the portfolio’s executable artifacts (gates, traces, evide
 - `scripts/check_assurance_mapping.py`, `scripts/review_assurance_run.py`, `scripts/audit_bundle.py`
 - `datasets/runs/assurance_eval/results.json`, `datasets/runs/assurance_eval/robust_results.json`
 - `docs/P7_STANDARDS_MAPPING.md`, `docs/P7_ROBUST_EXPERIMENT_PLAN.md`
-- Figures: `docs/figures/p7_mapping_flow.*`, `docs/figures/p7_gsn.*` (Mermaid + optional PNG/PDF via `render_p7_mermaid_figures.py`)
+- Figures: `docs/figures/p7_mapping_flow.*`, `p7_gsn.*`, `p7_review_stages.*` (Mermaid + optional PNG/PDF via `render_p7_mermaid_figures.py`); table index `papers/P7_StandardsMapping/generated_tables.md`; perturbation checklist `docs/P7_PERTURBATION_CHECKLIST.md`
 - `tests/test_assurance_p7.py` (integration gate)
 
 ## 7) Kill criteria

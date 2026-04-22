@@ -46,6 +46,21 @@ def _write_pack(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
+def _strip_disposition_commit_trace(run_dir: Path) -> None:
+    """Remove task_end events for disposition_commit (lab PONR) from trace.json in place."""
+    tr_path = run_dir / "trace.json"
+    tr = json.loads(tr_path.read_text(encoding="utf-8"))
+    evs: List[dict] = []
+    for ev in tr.get("events", []):
+        if ev.get("type") == "task_end":
+            name = (ev.get("payload") or {}).get("name", "")
+            if name == "disposition_commit":
+                continue
+        evs.append(ev)
+    tr["events"] = evs
+    tr_path.write_text(json.dumps(tr, indent=2) + "\n", encoding="utf-8")
+
+
 def materialize_case(
     repo_root: Path,
     work_root: Path,
@@ -169,6 +184,19 @@ def materialize_case(
         (r / "evidence_bundle.json").write_text(json.dumps(b), encoding="utf-8")
         return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.BUNDLE_SCHEMA_INVALID}), "artifact_admissibility"
 
+    if case_id == "bundle_broken_trace_hash":
+        r = work / "run_bad_bundle_sha"
+        _copy_run(base_lab_run, r)
+        b = json.loads((r / "evidence_bundle.json").read_text(encoding="utf-8"))
+        for art in b.get("artifacts") or []:
+            if not isinstance(art, dict):
+                continue
+            rel = str(art.get("path", ""))
+            if rel.endswith("trace.json") or rel == "trace.json":
+                art["sha256"] = "0" * 64
+        (r / "evidence_bundle.json").write_text(json.dumps(b, indent=2) + "\n", encoding="utf-8")
+        return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PROVENANCE_MISMATCH}), "artifact_admissibility"
+
     # ---- Family C: scenario consistency ----
     if case_id == "wrong_pack_for_scenario":
         # Warehouse trace but claim lab scenario for review; trace scenario_id is warehouse_v0
@@ -186,7 +214,7 @@ def materialize_case(
         shutil.rmtree(other, ignore_errors=True)
         return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PROVENANCE_MISMATCH}), "scenario_consistency"
 
-    if case_id == "swapped_scenario_id_in_trace":
+    if case_id in ("swapped_scenario_id_in_trace", "trace_from_other_scenario"):
         r = work / "run_wrong_sid"
         _copy_run(base_lab_run, r)
         tr = json.loads((r / "trace.json").read_text(encoding="utf-8"))
@@ -194,26 +222,31 @@ def materialize_case(
         (r / "trace.json").write_text(json.dumps(tr, indent=2) + "\n", encoding="utf-8")
         return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.SCENARIO_PACK_MISMATCH}), "scenario_consistency"
 
-    # ---- Family D: adversarial / misleading ----
-    if case_id in ("missing_required_ponr_event", "remove_final_commit_event_keep_structure"):
-        r = work / "run_no_ponr"
+    if case_id == "wrong_required_task_name":
+        r = work / "run_wrong_ponr_name"
         _copy_run(base_lab_run, r)
         tr = json.loads((r / "trace.json").read_text(encoding="utf-8"))
-        evs = []
         for ev in tr.get("events", []):
             if ev.get("type") == "task_end":
-                name = (ev.get("payload") or {}).get("name", "")
-                if name == "disposition_commit":
-                    continue
-            evs.append(ev)
-        tr["events"] = evs
+                pl = dict(ev.get("payload") or {})
+                if pl.get("name") == "disposition_commit":
+                    pl["name"] = "disposition_commit_substitute"
+                    ev["payload"] = pl
         (r / "trace.json").write_text(json.dumps(tr, indent=2) + "\n", encoding="utf-8")
-        fam = (
-            "adversarial_misleading"
-            if case_id == "remove_final_commit_event_keep_structure"
-            else "scenario_consistency"
-        )
-        return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PONR_MISSING}), fam
+        return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PONR_MISSING}), "scenario_consistency"
+
+    # ---- Family D: adversarial / misleading ----
+    if case_id == "missing_required_ponr_event":
+        r = work / "run_no_ponr_sc"
+        _copy_run(base_lab_run, r)
+        _strip_disposition_commit_trace(r)
+        return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PONR_MISSING}), "scenario_consistency"
+
+    if case_id == "remove_final_commit_event_keep_structure":
+        r = work / "run_no_ponr_adv"
+        _copy_run(base_lab_run, r)
+        _strip_disposition_commit_trace(r)
+        return r, lab_pack_w, "lab_profile_v0", "reject", frozenset({FC.PONR_MISSING}), "adversarial_misleading"
 
     if case_id == "partial_control_omission":
         p = work / "pack_partial.json"
@@ -226,6 +259,15 @@ def materialize_case(
                     "evidence_bundle",
                     "signed_attestation_chain",
                 ]
+        _write_pack(p, d)
+        return run_lab, p, "lab_profile_v0", "reject", frozenset({FC.INCOMPLETE_EVIDENCE}), "adversarial_misleading"
+
+    if case_id == "wellformed_but_incomplete_evidence":
+        p = work / "pack_wellformed_incomplete.json"
+        d = _load_pack(lab_pack_w)
+        for c in d["controls"]:
+            if c.get("id") == "C-001":
+                c["evidence_artifact_types"] = ["trace", "evidence_bundle", "conformance"]
         _write_pack(p, d)
         return run_lab, p, "lab_profile_v0", "reject", frozenset({FC.INCOMPLETE_EVIDENCE}), "adversarial_misleading"
 
@@ -257,13 +299,16 @@ def all_case_ids(quick: bool = False) -> List[str]:
         "bundle_schema_invalid",
         "trace_truncated",
         "bundle_corrupted_field",
+        "bundle_broken_trace_hash",
         "wrong_pack_for_scenario",
         "missing_required_ponr_event",
         "remove_final_commit_event_keep_structure",
         "cross_run_trace_bundle_swap",
         "stale_bundle_reused",
         "swapped_scenario_id_in_trace",
+        "wrong_required_task_name",
         "partial_control_omission",
+        "wellformed_but_incomplete_evidence",
         "manifest_points_to_foreign_artifact",
     ]
     if quick:

@@ -17,6 +17,7 @@ FIG = REPO / "docs" / "figures"
 FILES = (
     "p7_mapping_flow.mmd",
     "p7_gsn.mmd",
+    "p7_review_stages.mmd",
 )
 
 
