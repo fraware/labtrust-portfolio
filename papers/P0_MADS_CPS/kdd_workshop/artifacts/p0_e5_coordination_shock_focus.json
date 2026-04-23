@@ -1,15 +1,88 @@
 {
   "experiment": "P0_E5_model_evolution_coordination_shock_focus",
   "source_by_cell": "papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_model_evolution_by_cell.json",
-  "filter": {
-    "scenario_id": "rep_cps_scheduling_v0",
-    "regime": "coordination_shock",
-    "version_label": [
-      "V0_stable_baseline",
-      "V2_regressive_update"
-    ]
+  "focus_policy": {
+    "explicit_targets": [
+      {
+        "scenario_id": "rep_cps_scheduling_v0",
+        "regime": "baseline"
+      },
+      {
+        "scenario_id": "rep_cps_scheduling_v0",
+        "regime": "coordination_shock"
+      }
+    ],
+    "max_delta_scan": "V0_stable_baseline->V2_regressive_update across all cells"
   },
-  "rows": [
+  "value_rows": [
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 1.0,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 4.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 35.3679540442906,
+      "n_runs": 20,
+      "focus_type": "explicit_target"
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 1.0,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 4.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 35.3679540442906,
+      "n_runs": 20,
+      "focus_type": "explicit_target"
+    },
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 1.0,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 4.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 35.3679540442906,
+      "n_runs": 20,
+      "focus_type": "explicit_target"
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "n_runs": 20,
+      "focus_type": "explicit_target"
+    },
     {
       "version_label": "V0_stable_baseline",
       "version_type": "stable",
@@ -24,23 +97,8 @@
       "tasks_completed_mean": 3.3,
       "tasks_completed_stdev": 0.9233805168766387,
       "task_latency_ms_p95_mean": 147.2510473491014,
-      "n_runs": 20
-    },
-    {
-      "version_label": "V0_stable_baseline",
-      "version_type": "stable",
-      "controller": "rep_cps",
-      "scenario_id": "rep_cps_scheduling_v0",
-      "regime": "coordination_shock",
-      "raw_conformance_rate": 1.0,
-      "strong_replay_rate": 1.0,
-      "release_allow_rate": 1.0,
-      "productive_success_rate": 0.0,
-      "safe_nonproductive_rate": 1.0,
-      "tasks_completed_mean": 0.0,
-      "tasks_completed_stdev": 0.0,
-      "task_latency_ms_p95_mean": 0.0,
-      "n_runs": 20
+      "n_runs": 20,
+      "focus_type": "explicit_target"
     },
     {
       "version_label": "V2_regressive_update",
@@ -56,7 +114,25 @@
       "tasks_completed_mean": 3.3,
       "tasks_completed_stdev": 0.9233805168766387,
       "task_latency_ms_p95_mean": 147.2510473491014,
-      "n_runs": 20
+      "n_runs": 20,
+      "focus_type": "explicit_target"
+    },
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "n_runs": 20,
+      "focus_type": "explicit_target"
     },
     {
       "version_label": "V2_regressive_update",
@@ -72,7 +148,162 @@
       "tasks_completed_mean": 0.0,
       "tasks_completed_stdev": 0.0,
       "task_latency_ms_p95_mean": 0.0,
-      "n_runs": 20
+      "n_runs": 20,
+      "focus_type": "explicit_target"
+    },
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 1.0,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 4.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 35.3679540442906,
+      "n_runs": 20,
+      "focus_type": "max_abs_delta_tasks_completed_mean"
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "n_runs": 20,
+      "focus_type": "max_abs_delta_tasks_completed_mean"
+    },
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 1.0,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 4.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 35.3679540442906,
+      "n_runs": 20,
+      "focus_type": "max_delta_safe_nonproductive_rate"
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "n_runs": 20,
+      "focus_type": "max_delta_safe_nonproductive_rate"
+    }
+  ],
+  "delta_rows": [
+    {
+      "focus_type": "explicit_target_delta",
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "version_from": "V0_stable_baseline",
+      "version_to": "V2_regressive_update",
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0,
+      "delta_productive_success_rate": 0.0,
+      "delta_safe_nonproductive_rate": 0.0,
+      "delta_tasks_completed_mean": 0.0
+    },
+    {
+      "focus_type": "explicit_target_delta",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "version_from": "V0_stable_baseline",
+      "version_to": "V2_regressive_update",
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0,
+      "delta_productive_success_rate": -1.0,
+      "delta_safe_nonproductive_rate": 1.0,
+      "delta_tasks_completed_mean": -4.0
+    },
+    {
+      "focus_type": "explicit_target_delta",
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "version_from": "V0_stable_baseline",
+      "version_to": "V2_regressive_update",
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0,
+      "delta_productive_success_rate": 0.0,
+      "delta_safe_nonproductive_rate": 0.0,
+      "delta_tasks_completed_mean": 0.0
+    },
+    {
+      "focus_type": "explicit_target_delta",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "version_from": "V0_stable_baseline",
+      "version_to": "V2_regressive_update",
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0,
+      "delta_productive_success_rate": 0.0,
+      "delta_safe_nonproductive_rate": 0.0,
+      "delta_tasks_completed_mean": 0.0
+    },
+    {
+      "focus_type": "max_abs_delta_tasks_completed_mean",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "version_from": "V0_stable_baseline",
+      "version_to": "V2_regressive_update",
+      "delta_tasks_completed_mean": -4.0,
+      "delta_safe_nonproductive_rate": 1.0,
+      "delta_productive_success_rate": -1.0,
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0
+    },
+    {
+      "focus_type": "max_delta_safe_nonproductive_rate",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "baseline",
+      "version_from": "V0_stable_baseline",
+      "version_to": "V2_regressive_update",
+      "delta_tasks_completed_mean": -4.0,
+      "delta_safe_nonproductive_rate": 1.0,
+      "delta_productive_success_rate": -1.0,
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0
     }
   ]
 }

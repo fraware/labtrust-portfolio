@@ -4,7 +4,10 @@ Export focused E5 model-evolution tables from per-seed rows.
 
 Outputs:
 - by-cell table grouped by version/controller/scenario/regime
-- coordination_shock focused slice for manuscript-facing comparison
+- focused slice including:
+  - explicit rep_cps_scheduling_v0 baseline V0->V2 comparison
+  - explicit rep_cps_scheduling_v0 coordination_shock V0->V2 comparison
+  - max-delta cells across all controller/scenario/regime combinations
 """
 
 from __future__ import annotations
@@ -95,6 +98,169 @@ def _version_rollup_from_cells(cells: list[dict[str, Any]]) -> dict[str, dict[st
         agg["n_runs"] = float(total)
         rollup[label] = agg
     return rollup
+
+
+def _index_cells(
+    cells: list[dict[str, Any]],
+) -> dict[tuple[str, str, str, str], dict[str, Any]]:
+    idx: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    for row in cells:
+        key = (
+            str(row["version_label"]),
+            str(row["controller"]),
+            str(row["scenario_id"]),
+            str(row["regime"]),
+        )
+        idx[key] = row
+    return idx
+
+
+def _build_focus_rows(
+    by_cell: list[dict[str, Any]],
+    *,
+    v0_label: str = "V0_stable_baseline",
+    v2_label: str = "V2_regressive_update",
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    idx = _index_cells(by_cell)
+    focus_rows: list[dict[str, Any]] = []
+    delta_rows: list[dict[str, Any]] = []
+
+    explicit_targets = [
+        ("rep_cps_scheduling_v0", "baseline"),
+        ("rep_cps_scheduling_v0", "coordination_shock"),
+    ]
+    for scenario_id, regime in explicit_targets:
+        for controller in ("centralized", "rep_cps"):
+            for version_label in (v0_label, v2_label):
+                row = idx.get((version_label, controller, scenario_id, regime))
+                if row:
+                    enriched = dict(row)
+                    enriched["focus_type"] = "explicit_target"
+                    focus_rows.append(enriched)
+            v0 = idx.get((v0_label, controller, scenario_id, regime))
+            v2 = idx.get((v2_label, controller, scenario_id, regime))
+            if v0 and v2:
+                delta_rows.append(
+                    {
+                        "focus_type": "explicit_target_delta",
+                        "controller": controller,
+                        "scenario_id": scenario_id,
+                        "regime": regime,
+                        "version_from": v0_label,
+                        "version_to": v2_label,
+                        "delta_raw_conformance_rate": float(v2["raw_conformance_rate"])
+                        - float(v0["raw_conformance_rate"]),
+                        "delta_strong_replay_rate": float(v2["strong_replay_rate"])
+                        - float(v0["strong_replay_rate"]),
+                        "delta_release_allow_rate": float(v2["release_allow_rate"])
+                        - float(v0["release_allow_rate"]),
+                        "delta_productive_success_rate": float(v2["productive_success_rate"])
+                        - float(v0["productive_success_rate"]),
+                        "delta_safe_nonproductive_rate": float(v2["safe_nonproductive_rate"])
+                        - float(v0["safe_nonproductive_rate"]),
+                        "delta_tasks_completed_mean": float(v2["tasks_completed_mean"])
+                        - float(v0["tasks_completed_mean"]),
+                    }
+                )
+
+    # Max-delta scan across all shared controller/scenario/regime cells.
+    max_task_abs = -1.0
+    max_task_delta_row: dict[str, Any] | None = None
+    max_safe_nonprod = -1.0
+    max_safe_nonprod_row: dict[str, Any] | None = None
+    seen_triples: set[tuple[str, str, str]] = set()
+    for row in by_cell:
+        triple = (str(row["controller"]), str(row["scenario_id"]), str(row["regime"]))
+        if triple in seen_triples:
+            continue
+        seen_triples.add(triple)
+        v0 = idx.get((v0_label, triple[0], triple[1], triple[2]))
+        v2 = idx.get((v2_label, triple[0], triple[1], triple[2]))
+        if not v0 or not v2:
+            continue
+        delta_tasks = float(v2["tasks_completed_mean"]) - float(v0["tasks_completed_mean"])
+        abs_delta_tasks = abs(delta_tasks)
+        delta_safe = float(v2["safe_nonproductive_rate"]) - float(v0["safe_nonproductive_rate"])
+        if abs_delta_tasks > max_task_abs:
+            max_task_abs = abs_delta_tasks
+            max_task_delta_row = {
+                "focus_type": "max_abs_delta_tasks_completed_mean",
+                "controller": triple[0],
+                "scenario_id": triple[1],
+                "regime": triple[2],
+                "version_from": v0_label,
+                "version_to": v2_label,
+                "delta_tasks_completed_mean": delta_tasks,
+                "delta_safe_nonproductive_rate": delta_safe,
+                "delta_productive_success_rate": float(v2["productive_success_rate"])
+                - float(v0["productive_success_rate"]),
+                "delta_raw_conformance_rate": float(v2["raw_conformance_rate"])
+                - float(v0["raw_conformance_rate"]),
+                "delta_strong_replay_rate": float(v2["strong_replay_rate"])
+                - float(v0["strong_replay_rate"]),
+                "delta_release_allow_rate": float(v2["release_allow_rate"])
+                - float(v0["release_allow_rate"]),
+            }
+        if delta_safe > max_safe_nonprod:
+            max_safe_nonprod = delta_safe
+            max_safe_nonprod_row = {
+                "focus_type": "max_delta_safe_nonproductive_rate",
+                "controller": triple[0],
+                "scenario_id": triple[1],
+                "regime": triple[2],
+                "version_from": v0_label,
+                "version_to": v2_label,
+                "delta_tasks_completed_mean": delta_tasks,
+                "delta_safe_nonproductive_rate": delta_safe,
+                "delta_productive_success_rate": float(v2["productive_success_rate"])
+                - float(v0["productive_success_rate"]),
+                "delta_raw_conformance_rate": float(v2["raw_conformance_rate"])
+                - float(v0["raw_conformance_rate"]),
+                "delta_strong_replay_rate": float(v2["strong_replay_rate"])
+                - float(v0["strong_replay_rate"]),
+                "delta_release_allow_rate": float(v2["release_allow_rate"])
+                - float(v0["release_allow_rate"]),
+            }
+
+    for row in (max_task_delta_row, max_safe_nonprod_row):
+        if row:
+            delta_rows.append(row)
+            # Include corresponding V0/V2 value rows for direct reviewer readability.
+            controller = str(row["controller"])
+            scenario_id = str(row["scenario_id"])
+            regime = str(row["regime"])
+            for version_label in (v0_label, v2_label):
+                value_row = idx.get((version_label, controller, scenario_id, regime))
+                if value_row:
+                    enriched = dict(value_row)
+                    enriched["focus_type"] = str(row["focus_type"])
+                    focus_rows.append(enriched)
+
+    # De-duplicate value rows.
+    dedup: dict[tuple[str, str, str, str, str], dict[str, Any]] = {}
+    for row in focus_rows:
+        k = (
+            str(row["focus_type"]),
+            str(row["version_label"]),
+            str(row["controller"]),
+            str(row["scenario_id"]),
+            str(row["regime"]),
+        )
+        dedup[k] = row
+    focus_rows = list(dedup.values())
+    focus_rows.sort(
+        key=lambda r: (
+            str(r["focus_type"]),
+            str(r["scenario_id"]),
+            str(r["regime"]),
+            str(r["controller"]),
+            str(r["version_label"]),
+        )
+    )
+    delta_rows.sort(
+        key=lambda r: (str(r["focus_type"]), str(r["scenario_id"]), str(r["regime"]), str(r["controller"]))
+    )
+    return focus_rows, delta_rows
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]], fields: list[str]) -> None:
@@ -200,14 +366,7 @@ def main() -> int:
         )
     )
 
-    focus = [
-        r
-        for r in by_cell
-        if str(r["scenario_id"]) == "rep_cps_scheduling_v0"
-        and str(r["regime"]) == "coordination_shock"
-        and str(r["version_label"]) in {"V0_stable_baseline", "V2_regressive_update"}
-    ]
-    focus.sort(key=lambda r: (str(r["version_label"]), str(r["controller"])))
+    focus, focus_deltas = _build_focus_rows(by_cell)
 
     summary = _read_json(args.summary_json)
     version_summary = {
@@ -251,12 +410,15 @@ def main() -> int:
             {
                 "experiment": "P0_E5_model_evolution_coordination_shock_focus",
                 "source_by_cell": _repo_rel(args.out_json),
-                "filter": {
-                    "scenario_id": "rep_cps_scheduling_v0",
-                    "regime": "coordination_shock",
-                    "version_label": ["V0_stable_baseline", "V2_regressive_update"],
+                "focus_policy": {
+                    "explicit_targets": [
+                        {"scenario_id": "rep_cps_scheduling_v0", "regime": "baseline"},
+                        {"scenario_id": "rep_cps_scheduling_v0", "regime": "coordination_shock"},
+                    ],
+                    "max_delta_scan": "V0_stable_baseline->V2_regressive_update across all cells",
                 },
-                "rows": focus,
+                "value_rows": focus,
+                "delta_rows": focus_deltas,
             },
             indent=2,
         )
@@ -265,6 +427,7 @@ def main() -> int:
     )
 
     fields = [
+        "focus_type",
         "version_label",
         "version_type",
         "controller",
@@ -288,6 +451,7 @@ def main() -> int:
             {
                 "by_cell_rows": len(by_cell),
                 "focus_rows": len(focus),
+                "focus_delta_rows": len(focus_deltas),
                 "out_json": str(args.out_json),
                 "out_csv": str(args.out_csv),
                 "focus_json": str(args.focus_json),

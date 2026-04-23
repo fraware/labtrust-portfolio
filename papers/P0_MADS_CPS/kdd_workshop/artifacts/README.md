@@ -24,7 +24,7 @@ This directory is the canonical manuscript-facing artifact set for the P0 KDD wo
 - `p0_e5_model_evolution_summary.csv` - E5 compact per-version table.
 - `p0_e5_model_evolution_per_seed.jsonl` - E5 per-seed rows used for all E5 aggregation.
 - `p0_e5_model_evolution_by_cell.json` and `.csv` - E5 by-cell aggregate by version/controller/scenario/regime.
-- `p0_e5_coordination_shock_focus.json` and `.csv` - E5 focus rows for `rep_cps_scheduling_v0` + `coordination_shock`.
+- `p0_e5_coordination_shock_focus.json` and `.csv` - E5 focus rows and deltas for explicit `rep_cps_scheduling_v0` targets (`baseline` and `coordination_shock`) plus max-delta V0->V2 focus cells.
 
 ## Copy status
 
