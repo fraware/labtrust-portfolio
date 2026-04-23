@@ -36,6 +36,8 @@ datasets/releases/**
 # P7 Standards Mapping publishable eval artifacts (baseline + robust matrix)
 !datasets/runs/assurance_eval/
 !datasets/runs/assurance_eval/**
+!datasets/runs/assurance_eval_aies/
+!datasets/runs/assurance_eval_aies/**
 !datasets/runs/RUN_RESULTS_SUMMARY.md
 # P4 MAESTRO publishable artifacts
 !datasets/runs/maestro_fault_sweep/

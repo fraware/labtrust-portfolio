@@ -1,0 +1,66 @@
+{
+  "generated_at_utc": "2026-04-23T11:38:02.004719+00:00",
+  "git_commit_sha": "eef272e691d53d53495dd2ca6e8017a0ccb2a7a9",
+  "commands": [
+    "python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval_aies",
+    "python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval_aies --submission-mode",
+    "python -c \"from pathlib import Path; from labtrust_portfolio.thinslice import run_thin_slice; d=Path('datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7'); d.mkdir(parents=True, exist_ok=True); run_thin_slice(d, seed=7, scenario_id='lab_profile_v0', drop_completion_prob=0.0)\"",
+    "python scripts/export_bounded_review_packet.py --run-dir datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7 --out datasets/runs/assurance_eval_aies/bounded_review_packet --scenario-id lab_profile_v0",
+    "python scripts/export_aies_assurance_tables.py --in datasets/runs/assurance_eval_aies --out datasets/runs/assurance_eval_aies/tables",
+    "python scripts/export_aies_review_packet_figure.py --in datasets/runs/assurance_eval_aies/bounded_review_packet --out datasets/runs/assurance_eval_aies/figures"
+  ],
+  "scenario_ids": [
+    "lab_profile_v0",
+    "warehouse_v0",
+    "traffic_v0"
+  ],
+  "primary_main_text_scenarios": [
+    "lab_profile_v0",
+    "warehouse_v0"
+  ],
+  "proxy_bucket": "proxy_stress_only",
+  "source_files": {
+    "results_json": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\assurance_eval_aies\\results.json",
+    "negative_results_json": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\assurance_eval_aies\\negative_results.json"
+  },
+  "output_checksums_sha256": {
+    "baseline_summary.json": "426b7f60e82bb64d5410bab724f5ac0ccebbfff44df2dd6f9b489eb013a12fe0",
+    "bounded_review_packet\\assurance_pack.json": "dc195208c26df29914e437d7515e7b615645eb5a29b92aac999c6a76802f49e3",
+    "bounded_review_packet\\claim.json": "f98661bfb6b6e87e29d1e797327c0ecc695607279919e7b79dd7a5abe1f5b7ca",
+    "bounded_review_packet\\evidence_bundle.json": "d81beccf08d00bbba50fba0dadd1ac049d65f4be135219e7393c0fb8121906bb",
+    "bounded_review_packet\\maestro_report.json": "90ff08494c8a00dc36224a7fdf73461ea16ddebd430d205b4eb45c87b1ccaab4",
+    "bounded_review_packet\\packet_manifest.json": "3faf51d49f1c9a76e25d574d73f523d4cac10bc9b75e2491bed687db2c5f0af6",
+    "bounded_review_packet\\README.md": "9840ae3ca0b47f32bdee81aeada02145ce83692e8b1d2f5edbc893aaa3ebe791",
+    "bounded_review_packet\\release_manifest.json": "de555fa48146a061dbb132d202061bf58b5a941a017c4419588804fc9c93bfc3",
+    "bounded_review_packet\\review_output.json": "eee03d0a0ff9e77678f7cd3563389ff7fccafe1033335005366e4b701ba33dc0",
+    "bounded_review_packet\\review_packet_summary.csv": "d2bcef0903f61b5a2901c8fe9a3cde9095722ed6a80185f93d9c8bc82d20aad3",
+    "bounded_review_packet\\review_packet_summary.json": "04afbd1f85c3c1337c2ccd347a666788f65b35ae30c6f7dbb99abe7ffe16e03d",
+    "bounded_review_packet\\trace.json": "9a79f0d317f8db0d0e25294115efc2b0b5b39d0b4089ffda488ba748a9074be0",
+    "figures\\review_packet_figure.md": "694422c055abc39ed392ea2a4e4ef752bd9cf7ed6d0757bc57efc2c3a5c8ddb9",
+    "figures\\review_packet_figure.mmd": "ae089e72851d4d53a72664014b12b15680d020752c97ec3968da7b202f08e23e",
+    "figures\\review_packet_figure.pdf": "a783f363485bd9606be877e6c6602830179094e0e55865b038a72dd372113c0f",
+    "figures\\review_packet_figure.png": "821e714410712184b088d21f62d440507c138e1deecb6aaec15f8a950ed85f2b",
+    "figures\\review_packet_figure_caption.txt": "4a2963e4d9c1e334caf110233319355b7ce516bf548a881aa6aafddb34520641",
+    "institutional_positive_summary.json": "9f81bfbfcf9c4adcd63678297740f1f4df6aa283db919751952fbc10dcb171e6",
+    "negative_results.json": "6aeb7d41cfb7722d61a752f1613d4b09554337409f090f698a25ea30efeefbd9",
+    "negative_summary.json": "3a6d5d959c11edd55ac44e07709fd51051dff6a288e04950679b1188d1965d7b",
+    "proxy_stress_only\\traffic_medical_proxy_summary.json": "61e97d9ea21de13db7536c1a935f3917fc92989de4aa225152ca81c0251f9946",
+    "README.md": "38c7bad51c7d02ce0104dcd9ad496a49232205201326ca383f56307dd3e31813",
+    "results.json": "0021125299d9052f58be42aab45593848d508edd8aa261610ad38a941c683ef7",
+    "runs\\lab_profile_v0_seed7\\conformance.json": "7f938510bacb9bd5e0ee81cf9a68d36dc734cb5e9797191a5aec5a72416ea993",
+    "runs\\lab_profile_v0_seed7\\evidence_bundle.json": "d81beccf08d00bbba50fba0dadd1ac049d65f4be135219e7393c0fb8121906bb",
+    "runs\\lab_profile_v0_seed7\\maestro_report.json": "90ff08494c8a00dc36224a7fdf73461ea16ddebd430d205b4eb45c87b1ccaab4",
+    "runs\\lab_profile_v0_seed7\\release_manifest.json": "de555fa48146a061dbb132d202061bf58b5a941a017c4419588804fc9c93bfc3",
+    "runs\\lab_profile_v0_seed7\\trace.json": "9a79f0d317f8db0d0e25294115efc2b0b5b39d0b4089ffda488ba748a9074be0",
+    "tables\\baseline_table.csv": "57d08a3262e07761d40a58adb43dfe0e05c6661f94273e46c425a6756cf92026",
+    "tables\\baseline_table.tex": "c7ac2f8bc1f8549cb33d0cf9540eb3afd2a716064050ce8d15ed4f67770259b4",
+    "tables\\failure_family_table.csv": "835a8832f2ab12775f3eb63c3ba6ba27369eb34c1f7adbd3c0c8bdffdbfed708",
+    "tables\\failure_family_table.tex": "9e87aa0c11ae76b3b664bced54d8adfad6e7b4891a8afd2b4d261115d86235db",
+    "tables\\negative_ablation_table.csv": "62e394b8cb0d5875af840c8a739eabfde63ab699d71c91e0a349e59c833fe685",
+    "tables\\negative_ablation_table.tex": "956e63997a88db64ca76b1a859baad411ea8cf00006fdcc96d19ad5a2b336218",
+    "tables\\negative_failure_families.csv": "835a8832f2ab12775f3eb63c3ba6ba27369eb34c1f7adbd3c0c8bdffdbfed708",
+    "tables\\negative_failure_reasons.csv": "025dd5480caed7c5aed577ef22dfc3245fc97c9057d90ae3133c33833f3aa9bb",
+    "tables\\portability_table.csv": "b9230e89e995eae5c97ec9b838890af5a7f7e3ecaa5f468b0f62b84497f8b113",
+    "tables\\portability_table.tex": "b0380ddd18fefc0ee6d7051c79dc6f51308bdcb8464cb62adcc9d26af72e6ee1"
+  }
+}

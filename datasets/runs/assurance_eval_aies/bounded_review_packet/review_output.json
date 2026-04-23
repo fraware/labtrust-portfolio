@@ -1,0 +1,43 @@
+{
+  "run_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\assurance_eval_aies\\runs\\lab_profile_v0_seed7",
+  "review_mode": "full_review",
+  "scenario_id": "lab_profile_v0",
+  "evidence_bundle_ok": true,
+  "trace_ok": true,
+  "ponr_events": [
+    {
+      "seq": 14,
+      "type": "task_end",
+      "name": "disposition_commit"
+    }
+  ],
+  "controls_covered": [
+    {
+      "id": "C-001",
+      "evidence_types": [
+        "trace",
+        "evidence_bundle"
+      ]
+    },
+    {
+      "id": "C-002",
+      "evidence_types": [
+        "trace",
+        "evidence_bundle"
+      ]
+    }
+  ],
+  "ponr_coverage": {
+    "required_task_names": [
+      "disposition_commit"
+    ],
+    "found_in_trace": [
+      "disposition_commit"
+    ],
+    "ratio": 1.0
+  },
+  "control_coverage_ratio": 1.0,
+  "failure_stage": null,
+  "failure_reason_codes": [],
+  "exit_ok": true
+}

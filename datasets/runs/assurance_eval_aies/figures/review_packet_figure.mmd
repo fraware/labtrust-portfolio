@@ -1,0 +1,12 @@
+flowchart TD
+  A[External Claim Under Review]
+  B[Bounded Artifact Packet]
+  C[Machine Review Layer]
+  D[Verdict: PASS]
+  E[Failure Stage: none]
+  F[Failure Codes: none]
+  G[Out of Scope: Semantic Sufficiency, Full-chain Collusion]
+  A --> B --> C --> D
+  D --> E
+  D --> F
+  C -. limits .-> G

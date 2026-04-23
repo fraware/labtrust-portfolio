@@ -1,0 +1,21 @@
+{
+  "claim_id": "AIES-C1",
+  "scenario_id": "lab_profile_v0",
+  "review_mode": "full_review",
+  "review_exit_ok": true,
+  "failure_stage": null,
+  "failure_reason_codes": [],
+  "validated_checks": [
+    "pack_structure",
+    "artifact_presence_schema",
+    "scenario_alignment",
+    "ponr_consistency",
+    "control_coverage",
+    "provenance_consistency"
+  ],
+  "out_of_scope": [
+    "semantic domain sufficiency",
+    "collusive full-chain forgery",
+    "regulatory certification adequacy"
+  ]
+}

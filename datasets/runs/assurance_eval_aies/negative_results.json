@@ -1,0 +1,3307 @@
+{
+  "generation": {
+    "generated_at_utc": "2026-04-23T11:33:43.760393+00:00",
+    "git_commit_sha": "eef272e691d53d53495dd2ca6e8017a0ccb2a7a9"
+  },
+  "run_manifest": {
+    "script": "run_assurance_negative_eval.py",
+    "cases": [
+      "hazard_missing_control_ids",
+      "hazard_references_unknown_control",
+      "control_missing_evidence_types",
+      "missing_required_field",
+      "ponr_ids_missing_for_profile",
+      "evidence_map_inconsistent",
+      "missing_trace_file",
+      "missing_bundle_file",
+      "trace_schema_invalid",
+      "bundle_schema_invalid",
+      "trace_truncated",
+      "bundle_corrupted_field",
+      "bundle_broken_trace_hash",
+      "wrong_pack_for_scenario",
+      "missing_required_ponr_event",
+      "remove_final_commit_event_keep_structure",
+      "cross_run_trace_bundle_swap",
+      "stale_bundle_reused",
+      "swapped_scenario_id_in_trace",
+      "wrong_required_task_name",
+      "partial_control_omission",
+      "wellformed_but_incomplete_evidence",
+      "manifest_points_to_foreign_artifact",
+      "warehouse_missing_required_ponr_event",
+      "warehouse_manifest_points_to_foreign_artifact",
+      "traffic_wrong_pack_for_scenario",
+      "traffic_manifest_points_to_foreign_artifact",
+      "boundary_under_specified_pack_still_admissible",
+      "boundary_locally_consistent_cross_run_lineage"
+    ],
+    "positive_control_cases": [
+      "positive_valid_lab_s7",
+      "positive_valid_lab_s11",
+      "positive_valid_lab_s19",
+      "positive_valid_warehouse_s7",
+      "positive_valid_warehouse_s11",
+      "positive_valid_warehouse_s19",
+      "positive_valid_traffic_s7",
+      "positive_valid_traffic_s11",
+      "positive_valid_traffic_s19",
+      "positive_valid_toy_lab_s7",
+      "positive_valid_toy_lab_s11",
+      "positive_valid_toy_lab_s19"
+    ],
+    "review_modes": [
+      "schema_only",
+      "schema_plus_presence",
+      "full_review"
+    ],
+    "quick": false,
+    "repo_root": "<redacted>",
+    "path_redaction": "submission_mode"
+  },
+  "aggregate": {
+    "valid_accept_rate": 1.0,
+    "invalid_reject_rate": 0.931,
+    "false_accept_rate": 0.069,
+    "false_reject_rate": 0.0,
+    "localization_accuracy": 0.931,
+    "n_valid": 12,
+    "n_invalid": 29,
+    "mean_latency_ms_valid_cases": 68.367,
+    "mean_latency_ms_invalid_cases": 52.588,
+    "median_latency_ms_all_cases": 59.479,
+    "governance_evidence_discrimination_accuracy": 0.9655,
+    "invalid_reject_lift_full_minus_schema_only": 0.5862,
+    "false_accept_drop_full_vs_schema_only": 0.5862,
+    "localization_accuracy_lift_full_minus_schema_only": 0.5862,
+    "invalid_reject_lift_full_minus_schema_plus_presence": 0.5172
+  },
+  "by_mode": {
+    "schema_only": {
+      "valid_accept_rate": 1.0,
+      "invalid_reject_rate": 0.3448,
+      "false_accept_rate": 0.6552,
+      "false_reject_rate": 0.0,
+      "localization_accuracy": 0.3448,
+      "n_valid": 12,
+      "n_invalid": 29,
+      "mean_latency_ms_valid_cases": 33.76,
+      "mean_latency_ms_invalid_cases": 26.804,
+      "median_latency_ms_all_cases": 28.503
+    },
+    "schema_plus_presence": {
+      "valid_accept_rate": 1.0,
+      "invalid_reject_rate": 0.4138,
+      "false_accept_rate": 0.5862,
+      "false_reject_rate": 0.0,
+      "localization_accuracy": 0.4138,
+      "n_valid": 12,
+      "n_invalid": 29,
+      "mean_latency_ms_valid_cases": 62.158,
+      "mean_latency_ms_invalid_cases": 50.845,
+      "median_latency_ms_all_cases": 54.83
+    },
+    "full_review": {
+      "valid_accept_rate": 1.0,
+      "invalid_reject_rate": 0.931,
+      "false_accept_rate": 0.069,
+      "false_reject_rate": 0.0,
+      "localization_accuracy": 0.931,
+      "n_valid": 12,
+      "n_invalid": 29,
+      "mean_latency_ms_valid_cases": 68.367,
+      "mean_latency_ms_invalid_cases": 52.588,
+      "median_latency_ms_all_cases": 59.479
+    }
+  },
+  "by_family": {
+    "adversarial_misleading": {
+      "n": 6,
+      "reject_rate_on_negatives": 1.0,
+      "localization_accuracy": 1.0
+    },
+    "artifact_admissibility": {
+      "n": 7,
+      "reject_rate_on_negatives": 1.0,
+      "localization_accuracy": 1.0
+    },
+    "boundary_cases": {
+      "n": 2,
+      "reject_rate_on_negatives": 0.0,
+      "localization_accuracy": 0.0
+    },
+    "pack_structure": {
+      "n": 6,
+      "reject_rate_on_negatives": 1.0,
+      "localization_accuracy": 1.0
+    },
+    "positive_control": {
+      "n": 12,
+      "reject_rate_on_negatives": null,
+      "localization_accuracy": null
+    },
+    "scenario_consistency": {
+      "n": 8,
+      "reject_rate_on_negatives": 1.0,
+      "localization_accuracy": 1.0
+    }
+  },
+  "by_scenario": {
+    "lab_profile_v0": {
+      "schema_only": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 27.675
+      },
+      "schema_plus_presence": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 51.737
+      },
+      "full_review": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 55.107
+      }
+    },
+    "toy_lab_v0": {
+      "schema_only": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 40.271
+      },
+      "schema_plus_presence": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 73.458
+      },
+      "full_review": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 75.373
+      }
+    },
+    "traffic_v0": {
+      "schema_only": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 35.766
+      },
+      "schema_plus_presence": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 60.398
+      },
+      "full_review": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 72.889
+      }
+    },
+    "warehouse_v0": {
+      "schema_only": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 31.328
+      },
+      "schema_plus_presence": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 63.039
+      },
+      "full_review": {
+        "n_valid": 3,
+        "valid_accept_rate": 1.0,
+        "mean_latency_ms_valid_cases": 70.098
+      }
+    }
+  },
+  "by_perturbation": [
+    {
+      "perturbation_id": "manifest_points_to_foreign_artifact",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 26.527
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 50.321
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 52.202
+        }
+      }
+    },
+    {
+      "perturbation_id": "partial_control_omission",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 26.75
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 53.429
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "control_coverage",
+          "failure_reason_codes": [
+            "INCOMPLETE_EVIDENCE"
+          ],
+          "review_latency_ms": 54.013
+        }
+      }
+    },
+    {
+      "perturbation_id": "remove_final_commit_event_keep_structure",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 37.99
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 57.266
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 56.761
+        }
+      }
+    },
+    {
+      "perturbation_id": "traffic_manifest_points_to_foreign_artifact",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 25.527
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 56.308
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 52.368
+        }
+      }
+    },
+    {
+      "perturbation_id": "warehouse_manifest_points_to_foreign_artifact",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 26.028
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 49.838
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 56.372
+        }
+      }
+    },
+    {
+      "perturbation_id": "wellformed_but_incomplete_evidence",
+      "family": "adversarial_misleading",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 28.214
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 51.183
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "control_coverage",
+          "failure_reason_codes": [
+            "INCOMPLETE_EVIDENCE"
+          ],
+          "review_latency_ms": 55.364
+        }
+      }
+    },
+    {
+      "perturbation_id": "bundle_broken_trace_hash",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 38.637
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 129.019
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 104.755
+        }
+      }
+    },
+    {
+      "perturbation_id": "bundle_corrupted_field",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 40.371
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 76.437
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 76.928
+        }
+      }
+    },
+    {
+      "perturbation_id": "bundle_schema_invalid",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 39.553
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 79.163
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "BUNDLE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 78.386
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_bundle_file",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 28.645
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "BUNDLE_MISSING"
+          ],
+          "review_latency_ms": 65.657
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "BUNDLE_MISSING"
+          ],
+          "review_latency_ms": 62.514
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_trace_file",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 27.092
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "TRACE_MISSING"
+          ],
+          "review_latency_ms": 63.675
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_presence",
+          "failure_reason_codes": [
+            "TRACE_MISSING"
+          ],
+          "review_latency_ms": 65.477
+        }
+      }
+    },
+    {
+      "perturbation_id": "trace_schema_invalid",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 28.069
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 57.742
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 64.761
+        }
+      }
+    },
+    {
+      "perturbation_id": "trace_truncated",
+      "family": "artifact_admissibility",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 28.874
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 60.362
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "artifact_schema",
+          "failure_reason_codes": [
+            "TRACE_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 73.937
+        }
+      }
+    },
+    {
+      "perturbation_id": "boundary_locally_consistent_cross_run_lineage",
+      "family": "boundary_cases",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 28.218
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 54.48
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 54.804
+        }
+      }
+    },
+    {
+      "perturbation_id": "boundary_under_specified_pack_still_admissible",
+      "family": "boundary_cases",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 28.503
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 51.357
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 53.34
+        }
+      }
+    },
+    {
+      "perturbation_id": "control_missing_evidence_types",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_EVIDENCE_TYPES_MISSING"
+          ],
+          "review_latency_ms": 13.358
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_EVIDENCE_TYPES_MISSING"
+          ],
+          "review_latency_ms": 14.679
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_EVIDENCE_TYPES_MISSING"
+          ],
+          "review_latency_ms": 12.934
+        }
+      }
+    },
+    {
+      "perturbation_id": "evidence_map_inconsistent",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 12.85
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 11.62
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 11.421
+        }
+      }
+    },
+    {
+      "perturbation_id": "hazard_missing_control_ids",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING"
+          ],
+          "review_latency_ms": 13.354
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING"
+          ],
+          "review_latency_ms": 12.937
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING"
+          ],
+          "review_latency_ms": 13.059
+        }
+      }
+    },
+    {
+      "perturbation_id": "hazard_references_unknown_control",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING",
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 13.151
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING",
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 13.387
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "CONTROL_REFERENCE_MISSING",
+            "EVIDENCE_MAP_INCONSISTENT"
+          ],
+          "review_latency_ms": 13.408
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_required_field",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PACK_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 13.258
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PACK_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 12.696
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PACK_SCHEMA_INVALID"
+          ],
+          "review_latency_ms": 12.742
+        }
+      }
+    },
+    {
+      "perturbation_id": "ponr_ids_missing_for_profile",
+      "family": "pack_structure",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PROFILE_PONR_UNCOVERED"
+          ],
+          "review_latency_ms": 15.091
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PROFILE_PONR_UNCOVERED"
+          ],
+          "review_latency_ms": 15.052
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "pack",
+          "failure_reason_codes": [
+            "PROFILE_PONR_UNCOVERED"
+          ],
+          "review_latency_ms": 15.248
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_lab_s11",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 27.624
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 50.089
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 56.796
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_lab_s19",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 27.752
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 51.901
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 52.488
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_lab_s7",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 27.648
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 53.22
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 56.036
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_toy_lab_s11",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 42.489
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 81.765
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 79.552
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_toy_lab_s19",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 38.387
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 74.423
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 81.531
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_toy_lab_s7",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 39.938
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 64.185
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 65.037
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_traffic_s11",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 35.056
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 56.817
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 76.496
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_traffic_s19",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 36.2
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 69.185
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 73.419
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_traffic_s7",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 36.041
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 55.191
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 68.753
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_warehouse_s11",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 36.919
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 68.629
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 68.436
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_warehouse_s19",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 31.467
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 66.662
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 69.32
+        }
+      }
+    },
+    {
+      "perturbation_id": "positive_valid_warehouse_s7",
+      "family": "positive_control",
+      "expected_outcome": "accept",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 25.599
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 53.826
+        },
+        "full_review": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 72.537
+        }
+      }
+    },
+    {
+      "perturbation_id": "cross_run_trace_bundle_swap",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 34.17
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 58.72
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 70.31
+        }
+      }
+    },
+    {
+      "perturbation_id": "missing_required_ponr_event",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 28.866
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 54.83
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 57.595
+        }
+      }
+    },
+    {
+      "perturbation_id": "stale_bundle_reused",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 31.375
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 57.065
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "provenance",
+          "failure_reason_codes": [
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 62.134
+        }
+      }
+    },
+    {
+      "perturbation_id": "swapped_scenario_id_in_trace",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 29.03
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 52.941
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "scenario_alignment",
+          "failure_reason_codes": [
+            "SCENARIO_PACK_MISMATCH",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 62.657
+        }
+      }
+    },
+    {
+      "perturbation_id": "traffic_wrong_pack_for_scenario",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 28.713
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 52.998
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "scenario_alignment",
+          "failure_reason_codes": [
+            "SCENARIO_PACK_MISMATCH"
+          ],
+          "review_latency_ms": 57.057
+        }
+      }
+    },
+    {
+      "perturbation_id": "warehouse_missing_required_ponr_event",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 27.148
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 51.378
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 52.023
+        }
+      }
+    },
+    {
+      "perturbation_id": "wrong_pack_for_scenario",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 30.095
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 58.548
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "scenario_alignment",
+          "failure_reason_codes": [
+            "SCENARIO_PACK_MISMATCH",
+            "PONR_MISSING"
+          ],
+          "review_latency_ms": 62.989
+        }
+      }
+    },
+    {
+      "perturbation_id": "wrong_required_task_name",
+      "family": "scenario_consistency",
+      "expected_outcome": "reject",
+      "by_mode": {
+        "schema_only": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 27.849
+        },
+        "schema_plus_presence": {
+          "review_exit_ok": true,
+          "failure_stage": null,
+          "failure_reason_codes": [],
+          "review_latency_ms": 51.408
+        },
+        "full_review": {
+          "review_exit_ok": false,
+          "failure_stage": "ponr",
+          "failure_reason_codes": [
+            "PONR_MISSING",
+            "PROVENANCE_MISMATCH"
+          ],
+          "review_latency_ms": 59.479
+        }
+      }
+    }
+  ],
+  "rows": [
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s7",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 27.648
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s7",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 53.22
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s7",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 56.036
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s11",
+      "review_mode": "schema_only",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 27.624
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s11",
+      "review_mode": "schema_plus_presence",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 50.089
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s11",
+      "review_mode": "full_review",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 56.796
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s19",
+      "review_mode": "schema_only",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 27.752
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s19",
+      "review_mode": "schema_plus_presence",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 51.901
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_lab_s19",
+      "review_mode": "full_review",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 52.488
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s7",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 25.599
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s7",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 53.826
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s7",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 72.537
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s11",
+      "review_mode": "schema_only",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 36.919
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s11",
+      "review_mode": "schema_plus_presence",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 68.629
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s11",
+      "review_mode": "full_review",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 68.436
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s19",
+      "review_mode": "schema_only",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 31.467
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s19",
+      "review_mode": "schema_plus_presence",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 66.662
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_warehouse_s19",
+      "review_mode": "full_review",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 69.32
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s7",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 36.041
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s7",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 55.191
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s7",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 68.753
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s11",
+      "review_mode": "schema_only",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 35.056
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s11",
+      "review_mode": "schema_plus_presence",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 56.817
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s11",
+      "review_mode": "full_review",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 76.496
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s19",
+      "review_mode": "schema_only",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 36.2
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s19",
+      "review_mode": "schema_plus_presence",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 69.185
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_traffic_s19",
+      "review_mode": "full_review",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 73.419
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s7",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 39.938
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s7",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 64.185
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s7",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 65.037
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s11",
+      "review_mode": "schema_only",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 42.489
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s11",
+      "review_mode": "schema_plus_presence",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 81.765
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s11",
+      "review_mode": "full_review",
+      "seed": 11,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 79.552
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s19",
+      "review_mode": "schema_only",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 38.387
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s19",
+      "review_mode": "schema_plus_presence",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 74.423
+    },
+    {
+      "scenario_id": "toy_lab_v0",
+      "profile": "lab_v0.1",
+      "family": "positive_control",
+      "perturbation_id": "positive_valid_toy_lab_s19",
+      "review_mode": "full_review",
+      "seed": 19,
+      "expected_outcome": "accept",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": true,
+      "review_latency_ms": 81.531
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "hazard_missing_control_ids",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_REFERENCE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.354
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "hazard_missing_control_ids",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_REFERENCE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 12.937
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "hazard_missing_control_ids",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_REFERENCE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.059
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "hazard_references_unknown_control",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_REFERENCE_MISSING",
+        "EVIDENCE_MAP_INCONSISTENT"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.151
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "hazard_references_unknown_control",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_REFERENCE_MISSING",
+        "EVIDENCE_MAP_INCONSISTENT"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.387
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "hazard_references_unknown_control",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_REFERENCE_MISSING",
+        "EVIDENCE_MAP_INCONSISTENT"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.408
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "control_missing_evidence_types",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_EVIDENCE_TYPES_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.358
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "control_missing_evidence_types",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_EVIDENCE_TYPES_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 14.679
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "control_missing_evidence_types",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "CONTROL_EVIDENCE_TYPES_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 12.934
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "missing_required_field",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "PACK_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 13.258
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "missing_required_field",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "PACK_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 12.696
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "missing_required_field",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "PACK_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 12.742
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "ponr_ids_missing_for_profile",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "PROFILE_PONR_UNCOVERED"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 15.091
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "ponr_ids_missing_for_profile",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "PROFILE_PONR_UNCOVERED"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 15.052
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "ponr_ids_missing_for_profile",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "PROFILE_PONR_UNCOVERED"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 15.248
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "evidence_map_inconsistent",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "EVIDENCE_MAP_INCONSISTENT"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 12.85
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "evidence_map_inconsistent",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "EVIDENCE_MAP_INCONSISTENT"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 11.62
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "pack_structure",
+      "perturbation_id": "evidence_map_inconsistent",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "pack",
+      "failure_reason_codes": [
+        "EVIDENCE_MAP_INCONSISTENT"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 11.421
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "missing_trace_file",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 27.092
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "missing_trace_file",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_presence",
+      "failure_reason_codes": [
+        "TRACE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 63.675
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "missing_trace_file",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_presence",
+      "failure_reason_codes": [
+        "TRACE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 65.477
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "missing_bundle_file",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 28.645
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "missing_bundle_file",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_presence",
+      "failure_reason_codes": [
+        "BUNDLE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 65.657
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "missing_bundle_file",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_presence",
+      "failure_reason_codes": [
+        "BUNDLE_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 62.514
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "trace_schema_invalid",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "TRACE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 28.069
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "trace_schema_invalid",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "TRACE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 57.742
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "trace_schema_invalid",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "TRACE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 64.761
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_schema_invalid",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "BUNDLE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 39.553
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_schema_invalid",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "BUNDLE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 79.163
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_schema_invalid",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "BUNDLE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 78.386
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "trace_truncated",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "TRACE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 28.874
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "trace_truncated",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "TRACE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 60.362
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "trace_truncated",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "TRACE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 73.937
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_corrupted_field",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "BUNDLE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 40.371
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_corrupted_field",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "BUNDLE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 76.437
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_corrupted_field",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "artifact_schema",
+      "failure_reason_codes": [
+        "BUNDLE_SCHEMA_INVALID"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 76.928
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_broken_trace_hash",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 38.637
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_broken_trace_hash",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 129.019
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "artifact_admissibility",
+      "perturbation_id": "bundle_broken_trace_hash",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "provenance",
+      "failure_reason_codes": [
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 104.755
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "wrong_pack_for_scenario",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 30.095
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "wrong_pack_for_scenario",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 58.548
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "wrong_pack_for_scenario",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "scenario_alignment",
+      "failure_reason_codes": [
+        "SCENARIO_PACK_MISMATCH",
+        "PONR_MISSING"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 62.989
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "missing_required_ponr_event",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 28.866
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "missing_required_ponr_event",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 54.83
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "missing_required_ponr_event",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "ponr",
+      "failure_reason_codes": [
+        "PONR_MISSING",
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 57.595
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "remove_final_commit_event_keep_structure",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 37.99
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "remove_final_commit_event_keep_structure",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 57.266
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "remove_final_commit_event_keep_structure",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "ponr",
+      "failure_reason_codes": [
+        "PONR_MISSING",
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 56.761
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "cross_run_trace_bundle_swap",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 34.17
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "cross_run_trace_bundle_swap",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 58.72
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "cross_run_trace_bundle_swap",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "provenance",
+      "failure_reason_codes": [
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 70.31
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "stale_bundle_reused",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 31.375
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "stale_bundle_reused",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 57.065
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "stale_bundle_reused",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "provenance",
+      "failure_reason_codes": [
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 62.134
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "swapped_scenario_id_in_trace",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 29.03
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "swapped_scenario_id_in_trace",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 52.941
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "swapped_scenario_id_in_trace",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "scenario_alignment",
+      "failure_reason_codes": [
+        "SCENARIO_PACK_MISMATCH",
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 62.657
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "wrong_required_task_name",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 27.849
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "wrong_required_task_name",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 51.408
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "wrong_required_task_name",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "ponr",
+      "failure_reason_codes": [
+        "PONR_MISSING",
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 59.479
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "partial_control_omission",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 26.75
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "partial_control_omission",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 53.429
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "partial_control_omission",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "control_coverage",
+      "failure_reason_codes": [
+        "INCOMPLETE_EVIDENCE"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 54.013
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "wellformed_but_incomplete_evidence",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 28.214
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "wellformed_but_incomplete_evidence",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 51.183
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "wellformed_but_incomplete_evidence",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "control_coverage",
+      "failure_reason_codes": [
+        "INCOMPLETE_EVIDENCE"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 55.364
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "manifest_points_to_foreign_artifact",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 26.527
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "manifest_points_to_foreign_artifact",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 50.321
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "manifest_points_to_foreign_artifact",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "provenance",
+      "failure_reason_codes": [
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 52.202
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "warehouse_missing_required_ponr_event",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 27.148
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "warehouse_missing_required_ponr_event",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 51.378
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "warehouse_missing_required_ponr_event",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "ponr",
+      "failure_reason_codes": [
+        "PONR_MISSING",
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 52.023
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "warehouse_manifest_points_to_foreign_artifact",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 26.028
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "warehouse_manifest_points_to_foreign_artifact",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 49.838
+    },
+    {
+      "scenario_id": "warehouse_v0",
+      "profile": "warehouse_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "warehouse_manifest_points_to_foreign_artifact",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "provenance",
+      "failure_reason_codes": [
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 56.372
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "traffic_wrong_pack_for_scenario",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 28.713
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "traffic_wrong_pack_for_scenario",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 52.998
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "scenario_consistency",
+      "perturbation_id": "traffic_wrong_pack_for_scenario",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "scenario_alignment",
+      "failure_reason_codes": [
+        "SCENARIO_PACK_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 57.057
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "traffic_manifest_points_to_foreign_artifact",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 25.527
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "traffic_manifest_points_to_foreign_artifact",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 56.308
+    },
+    {
+      "scenario_id": "traffic_v0",
+      "profile": "medical_v0.1",
+      "family": "adversarial_misleading",
+      "perturbation_id": "traffic_manifest_points_to_foreign_artifact",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "reject",
+      "review_exit_ok": false,
+      "failure_stage": "provenance",
+      "failure_reason_codes": [
+        "PROVENANCE_MISMATCH"
+      ],
+      "reason_matches_expected": true,
+      "review_latency_ms": 52.368
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "boundary_cases",
+      "perturbation_id": "boundary_under_specified_pack_still_admissible",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 28.503
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "boundary_cases",
+      "perturbation_id": "boundary_under_specified_pack_still_admissible",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 51.357
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "boundary_cases",
+      "perturbation_id": "boundary_under_specified_pack_still_admissible",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 53.34
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "boundary_cases",
+      "perturbation_id": "boundary_locally_consistent_cross_run_lineage",
+      "review_mode": "schema_only",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 28.218
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "boundary_cases",
+      "perturbation_id": "boundary_locally_consistent_cross_run_lineage",
+      "review_mode": "schema_plus_presence",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 54.48
+    },
+    {
+      "scenario_id": "lab_profile_v0",
+      "profile": "lab_v0.1",
+      "family": "boundary_cases",
+      "perturbation_id": "boundary_locally_consistent_cross_run_lineage",
+      "review_mode": "full_review",
+      "seed": 7,
+      "expected_outcome": "reject",
+      "observed_outcome": "accept",
+      "review_exit_ok": true,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "reason_matches_expected": false,
+      "review_latency_ms": 54.804
+    }
+  ]
+}
