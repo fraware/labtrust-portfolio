@@ -77,6 +77,7 @@ class TestAssuranceAiesExports(unittest.TestCase):
                     str(packet_dir),
                     "--scenario-id",
                     "lab_profile_v0",
+                    "--submission-mode",
                 ],
                 cwd=str(repo_root()),
                 env=env,
@@ -132,6 +133,7 @@ class TestAssuranceAiesExports(unittest.TestCase):
                 out / "tables" / "failure_family_table.tex",
                 out / "tables" / "negative_failure_families.csv",
                 out / "tables" / "negative_failure_reasons.csv",
+                out / "tables" / "negative_failure_reasons.json",
                 out / "proxy_stress_only" / "traffic_medical_proxy_summary.json",
                 out / "bounded_review_packet" / "packet_manifest.json",
                 out / "figures" / "review_packet_figure.mmd",
@@ -147,4 +149,15 @@ class TestAssuranceAiesExports(unittest.TestCase):
                 (inst.get("portability_case") or {}).get("scenario_id"),
                 "warehouse_v0",
             )
+            self.assertTrue(
+                (inst.get("portability_case") or {}).get("review_exit_ok"),
+                "warehouse portability case must pass in AIES bundle",
+            )
+
+            packet_manifest = json.loads(
+                (out / "bounded_review_packet" / "packet_manifest.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            self.assertEqual(packet_manifest.get("path_redaction"), "submission_mode")
 

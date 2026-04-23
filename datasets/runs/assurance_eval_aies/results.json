@@ -131,33 +131,87 @@
       "run_dir": "<ephemeral_thin_slice_run>",
       "review_mode": "full_review",
       "scenario_id": "warehouse_v0",
-      "evidence_bundle_ok": false,
-      "trace_ok": false,
-      "ponr_events": [],
-      "controls_covered": [],
-      "ponr_coverage": null,
-      "control_coverage_ratio": null,
-      "failure_stage": "pack",
-      "failure_reason_codes": [
-        "PROFILE_PONR_UNCOVERED"
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [
+        {
+          "seq": 8,
+          "type": "task_end",
+          "name": "place"
+        }
       ],
-      "exit_ok": false
+      "controls_covered": [
+        {
+          "id": "C-W01",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-W02",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [
+          "place"
+        ],
+        "found_in_trace": [
+          "place"
+        ],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "exit_ok": true
     },
     "medical_v0.1": {
       "run_dir": "<ephemeral_thin_slice_run>",
       "review_mode": "full_review",
       "scenario_id": "traffic_v0",
-      "evidence_bundle_ok": false,
-      "trace_ok": false,
-      "ponr_events": [],
-      "controls_covered": [],
-      "ponr_coverage": null,
-      "control_coverage_ratio": null,
-      "failure_stage": "pack",
-      "failure_reason_codes": [
-        "PROFILE_PONR_UNCOVERED"
+      "evidence_bundle_ok": true,
+      "trace_ok": true,
+      "ponr_events": [
+        {
+          "seq": 8,
+          "type": "task_end",
+          "name": "actuate"
+        }
       ],
-      "exit_ok": false
+      "controls_covered": [
+        {
+          "id": "C-M01",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        },
+        {
+          "id": "C-M02",
+          "evidence_types": [
+            "trace",
+            "evidence_bundle"
+          ]
+        }
+      ],
+      "ponr_coverage": {
+        "required_task_names": [
+          "actuate"
+        ],
+        "found_in_trace": [
+          "actuate"
+        ],
+        "ratio": 1.0
+      },
+      "control_coverage_ratio": 1.0,
+      "failure_stage": null,
+      "failure_reason_codes": [],
+      "exit_ok": true
     }
   },
   "review": {

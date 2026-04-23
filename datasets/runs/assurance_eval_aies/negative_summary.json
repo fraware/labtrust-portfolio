@@ -7,9 +7,9 @@
     "localization_accuracy": 0.931,
     "n_valid": 12,
     "n_invalid": 29,
-    "mean_latency_ms_valid_cases": 68.367,
-    "mean_latency_ms_invalid_cases": 52.588,
-    "median_latency_ms_all_cases": 59.479,
+    "mean_latency_ms_valid_cases": 54.135,
+    "mean_latency_ms_invalid_cases": 48.218,
+    "median_latency_ms_all_cases": 52.77,
     "governance_evidence_discrimination_accuracy": 0.9655,
     "invalid_reject_lift_full_minus_schema_only": 0.5862,
     "false_accept_drop_full_vs_schema_only": 0.5862,
@@ -25,9 +25,9 @@
       "localization_accuracy": 0.3448,
       "n_valid": 12,
       "n_invalid": 29,
-      "mean_latency_ms_valid_cases": 33.76,
-      "mean_latency_ms_invalid_cases": 26.804,
-      "median_latency_ms_all_cases": 28.503
+      "mean_latency_ms_valid_cases": 28.201,
+      "mean_latency_ms_invalid_cases": 28.488,
+      "median_latency_ms_all_cases": 26.906
     },
     "schema_plus_presence": {
       "valid_accept_rate": 1.0,
@@ -37,9 +37,9 @@
       "localization_accuracy": 0.4138,
       "n_valid": 12,
       "n_invalid": 29,
-      "mean_latency_ms_valid_cases": 62.158,
-      "mean_latency_ms_invalid_cases": 50.845,
-      "median_latency_ms_all_cases": 54.83
+      "mean_latency_ms_valid_cases": 51.419,
+      "mean_latency_ms_invalid_cases": 48.59,
+      "median_latency_ms_all_cases": 54.669
     },
     "full_review": {
       "valid_accept_rate": 1.0,
@@ -49,9 +49,9 @@
       "localization_accuracy": 0.931,
       "n_valid": 12,
       "n_invalid": 29,
-      "mean_latency_ms_valid_cases": 68.367,
-      "mean_latency_ms_invalid_cases": 52.588,
-      "median_latency_ms_all_cases": 59.479
+      "mean_latency_ms_valid_cases": 54.135,
+      "mean_latency_ms_invalid_cases": 48.218,
+      "median_latency_ms_all_cases": 52.77
     }
   },
   "by_family": {

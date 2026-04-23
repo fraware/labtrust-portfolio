@@ -1,0 +1,37 @@
+{
+  "experiment": "P0_E4_coordination_shock_focus",
+  "scenario_id": "rep_cps_scheduling_v0",
+  "regime": "coordination_shock",
+  "rows": [
+    {
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "productive_success_rate": 0.55,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 3.3,
+      "tasks_completed_stdev": 0.9233805168766387,
+      "task_latency_ms_p95_mean": 147.2510473491014,
+      "top_outcome_class": "success_safe",
+      "top_failure_or_safe_fail_reason": "outcome:success_safe",
+      "n_seeds": 20
+    },
+    {
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "top_outcome_class": "partial_safe",
+      "top_failure_or_safe_fail_reason": "outcome:partial_safe",
+      "n_seeds": 20
+    }
+  ]
+}

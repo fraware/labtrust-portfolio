@@ -12,11 +12,11 @@
   },
   "portability_case": {
     "scenario_id": "warehouse_v0",
-    "review_exit_ok": false,
-    "trace_ok": false,
-    "evidence_bundle_ok": false,
-    "ponr_coverage_ratio": null,
-    "control_coverage_ratio": null,
+    "review_exit_ok": true,
+    "trace_ok": true,
+    "evidence_bundle_ok": true,
+    "ponr_coverage_ratio": 1.0,
+    "control_coverage_ratio": 1.0,
     "review_latency_ms": null
   }
 }

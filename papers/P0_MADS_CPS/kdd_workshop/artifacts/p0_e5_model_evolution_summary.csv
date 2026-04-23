@@ -1,0 +1,4 @@
+version_label,version_type,raw_conformance_rate,tier2_rate,tier3_rate,strong_replay_rate,release_allow_rate,productive_success_rate,safe_nonproductive_rate,tasks_completed_mean,tasks_completed_stdev,task_latency_ms_p95_mean,n_runs
+V0_stable_baseline,stable,0.975,1.0,1.0,0.975,0.975,0.7125,0.08333333333333333,3.683333333333333,1.3751125223389702,83.07594936514546,240
+V1_benign_update,benign_update,0.975,1.0,1.0,0.975,0.975,0.7125,0.08333333333333333,3.683333333333333,1.3751125223389702,61.87144123593056,240
+V2_regressive_update,regressive_update,0.975,1.0,1.0,0.975,0.975,0.6291666666666667,0.16666666666666666,3.35,1.7047803819341703,80.12861986145457,240

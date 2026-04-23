@@ -8,7 +8,7 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 ## P0 — MADS-CPS (machine-checkable minimum assurance bar)
 
-**What it measures:** E1 conformance corpus (challenge set with injected faults; checker agreement; Tier 1 validates `maestro_report.json` against MAESTRO_REPORT v0.2). E2 restricted auditability (4-col verification-mode admissibility matrix). E3 replay link (independent verifier; **`--standalone-verifier`** recommended for publishable runs). E4 algorithm-independence (two adapters, same artifact interface).
+**What it measures:** E1 conformance corpus (challenge set with injected faults; checker agreement; Tier 1 validates `maestro_report.json` against MAESTRO_REPORT v0.2). E2 restricted auditability (4-col verification-mode admissibility matrix). E3 replay link (independent verifier; **`--standalone-verifier`** recommended for publishable runs). E4 algorithm-independence (two adapters, same artifact interface) plus admissibility-vs-productivity export. E5 model evolution / upstream-version-shift evaluation under fixed interface semantics.
 
 **Result locations:**
 - `datasets/runs/p0_conformance_corpus/` — E1 corpus (case_* dirs, corpus_manifest.json)
@@ -20,6 +20,11 @@ This document explains what each paper (P0–P8) measures, where its results are
 - `datasets/runs/p0_e4_controller_pairs.jsonl` — E4 paired per-seed controller-separating evidence
 - `datasets/runs/p0_e4_raw_failure_reasons.json` — E4 raw-failure causal accounting (tier, reason, offending key/path, replay-failed flag)
 - `datasets/runs/p0_e4_controller_matrix.json` — E4 controller-matrix output
+- `datasets/runs/p0_e4_admissibility_vs_productivity.json` / `.csv` — E4 manuscript-facing admissibility-vs-productivity summary
+- `datasets/runs/p0_e4_coordination_shock_focus.json` / `.csv` — focused E4 slice for `coordination_shock` + `rep_cps_scheduling_v0`
+- `datasets/runs/p0_e5_model_evolution.json` — E5 version-shift summary and pairwise deltas vs V0
+- `datasets/runs/p0_e5_model_evolution_per_seed.jsonl` — E5 per-seed output
+- `datasets/runs/p0_e5_model_evolution_summary.csv` — E5 compact table output
 - `datasets/runs/e2_redaction_demo/` — E2 redacted trace and evidence_bundle_redacted.json
 - `datasets/releases/p0_e3_release/` — released run; `datasets/releases/portfolio_v0.1/p0_conformance_summary.json` — build_p0_conformance_summary.py
 
@@ -29,9 +34,10 @@ This document explains what each paper (P0–P8) measures, where its results are
 - **E2:** 4-col verification-mode admissibility matrix; redacted trace preserves schema and integrity, replay_ok false. export_e2_admissibility_matrix.py.
 - **E4:** controller-matrix summaries and per-seed diagnostics; use raw + normalized + per-seed + diagnostics artifacts. `export_p0_table3.py` prefers strong replay from `p0_e4_raw_summary.json` and requires E3 strong fields. In the current publishable run, `coordination_shock` on `rep_cps_scheduling_v0` shows MAESTRO-core divergence (`p0_e4_diagnostics.json`) even when high-level metrics remain close.
 - **E4 focused validation package:** use `export_p0_e4_controller_divergence_table.py` for the `coordination_shock + rep_cps_scheduling_v0` comparison row set, and `export_p0_e4_claim_matrix.py` for overclaim guardrails. Semantics note for the zero-task anomaly row: `docs/P0_E4_COORDINATION_SHOCK_NOTE.md`. Productivity/admissibility split is explicit via per-seed `productive_success` / `safe_nonproductive` and summary `productive_success_rate` / `safe_nonproductive_rate`.
+- **E5:** compare version conditions (V0 stable, V1 benign update, V2 regressive update) under fixed scenarios/regimes and fixed artifact interface. Read `pairwise_deltas_vs_v0` in `p0_e5_model_evolution.json` for claim-ready deltas.
 - **Verification mode:** verification_mode (public | evaluator | regulator); kernel/mads/VERIFICATION_MODES.v0.1.md.
 
-**Tables and figures:** Table 1: build_p0_conformance_corpus.py, export_e1_corpus_table.py. Table 2: e2_redaction_demo.py, export_e2_admissibility_matrix.py. Table 3: run_p0_e4_controller_matrix.py, export_p0_table3.py (strong replay preference: E4 raw baseline rows, then E3 strong replay). Figures 1-3: export_p0_assurance_pipeline.py, export_p0_tier_lattice.py, export_p0_redaction_figure.py. Per-seed E3: export_e3_table.py. plot_e3_latency.py. build_p0_conformance_summary.py. See papers/P0_MADS-CPS/DRAFT.md Appendix.
+**Tables and figures:** Table 1: build_p0_conformance_corpus.py, export_e1_corpus_table.py. Table 2: e2_redaction_demo.py, export_e2_admissibility_matrix.py. Table 3: run_p0_e4_controller_matrix.py, export_p0_table3.py (strong replay preference: E4 raw baseline rows, then E3 strong replay). E4 focused tables: export_p0_e4_controller_divergence_table.py, export_p0_e4_claim_matrix.py, export_p0_e4_admissibility_vs_productivity.py. E5 summary table: run_p0_e5_model_evolution.py (`p0_e5_model_evolution_summary.csv`). Figures 1-3: export_p0_assurance_pipeline.py, export_p0_tier_lattice.py, export_p0_redaction_figure.py. Per-seed E3: export_e3_table.py. plot_e3_latency.py. build_p0_conformance_summary.py. Workshop packaging: `papers/P0_MADS_CPS/kdd_workshop/`.
 
 ---
 
@@ -201,6 +207,9 @@ This document explains what each paper (P0–P8) measures, where its results are
 - `datasets/runs/assurance_eval/results.json` — mapping_check, review, reviews
 - `datasets/runs/assurance_eval/robust_results.json` — positive-control stability matrix (`aggregate`, `rows`, `run_manifest`)
 - `datasets/runs/assurance_eval/negative_results.json` — discrimination: `aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, `rows` (run with `--submission-mode` for path redaction in release bundles)
+- `datasets/runs/assurance_eval_aies/` — AIES paper-facing bundle:
+  `baseline_summary.json`, `institutional_positive_summary.json`, `negative_summary.json`,
+  `bounded_review_packet/`, `tables/`, `figures/`, `RUN_MANIFEST.json`, `README.md`
 - `papers/P7_StandardsMapping/p7_*.csv` — Tables 4–6 + `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, `p7_submission_manifest_redacted.json`, `p7_generation_metadata.json` (`export_p7_negative_tables.py`)
 - **Auditor script:** `scripts/audit_bundle.py` — pass/fail mapping completeness and PONR coverage; `--run-dir` for optional run review; `--release datasets/releases/portfolio_v0.1` for one-command audit over a release dir (runs mapping + PONR; if release contains evidence_bundle.json, runs review there too). JSON + human output.
 - **Part 11:** `docs/PART11_AUDIT_TRAIL_ALIGNMENT.md` — each requirement mapped to artifact path and field/event (machine-checkable; no prose-only).
@@ -214,6 +223,13 @@ This document explains what each paper (P0–P8) measures, where its results are
 - **Auditor:** Run `audit_bundle.py [--run-dir path]`; output includes `mapping_completeness`, `ponr_coverage`, `review_exit_ok` (if run-dir given).
 
 **Tables and figures:** `scripts/export_assurance_tables.py` (Tables 1–3). `scripts/export_assurance_gsn.py`, `scripts/export_p7_mapping_flow.py` (Figure 0), `docs/figures/p7_review_stages.mmd` (Figure 2), `scripts/render_p7_mermaid_figures.py`. `scripts/run_assurance_negative_eval.py --submission-mode` + `scripts/export_p7_negative_tables.py --submission-mode` (Tables 4–6 + supplements). Non-goals: P7 DRAFT, kernel/assurance_pack/README.md, profiles/lab/v0.1/README.md. Kill criterion K7: no "template theater"; every mapping claim checkable by script or schema.
+
+**AIES sprint exports:** `scripts/export_bounded_review_packet.py`,
+`scripts/export_aies_assurance_tables.py`, and
+`scripts/export_aies_review_packet_figure.py` generate bounded-access review artifacts,
+institutional baseline/portability tables, and reviewer-view figure assets under
+`datasets/runs/assurance_eval_aies/`. Traffic/medical proxy outputs are isolated in
+`proxy_stress_only/` and excluded from main-text tables by default.
 
 ---
 
@@ -255,7 +271,7 @@ This document explains what each paper (P0–P8) measures, where its results are
 | P4 | Fault sweep (incl. calibration_invalid_01); recovery metrics (steps_after_fault, tasks_after_fault); Centralized/Blackboard/RetryHeavy baselines; anti-gaming + scoring_proof; adapter_costs.json; plot_maestro_recovery. |
 | P5 | Held-out MAE; per_scenario_baseline_mae; feature/regression; 95% CI; scaling_fit; success_criteria_met.trigger_met; --seeds 20, --fault-mix. |
 | P6 | Red-team (15) + confusable_deputy (6) + jailbreak_style (4) + adaptive suite; validator stack allow_list+safe_args+ponr_gate(+privilege heuristic); run_manifest (timestamp_iso, evaluator_version, policy_version, prompt_template_hash, suite_mode); e2e_denial_trace; adapter_latency (3 scenarios, 20 seeds); optional latency_decomposition (--latency-decomposition); real_llm / real_llm_models with publishable default --real-llm-runs 10 --real-llm-suite full (pass_rate, Wilson CI); cross_model_summary when 2+ models; baseline 3-way tool-level + args_unsafe + benign (--baseline-plan benign); denial_trace_stats; layer attribution (denial_by_layer incl. ponr_gate_only, export_p6_layer_attribution); failure analysis (run_details, export_p6_failure_analysis); export_llm_redteam_table, export_p6_baseline_table, export_p6_artifact_hashes, export_p6_reproducibility_table, export_p6_cross_model_heatmap, export_p6_latency_decomposition; optional p6_concurrency_benchmark, p6_capture_ablation, p6_storage_benchmark, p6_cost_model, p6_policy_sweep, p6_replanning_benchmark, p6_adaptive_suite_run; P6_OWASP_MAPPING. |
-| P7 | mapping_check + ponr_coverage_ok; robust_results; negative_results + ablation CSVs; three profiles; per_profile; P7_STANDARDS_MAPPING; P7_REVIEW_FAILURE_CODES; P7_PERTURBATION_CHECKLIST; audit_bundle; review modes; export_assurance_gsn; mapping flow + review-stage figures; P7_AUDITOR_FEEDBACK_PROTOCOL; non-goals; K7. |
+| P7 | mapping_check + ponr_coverage_ok; robust_results; negative_results + ablation CSVs; three profiles; per_profile; **AIES bundle** under `assurance_eval_aies/` with institutional baseline (`lab_profile_v0`), portability row (`warehouse_v0`), bounded review packet, negative-family/failure exports, reviewer figure, and `RUN_MANIFEST.json`; P7_STANDARDS_MAPPING; P7_REVIEW_FAILURE_CODES; P7_PERTURBATION_CHECKLIST; audit_bundle; review modes; export_assurance_gsn; mapping flow + review-stage figures; P7_AUDITOR_FEEDBACK_PROTOCOL; non-goals; K7. |
 | P8 | fixed/meta/naive; --scenario v0/v1; --non-vacuous + stress_selection_policy; verify_p8_meta_artifacts; optional --fallback-adapter retry_heavy; comparison.json + collapse_sweep.json; collapse_paired_analysis; export_meta_tables; plot_meta_collapse (uncertainty). |
 
 For full interpretation, follow-up experiments, and verification checklists, see [EVAL_RESULTS_INTERPRETATION.md](EVAL_RESULTS_INTERPRETATION.md). For how to run each pipeline, see [EVALS_RUNBOOK.md](EVALS_RUNBOOK.md).

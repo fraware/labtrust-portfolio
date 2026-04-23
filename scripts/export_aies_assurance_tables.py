@@ -289,6 +289,18 @@ def main() -> int:
     reason_headers = ["failure_reason_code", "count_full_review_rejections"]
     reason_rows = [[k, v] for k, v in sorted(failure_counts.items(), key=lambda kv: kv[1], reverse=True)]
     _write_csv(out_tables / "negative_failure_reasons.csv", reason_headers, reason_rows)
+    (out_tables / "negative_failure_reasons.json").write_text(
+        json.dumps(
+            {
+                "top_failure_reasons": [
+                    {"failure_reason_code": k, "count": v} for k, v in reason_rows
+                ]
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
     run_manifest = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -297,7 +309,7 @@ def main() -> int:
             "python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval_aies",
             "python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval_aies --submission-mode",
             "python -c \"from pathlib import Path; from labtrust_portfolio.thinslice import run_thin_slice; d=Path('datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7'); d.mkdir(parents=True, exist_ok=True); run_thin_slice(d, seed=7, scenario_id='lab_profile_v0', drop_completion_prob=0.0)\"",
-            "python scripts/export_bounded_review_packet.py --run-dir datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7 --out datasets/runs/assurance_eval_aies/bounded_review_packet --scenario-id lab_profile_v0",
+            "python scripts/export_bounded_review_packet.py --run-dir datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7 --out datasets/runs/assurance_eval_aies/bounded_review_packet --scenario-id lab_profile_v0 --submission-mode",
             "python scripts/export_aies_assurance_tables.py --in datasets/runs/assurance_eval_aies --out datasets/runs/assurance_eval_aies/tables",
             "python scripts/export_aies_review_packet_figure.py --in datasets/runs/assurance_eval_aies/bounded_review_packet --out datasets/runs/assurance_eval_aies/figures",
         ],
@@ -343,7 +355,7 @@ def main() -> int:
                 "python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval_aies",
                 "python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval_aies --submission-mode",
                 "python -c \"from pathlib import Path; from labtrust_portfolio.thinslice import run_thin_slice; d=Path('datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7'); d.mkdir(parents=True, exist_ok=True); run_thin_slice(d, seed=7, scenario_id='lab_profile_v0', drop_completion_prob=0.0)\"",
-                "python scripts/export_bounded_review_packet.py --run-dir datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7 --out datasets/runs/assurance_eval_aies/bounded_review_packet --scenario-id lab_profile_v0",
+                "python scripts/export_bounded_review_packet.py --run-dir datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7 --out datasets/runs/assurance_eval_aies/bounded_review_packet --scenario-id lab_profile_v0 --submission-mode",
                 "python scripts/export_aies_assurance_tables.py --in datasets/runs/assurance_eval_aies --out datasets/runs/assurance_eval_aies/tables",
                 "python scripts/export_aies_review_packet_figure.py --in datasets/runs/assurance_eval_aies/bounded_review_packet --out datasets/runs/assurance_eval_aies/figures",
                 "```",

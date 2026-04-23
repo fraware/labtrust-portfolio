@@ -153,6 +153,7 @@ Exit code 1 if any red-team case fails (expected_block not satisfied).
 - **Review:** `scripts/review_assurance_run.py <run_dir> [--scenario-id <id>] [--review-mode schema_only|schema_plus_presence|full_review]`. Default `full_review`: scenario/trace alignment, PONR tasks, **all** evidence types per control, bundle+release SHA vs files. Weaker modes are **ablation baselines** for discrimination experiments. Failure codes: `docs/P7_REVIEW_FAILURE_CODES.md`. Scripted review is partial; no certification claim.
 - **Robust matrix:** `scripts/run_assurance_robust_eval.py` (default seeds 1..20, 400 runs). `run_manifest.scenario_profile_alignment` documents scenario→pack pairing; see note for traffic_v0↔medical_v0.1.
 - **Negative controls:** `scripts/run_assurance_negative_eval.py [--quick]` writes `datasets/runs/assurance_eval/negative_results.json` (`generation`, `aggregate`, `by_mode`, `by_family`, `by_scenario`, `by_perturbation`, per-row codes and latency). Use `--submission-mode` (or `--redact-paths`) for blind-review-safe manifests. `scripts/export_p7_negative_tables.py` emits CSVs under `papers/P7_StandardsMapping/`: Tables 4–6 (`p7_negative_family_summary.csv`, `p7_ablation_summary.csv`, `p7_failure_reason_breakdown.csv`) plus `p7_perturbation_reject_matrix.csv`, `p7_aggregate_lift_metrics.csv`, `p7_latency_by_mode.csv`, `p7_negative_by_scenario.csv`, `p7_boundary_case_summary.csv`, and provenance sidecars (`p7_submission_manifest_redacted.json`, `p7_generation_metadata.json`).
+- **AIES 2026 bundle:** Use a dedicated output root `datasets/runs/assurance_eval_aies/`. Run `run_assurance_eval.py` and `run_assurance_negative_eval.py --submission-mode` into that root, materialize a representative `lab_profile_v0` run, then export bounded packet/tables/figure. Main-text artifacts are institutional baseline (`lab_profile_v0`) and portability (`warehouse_v0`); traffic/medical proxy artifacts are exported only under `proxy_stress_only/`. Use `export_bounded_review_packet.py --submission-mode` for path-redacted packet metadata.
 - **Export:** `scripts/export_assurance_tables.py [--results path]` prints Table 1–2; Table 3 from `robust_results.json` when present. GSN-lite: `export_assurance_gsn.py`. Camera-ready Mermaid: `render_p7_mermaid_figures.py` (includes `docs/figures/p7_review_stages.mmd` — Figure 2 review-stage flow). Table index: `papers/P7_StandardsMapping/generated_tables.md`. Perturbation brief vs ids: `docs/P7_PERTURBATION_CHECKLIST.md`.
 - **Integration tests:** `tests/test_assurance_p7.py`; `tests/test_assurance_negative_eval.py` (quick negative eval + export smoke + CSV↔JSON consistency checks for `by_mode`, `by_family`, and aggregate lift fields).
 
@@ -164,6 +165,13 @@ PYTHONPATH=impl/src python scripts/audit_bundle.py [--run-dir path/to/run] [--re
 PYTHONPATH=impl/src python scripts/export_assurance_tables.py
 python scripts/export_p7_negative_tables.py --input datasets/runs/assurance_eval/negative_results.json [--submission-mode]
 python scripts/export_assurance_gsn.py
+# AIES packaging path:
+PYTHONPATH=impl/src python scripts/run_assurance_eval.py --out datasets/runs/assurance_eval_aies
+PYTHONPATH=impl/src python scripts/run_assurance_negative_eval.py --out datasets/runs/assurance_eval_aies --submission-mode
+PYTHONPATH=impl/src python -c "from pathlib import Path; from labtrust_portfolio.thinslice import run_thin_slice; d=Path('datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7'); d.mkdir(parents=True, exist_ok=True); run_thin_slice(d, seed=7, scenario_id='lab_profile_v0', drop_completion_prob=0.0)"
+PYTHONPATH=impl/src python scripts/export_bounded_review_packet.py --run-dir datasets/runs/assurance_eval_aies/runs/lab_profile_v0_seed7 --out datasets/runs/assurance_eval_aies/bounded_review_packet --scenario-id lab_profile_v0 --submission-mode
+python scripts/export_aies_assurance_tables.py --in datasets/runs/assurance_eval_aies --out datasets/runs/assurance_eval_aies/tables
+python scripts/export_aies_review_packet_figure.py --in datasets/runs/assurance_eval_aies/bounded_review_packet --out datasets/runs/assurance_eval_aies/figures
 ```
 
 ## P8 — Meta-Coordination

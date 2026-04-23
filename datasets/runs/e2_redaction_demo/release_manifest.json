@@ -1,20 +1,20 @@
 {
   "version": "0.1",
-  "release_id": "release_run_64a9331b85",
-  "created_at_utc": "2026-04-22T06:42:48.341619Z",
+  "release_id": "release_run_f4a44b8456",
+  "created_at_utc": "2026-04-23T11:33:19.680869Z",
   "kernel_version": "0.1",
   "artifacts": [
     {
-      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/e2_redaction_demo/trace.json",
-      "sha256": "75951a730c3927f9258b4f4e90189f7d8784c5a84d024270155f959cfdd2ab1b"
+      "path": "datasets/runs/e2_redaction_demo/trace.json",
+      "sha256": "50d2cc8ae6f2b83b19e894ab19da65fbeaca3cdd0dc1b95cdcaf64f1ad9f0461"
     },
     {
-      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/e2_redaction_demo/maestro_report.json",
-      "sha256": "ef116c3d8d5d06369d8112ad147fb9fe6ee80041b9e9a10e111acdf826a5f23e"
+      "path": "datasets/runs/e2_redaction_demo/maestro_report.json",
+      "sha256": "21bd8ebae33c95db2e142f002ca6851054507210662e4fcbd33369e8e9879b2c"
     },
     {
-      "path": "C:/Users/mateo/labtrust-portfolio/datasets/runs/e2_redaction_demo/evidence_bundle.json",
-      "sha256": "fb23006b834044f6094d5ff44fbbaa3a86ddb1ce4fea4f6b081640eb3e16b76f"
+      "path": "datasets/runs/e2_redaction_demo/evidence_bundle.json",
+      "sha256": "d73187ebff08beb27eeaaa4c692b45069b1bdbd32c86eabd4f81fdb6057bf4bc"
     }
   ]
 }

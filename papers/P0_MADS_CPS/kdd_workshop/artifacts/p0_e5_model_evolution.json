@@ -1,0 +1,152 @@
+{
+  "experiment": "P0_E5_model_evolution",
+  "run_manifest": {
+    "commit_sha": "eef272e691d53d53495dd2ca6e8017a0ccb2a7a9",
+    "script": "run_p0_e5_model_evolution.py",
+    "scenarios": [
+      "toy_lab_v0",
+      "lab_profile_v0",
+      "rep_cps_scheduling_v0"
+    ],
+    "regimes": [
+      "baseline",
+      "coordination_shock"
+    ],
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "seed_count": 20,
+    "version_conditions": [
+      {
+        "version_label": "V0_stable_baseline",
+        "version_type": "stable",
+        "centralized_override_params": {},
+        "rep_cps_override_params": {},
+        "comparison_kind": "synthetic_version_shift"
+      },
+      {
+        "version_label": "V1_benign_update",
+        "version_type": "benign_update",
+        "centralized_override_params": {
+          "delay_p95_ms": 52.0
+        },
+        "rep_cps_override_params": {
+          "delay_p95_ms": 52.0
+        },
+        "comparison_kind": "synthetic_version_shift"
+      },
+      {
+        "version_label": "V2_regressive_update",
+        "version_type": "regressive_update",
+        "centralized_override_params": {},
+        "rep_cps_override_params": {
+          "safety_gate_max_load": 0.2
+        },
+        "comparison_kind": "synthetic_version_shift"
+      }
+    ],
+    "comparison_mode": "synthetic_version_shift",
+    "artifact_interface": "fixed_mads_cps_interface"
+  },
+  "per_version_summary": [
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "raw_conformance_rate": 0.975,
+      "tier2_rate": 1.0,
+      "tier3_rate": 1.0,
+      "strong_replay_rate": 0.975,
+      "release_allow_rate": 0.975,
+      "productive_success_rate": 0.7125,
+      "safe_nonproductive_rate": 0.08333333333333333,
+      "tasks_completed_mean": 3.683333333333333,
+      "tasks_completed_stdev": 1.3751125223389702,
+      "task_latency_ms_p95_mean": 83.07594936514546,
+      "top_failure_reasons": [
+        "PONR coverage: trace missing task_end for: disposition_commit"
+      ],
+      "n_runs": 240
+    },
+    {
+      "version_label": "V1_benign_update",
+      "version_type": "benign_update",
+      "raw_conformance_rate": 0.975,
+      "tier2_rate": 1.0,
+      "tier3_rate": 1.0,
+      "strong_replay_rate": 0.975,
+      "release_allow_rate": 0.975,
+      "productive_success_rate": 0.7125,
+      "safe_nonproductive_rate": 0.08333333333333333,
+      "tasks_completed_mean": 3.683333333333333,
+      "tasks_completed_stdev": 1.3751125223389702,
+      "task_latency_ms_p95_mean": 61.87144123593056,
+      "top_failure_reasons": [
+        "PONR coverage: trace missing task_end for: disposition_commit"
+      ],
+      "n_runs": 240
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "raw_conformance_rate": 0.975,
+      "tier2_rate": 1.0,
+      "tier3_rate": 1.0,
+      "strong_replay_rate": 0.975,
+      "release_allow_rate": 0.975,
+      "productive_success_rate": 0.6291666666666667,
+      "safe_nonproductive_rate": 0.16666666666666666,
+      "tasks_completed_mean": 3.35,
+      "tasks_completed_stdev": 1.7047803819341703,
+      "task_latency_ms_p95_mean": 80.12861986145457,
+      "top_failure_reasons": [
+        "PONR coverage: trace missing task_end for: disposition_commit"
+      ],
+      "n_runs": 240
+    }
+  ],
+  "pairwise_deltas_vs_v0": [
+    {
+      "version_label": "V1_benign_update",
+      "vs_version": "V0_stable_baseline",
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0,
+      "delta_productive_success_rate": 0.0,
+      "delta_safe_nonproductive_rate": 0.0,
+      "delta_tasks_completed_mean": 0.0
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "vs_version": "V0_stable_baseline",
+      "delta_raw_conformance_rate": 0.0,
+      "delta_strong_replay_rate": 0.0,
+      "delta_release_allow_rate": 0.0,
+      "delta_productive_success_rate": -0.08333333333333337,
+      "delta_safe_nonproductive_rate": 0.08333333333333333,
+      "delta_tasks_completed_mean": -0.33333333333333304
+    }
+  ],
+  "paths": {
+    "per_seed_jsonl": "datasets/runs/p0_e5_model_evolution_per_seed.jsonl",
+    "summary_csv": "datasets/runs/p0_e5_model_evolution_summary.csv"
+  }
+}

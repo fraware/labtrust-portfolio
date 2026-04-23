@@ -60,6 +60,17 @@ def _copy_required(run_dir: Path, out_dir: Path, names: List[str]) -> Dict[str, 
     return copied
 
 
+def _pack_profile_dir(pack_path: Path) -> Path:
+    return pack_path.resolve().parent
+
+
+def _redact_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(REPO.resolve())).replace("\\", "/")
+    except ValueError:
+        return "<redacted_external_path>"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Export bounded review packet")
     ap.add_argument("--run-dir", type=Path, required=True, help="Source run directory")
@@ -83,6 +94,11 @@ def main() -> int:
         default="AIES-C1",
         help="Identifier for claim under review",
     )
+    ap.add_argument(
+        "--submission-mode",
+        action="store_true",
+        help="Redact machine-local absolute paths in packet metadata.",
+    )
     args = ap.parse_args()
 
     run_dir = args.run_dir.resolve()
@@ -103,7 +119,7 @@ def main() -> int:
         args.pack,
         args.scenario_id,
         args.review_mode,
-        profile_dir=args.pack.parent,
+        profile_dir=_pack_profile_dir(args.pack),
         repo_root=REPO,
     )
 
@@ -119,6 +135,7 @@ def main() -> int:
     shutil.copy2(args.pack, pack_dst)
     copied_hashes["assurance_pack.json"] = _sha256(pack_dst)
 
+    run_dir_source = _redact_path(run_dir) if args.submission_mode else str(run_dir)
     claim = {
         "claim_id": args.claim_id,
         "claim_text": (
@@ -128,7 +145,7 @@ def main() -> int:
         ),
         "scenario_id": args.scenario_id,
         "review_mode": args.review_mode,
-        "run_dir_source": str(run_dir),
+        "run_dir_source": run_dir_source,
         "bounded_access_note": (
             "This packet is intended for external review with bounded artifact "
             "access and no privileged runtime internals."
@@ -212,9 +229,10 @@ def main() -> int:
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "git_commit_sha": _git_head(),
         "script": "export_bounded_review_packet.py",
-        "source_run_dir": str(run_dir),
+        "source_run_dir": run_dir_source,
         "scenario_id": args.scenario_id,
         "review_mode": args.review_mode,
+        "path_redaction": "submission_mode" if args.submission_mode else "none",
         "files_sha256": copied_hashes,
     }
     (out_dir / "packet_manifest.json").write_text(

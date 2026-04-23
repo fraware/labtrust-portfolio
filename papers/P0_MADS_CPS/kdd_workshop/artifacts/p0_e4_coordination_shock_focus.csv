@@ -1,0 +1,3 @@
+controller,scenario_id,regime,raw_conformance_rate,strong_replay_rate,productive_success_rate,safe_nonproductive_rate,tasks_completed_mean,tasks_completed_stdev,task_latency_ms_p95_mean,top_outcome_class,top_failure_or_safe_fail_reason,n_seeds
+centralized,rep_cps_scheduling_v0,coordination_shock,1.0,1.0,0.55,0.0,3.3,0.9233805168766387,147.2510473491014,success_safe,outcome:success_safe,20
+rep_cps,rep_cps_scheduling_v0,coordination_shock,1.0,1.0,0.0,1.0,0.0,0.0,0.0,partial_safe,outcome:partial_safe,20

@@ -67,7 +67,13 @@ def _redact_ephemeral_paths(obj: object) -> None:
             _redact_ephemeral_paths(item)
 
 
-def _run_review(run_dir: Path, scenario_id: str, pack_path: Path, env: dict) -> dict:
+def _run_review(
+    run_dir: Path,
+    scenario_id: str,
+    pack_path: Path,
+    profile_dir: Path,
+    env: dict,
+) -> dict:
     review_cmd = [
         sys.executable,
         str(REPO / "scripts" / "review_assurance_run.py"),
@@ -76,6 +82,8 @@ def _run_review(run_dir: Path, scenario_id: str, pack_path: Path, env: dict) -> 
         scenario_id,
         "--pack",
         str(pack_path),
+        "--profile-dir",
+        str(profile_dir),
     ]
     r = subprocess.run(
         review_cmd, cwd=str(REPO), env=env, capture_output=True, text=True
@@ -149,6 +157,7 @@ def main() -> int:
                 run_dirs[scenario_id],
                 scenario_id,
                 PROFILE_PACKS[0][1],
+                PROFILE_PACKS[0][1].parent,
                 env,
             )
 
@@ -157,7 +166,11 @@ def main() -> int:
             pack_path = PACK_BY_NAME.get(profile_name)
             if pack_path and pack_path.exists():
                 results["per_profile"][profile_name] = _run_review(
-                    run_dirs[scen], scen, pack_path, env
+                    run_dirs[scen],
+                    scen,
+                    pack_path,
+                    pack_path.parent,
+                    env,
                 )
 
     # Table 1 flagship summary: lab_profile_v0 (kernel PONR disposition_commit), not toy_lab_v0
