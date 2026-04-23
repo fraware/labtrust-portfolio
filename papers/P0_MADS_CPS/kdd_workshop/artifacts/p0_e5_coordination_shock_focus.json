@@ -1,0 +1,78 @@
+{
+  "experiment": "P0_E5_model_evolution_coordination_shock_focus",
+  "source_by_cell": "papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_model_evolution_by_cell.json",
+  "filter": {
+    "scenario_id": "rep_cps_scheduling_v0",
+    "regime": "coordination_shock",
+    "version_label": [
+      "V0_stable_baseline",
+      "V2_regressive_update"
+    ]
+  },
+  "rows": [
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.55,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 3.3,
+      "tasks_completed_stdev": 0.9233805168766387,
+      "task_latency_ms_p95_mean": 147.2510473491014,
+      "n_runs": 20
+    },
+    {
+      "version_label": "V0_stable_baseline",
+      "version_type": "stable",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "n_runs": 20
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "controller": "centralized",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.55,
+      "safe_nonproductive_rate": 0.0,
+      "tasks_completed_mean": 3.3,
+      "tasks_completed_stdev": 0.9233805168766387,
+      "task_latency_ms_p95_mean": 147.2510473491014,
+      "n_runs": 20
+    },
+    {
+      "version_label": "V2_regressive_update",
+      "version_type": "regressive_update",
+      "controller": "rep_cps",
+      "scenario_id": "rep_cps_scheduling_v0",
+      "regime": "coordination_shock",
+      "raw_conformance_rate": 1.0,
+      "strong_replay_rate": 1.0,
+      "release_allow_rate": 1.0,
+      "productive_success_rate": 0.0,
+      "safe_nonproductive_rate": 1.0,
+      "tasks_completed_mean": 0.0,
+      "tasks_completed_stdev": 0.0,
+      "task_latency_ms_p95_mean": 0.0,
+      "n_runs": 20
+    }
+  ]
+}

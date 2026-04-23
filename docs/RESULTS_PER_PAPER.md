@@ -10,23 +10,19 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 **What it measures:** E1 conformance corpus (challenge set with injected faults; checker agreement; Tier 1 validates `maestro_report.json` against MAESTRO_REPORT v0.2). E2 restricted auditability (4-col verification-mode admissibility matrix). E3 replay link (independent verifier; **`--standalone-verifier`** recommended for publishable runs). E4 algorithm-independence (two adapters, same artifact interface) plus admissibility-vs-productivity export. E5 model evolution / upstream-version-shift evaluation under fixed interface semantics.
 
-**Result locations:**
-- `datasets/runs/p0_conformance_corpus/` — E1 corpus (case_* dirs, corpus_manifest.json)
-- `datasets/runs/e3_summary.json` — E3 replay-link summary; `datasets/runs/p0_e3_variance.json` — variance and 95% CIs
-- `datasets/runs/p0_e4_raw_summary.json` — E4 raw controller-matrix summary (baseline rows used for strong replay preference)
-- `datasets/runs/p0_e4_normalized_summary.json` — E4 normalized controller-matrix summary
-- `datasets/runs/p0_e4_per_seed.jsonl` — E4 per-seed rows from the controller matrix
-- `datasets/runs/p0_e4_diagnostics.json` — E4 diagnostics and run metadata
-- `datasets/runs/p0_e4_controller_pairs.jsonl` — E4 paired per-seed controller-separating evidence
-- `datasets/runs/p0_e4_raw_failure_reasons.json` — E4 raw-failure causal accounting (tier, reason, offending key/path, replay-failed flag)
-- `datasets/runs/p0_e4_controller_matrix.json` — E4 controller-matrix output
-- `datasets/runs/p0_e4_admissibility_vs_productivity.json` / `.csv` — E4 manuscript-facing admissibility-vs-productivity summary
-- `datasets/runs/p0_e4_coordination_shock_focus.json` / `.csv` — focused E4 slice for `coordination_shock` + `rep_cps_scheduling_v0`
-- `datasets/runs/p0_e5_model_evolution.json` — E5 version-shift summary and pairwise deltas vs V0
-- `datasets/runs/p0_e5_model_evolution_per_seed.jsonl` — E5 per-seed output
-- `datasets/runs/p0_e5_model_evolution_summary.csv` — E5 compact table output
-- `datasets/runs/e2_redaction_demo/` — E2 redacted trace and evidence_bundle_redacted.json
-- `datasets/releases/p0_e3_release/` — released run; `datasets/releases/portfolio_v0.1/p0_conformance_summary.json` — build_p0_conformance_summary.py
+**Result locations (canonical workshop package):**
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e1_corpus_table.md` — E1 manuscript-facing corpus table
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e2_admissibility_matrix.md` — E2 admissibility table
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/e3_summary.json` and `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e3_variance.json` — E3 replay-link summary and variance
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e4_controller_matrix.json` — E4 controller matrix payload
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e4_admissibility_vs_productivity.json` / `.csv` — E4 admissibility-vs-productivity summary
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e4_coordination_shock_focus.json` / `.csv` — focused E4 slice for `coordination_shock` + `rep_cps_scheduling_v0`
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/controller_divergence_table.md` and `papers/P0_MADS_CPS/kdd_workshop/artifacts/claim_matrix.md` — E4 claim-guardrail exports
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_model_evolution.json` — E5 synthetic version-shift summary and pairwise deltas vs V0
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_model_evolution_per_seed.jsonl` — E5 per-seed source rows (non-empty, committed)
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_model_evolution_summary.csv` — E5 per-version compact table
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_model_evolution_by_cell.json` / `.csv` — E5 by-cell export by version/controller/scenario/regime
+- `papers/P0_MADS_CPS/kdd_workshop/artifacts/p0_e5_coordination_shock_focus.json` / `.csv` — focused E5 comparison rows for `rep_cps_scheduling_v0` + `coordination_shock`
 
 **How to read:**
 - **E3:** tasks_completed_mean, p95_latency_ms_mean, all_match, run_manifest; --standalone-verifier uses verify_maestro_from_trace.py as separate process.
@@ -34,7 +30,7 @@ This document explains what each paper (P0–P8) measures, where its results are
 - **E2:** 4-col verification-mode admissibility matrix; redacted trace preserves schema and integrity, replay_ok false. export_e2_admissibility_matrix.py.
 - **E4:** controller-matrix summaries and per-seed diagnostics; use raw + normalized + per-seed + diagnostics artifacts. `export_p0_table3.py` prefers strong replay from `p0_e4_raw_summary.json` and requires E3 strong fields. In the current publishable run, `coordination_shock` on `rep_cps_scheduling_v0` shows MAESTRO-core divergence (`p0_e4_diagnostics.json`) even when high-level metrics remain close.
 - **E4 focused validation package:** use `export_p0_e4_controller_divergence_table.py` for the `coordination_shock + rep_cps_scheduling_v0` comparison row set, and `export_p0_e4_claim_matrix.py` for overclaim guardrails. Semantics note for the zero-task anomaly row: `docs/P0_E4_COORDINATION_SHOCK_NOTE.md`. Productivity/admissibility split is explicit via per-seed `productive_success` / `safe_nonproductive` and summary `productive_success_rate` / `safe_nonproductive_rate`.
-- **E5:** compare version conditions (V0 stable, V1 benign update, V2 regressive update) under fixed scenarios/regimes and fixed artifact interface. Read `pairwise_deltas_vs_v0` in `p0_e5_model_evolution.json` for claim-ready deltas.
+- **E5:** compare synthetic version conditions (V0 stable, V1 benign update, V2 regressive update) under fixed scenarios/regimes and fixed artifact interface semantics. Use `p0_e5_model_evolution_by_cell.json` and `p0_e5_coordination_shock_focus.json` for reviewer-legible local rows, then `pairwise_deltas_vs_v0` in `p0_e5_model_evolution.json` for bounded global deltas.
 - **Verification mode:** verification_mode (public | evaluator | regulator); kernel/mads/VERIFICATION_MODES.v0.1.md.
 
 **Tables and figures:** Table 1: build_p0_conformance_corpus.py, export_e1_corpus_table.py. Table 2: e2_redaction_demo.py, export_e2_admissibility_matrix.py. Table 3: run_p0_e4_controller_matrix.py, export_p0_table3.py (strong replay preference: E4 raw baseline rows, then E3 strong replay). E4 focused tables: export_p0_e4_controller_divergence_table.py, export_p0_e4_claim_matrix.py, export_p0_e4_admissibility_vs_productivity.py. E5 summary table: run_p0_e5_model_evolution.py (`p0_e5_model_evolution_summary.csv`). Figures 1-3: export_p0_assurance_pipeline.py, export_p0_tier_lattice.py, export_p0_redaction_figure.py. Per-seed E3: export_e3_table.py. plot_e3_latency.py. build_p0_conformance_summary.py. Workshop packaging: `papers/P0_MADS_CPS/kdd_workshop/`.
