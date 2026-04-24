@@ -15,6 +15,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from datetime import datetime, timezone
 from typing import Any
 
 REPO = Path(__file__).resolve().parents[1]
@@ -148,6 +149,65 @@ def verify(run_dir: Path) -> list[str]:
     return errors
 
 
+def build_report(run_dir: Path, errors: list[str]) -> dict[str, Any]:
+    red = _load_json(run_dir / "red_team_results.json") if (run_dir / "red_team_results.json").exists() else {}
+    adapter = _load_json(run_dir / "adapter_latency.json") if (run_dir / "adapter_latency.json").exists() else {}
+    replay = _load_json(run_dir / "replay_denials.json") if (run_dir / "replay_denials.json").exists() else {}
+    model_rows = red.get("real_llm_models") or []
+    metrics = {}
+    for row in model_rows:
+        model_id = row.get("model_id", "unknown")
+        metrics[model_id] = {
+            "n_runs_total": row.get("n_runs_total"),
+            "n_pass_total": row.get("n_pass_total"),
+            "pass_rate_pct": row.get("pass_rate_pct"),
+            "suite_mode": (row.get("run_manifest") or {}).get("suite_mode"),
+            "n_runs_per_case": row.get("n_runs_per_case"),
+        }
+    checks: list[dict[str, Any]] = []
+    for name in REQUIRED_TOP_LEVEL:
+        p = run_dir / name
+        checks.append(
+            {
+                "check": name.replace(".json", "").replace(".", "_"),
+                "path": str(p.relative_to(REPO)),
+                "exists": p.is_file(),
+            }
+        )
+    for rel in (
+        "papers/P6_LLMPlanning/claims.yaml",
+        "papers/P6_LLMPlanning/sat-cps2026/claims_satcps.yaml",
+        "papers/P6_LLMPlanning/sat-cps2026/CLAIM_ARTIFACT_MATRIX_FREEZE_2026-04-24.md",
+        "papers/P6_LLMPlanning/sat-cps2026/FREEZE_SUBMISSION_NOTES_2026-04-24.md",
+        "scripts/verify_p6_camera_ready_bundle.py",
+    ):
+        p = REPO / rel
+        checks.append({"check": p.name, "path": rel, "exists": p.is_file()})
+    return {
+        "status": "ok" if not errors else "failed",
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "run_dir": str(run_dir.relative_to(REPO)),
+        "checks": checks,
+        "errors": errors,
+        "canonical_metrics": metrics,
+        "canonical_adapter_metrics": {
+            "tail_latency_p95_mean_ms": adapter.get("tail_latency_p95_mean_ms"),
+            "tail_latency_p95_stdev_ms": adapter.get("tail_latency_p95_stdev_ms"),
+            "tail_latency_p95_ci95_lower": adapter.get("tail_latency_p95_ci95_lower"),
+            "tail_latency_p95_ci95_upper": adapter.get("tail_latency_p95_ci95_upper"),
+            "runs_with_denial": (
+                f"{(adapter.get('denial_stats') or {}).get('runs_with_denial')}/"
+                f"{(adapter.get('denial_stats') or {}).get('total_runs')}"
+            ),
+            "replay_matches": (
+                f"{replay.get('replay_matches')}/{replay.get('denials_checked')}"
+                if replay
+                else None
+            ),
+        },
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument(
@@ -156,9 +216,21 @@ def main() -> int:
         default=DEFAULT_RUN_DIR,
         help="P6 run directory (default: canonical camera-ready bundle)",
     )
+    ap.add_argument(
+        "--write-report",
+        type=Path,
+        default=None,
+        help="Optional path to write a machine-readable verification report JSON.",
+    )
     args = ap.parse_args()
     run_dir = args.run_dir.resolve()
     errs = verify(run_dir)
+    if args.write_report is not None:
+        report_path = args.write_report.resolve()
+        report_path.parent.mkdir(parents=True, exist_ok=True)
+        report = build_report(run_dir, errs)
+        report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+        print(f"Wrote verification report: {report_path.relative_to(REPO)}")
     if errs:
         print(f"P6 bundle verification FAILED ({len(errs)} issue(s)):", file=sys.stderr)
         for e in errs:

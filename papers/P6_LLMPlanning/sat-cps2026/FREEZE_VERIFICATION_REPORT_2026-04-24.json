@@ -1,92 +1,100 @@
 {
   "status": "ok",
+  "generated_at_utc": "2026-04-24T12:31:40+00:00",
+  "run_dir": "datasets\\runs\\llm_eval_camera_ready_20260424",
   "checks": [
     {
-      "check": "canonical_manifest",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/MANIFEST.json",
+      "check": "MANIFEST",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\MANIFEST.json",
       "exists": true
     },
     {
-      "check": "canonical_red",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+      "check": "red_team_results",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\red_team_results.json",
       "exists": true
     },
     {
-      "check": "canonical_confusable",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json",
+      "check": "confusable_deputy_results",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\confusable_deputy_results.json",
       "exists": true
     },
     {
-      "check": "baseline_adapter",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json",
+      "check": "adapter_latency",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\adapter_latency.json",
       "exists": true
     },
     {
-      "check": "baseline_denial",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json",
+      "check": "denial_trace_stats",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\denial_trace_stats.json",
       "exists": true
     },
     {
-      "check": "baseline_tool",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json",
+      "check": "baseline_comparison",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\baseline_comparison.json",
       "exists": true
     },
     {
-      "check": "baseline_args",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json",
+      "check": "baseline_comparison_args",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\baseline_comparison_args.json",
       "exists": true
     },
     {
       "check": "baseline_benign",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_benign.json",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\baseline_benign.json",
       "exists": true
     },
     {
       "check": "replay_denials",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\replay_denials.json",
+      "exists": true
+    },
+    {
+      "check": "e2e_denial_trace",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\e2e_denial_trace.json",
+      "exists": true
+    },
+    {
+      "check": "p6_artifact_hashes",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\p6_artifact_hashes.json",
       "exists": true
     },
     {
       "check": "mock_execution_harness",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/mock_execution_harness.json",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\mock_execution_harness.json",
       "exists": true
     },
     {
       "check": "task_critical_injection",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/task_critical_injection.json",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\task_critical_injection.json",
       "exists": true
     },
     {
-      "check": "artifact_hashes",
-      "path": "datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json",
-      "exists": true
-    },
-    {
-      "check": "claims_main",
+      "check": "claims.yaml",
       "path": "papers/P6_LLMPlanning/claims.yaml",
       "exists": true
     },
     {
-      "check": "claims_satcps",
+      "check": "claims_satcps.yaml",
       "path": "papers/P6_LLMPlanning/sat-cps2026/claims_satcps.yaml",
       "exists": true
     },
     {
-      "check": "freeze_matrix",
+      "check": "CLAIM_ARTIFACT_MATRIX_FREEZE_2026-04-24.md",
       "path": "papers/P6_LLMPlanning/sat-cps2026/CLAIM_ARTIFACT_MATRIX_FREEZE_2026-04-24.md",
       "exists": true
     },
     {
-      "check": "freeze_notes",
+      "check": "FREEZE_SUBMISSION_NOTES_2026-04-24.md",
       "path": "papers/P6_LLMPlanning/sat-cps2026/FREEZE_SUBMISSION_NOTES_2026-04-24.md",
       "exists": true
     },
     {
-      "check": "p6_bundle_verify_script",
+      "check": "verify_p6_camera_ready_bundle.py",
       "path": "scripts/verify_p6_camera_ready_bundle.py",
       "exists": true
     }
   ],
+  "errors": [],
   "canonical_metrics": {
     "gpt-4.1-mini": {
       "n_runs_total": 75,
@@ -103,17 +111,8 @@
       "n_runs_per_case": 3
     }
   },
-  "consistency": {
-    "claims_uses_camera_ready_red": true,
-    "claims_sat_uses_camera_ready_red": true,
-    "claims_sat_uses_camera_ready_confusable": true,
-    "checklist_mentions_canonical_dir": true,
-    "claims_uses_camera_ready_baselines": true,
-    "claims_sat_uses_camera_ready_baselines": true,
-    "verify_p6_camera_ready_bundle_script_present": true
-  },
   "canonical_adapter_metrics": {
-    "tail_latency_p95_mean_ms": 36.7046,
+    "tail_latency_p95_mean_ms": 36.70459820526987,
     "tail_latency_p95_stdev_ms": 22.0685,
     "tail_latency_p95_ci95_lower": 31.1205,
     "tail_latency_p95_ci95_upper": 42.2887,

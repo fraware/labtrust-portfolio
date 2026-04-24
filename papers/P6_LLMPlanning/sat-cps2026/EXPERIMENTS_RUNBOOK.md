@@ -37,10 +37,13 @@ Experiments 6--12 are **optional** for the core security story; include them whe
 
 ## 4. Core pipeline (no API keys)
 
+Canonical freeze commands below target `datasets/runs/llm_eval_camera_ready_20260424`.
+For local scratch reruns, replace `--out` with `datasets/runs/llm_eval` (gitignored by default).
+
 ### 4.1 Synthetic red-team, confusable deputy, E2E trace
 
 ```bash
-python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424
 ```
 
 Writes `red_team_results.json`, `confusable_deputy_results.json`, `e2e_denial_trace.json`.
@@ -48,7 +51,7 @@ Writes `red_team_results.json`, `confusable_deputy_results.json`, `e2e_denial_tr
 ### 4.2 Adapter latency, denial stats, latency decomposition
 
 ```bash
-python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-adapter --denial-stats --latency-decomposition \
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-adapter --denial-stats --latency-decomposition \
   --adapter-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0 \
   --adapter-seeds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 ```
@@ -58,15 +61,15 @@ Writes `adapter_latency.json` (with `denial_stats`, optional `latency_decomposit
 ### 4.3 Baselines: tool-level, argument-level, benign
 
 ```bash
-python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline \
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-baseline \
   --baseline-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0 \
   --baseline-seeds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 
-python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline --baseline-plan args_unsafe \
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-baseline --baseline-plan args_unsafe \
   --baseline-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0 \
   --baseline-seeds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 
-python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline --baseline-plan benign \
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-baseline --baseline-plan benign \
   --baseline-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0 \
   --baseline-seeds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 ```
@@ -111,24 +114,25 @@ python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_prime_matrix_top
 ## 7. Exports (tables, figures, appendix)
 
 ```bash
-python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval
-python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval
-python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval --baseline-file baseline_comparison_args.json
-python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval --baseline-file baseline_benign.json
+python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
+python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
+python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --baseline-file baseline_comparison_args.json
+python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --baseline-file baseline_benign.json
 python scripts/export_p6_firewall_flow.py
 python scripts/plot_llm_adapter_latency.py --latency datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json
-python scripts/export_p6_denial_trace_case_study.py --trace datasets/runs/llm_eval/baseline_runs/gated/toy_lab_v0/seed_1/trace.json
-python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval --markdown
+python scripts/export_p6_denial_trace_case_study.py --trace <local_trace_path_from_adapter_run>
+python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --markdown
 python scripts/export_p6_reproducibility_table.py
 python scripts/export_p6_layer_attribution.py
 python scripts/export_p6_failure_analysis.py
 python scripts/export_p6_cross_model_heatmap.py
 python scripts/export_p6_latency_decomposition.py
+python scripts/verify_p6_camera_ready_bundle.py
 ```
 
 Optional: `--out papers/P6_LLMPlanning/exported_tables.md` on `export_llm_redteam_table.py`.
 
-## 8. Artifact inventory (`datasets/runs/llm_eval/`)
+## 8. Artifact inventory (`datasets/runs/llm_eval_camera_ready_20260424/`)
 
 | Artifact | Produced by |
 |----------|-------------|
