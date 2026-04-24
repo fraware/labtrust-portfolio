@@ -42,6 +42,7 @@
     "llm_runs": "datasets\\runs\\llm_eval_camera_ready_20260424\\red_team_results.json",
     "adapter_latency": "datasets\\runs\\llm_eval_camera_ready_20260424\\adapter_latency.json",
     "baselines": "datasets\\runs\\llm_eval_camera_ready_20260424\\baseline_comparison.json",
-    "replay": "datasets\\runs\\llm_eval_camera_ready_20260424\\replay_denials.json"
+    "replay": "datasets\\runs\\llm_eval_camera_ready_20260424\\replay_denials.json",
+    "task_critical_injection": "datasets\\runs\\llm_eval_camera_ready_20260424\\task_critical_injection.json"
   }
 }
