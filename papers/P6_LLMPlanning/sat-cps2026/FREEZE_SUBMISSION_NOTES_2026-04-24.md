@@ -54,3 +54,4 @@ Camera-ready baseline/adapter artifacts are now committed in the canonical run:
 
 - Claims and checklist wording are aligned with canonical camera-ready paths.
 - Baseline/adapter references in claim YAMLs now point to camera-ready artifacts.
+- Machine gate: `python scripts/verify_p6_camera_ready_bundle.py` (also runs in CI on every push/PR).

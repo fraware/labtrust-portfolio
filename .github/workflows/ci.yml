@@ -40,6 +40,9 @@ jobs:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
         run: |
           PYTHONPATH=impl/src python -m unittest discover -s tests -q
+      - name: P6 camera-ready bundle integrity
+        run: |
+          python scripts/verify_p6_camera_ready_bundle.py
       - name: Run thin-slice and validate outputs
         env:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel

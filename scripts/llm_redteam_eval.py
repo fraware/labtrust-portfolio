@@ -3,7 +3,9 @@
 P6 LLM Planning: red-team eval. Run policy on RED_TEAM_CASES; verify expected_block
 cases blocked. Optionally run LLMPlanningAdapter and record latency. With --real-llm,
 call a real LLM API (keys from .env) for red-team-style prompts and record validator
-outcome. Writes to datasets/runs/llm_eval/. Usage: ... llm_redteam_eval.py [--out DIR] [--run-adapter] [--real-llm]
+outcome. Writes to `--out DIR` (default scratch dir is `datasets/runs/llm_eval/`; the
+canonical frozen bundle for SaT-CPS is `datasets/runs/llm_eval_camera_ready_20260424/`).
+Usage: ... llm_redteam_eval.py [--out DIR] [--run-adapter] [--real-llm]
 """
 from __future__ import annotations
 

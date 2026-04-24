@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Export P6 artifact SHA256 hashes and appendix markdown for reproduction.
-Reads artifact files from the llm_eval run dir; outputs p6_artifact_hashes.json
+Reads artifact files from a P6 run directory (default: canonical camera-ready bundle);
+outputs p6_artifact_hashes.json
 and optional markdown for Appendix A.
 Usage: PYTHONPATH=impl/src python scripts/export_p6_artifact_hashes.py [--out-dir path] [--repo-url URL] [--tag TAG] [--markdown]
 """
@@ -13,7 +14,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-DEFAULT_OUT = REPO / "datasets" / "runs" / "llm_eval"
+DEFAULT_OUT = REPO / "datasets" / "runs" / "llm_eval_camera_ready_20260424"
 
 ARTIFACTS = [
     "red_team_results.json",
@@ -155,11 +156,11 @@ def main() -> int:
             "",
             "**Commands (exact reproduction).**",
             "```",
-            "python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval",
-            "python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-adapter --denial-stats",
-            "python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline",
-            "python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval",
-            "python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval",
+            "python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424",
+            "python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-adapter --denial-stats",
+            "python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-baseline",
+            "python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424",
+            "python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424",
             "python scripts/export_p6_firewall_flow.py",
             "python scripts/plot_llm_adapter_latency.py",
             "```",

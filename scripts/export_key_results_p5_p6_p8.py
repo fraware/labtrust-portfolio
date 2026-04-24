@@ -62,7 +62,9 @@ def p5_block(runs: Path) -> list[str]:
 
 
 def p6_block(runs: Path) -> list[str]:
-    p = runs / "llm_eval" / "red_team_results.json"
+    cr = runs / "llm_eval_camera_ready_20260424" / "red_team_results.json"
+    legacy = runs / "llm_eval" / "red_team_results.json"
+    p = cr if cr.exists() else legacy
     data = _load(p)
     lines = ["## P6 — Key results", ""]
     if not data:
@@ -78,12 +80,22 @@ def p6_block(runs: Path) -> list[str]:
     if jb:
         jb_pass = jb.get("all_pass", "—")
         lines.append(f"- Jailbreak-style: all_pass {jb_pass}")
-    conf = _load(runs / "llm_eval" / "confusable_deputy_results.json")
+    conf_path = (
+        runs / "llm_eval_camera_ready_20260424" / "confusable_deputy_results.json"
+        if (runs / "llm_eval_camera_ready_20260424" / "confusable_deputy_results.json").exists()
+        else runs / "llm_eval" / "confusable_deputy_results.json"
+    )
+    conf = _load(conf_path)
     if conf:
         cd_pass = conf.get("all_pass", "—")
         n_cd = len(conf.get("confusable_deputy_cases", []))
         lines.append(f"- Confusable deputy: {n_cd} cases, all_pass {cd_pass}")
-    adapter = _load(runs / "llm_eval" / "adapter_latency.json")
+    adapter_path = (
+        runs / "llm_eval_camera_ready_20260424" / "adapter_latency.json"
+        if (runs / "llm_eval_camera_ready_20260424" / "adapter_latency.json").exists()
+        else runs / "llm_eval" / "adapter_latency.json"
+    )
+    adapter = _load(adapter_path)
     if adapter:
         lat = adapter.get("tail_latency_p95_mean_ms")
         if lat is not None:

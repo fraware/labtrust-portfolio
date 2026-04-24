@@ -2,6 +2,10 @@
 """
 Replay and verify denied typed-plan steps from P6 trace artifacts.
 
+Requires `trace.json` files under the run directory (typically produced by a full
+adapter/baseline sweep). The committed camera-ready bundle ships a frozen
+`replay_denials.json` without committing every per-seed trace for size.
+
 Usage:
   python scripts/replay_denials.py --run-dir datasets/runs/llm_eval
 """

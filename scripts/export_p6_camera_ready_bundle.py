@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_RUN_DIR = REPO_ROOT / "datasets" / "runs" / "llm_eval"
+DEFAULT_RUN_DIR = REPO_ROOT / "datasets" / "runs" / "llm_eval_camera_ready_20260424"
 
 
 def _read_json(path: Path, required: bool = True) -> dict:

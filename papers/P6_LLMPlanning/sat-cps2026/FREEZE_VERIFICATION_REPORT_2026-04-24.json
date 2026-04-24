@@ -80,6 +80,11 @@
       "check": "freeze_notes",
       "path": "papers/P6_LLMPlanning/sat-cps2026/FREEZE_SUBMISSION_NOTES_2026-04-24.md",
       "exists": true
+    },
+    {
+      "check": "p6_bundle_verify_script",
+      "path": "scripts/verify_p6_camera_ready_bundle.py",
+      "exists": true
     }
   ],
   "canonical_metrics": {
@@ -104,7 +109,8 @@
     "claims_sat_uses_camera_ready_confusable": true,
     "checklist_mentions_canonical_dir": true,
     "claims_uses_camera_ready_baselines": true,
-    "claims_sat_uses_camera_ready_baselines": true
+    "claims_sat_uses_camera_ready_baselines": true,
+    "verify_p6_camera_ready_bundle_script_present": true
   },
   "canonical_adapter_metrics": {
     "tail_latency_p95_mean_ms": 36.7046,
