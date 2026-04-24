@@ -1,0 +1,212 @@
+{
+  "status": "ok",
+  "generated_at_utc": "2026-04-24T12:34:54+00:00",
+  "canonical_run_id": "llm_eval_camera_ready_20260424",
+  "checks": [
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "impl/src/labtrust_portfolio/llm_planning.py",
+      "exists": true
+    },
+    {
+      "claim_id": "C2",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "impl/src/labtrust_portfolio/llm_planning.py",
+      "exists": true
+    },
+    {
+      "claim_id": "C2",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C2",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "docs/P6_OWASP_MAPPING.md",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/p6_benign_suite.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/p6_adaptive_suite.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/e2e_denial_trace.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_benign.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C1",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "impl/src/labtrust_portfolio/llm_planning.py",
+      "exists": true
+    },
+    {
+      "claim_id": "C2",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "impl/src/labtrust_portfolio/llm_planning.py",
+      "exists": true
+    },
+    {
+      "claim_id": "C2",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C2",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C3",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "docs/P6_OWASP_MAPPING.md",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/e2e_denial_trace.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "scripts/export_p6_denial_trace_case_study.py",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_benign.json",
+      "exists": true
+    },
+    {
+      "claim_id": "C4",
+      "release_id": "llm_eval_camera_ready_20260424",
+      "artifact_path": "datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json",
+      "exists": true
+    }
+  ],
+  "errors": []
+}

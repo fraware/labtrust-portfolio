@@ -21,6 +21,7 @@ This folder is the **submission-facing bundle** for the workshop paper (ACM proc
 | **CLAIM_ARTIFACT_MATRIX_FREEZE_2026-04-24.md** | Pre-submit claim-to-artifact matrix |
 | **FREEZE_SUBMISSION_NOTES_2026-04-24.md** | One-page freeze snapshot (canonical run, denominators, non-merge rules) |
 | **FREEZE_VERIFICATION_REPORT_2026-04-24.json** | Machine-readable existence + consistency checks |
+| **CLAIMS_CONSISTENCY_REPORT_2026-04-24.json** | Machine-readable claim-YAML path consistency checks |
 
 ## Evidence tiers (how to cite without overclaiming)
 

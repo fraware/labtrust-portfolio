@@ -47,6 +47,7 @@ artifact paths against the current repository state.
 | `datasets/runs/llm_eval_camera_ready_20260424/task_critical_injection.json` | yes | Thin-slice task-critical injection rows. |
 | `datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json` | yes | SHA256 appendix inputs. |
 | `scripts/verify_p6_camera_ready_bundle.py` | yes | CI / pre-submit machine gate for the bundle. |
+| `scripts/verify_p6_claims_consistency.py` | yes | CI / pre-submit machine gate for claim-path integrity. |
 
 ## Mismatches flagged before freeze
 

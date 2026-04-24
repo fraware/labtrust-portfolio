@@ -31,6 +31,7 @@ Paper is ready for submission only when all items are true.
 - [ ] `run_manifest` fields are consistent with the text (`timestamp_iso`, `evaluator_version`, `policy_version`; real-LLM: `prompt_template_hash` where written).
 - [ ] Appendix or supplementary: `export_p6_artifact_hashes.py` + `export_p6_reproducibility_table.py` run on the **same** directory cited in the paper.
 - [ ] Machine integrity gate passes: `python scripts/verify_p6_camera_ready_bundle.py` (CI + local pre-submit).
+- [ ] Claim path integrity gate passes: `python scripts/verify_p6_claims_consistency.py` (CI + local pre-submit).
 - [ ] Optional deep-dive exports (if referenced): `export_p6_layer_attribution.py`, `export_p6_failure_analysis.py`, `export_p6_cross_model_heatmap.py`, `export_p6_latency_decomposition.py`.
 
 ## Optional extended experiments (6--12)
