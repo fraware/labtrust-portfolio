@@ -246,14 +246,29 @@ def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, tempe
     try:
         if provider == "openai":
             import openai
-            client = openai.OpenAI(api_key=api_key)
-            resp = client.chat.completions.create(
-                model=model_id,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=temperature,
-                max_tokens=200,
+            # Set finite timeout so a stalled request does not hang the entire run.
+            client = openai.OpenAI(api_key=api_key, timeout=90)
+            # Newer GPT families may prefer/require Responses API payload semantics.
+            # Try model-appropriate path first, then fall back for compatibility.
+            if model_id.startswith("gpt-5"):
+                text, err = _call_openai_responses(client, model_id, prompt, temperature)
+                if not err:
+                    return (text, None)
+                text2, err2 = _call_openai_chat_completions(
+                    client, model_id, prompt, temperature
+                )
+                if not err2:
+                    return (text2, None)
+                return ("", f"responses_error={err}; chat_error={err2}")
+            text, err = _call_openai_chat_completions(
+                client, model_id, prompt, temperature
             )
-            return ((resp.choices[0].message.content or "").strip(), None)
+            if not err:
+                return (text, None)
+            text2, err2 = _call_openai_responses(client, model_id, prompt, temperature)
+            if not err2:
+                return (text2, None)
+            return ("", f"chat_error={err}; responses_error={err2}")
         else:
             import anthropic
             client = anthropic.Anthropic(api_key=api_key)
@@ -268,6 +283,96 @@ def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, tempe
         return ("", f"Package not installed: {e}")
     except Exception as e:
         return ("", str(e))
+
+
+def _call_openai_chat_completions(
+    client, model_id: str, prompt: str, temperature: float
+) -> tuple[str, str | None]:
+    """OpenAI Chat Completions path with robust content extraction."""
+    try:
+        req = {
+            "model": model_id,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "max_tokens": 200,
+        }
+        try:
+            resp = client.chat.completions.create(timeout=30, **req)
+        except Exception as e:
+            # Some newer models reject temperature; retry without it.
+            if "Unsupported parameter: 'temperature'" in str(e):
+                req.pop("temperature", None)
+                resp = client.chat.completions.create(timeout=30, **req)
+            else:
+                raise
+        choices = getattr(resp, "choices", None) or []
+        if not choices:
+            return ("", "chat: empty choices")
+        message = getattr(choices[0], "message", None)
+        content = getattr(message, "content", "") if message is not None else ""
+        # Some SDK variants return structured content blocks.
+        if isinstance(content, list):
+            text_parts = []
+            for part in content:
+                if isinstance(part, dict):
+                    txt = part.get("text")
+                    if txt:
+                        text_parts.append(str(txt))
+                elif isinstance(part, str):
+                    text_parts.append(part)
+            content = "".join(text_parts)
+        return (str(content or "").strip(), None)
+    except Exception as e:
+        return ("", f"chat: {e}")
+
+
+def _extract_text_from_responses_api(resp) -> str:
+    """Extract text from OpenAI Responses API object across SDK versions."""
+    out = []
+    output = getattr(resp, "output", None)
+    if isinstance(output, list):
+        for item in output:
+            content = getattr(item, "content", None)
+            if isinstance(content, list):
+                for c in content:
+                    txt = getattr(c, "text", None)
+                    if txt:
+                        out.append(str(txt))
+    text = "".join(out).strip()
+    if text:
+        return text
+    text_attr = getattr(resp, "output_text", None)
+    if isinstance(text_attr, str) and text_attr.strip():
+        return text_attr.strip()
+    return ""
+
+
+def _call_openai_responses(
+    client, model_id: str, prompt: str, temperature: float
+) -> tuple[str, str | None]:
+    """OpenAI Responses API path."""
+    try:
+        req = {
+            "model": model_id,
+            "input": prompt,
+            "temperature": temperature,
+            "max_output_tokens": 200,
+        }
+        try:
+            resp = client.responses.create(timeout=30, **req)
+        except Exception as e:
+            # Some newer models reject temperature; retry without it.
+            if "Unsupported parameter: 'temperature'" in str(e):
+                req.pop("temperature", None)
+                resp = client.responses.create(timeout=30, **req)
+            else:
+                raise
+        text = _extract_text_from_responses_api(resp)
+        if not text:
+            return ("", "responses: empty output")
+        return (text, None)
+    except Exception as e:
+        return ("", f"responses: {e}")
 
 
 def _call_prime_inference_once(

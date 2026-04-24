@@ -58,6 +58,22 @@ def _benign_plan_steps() -> List[dict]:
     ]
 
 
+def _step_shape_errors(step: dict, idx: int) -> list[str]:
+    """Return deterministic malformed-step reasons for fail-closed handling."""
+    errs: list[str] = []
+    if not isinstance(step, dict):
+        return [f"step {idx} must be object"]
+    if "seq" not in step or not isinstance(step.get("seq"), int) or step.get("seq", -1) < 0:
+        errs.append(f"step {idx} invalid seq")
+    if "tool" not in step or not isinstance(step.get("tool"), str) or not step.get("tool"):
+        errs.append(f"step {idx} missing or invalid tool")
+    if "args" not in step or not isinstance(step.get("args"), dict):
+        errs.append(f"step {idx} missing or invalid args")
+    if "validators" not in step or not isinstance(step.get("validators"), list):
+        errs.append(f"step {idx} missing or invalid validators")
+    return errs
+
+
 class LLMPlanningAdapter:
     """
     Adapter that runs thin-slice and injects a synthetic typed plan into trace
@@ -122,9 +138,13 @@ class LLMPlanningAdapter:
         if self.validation_mode == "ungated":
             policy_ok = True
         else:
-            for s in typed_plan["steps"]:
+            for i, s in enumerate(typed_plan["steps"]):
                 t_val_start = time.perf_counter() if self.record_timings else 0
-                if self.validation_mode == "gated":
+                shape_errors = _step_shape_errors(s, i)
+                if shape_errors:
+                    allowed = False
+                    reasons = [f"malformed typed step: {e}" for e in shape_errors]
+                elif self.validation_mode == "gated":
                     allowed, reasons = validate_plan_step(s, ALLOWED_TOOLS)
                 else:
                     allowed = policy_check_step(s, ALLOWED_TOOLS)
@@ -141,7 +161,11 @@ class LLMPlanningAdapter:
             captured = []
         else:
             captured = [
-                capture_tool_call(s["tool"], s["args"], ["allow_list"])
+                capture_tool_call(
+                    str(s.get("tool", "")),
+                    s.get("args", {}) if isinstance(s.get("args"), dict) else {},
+                    ["allow_list"],
+                )
                 for s in typed_plan["steps"]
             ]
         capture_total_ms = round((time.perf_counter() - t_cap_start) * 1000, 4) if self.record_timings else 0

@@ -30,9 +30,9 @@ Prompt injection is structurally different from SQL injection; treat LLMs as pot
 
 ## 5) Experiment plan
 - Scenarios: 3 MAESTRO scenarios (toy_lab_v0, lab_profile_v0, warehouse_v0), 20 seeds per scenario (publishable).
-- Metrics: red-team pass (15 cases), confusable deputy (6), jailbreak-style (4); adaptive suite pass; real-LLM: default 10 runs per case, full-suite mode (`--real-llm-suite full`), pass_rate_pct, 95% Wilson CI, latency mean ± stdev; adapter tail_latency_p95 mean/stdev/CI; denial-trace stats (runs_with_denial, tasks_completed_mean per scenario); run_manifest (timestamp_iso, evaluator_version, policy_version, prompt_template_hash, suite_mode); layer attribution; optional baseline benign and latency_decomposition.
+- Metrics: red-team pass (15 cases), confusable deputy (6), jailbreak-style (4); adaptive suite pass; real-LLM camera-ready: 3 runs per case, full-suite mode (`--real-llm-suite full`), pass_rate_pct, 95% Wilson CI, latency mean ± stdev; adapter tail_latency_p95 mean/stdev/CI; denial-trace stats (runs_with_denial, tasks_completed_mean per scenario); run_manifest (timestamp_iso, evaluator_version, policy_version, prompt_template_hash, suite_mode); layer attribution; optional baseline benign and latency_decomposition.
 - Baselines: 3-way (gated = full validator; weak = allow-list only; ungated = no validation); tool-level (execute_system) and argument-level (--baseline-plan args_unsafe: path traversal in allow-listed tool); same scenarios/seeds.
-- Real-LLM (canonical): `--real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 10 --real-llm-suite full` (OpenAI). Optional: `--real-llm-provider prime` and separate `--out` for multi-provider matrices (see sat-cps2026/EXPERIMENTS_RUNBOOK.md).
+- Real-LLM (canonical): `--out datasets/runs/llm_eval_camera_ready_20260424 --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full` (OpenAI). Optional: `--real-llm-provider prime` and separate `--out` for multi-provider matrices (see sat-cps2026/EXPERIMENTS_RUNBOOK.md).
 - Stressors: prompt injection via tool-fed content; partial tool results; path traversal in args; time pressure.
 
 ## 6) Artifact checklist

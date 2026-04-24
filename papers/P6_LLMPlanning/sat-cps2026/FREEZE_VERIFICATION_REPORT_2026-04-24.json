@@ -1,0 +1,87 @@
+{
+  "status": "ok",
+  "checks": [
+    {
+      "check": "canonical_manifest",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/MANIFEST.json",
+      "exists": true
+    },
+    {
+      "check": "canonical_red",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+      "exists": true
+    },
+    {
+      "check": "canonical_confusable",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json",
+      "exists": true
+    },
+    {
+      "check": "baseline_adapter",
+      "path": "datasets/runs/llm_eval/adapter_latency.json",
+      "exists": true
+    },
+    {
+      "check": "baseline_denial",
+      "path": "datasets/runs/llm_eval/denial_trace_stats.json",
+      "exists": true
+    },
+    {
+      "check": "baseline_tool",
+      "path": "datasets/runs/llm_eval/baseline_comparison.json",
+      "exists": true
+    },
+    {
+      "check": "baseline_args",
+      "path": "datasets/runs/llm_eval/baseline_comparison_args.json",
+      "exists": true
+    },
+    {
+      "check": "baseline_benign",
+      "path": "datasets/runs/llm_eval/baseline_benign.json",
+      "exists": true
+    },
+    {
+      "check": "claims_main",
+      "path": "papers/P6_LLMPlanning/claims.yaml",
+      "exists": true
+    },
+    {
+      "check": "claims_satcps",
+      "path": "papers/P6_LLMPlanning/sat-cps2026/claims_satcps.yaml",
+      "exists": true
+    },
+    {
+      "check": "freeze_matrix",
+      "path": "papers/P6_LLMPlanning/sat-cps2026/CLAIM_ARTIFACT_MATRIX_FREEZE_2026-04-24.md",
+      "exists": true
+    },
+    {
+      "check": "freeze_notes",
+      "path": "papers/P6_LLMPlanning/sat-cps2026/FREEZE_SUBMISSION_NOTES_2026-04-24.md",
+      "exists": true
+    }
+  ],
+  "canonical_metrics": {
+    "gpt-4.1-mini": {
+      "n_runs_total": 75,
+      "n_pass_total": 75,
+      "pass_rate_pct": 100.0,
+      "suite_mode": "full",
+      "n_runs_per_case": 3
+    },
+    "gpt-4.1": {
+      "n_runs_total": 75,
+      "n_pass_total": 75,
+      "pass_rate_pct": 100.0,
+      "suite_mode": "full",
+      "n_runs_per_case": 3
+    }
+  },
+  "consistency": {
+    "claims_uses_camera_ready_red": true,
+    "claims_sat_uses_camera_ready_red": true,
+    "claims_sat_uses_camera_ready_confusable": true,
+    "checklist_mentions_canonical_dir": true
+  }
+}

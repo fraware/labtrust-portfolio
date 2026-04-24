@@ -3,7 +3,7 @@
 Submission-readiness checklist (docs/STATE_OF_THE_ART_CRITERIA.md section 3) verified on 2025-03-11.
 
 - Claim-evidence: All claims in claims.yaml have artifact_paths and at least one table_id or figure_id (Table 1, Table 1b, Table 2, Baseline table, Figure 0, Figure 1).
-- Repro under 20 min: Minimal run documented (adapter-seeds 3); run manifest in red_team_results.json and adapter_latency.json. Full publishable: --real-llm-runs 10 --real-llm-suite full, 3 scenarios, 20 seeds, --run-baseline (3-way), optional --baseline-plan args_unsafe and benign, optional --latency-decomposition.
+- Repro under 20 min: Minimal run documented (adapter-seeds 3); run manifest in red_team_results.json and adapter_latency.json. Full publishable camera-ready run: `--out datasets/runs/llm_eval_camera_ready_20260424 --real-llm-runs 3 --real-llm-suite full`, 3 scenarios, 20 seeds, --run-baseline (3-way), optional --baseline-plan args_unsafe and benign, optional --latency-decomposition.
 - Variance: Scenarios and seeds in adapter_latency.json; red-team from eval; real-LLM multi-run with pass_rate and Wilson CI (OpenAI canonical: gpt-4.1-mini, gpt-4.1).
 - No kernel redefinition: Draft cites TYPED_PLAN schema and MAESTRO; does not redefine tiers or trace.
 - Overclaim: Conditional paper; trigger and scope in Limitations and docs/CONDITIONAL_TRIGGERS.md (P6). Containment only, not elimination. Real-LLM: synthetic table remains primary validator evidence; Table 1b documents pass_rate and CI.

@@ -154,10 +154,15 @@ def main() -> int:
     else:
         print(text)
 
+    # Nested dict so JSON serialization is valid (tuple keys are not JSON-safe).
+    by_case_mode_nested: dict[str, dict[str, int]] = {}
+    for (cid, mode), count in by_case_mode.items():
+        by_case_mode_nested.setdefault(cid, {})[mode] = count
+
     # Write JSON artifact for paper inclusion
     out_json = args.out_dir / "p6_failure_analysis.json"
     out_json.write_text(
-        json.dumps({"rows": rows, "by_case_mode": dict(by_case_mode)}, indent=2) + "\n",
+        json.dumps({"rows": rows, "by_case_mode": by_case_mode_nested}, indent=2) + "\n",
         encoding="utf-8",
     )
     print(f"Wrote {out_json}")

@@ -23,16 +23,38 @@ def validate_plan(plan: Dict[str, Any]) -> Tuple[bool, List[str]]:
     if not isinstance(steps, list):
         errors.append("steps must be array")
         return (False, errors)
+    seqs: List[int] = []
     for i, step in enumerate(steps):
         if not isinstance(step, dict):
             errors.append(f"step {i} must be object")
             continue
+        if "seq" not in step:
+            errors.append(f"step {i} missing seq")
+        elif not isinstance(step.get("seq"), int):
+            errors.append(f"step {i} seq must be integer")
+        elif step.get("seq", -1) < 0:
+            errors.append(f"step {i} seq must be >= 0")
+        else:
+            seqs.append(step["seq"])
         if "tool" not in step:
             errors.append(f"step {i} missing tool")
+        elif not isinstance(step.get("tool"), str) or not step.get("tool"):
+            errors.append(f"step {i} tool must be non-empty string")
         if "args" not in step:
             errors.append(f"step {i} missing args")
+        elif not isinstance(step.get("args"), dict):
+            errors.append(f"step {i} args must be object")
         if "validators" not in step:
             errors.append(f"step {i} missing validators")
+        elif (
+            not isinstance(step.get("validators"), list)
+            or not all(isinstance(v, str) for v in step.get("validators", []))
+        ):
+            errors.append(f"step {i} validators must be array[string]")
+    if len(seqs) != len(set(seqs)):
+        errors.append("duplicate sequence identifiers are not allowed")
+    if seqs and seqs != sorted(seqs):
+        errors.append("sequence identifiers must be monotone increasing")
     return (len(errors) == 0, errors)
 
 

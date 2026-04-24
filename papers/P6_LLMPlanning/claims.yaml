@@ -4,16 +4,16 @@
 
 paper_id: "P6_LLMPlanning"
 title: "Safe LLM Planning for CPS: Typed Plans and Runtime Safety Gates"
-release_id: "llm_eval"
+release_id: "llm_eval_camera_ready_20260424"
 
 claims:
   - id: "C1"
     statement: "Typed plan outputs and validators produce a testable interface that blocks unsafe tool use, unsafe argument patterns, and unsafe PONR or gate-bypass proposals (ponr_gate), alongside allow-list and safe_args."
     evidence:
-      release_id: "llm_eval"
+      release_id: "llm_eval_camera_ready_20260424"
       confidence: "high"  # allow_list + safe_args + ponr_gate; expanded red-team + jailbreak-style; containment only
       artifact_paths:
-        - "datasets/runs/llm_eval/red_team_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json"
         - "kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json"
         - "impl/src/labtrust_portfolio/llm_planning.py"
       table_ids: ["Table 1"]
@@ -34,11 +34,11 @@ claims:
   - id: "C3"
     statement: "CPS-oriented suites (expanded red-team, confusable deputy, jailbreak-style, adaptive/indirect corpus, benign and adaptive JSON suites) exercise planner failure modes aligned with OWASP LLM Top 10 categories in the mapping doc; real-LLM Table 1b uses full suite mode (red + confusable + jailbreak) with multi-run Wilson intervals by default."
     evidence:
-      release_id: "llm_eval"
+      release_id: "llm_eval_camera_ready_20260424"
       confidence: "medium"  # OWASP mapping; real-LLM optional (API keys); containment only
       artifact_paths:
-        - "datasets/runs/llm_eval/red_team_results.json"
-        - "datasets/runs/llm_eval/confusable_deputy_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json"
         - "datasets/runs/llm_eval/p6_adaptive_results.json"
         - "docs/P6_OWASP_MAPPING.md"
         - "datasets/p6_benign_suite.json"
@@ -61,4 +61,4 @@ claims:
       table_ids: ["Table 2", "Baseline table"]
       figure_ids: ["Figure 1"]
 
-# Table 1: red_team (synthetic). Table 1b: real-LLM (default 10 runs/case, full suite, Wilson CI). Table 2: adapter latency + optional latency_decomposition. Baselines: gated/weak/ungated (tool, args_unsafe, benign). Figure 1: plot_llm_adapter_latency.py. Bundle: scripts/p6_publish_bundle.py.
+# Table 1: red_team (synthetic). Table 1b: real-LLM (camera-ready canonical: full suite, 3 runs/case, Wilson CI, run dir llm_eval_camera_ready_20260424). Table 2: adapter latency + optional latency_decomposition (llm_eval run dir). Baselines: gated/weak/ungated (tool, args_unsafe, benign; llm_eval run dir). Figure 1: plot_llm_adapter_latency.py. Bundle: scripts/p6_publish_bundle.py.

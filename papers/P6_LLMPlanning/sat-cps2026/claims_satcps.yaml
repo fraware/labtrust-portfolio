@@ -1,6 +1,6 @@
 # SaT-CPS 2026 venue claims (P6). Four claims only; no "sufficient", "comprehensive", "guarantee", "eliminate", "state-of-the-art", unqualified "robust".
 # Evidence: expanded red-team + confusable deputy + jailbreak-style + ponr_gate + adaptive suite; Figure 1 = decision path; case study = denial trace.
-# Real-LLM (Table 1b): default --real-llm-suite full (red + confusable + jailbreak), --real-llm-runs 10; historical OpenAI snapshot 2026-03-17 used 5 runs/case and 13 cases/model (pre-expansion). Optional Prime matrix: separate artifact dir; do not mix denominators across runs.
+# Real-LLM (Table 1b): camera-ready run uses --real-llm-suite full (red + confusable + jailbreak), --real-llm-runs 3 in datasets/runs/llm_eval_camera_ready_20260424. Historical OpenAI snapshots and GPT-5.x supplementary runs use separate denominators; keep them labeled separately. Optional Prime matrix: separate artifact dir; do not mix denominators across runs.
 # Run manifests: timestamp_iso, evaluator_version, policy_version, prompt_template_hash (real-LLM). Appendix: export_p6_reproducibility_table.py. See EXPERIMENTS_RUNBOOK.md, README.md (evidence tiers).
 
 paper_id: "P6_LLMPlanning_SaT-CPS2026"
@@ -11,10 +11,10 @@ claims:
   - id: "C1"
     statement: "A typed-plan firewall with tool allow-listing and argument validation blocks the released synthetic unsafe cases and admits the released safe cases."
     evidence:
-      release_id: "llm_eval"
+      release_id: "llm_eval_camera_ready_20260424"
       artifact_paths:
-        - "datasets/runs/llm_eval/red_team_results.json"
-        - "datasets/runs/llm_eval/confusable_deputy_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json"
         - "kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json"
         - "impl/src/labtrust_portfolio/llm_planning.py"
       table_ids: ["Table 1 (synthetic red-team suite; row count from run)"]
@@ -34,12 +34,12 @@ claims:
   - id: "C3"
     statement: "The released evaluation suite covers a practically relevant subset of CPS-oriented planner failure modes: unsafe tool use, authority confusion, jailbreak-style phrases, and argument-level violations."
     evidence:
-      release_id: "llm_eval"
+      release_id: "llm_eval_camera_ready_20260424"
       artifact_paths:
-        - "datasets/runs/llm_eval/red_team_results.json"
-        - "datasets/runs/llm_eval/confusable_deputy_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json"
         - "docs/P6_OWASP_MAPPING.md"
-      table_ids: ["Table 1", "Table 1b (real-LLM OpenAI full-suite; denominator from run_manifest, latest repo snapshot: 250/250 each at N=10 runs/case, 25 cases/model, Wilson [98.5, 100.0])", "Table 1b optional (Prime four-model matrix; separate out dir, separately labeled denominator)", "Layer attribution", "Failure analysis (p6_failure_analysis.json)"]
+      table_ids: ["Table 1", "Table 1b (real-LLM OpenAI full-suite; denominator from run_manifest, camera-ready snapshot llm_eval_camera_ready_20260424: 75/75 each at N=3 runs/case, 25 cases/model, Wilson [95.1, 100.0])", "Table 1b optional (Prime four-model matrix; separate out dir, separately labeled denominator)", "Layer attribution", "Failure analysis (p6_failure_analysis.json)"]
       figure_ids: []
 
   - id: "C4"

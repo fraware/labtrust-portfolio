@@ -20,7 +20,7 @@ Papers P2, P5, P6, and P8 are **conditional**: proceed only when their trigger c
 ## P6 LLM Planning
 
 - **Trigger:** An LLM is in the control plane (planning/toolcalling), OR a typed-plan + validator firewall is needed as a general containment pattern.
-- **Trigger proof required:** Firewall reduces unsafe attempts without collapsing task completion on at least one scenario family. Deliverable: evidence (unsafe blocked in released suites: red_team 15/15, confusable deputy 6/6, jailbreak-style 4/4); real-LLM Table 1b (publishable default 10 runs/case, full-suite mode, pass_rate with Wilson CI); adapter latency and 3-way baseline (tool-level, args_unsafe, optional benign); tasks_completed non-zero; document in release and P6.
+- **Trigger proof required:** Firewall reduces unsafe attempts without collapsing task completion on at least one scenario family. Deliverable: evidence (unsafe blocked in released suites: red_team 15/15, confusable deputy 6/6, jailbreak-style 4/4); real-LLM Table 1b (camera-ready canonical run uses full-suite mode and 3 runs/case; report pass_rate with Wilson CI and denominator from run_manifest); adapter latency and 3-way baseline (tool-level, args_unsafe, optional benign); tasks_completed non-zero; document in release and P6.
 - **Proceed when:** You are building or evaluating an LLM-in-the-loop control plane and need containment and measurable robustness (not “elimination” of prompt injection).
 - **Dependency order:** LLM planning is a module inside the MADS envelope; evaluated on MAESTRO scenarios.
 

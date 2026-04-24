@@ -7,6 +7,7 @@ from labtrust_portfolio.llm_planning import (
     CONFUSABLE_DEPUTY_CASES,
     JAILBREAK_STYLE_CASES,
     RED_TEAM_CASES,
+    validate_plan,
     ponr_gate_check,
     validate_plan_step_with_attribution,
 )
@@ -71,6 +72,34 @@ class TestSyntheticSuites(unittest.TestCase):
         self.assertGreaterEqual(len(RED_TEAM_CASES), 15)
         self.assertGreaterEqual(len(CONFUSABLE_DEPUTY_CASES), 6)
         self.assertGreaterEqual(len(JAILBREAK_STYLE_CASES), 4)
+
+
+class TestTypedPlanValidation(unittest.TestCase):
+    def test_duplicate_seq_denied(self) -> None:
+        plan = {
+            "version": "0.1",
+            "plan_id": "p1",
+            "steps": [
+                {"seq": 0, "tool": "query_status", "args": {}, "validators": ["allow_list"]},
+                {"seq": 0, "tool": "submit_result", "args": {}, "validators": ["allow_list"]},
+            ],
+        }
+        ok, errs = validate_plan(plan)
+        self.assertFalse(ok)
+        self.assertTrue(any("duplicate sequence identifiers" in e for e in errs))
+
+    def test_non_monotone_seq_denied(self) -> None:
+        plan = {
+            "version": "0.1",
+            "plan_id": "p2",
+            "steps": [
+                {"seq": 1, "tool": "query_status", "args": {}, "validators": ["allow_list"]},
+                {"seq": 0, "tool": "submit_result", "args": {}, "validators": ["allow_list"]},
+            ],
+        }
+        ok, errs = validate_plan(plan)
+        self.assertFalse(ok)
+        self.assertTrue(any("monotone increasing" in e for e in errs))
 
 
 if __name__ == "__main__":

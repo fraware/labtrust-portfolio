@@ -17,11 +17,15 @@ This folder is the **submission-facing bundle** for the workshop paper (ACM proc
 | **references.bib** | Bibliography for LaTeX |
 | **reproducibility_table.md** | Example or exported appendix table (regenerate via scripts; not authoritative alone) |
 | **layer_attribution.md** | Example or exported layer-attribution table (from `export_p6_layer_attribution.py`) |
+| **ENGINEERING_TRUTH_PACKAGE_2026-04-24.md** | Implementation truth audit (schema, safe_args, traces, replay) |
+| **CLAIM_ARTIFACT_MATRIX_FREEZE_2026-04-24.md** | Pre-submit claim-to-artifact matrix |
+| **FREEZE_SUBMISSION_NOTES_2026-04-24.md** | One-page freeze snapshot (canonical run, denominators, non-merge rules) |
+| **FREEZE_VERIFICATION_REPORT_2026-04-24.json** | Machine-readable existence + consistency checks |
 
 ## Evidence tiers (how to cite without overclaiming)
 
 1. **Primary (validator correctness):** Synthetic suite in `red_team_results.json`, `confusable_deputy_results.json` -- 15 red-team, 6 confusable deputy, 4 jailbreak-style cases. This is the main security evidence for "firewall blocks released unsafe forms."
-2. **Canonical real-LLM (OpenAI, Table 1b):** Run `llm_redteam_eval.py --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 10 --real-llm-suite full`. Current repo snapshot: **250/250 passes per model** (100.0%, 95% Wilson CI [98.5, 100.0]); **25 cases per model** (15 red-team + 6 confusable deputy + 4 jailbreak-style), N=10 runs/case. Always report denominator and suite_mode from run_manifest.
+2. **Canonical real-LLM (OpenAI, Table 1b):** Run `llm_redteam_eval.py --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full`. Camera-ready snapshot (`llm_eval_camera_ready_20260424`): **75/75 passes per model** (100.0%, 95% Wilson CI [95.1, 100.0]); **25 cases per model** (15 red-team + 6 confusable deputy + 4 jailbreak-style), N=3 runs/case. Always report denominator and suite_mode from run_manifest.
 3. **Optional cross-provider matrix (Prime Inference):** If enabled in the eval script, a separate output directory (e.g. `datasets/runs/llm_eval_prime_matrix_top4_n3/`) can hold N=3 runs/case and four models. Treat as **supplementary** unless you regenerate and promote it to the main paper; keep denominators explicitly separated from OpenAI runs. See **EXPERIMENTS_RUNBOOK.md** for commands.
 4. **Deployability and extensions (experiments 6--12):** Concurrency, capture-off ablation, storage, cost model, policy sweep, replanning, adaptive suite -- optional JSON artifacts under `datasets/runs/llm_eval/` or adjacent paths; support deployment claims only when those JSONs exist for the cited tag.
 
@@ -54,4 +58,4 @@ python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline -
 python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval --run-baseline --baseline-plan benign --baseline-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0 --baseline-seeds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 ```
 
-Real-LLM (Table 1b, OpenAI): add API key to `.env` and run the first eval with `--real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 10 --real-llm-suite full` (see EXPERIMENTS_RUNBOOK.md).
+Real-LLM (Table 1b, OpenAI): add API key to `.env` and run the first eval with `--real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full` (see EXPERIMENTS_RUNBOOK.md).

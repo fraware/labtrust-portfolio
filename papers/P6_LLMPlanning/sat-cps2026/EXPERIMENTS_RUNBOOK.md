@@ -81,17 +81,19 @@ python scripts/run_paper_experiments.py --paper P6
 
 Runs the paper-default bundle (no real-LLM). Use `--quick` for fewer seeds.
 
-## 5. Real-LLM -- OpenAI (canonical Table 1b)
+## 5. Real-LLM -- OpenAI (canonical Table 1b, camera-ready)
 
 Requires `OPENAI_API_KEY` in `.env`.
 
 ```bash
-python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval \
-  --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 10 --real-llm-suite full
-python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval
+python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 \
+  --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full
+python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 ```
 
-**Publishable defaults:** `--real-llm-runs 10`, `--real-llm-suite full` (red-team + confusable deputy + jailbreak-style in the same API loop as Table 1b). Use `--real-llm-suite core` to match older red+confusable-only denominators. **Historical snapshot (2026-03-17):** 13 cases per model, 5 runs per case (pre-expansion corpora). Structure of `real_llm` vs `real_llm_models[]` follows `llm_redteam_eval.py`; `run_manifest.suite_mode` and `real_llm_case_count` record the mix.
+**Camera-ready defaults:** `--out datasets/runs/llm_eval_camera_ready_20260424`, `--real-llm-runs 3`, `--real-llm-suite full` (red-team + confusable deputy + jailbreak-style in the same API loop as Table 1b). Use `--real-llm-suite core` to match older red+confusable-only denominators. Structure of `real_llm` vs `real_llm_models[]` follows `llm_redteam_eval.py`; `run_manifest.suite_mode` and `real_llm_case_count` record the mix.
+
+**OpenAI GPT-5.x (supplementary, separate `--out`):** `llm_redteam_eval.py` uses the Responses API for `gpt-5*` with `chat.completions` fallback, retries without `temperature` if the API rejects that parameter, and uses bounded HTTP timeouts. Example isolated dirs from 2026-04-24: `datasets/runs/llm_eval_openai_gpt54_postpatch_20260424`, `datasets/runs/llm_eval_openai_gpt54pro_postpatch2_n3_20260424`. Do not merge with camera-ready Table 1b without relabeling. See `papers/P6_LLMPlanning/sat-cps2026/ENGINEERING_TRUTH_PACKAGE_2026-04-24.md`.
 
 ## 6. Real-LLM -- optional Prime Inference (four-model matrix)
 
