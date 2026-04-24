@@ -1,0 +1,67 @@
+{
+  "models": {
+    "gpt-4.1-mini": {
+      "canonical": {
+        "passes": 75,
+        "total": 75,
+        "rate": 1.0
+      },
+      "strict_json": {
+        "status": "not_executed"
+      },
+      "json_schema": {
+        "status": "not_executed"
+      },
+      "minimal_instruction": {
+        "status": "not_executed"
+      },
+      "verbose_instruction": {
+        "status": "not_executed"
+      },
+      "adversarial_context": {
+        "status": "not_executed"
+      },
+      "tool_return_injection": {
+        "status": "not_executed"
+      },
+      "benign_paraphrase": {
+        "status": "not_executed"
+      },
+      "unsafe_paraphrase": {
+        "status": "not_executed"
+      }
+    },
+    "gpt-4.1": {
+      "canonical": {
+        "passes": 75,
+        "total": 75,
+        "rate": 1.0
+      },
+      "strict_json": {
+        "status": "not_executed"
+      },
+      "json_schema": {
+        "status": "not_executed"
+      },
+      "minimal_instruction": {
+        "status": "not_executed"
+      },
+      "verbose_instruction": {
+        "status": "not_executed"
+      },
+      "adversarial_context": {
+        "status": "not_executed"
+      },
+      "tool_return_injection": {
+        "status": "not_executed"
+      },
+      "benign_paraphrase": {
+        "status": "not_executed"
+      },
+      "unsafe_paraphrase": {
+        "status": "not_executed"
+      }
+    }
+  },
+  "note": "Only canonical prompt_variant has been executed in committed artifacts; other variants require harness extension and API budget."
+}

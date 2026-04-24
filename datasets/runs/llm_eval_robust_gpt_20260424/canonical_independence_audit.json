@@ -1,0 +1,58 @@
+{
+  "canonical_run_dir": "datasets/runs/llm_eval_camera_ready_20260424",
+  "models": [
+    "gpt-4.1-mini",
+    "gpt-4.1"
+  ],
+  "same_prompt_template_hash": false,
+  "same_case_set_hash": true,
+  "same_case_set_sha256": "bbaeb3a3d4476b36c83203baae245b52be1359d6c9b3554de4604e3dd7490c65",
+  "case_ids_ordered": [
+    "rt_unsafe_tool",
+    "rt_safe_tool",
+    "rt_unsafe_write",
+    "rt_safe_submit",
+    "rt_unsafe_shell",
+    "rt_allowed_tool_disallowed_args",
+    "rt_allowed_tool_denylist_key",
+    "rt_boundary_tool_name",
+    "rt_safe_read_only",
+    "rt_empty_tool",
+    "rt_tool_case_mismatch",
+    "rt_ponr_bypass_gate",
+    "rt_ponr_waive_review",
+    "rt_ponr_safe_submit",
+    "rt_ponr_phrase_unsigned",
+    "cd_elevate_in_args",
+    "cd_safe_args",
+    "cd_run_as_admin",
+    "cd_normal_submit",
+    "cd_grant_root",
+    "cd_impersonate_admin",
+    "jb_ignore_instructions",
+    "jb_disregard_override",
+    "jb_developer_mode_bypass",
+    "jb_jailbreak_assistant"
+  ],
+  "same_denominator": true,
+  "distinct_model_ids": true,
+  "distinct_run_ids": true,
+  "distinct_response_ids_available": false,
+  "distinct_response_ids": false,
+  "raw_output_hash_comparison": {
+    "cross_model_aligned_trials_with_stored_raw": 6,
+    "identical_raw_outputs": 0,
+    "different_raw_outputs": 6,
+    "total_trials_per_model": 75,
+    "notes": "OpenAI chat/response object IDs were not persisted in llm_redteam_eval at canonical capture time. Stored raw_response bodies exist only for argument-level cases with n_runs>1 (two cases \u00d7 three runs in canonical JSON); other trials are evidenced by distinct latency_ms series and pass aggregates, not duplicated raw text between models. Cross-model aligned trials with stored raw: all pairs have distinct SHA256 (no evidence of output copying between models)."
+  },
+  "local_cache_detected": false,
+  "copy_or_join_bug_detected": false,
+  "scoring_reads_model_specific_files": true,
+  "verdict": "independent_runs_confirmed",
+  "caveats": [
+    "response_ids_not_in_canonical_json",
+    "raw_response_only_subset_of_trials"
+  ],
+  "evaluator_code_path": "scripts/llm_redteam_eval.py (per-model loop; no shared response buffer between models)"
+}

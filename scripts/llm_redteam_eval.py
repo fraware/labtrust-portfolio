@@ -3,8 +3,10 @@
 P6 LLM Planning: red-team eval. Run policy on RED_TEAM_CASES; verify expected_block
 cases blocked. Optionally run LLMPlanningAdapter and record latency. With --real-llm,
 call a real LLM API (keys from .env) for red-team-style prompts and record validator
-outcome. Writes to `--out DIR` (default scratch dir is `datasets/runs/llm_eval/`; the
-canonical frozen bundle for SaT-CPS is `datasets/runs/llm_eval_camera_ready_20260424/`).
+outcome. Use ``--store-real-llm-transcripts`` to persist every trial's raw output and
+OpenAI ``api_response_id`` when returned (for robustness audits). Writes to ``--out DIR``
+(default scratch dir is ``datasets/runs/llm_eval/``; canonical frozen bundle for SaT-CPS
+is ``datasets/runs/llm_eval_camera_ready_20260424/``).
 Usage: ... llm_redteam_eval.py [--out DIR] [--run-adapter] [--real-llm]
 """
 from __future__ import annotations
@@ -243,8 +245,24 @@ def _is_rate_limit_error(exc: BaseException) -> bool:
     return False
 
 
-def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, temperature: float) -> tuple[str, str | None]:
-    """Call LLM once; return (response_text, error_message)."""
+def _call_llm_one(
+    provider: str,
+    api_key: str,
+    model_id: str,
+    prompt: str,
+    temperature: float,
+    meta_out: dict | None = None,
+) -> tuple[str, str | None]:
+    """Call LLM once; return (response_text, error_message).
+
+    If ``meta_out`` is a dict, callee may set keys ``api_response_id``,
+    ``api_request_id``, ``provider_finish_reason`` when the provider returns them.
+    """
+    if meta_out is not None:
+        meta_out.clear()
+        meta_out.setdefault("api_response_id", None)
+        meta_out.setdefault("api_request_id", None)
+        meta_out.setdefault("provider_finish_reason", None)
     if provider == "prime":
         return _call_prime_inference_once(api_key, model_id, prompt, temperature)
     try:
@@ -255,21 +273,25 @@ def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, tempe
             # Newer GPT families may prefer/require Responses API payload semantics.
             # Try model-appropriate path first, then fall back for compatibility.
             if model_id.startswith("gpt-5"):
-                text, err = _call_openai_responses(client, model_id, prompt, temperature)
+                text, err = _call_openai_responses(
+                    client, model_id, prompt, temperature, meta_out=meta_out
+                )
                 if not err:
                     return (text, None)
                 text2, err2 = _call_openai_chat_completions(
-                    client, model_id, prompt, temperature
+                    client, model_id, prompt, temperature, meta_out=meta_out
                 )
                 if not err2:
                     return (text2, None)
                 return ("", f"responses_error={err}; chat_error={err2}")
             text, err = _call_openai_chat_completions(
-                client, model_id, prompt, temperature
+                client, model_id, prompt, temperature, meta_out=meta_out
             )
             if not err:
                 return (text, None)
-            text2, err2 = _call_openai_responses(client, model_id, prompt, temperature)
+            text2, err2 = _call_openai_responses(
+                client, model_id, prompt, temperature, meta_out=meta_out
+            )
             if not err2:
                 return (text2, None)
             return ("", f"chat_error={err}; responses_error={err2}")
@@ -282,6 +304,8 @@ def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, tempe
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temperature,
             )
+            if meta_out is not None:
+                meta_out["api_response_id"] = getattr(msg, "id", None)
             return ((msg.content[0].text if msg.content else "").strip(), None)
     except ImportError as e:
         return ("", f"Package not installed: {e}")
@@ -290,7 +314,11 @@ def _call_llm_one(provider: str, api_key: str, model_id: str, prompt: str, tempe
 
 
 def _call_openai_chat_completions(
-    client, model_id: str, prompt: str, temperature: float
+    client,
+    model_id: str,
+    prompt: str,
+    temperature: float,
+    meta_out: dict | None = None,
 ) -> tuple[str, str | None]:
     """OpenAI Chat Completions path with robust content extraction."""
     try:
@@ -309,6 +337,10 @@ def _call_openai_chat_completions(
                 resp = client.chat.completions.create(timeout=30, **req)
             else:
                 raise
+        if meta_out is not None:
+            meta_out["api_response_id"] = getattr(resp, "id", None)
+            ch0 = (getattr(resp, "choices", None) or [None])[0]
+            meta_out["provider_finish_reason"] = getattr(ch0, "finish_reason", None)
         choices = getattr(resp, "choices", None) or []
         if not choices:
             return ("", "chat: empty choices")
@@ -352,7 +384,11 @@ def _extract_text_from_responses_api(resp) -> str:
 
 
 def _call_openai_responses(
-    client, model_id: str, prompt: str, temperature: float
+    client,
+    model_id: str,
+    prompt: str,
+    temperature: float,
+    meta_out: dict | None = None,
 ) -> tuple[str, str | None]:
     """OpenAI Responses API path."""
     try:
@@ -371,6 +407,8 @@ def _call_openai_responses(
                 resp = client.responses.create(timeout=30, **req)
             else:
                 raise
+        if meta_out is not None:
+            meta_out["api_response_id"] = getattr(resp, "id", None)
         text = _extract_text_from_responses_api(resp)
         if not text:
             return ("", "responses: empty output")
@@ -465,6 +503,7 @@ def run_real_llm_full_suite(
     provider: str | None = None,
     api_key: str | None = None,
     suite_mode: str = "full",
+    store_all_transcripts: bool = False,
 ) -> dict:
     """
     Run red-team (+ optional jailbreak-style) and confusable-deputy cases through a real LLM.
@@ -494,6 +533,7 @@ def run_real_llm_full_suite(
         ]
     ARGUMENT_LEVEL_CASES = ("rt_allowed_tool_disallowed_args", "rt_allowed_tool_denylist_key")
     cases_result = []
+    raw_cap = 4000 if store_all_transcripts else 2000
     for case in all_cases:
         case_id = case["id"]
         expected_block = case["expected_block"]
@@ -504,13 +544,31 @@ def run_real_llm_full_suite(
         run_details = []  # for argument-level cases: raw + parsed for failure analysis
         for run_idx in range(n_runs):
             t0 = time.perf_counter()
-            text, err = _call_llm_one(provider, api_key, model_id, prompt, temperature)
+            meta: dict = {}
+            text, err = _call_llm_one(
+                provider, api_key, model_id, prompt, temperature, meta_out=meta
+            )
             elapsed_ms = round((time.perf_counter() - t0) * 1000, 2)
             runs_latency_ms.append(elapsed_ms)
+            record = store_all_transcripts or (
+                case_id in ARGUMENT_LEVEL_CASES and n_runs > 1
+            )
             if err:
                 runs_pass.append(False)
-                if case_id in ARGUMENT_LEVEL_CASES:
-                    run_details.append({"run_idx": run_idx, "raw_response": "", "parsed_step": {}, "pass": False, "latency_ms": elapsed_ms, "error": err})
+                if record:
+                    row = {
+                        "run_idx": run_idx,
+                        "raw_response": "",
+                        "parsed_step": {},
+                        "pass": False,
+                        "latency_ms": elapsed_ms,
+                        "error": err,
+                    }
+                    if meta.get("api_response_id"):
+                        row["api_response_id"] = meta["api_response_id"]
+                    if meta.get("provider_finish_reason") is not None:
+                        row["provider_finish_reason"] = meta["provider_finish_reason"]
+                    run_details.append(row)
                 continue
             step = _parse_step_from_response(text)
             step.setdefault("validators", ref_step.get("validators", ["allow_list"]))
@@ -518,14 +576,19 @@ def run_real_llm_full_suite(
             actually_blocked = not allowed
             pass_this = actually_blocked == expected_block
             runs_pass.append(pass_this)
-            if case_id in ARGUMENT_LEVEL_CASES and n_runs > 1:
-                run_details.append({
+            if record:
+                row = {
                     "run_idx": run_idx,
-                    "raw_response": text[:2000] if text else "",
+                    "raw_response": (text or "")[:raw_cap],
                     "parsed_step": step,
                     "pass": pass_this,
                     "latency_ms": elapsed_ms,
-                })
+                }
+                if meta.get("api_response_id"):
+                    row["api_response_id"] = meta["api_response_id"]
+                if meta.get("provider_finish_reason") is not None:
+                    row["provider_finish_reason"] = meta["provider_finish_reason"]
+                run_details.append(row)
         n_runs_done = len(runs_pass)
         pass_count = sum(1 for p in runs_pass if p)
         pass_rate_pct = round(100.0 * pass_count / n_runs_done, 1) if n_runs_done else 0.0
@@ -588,7 +651,13 @@ def run_real_llm_full_suite(
         "total_latency_ms": round(total_latency_ms, 2),
         "suite_mode": suite_mode,
         "run_manifest": _real_llm_run_manifest(
-            model_id, provider, temperature, n_runs, all_cases, suite_mode
+            model_id,
+            provider,
+            temperature,
+            n_runs,
+            all_cases,
+            suite_mode,
+            store_all_transcripts=store_all_transcripts,
         ),
     }
 
@@ -600,6 +669,7 @@ def _real_llm_run_manifest(
     n_runs: int,
     all_cases: list,
     suite_mode: str = "full",
+    store_all_transcripts: bool = False,
 ) -> dict:
     m = {
         "script": "llm_redteam_eval.py",
@@ -612,6 +682,7 @@ def _real_llm_run_manifest(
         "real_llm_case_count": len(all_cases),
         "timestamp_iso": get_timestamp_iso(),
         "prompt_template_hash": get_prompt_template_hash(all_cases),
+        "store_all_transcripts": bool(store_all_transcripts),
         "evaluator_version": get_evaluator_version(),
         "policy_version": get_policy_version(),
     }
@@ -1038,6 +1109,15 @@ def main() -> int:
         help="Real-LLM case mix: full = red-team + confusable + jailbreak-style; core = red + confusable only",
     )
     ap.add_argument(
+        "--store-real-llm-transcripts",
+        action="store_true",
+        help=(
+            "With --real-llm: persist per-run raw_response, parsed_step, api_response_id (when returned), "
+            "and provider_finish_reason for every case (larger red_team_results.json). "
+            "Recommended for robustness audits (see datasets/runs/llm_eval_robust_gpt_20260424)."
+        ),
+    )
+    ap.add_argument(
         "--real-llm-provider",
         type=str,
         choices=("auto", "openai", "anthropic", "prime"),
@@ -1125,6 +1205,7 @@ def main() -> int:
                     provider=prov_label,
                     api_key=api_key,
                     suite_mode=args.real_llm_suite,
+                    store_all_transcripts=bool(args.store_real_llm_transcripts),
                 )
                 real_llm_models.append(real_out)
             except SystemExit:

@@ -1,0 +1,29 @@
+{
+  "source_red_team_results": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
+  "models_summarized": [
+    "gpt-4.1-mini",
+    "gpt-4.1"
+  ],
+  "n_cases": 25,
+  "n_runs_per_case": 3,
+  "aggregate": {
+    "gpt-4.1-mini": {
+      "n_pass_total": 75,
+      "n_runs_total": 75,
+      "pass_rate_pct": 100.0,
+      "wilson_ci95": [
+        95.1,
+        100.0
+      ]
+    },
+    "gpt-4.1": {
+      "n_pass_total": 75,
+      "n_runs_total": 75,
+      "pass_rate_pct": 100.0,
+      "wilson_ci95": [
+        95.1,
+        100.0
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+model,suite,prompt_variant,passes,total,rate,wilson_low,wilson_high,include_in_main_paper,reason
+gpt-4.1-mini,canonical_25,canonical,75,75,100.0,95.1,100.0,true,frozen canonical row (Tier A)
+gpt-4.1,canonical_25,canonical,75,75,100.0,95.1,100.0,true,frozen canonical row (Tier A)
+gpt-5.4,canonical_25,json_schema,,,,,,false,Tier B: not re-run in this package; see llm_eval_openai_gpt54_postpatch_20260424 for exploratory aggregate
+gpt-5.4-pro,canonical_25,json_schema,,,,,,false,Tier B: not re-run under robust protocol; prior exploratory run failed inclusion criteria
