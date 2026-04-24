@@ -58,6 +58,13 @@ Argument-level baseline (`baseline_comparison_args.json`):
 
 Benign suite (`baseline_benign.json`) is available for false-positive reporting.
 
+Task-critical extension (`task_critical_injection.json`):
+
+- replacement (gated): runs 20, denials 20, unsafe_executions 0, tasks_completed_mean 3.95, fallback_exists false
+- competition (gated): runs 20, denials 20, unsafe_executions 0, tasks_completed_mean 3.95, fallback_exists true
+- args_unsafe (gated): runs 20, denials 20, unsafe_executions 0, tasks_completed_mean 4.95, fallback_exists false
+- replacement (ungated reference): runs 20, denials 0, unsafe_executions 20, tasks_completed_mean 3.95, fallback_exists false
+
 ## 5) Optional Prime matrix (historical)
 
 Prime results (N=3, separate output directory) remain useful as supplementary cross-provider evidence, but must be labeled with a separate denominator and not mixed with the OpenAI camera-ready table row.
@@ -81,6 +88,7 @@ python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_202
 python scripts/llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --run-baseline --baseline-plan benign --baseline-scenarios toy_lab_v0,lab_profile_v0,warehouse_v0 --baseline-seeds 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20
 python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --out papers/P6_LLMPlanning/exported_tables.md
 python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
+python scripts/run_p6_task_critical_injection.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --markdown
 python scripts/export_p6_reproducibility_table.py
 ```

@@ -123,6 +123,7 @@ python scripts/plot_llm_adapter_latency.py --latency datasets/runs/llm_eval_came
 python scripts/export_p6_denial_trace_case_study.py --trace <local_trace_path_from_adapter_run>
 python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --markdown
 python scripts/export_p6_reproducibility_table.py
+python scripts/run_p6_task_critical_injection.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 python scripts/export_p6_layer_attribution.py
 python scripts/export_p6_failure_analysis.py
 python scripts/export_p6_cross_model_heatmap.py
@@ -144,6 +145,8 @@ Optional: `--out papers/P6_LLMPlanning/exported_tables.md` on `export_llm_redtea
 | `baseline_comparison.json` | `--run-baseline` |
 | `baseline_comparison_args.json` | `--run-baseline --baseline-plan args_unsafe` |
 | `baseline_benign.json` | `--run-baseline --baseline-plan benign` |
+| `task_critical_injection.json` | `run_p6_task_critical_injection.py` (default 20 seeds; includes `fallback_exists`) |
+| `P6_CAMERA_READY_SUMMARY.json` | Canonical freeze summary (paper-facing numbers) |
 | `p6_artifact_hashes.json` | `export_p6_artifact_hashes.py` |
 | `p6_failure_analysis.json` | `export_p6_failure_analysis.py` |
 | `p6_concurrency_benchmark.json` | `p6_concurrency_benchmark.py` |

@@ -30,7 +30,8 @@ This folder is the **submission-facing bundle** for the workshop paper (ACM proc
 1. **Primary (validator correctness):** Synthetic suite in `red_team_results.json`, `confusable_deputy_results.json` -- 15 red-team, 6 confusable deputy, 4 jailbreak-style cases. This is the main security evidence for "firewall blocks released unsafe forms."
 2. **Canonical real-LLM (OpenAI, Table 1b):** Run `llm_redteam_eval.py --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full`. Camera-ready snapshot (`llm_eval_camera_ready_20260424`): **75/75 passes per model** (100.0%, 95% Wilson CI [95.1, 100.0]); **25 cases per model** (15 red-team + 6 confusable deputy + 4 jailbreak-style), N=3 runs/case. Always report denominator and suite_mode from run_manifest.
 3. **Optional cross-provider matrix (Prime Inference):** If enabled in the eval script, a separate output directory (e.g. `datasets/runs/llm_eval_prime_matrix_top4_n3/`) can hold N=3 runs/case and four models. Treat as **supplementary** unless you regenerate and promote it to the main paper; keep denominators explicitly separated from OpenAI runs. See **EXPERIMENTS_RUNBOOK.md** for commands.
-4. **Deployability and extensions (experiments 6--12):** Concurrency, capture-off ablation, storage, cost model, policy sweep, replanning, adaptive suite -- optional JSON artifacts under a dedicated `--out` directory (often scratch `datasets/runs/llm_eval/`); support deployment claims only when those JSONs exist for the cited tag.
+4. **Task-critical extension:** `task_critical_injection.json` provides replacement/competition rows (20 seeds) with denial count, unsafe executions, task completion, and `fallback_exists`.
+5. **Deployability and extensions (experiments 6--12):** Concurrency, capture-off ablation, storage, cost model, policy sweep, replanning, adaptive suite -- optional JSON artifacts under a dedicated `--out` directory (often scratch `datasets/runs/llm_eval/`); support deployment claims only when those JSONs exist for the cited tag.
 
 ## Run manifest and reproducibility
 
@@ -39,6 +40,7 @@ All summary JSONs in a P6 run directory include `run_manifest` with at least `ti
 ```text
 python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 python scripts/export_p6_reproducibility_table.py
+python scripts/run_p6_task_critical_injection.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 python scripts/verify_p6_camera_ready_bundle.py
 python scripts/verify_p6_claims_consistency.py
 python scripts/verify_p6_narrative_consistency.py

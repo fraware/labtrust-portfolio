@@ -28,8 +28,10 @@ Paper is ready for submission only when all items are true.
 ## Reproducibility and artifact integrity
 
 - [ ] Every table number in the camera-ready draft maps to a file under the cited canonical run directory (current default: `datasets/runs/llm_eval_camera_ready_20260424/`; Prime or supplementary runs must use clearly named alternate dirs).
+- [ ] `P6_CAMERA_READY_SUMMARY.json` exists in the canonical run and matches paper-facing numbers.
 - [ ] `run_manifest` fields are consistent with the text (`timestamp_iso`, `evaluator_version`, `policy_version`; real-LLM: `prompt_template_hash` where written).
 - [ ] Appendix or supplementary: `export_p6_artifact_hashes.py` + `export_p6_reproducibility_table.py` run on the **same** directory cited in the paper.
+- [ ] If task-critical evidence is cited, `task_critical_injection.json` reflects 20 seeds and includes `fallback_exists` per row.
 - [ ] Machine integrity gate passes: `python scripts/verify_p6_camera_ready_bundle.py` (CI + local pre-submit).
 - [ ] Claim path integrity gate passes: `python scripts/verify_p6_claims_consistency.py` (CI + local pre-submit).
 - [ ] Narrative integrity gate passes: `python scripts/verify_p6_narrative_consistency.py` (CI + local pre-submit).
