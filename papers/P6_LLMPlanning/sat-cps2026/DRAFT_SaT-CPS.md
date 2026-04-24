@@ -130,7 +130,7 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 
-**Canonical OpenAI run (Table 1b, camera-ready snapshot).** Reported: full-suite mode, 3 runs per case, 25 cases per model (75 trials per model). Models gpt-4.1-mini and gpt-4.1 each score 75/75 (100.0%, 95% Wilson CI [95.1, 100.0]). Command: `llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full`. Output: red_team_results.json (real_llm_models[], cross_model_summary when multiple models).
+**Canonical OpenAI run (Table 1b, camera-ready snapshot).** Reported: full-suite mode, 3 runs per case, 25 cases per model (75 trials per model). Models gpt-4.1-mini and gpt-4.1 each score 75/75 (100.0%, 95% Wilson CI [95.1, 100.0]). The real-LLM experiment verifies that, when two OpenAI models produce the targeted typed unsafe forms under the controlled full-suite prompt, the validator yields the expected allow/deny outcomes. Command: `llm_redteam_eval.py --out datasets/runs/llm_eval_camera_ready_20260424 --real-llm --real-llm-models gpt-4.1-mini,gpt-4.1 --real-llm-runs 3 --real-llm-suite full`. Output: red_team_results.json (real_llm_models[], cross_model_summary when multiple models).
 
 
 
@@ -160,11 +160,11 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 
-**Tool-level benchmark (existing).** The injected unsafe step is execute_system (disallowed tool). Gated and weak both deny (rejection at allow-list layer); ungated allows. This baseline shows the value of having a gate at all; it does not isolate the marginal contribution of safe_args. Reported: 60 runs; gated 60 denials, weak 60, ungated 0; tasks_completed_mean 3.95 (all modes).
+**Tool-level benchmark (existing).** The injected unsafe step is execute_system (disallowed tool). Gated and weak both deny (rejection at allow-list layer); ungated allows. This baseline shows the value of having a gate at all; it does not isolate the marginal contribution of safe_args and does not replace required nominal steps. Reported: 60 runs; gated 60 denials, weak 60, ungated 0; tasks_completed_mean 3.95 (all modes).
 
 
 
-**Argument-level benchmark (safe_args ablation).** With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation. Reported: 60 runs; gated 60 denials, weak 0, ungated 0; tasks_completed_mean 3.95. Source: baseline_comparison.json (tool-level), baseline_comparison_args.json (argument-level); export_p6_baseline_table.py [--baseline-file baseline_comparison_args.json].
+**Argument-level benchmark (safe_args ablation).** With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation. Reported: 60 runs; gated 60 denials, weak 0, ungated 0; tasks_completed_mean 3.95. Source: baseline_comparison.json (tool-level), baseline_comparison_args.json (argument-level); export_p6_baseline_table.py [--baseline-file baseline_comparison_args.json]. Additional task-critical replacement/competition evidence is captured in `task_critical_injection.json`.
 
 **Utility-security tradeoff.** Benign suite (--baseline-plan benign) runs gated/weak/ungated on all-safe steps; baseline_benign.json reports benign_acceptance_rate and false_positive_count per mode. Gated should preserve benign acceptance (no over-denial) while improving unsafe denial in the adversarial baselines.
 

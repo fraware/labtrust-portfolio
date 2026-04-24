@@ -99,7 +99,7 @@ Synthetic evidence isolates validator correctness from model-generation variabil
 
 \subsection{Block B: Real-LLM Stress Test}
 
-The validator correctly blocks the canonical unsafe step; the real-LLM experiment tests whether models reliably emit unsafe argument forms under repeated prompting. \textbf{OpenAI (camera-ready snapshot):} full-suite mode, 3 runs/case, 25 cases/model (75 trials/model). \texttt{gpt-4.1-mini} and \texttt{gpt-4.1} each score 75/75 (100.0\%, 95\% Wilson CI [95.1, 100.0\%]). \textbf{Optional Prime matrix:} separate denominator and output directory; see venue \texttt{EXPERIMENTS\_RUNBOOK.md} and do not merge rows without relabeling.
+The validator correctly blocks the canonical unsafe step; the real-LLM experiment verifies that, when two OpenAI models produce the targeted typed unsafe forms under the controlled full-suite prompt, the validator yields the expected allow/deny outcomes. \textbf{OpenAI (camera-ready snapshot):} full-suite mode, 3 runs/case, 25 cases/model (75 trials/model). \texttt{gpt-4.1-mini} and \texttt{gpt-4.1} each score 75/75 (100.0\%, 95\% Wilson CI [95.1, 100.0\%]). \textbf{Optional Prime matrix:} separate denominator and output directory; see venue \texttt{EXPERIMENTS\_RUNBOOK.md} and do not merge rows without relabeling.
 
 \paragraph{Failure case as first-class result.} Any future argument-level misses or parse failures must be reported explicitly with denominator and suite mode. Repeated-run real-LLM evaluation is necessary to assess containment; argument-level cases are exactly where real systems need tighter controls.
 
@@ -111,9 +111,9 @@ Three scenarios, 20 seeds each; mean p95 latency, stdev, 95\% CI; total denied u
 
 \subsection{Block D: Baseline Comparison}
 
-\textbf{Tool-level benchmark.} The injected unsafe step is \texttt{execute\_system} (disallowed tool). Gated and weak both deny (rejection at allow-list layer); ungated allows. This baseline shows the value of having a gate at all; it does not isolate the marginal contribution of safe\_args.
+\textbf{Tool-level benchmark.} The injected unsafe step is \texttt{execute\_system} (disallowed tool). Gated and weak both deny (rejection at allow-list layer); ungated allows. This baseline shows the value of having a gate at all; it does not isolate the marginal contribution of safe\_args and does not replace required nominal steps.
 
-\textbf{Argument-level benchmark (safe\_args ablation).} With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe\_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation.
+\textbf{Argument-level benchmark (safe\_args ablation).} With an allow-listed tool and unsafe arguments (path traversal), gated denies (safe\_args blocks), weak allows (allow-list only), ungated allows. This demonstrates the incremental value of argument-level validation. Additional task-critical replacement/competition evidence is captured in \texttt{task\_critical\_injection.json}.
 
 \textbf{Benign utility (optional).} All-safe plans across gated/weak/ungated quantify false-positive denials; see \texttt{baseline\_benign.json} and \texttt{p6\_benign\_suite.json}.
 

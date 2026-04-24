@@ -1,11 +1,16 @@
 {
   "status": "ok",
-  "generated_at_utc": "2026-04-24T12:44:22+00:00",
+  "generated_at_utc": "2026-04-24T13:55:39+00:00",
   "run_dir": "datasets\\runs\\llm_eval_camera_ready_20260424",
   "checks": [
     {
       "check": "MANIFEST",
       "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\MANIFEST.json",
+      "exists": true
+    },
+    {
+      "check": "P6_CAMERA_READY_SUMMARY",
+      "path": "datasets\\runs\\llm_eval_camera_ready_20260424\\P6_CAMERA_READY_SUMMARY.json",
       "exists": true
     },
     {

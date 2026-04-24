@@ -43,6 +43,7 @@ artifact paths against the current repository state.
 | `datasets/runs/llm_eval_camera_ready_20260424/MANIFEST.json` | yes | Canonical manifest present. |
 | `datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json` | yes | Adapter latency + denial_stats. |
 | `datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json` | yes | Deterministic replay verification. |
+| `datasets/runs/llm_eval_camera_ready_20260424/P6_CAMERA_READY_SUMMARY.json` | yes | Consolidated paper-number freeze summary. |
 | `datasets/runs/llm_eval_camera_ready_20260424/mock_execution_harness.json` | yes | Mock deny-vs-execute partition. |
 | `datasets/runs/llm_eval_camera_ready_20260424/task_critical_injection.json` | yes | Thin-slice task-critical injection rows. |
 | `datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json` | yes | SHA256 appendix inputs. |

@@ -32,6 +32,7 @@ Camera-ready baseline/adapter artifacts are now committed in the canonical run:
 - `datasets/runs/llm_eval_camera_ready_20260424/e2e_denial_trace.json`
 - `datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json`
 - `datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/P6_CAMERA_READY_SUMMARY.json`
 
 ## Supplementary isolated GPT-5.x runs (do not merge denominators)
 

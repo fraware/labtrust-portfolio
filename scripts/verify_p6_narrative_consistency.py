@@ -18,13 +18,41 @@ from typing import Any
 REPO = Path(__file__).resolve().parents[1]
 CANONICAL = "llm_eval_camera_ready_20260424"
 REQUIRED_SNIPPETS: dict[str, list[str]] = {
-    "papers/P6_LLMPlanning/DRAFT.md": [CANONICAL, "75/75", "95.1, 100.0", "36.70"],
-    "papers/P6_LLMPlanning/P6_RESULTS_REPORT.md": [CANONICAL, "75 / 75", "36.70", "22.07", "[31.12, 42.29]"],
-    "papers/P6_LLMPlanning/sat-cps2026/DRAFT_SaT-CPS.md": [CANONICAL, "75/75", "95.1, 100.0"],
-    "papers/P6_LLMPlanning/sat-cps2026/main.tex": ["llm\\_eval\\_camera\\_ready\\_20260424", "75/75", "95.1, 100.0"],
+    "papers/P6_LLMPlanning/DRAFT.md": [
+        CANONICAL,
+        "75/75",
+        "95.1, 100.0",
+        "36.70",
+        "targeted typed unsafe forms under the controlled full-suite prompt",
+    ],
+    "papers/P6_LLMPlanning/P6_RESULTS_REPORT.md": [
+        CANONICAL,
+        "75 / 75",
+        "36.70",
+        "22.07",
+        "[31.12, 42.29]",
+    ],
+    "papers/P6_LLMPlanning/sat-cps2026/DRAFT_SaT-CPS.md": [
+        CANONICAL,
+        "75/75",
+        "95.1, 100.0",
+        "targeted typed unsafe forms under the controlled full-suite prompt",
+    ],
+    "papers/P6_LLMPlanning/sat-cps2026/main.tex": [
+        "llm\\_eval\\_camera\\_ready\\_20260424",
+        "75/75",
+        "95.1, 100.0",
+    ],
     "docs/RESULTS_PER_PAPER.md": [CANONICAL, "36.70", "60/60/0"],
 }
-FORBIDDEN_SNIPPETS = ("32.07", "18.45", "27.41, 36.74")
+FORBIDDEN_SNIPPETS = (
+    "32.07",
+    "18.45",
+    "27.41",
+    "36.74",
+    "180/180",
+    'denials_checked": 180',
+)
 
 
 def _read(path: Path) -> str:
@@ -38,7 +66,14 @@ def verify() -> tuple[list[dict[str, Any]], list[str]]:
         p = REPO / rel
         if not p.exists():
             errors.append(f"missing file: {rel}")
-            checks.append({"path": rel, "exists": False, "missing_required": required, "forbidden_hits": []})
+            checks.append(
+                {
+                    "path": rel,
+                    "exists": False,
+                    "missing_required": required,
+                    "forbidden_hits": [],
+                }
+            )
             continue
         text = _read(p)
         missing = [s for s in required if s not in text]
@@ -65,7 +100,9 @@ def main() -> int:
     checks, errors = verify()
     report = {
         "status": "ok" if not errors else "failed",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(
+            timespec="seconds"
+        ),
         "canonical_run_id": CANONICAL,
         "checks": checks,
         "errors": errors,
