@@ -35,10 +35,10 @@ No aspirational behavior is reported as implemented.
 | Missing/invalid args object denied | Yes | `impl/src/labtrust_portfolio/llm_planning.py` and adapter shape checks | implicit via validator tests | malformed-step traces | Denied in gated path. |
 | Duplicate/non-monotone seq denied | Yes | `impl/src/labtrust_portfolio/llm_planning.py` | `tests/test_llm_planning_validators.py` | unit-test result | Added explicit checks on 2026-04-24. |
 | Unsupported tools denied | Yes | `impl/src/labtrust_portfolio/llm_planning.py` | `tests/test_llm_planning_validators.py` | `trace_samples/disallowed_tool/trace.json` | Allow-list gate. |
-| Tool allow-list enforced before execution | Partial | adapter validator path | synthetic suites | denial traces | Denied typed steps are not executed through adapter tool path. |
+| Tool allow-list enforced before execution | Yes (mock harness) | `impl/src/labtrust_portfolio/llm_planning.py` (`MockToolExecutor`) + adapter validator path | `tests/test_llm_planning_validators.py` | `mock_execution_harness.json` + denial traces | Mock executor records deny/execute partition explicitly. |
 | Argument validation for allowed tools | Yes (gated mode) | `impl/src/labtrust_portfolio/llm_planning.py` | `tests/test_llm_planning_validators.py` | `baseline_comparison_args.json` | `safe_args` runs only when validator is present. |
 | Unsafe args to allowed tools denied | Yes (gated mode) | `impl/src/labtrust_portfolio/llm_planning.py` | same | `trace_samples/unsafe_args_path_traversal/trace.json`, `trace_samples/denylist_key/trace.json` | Works for current heuristic rules. |
-| Denied steps never executed | Partial | adapter | N/A | trace metadata | No separate real tool executor in this harness. |
+| Denied steps never executed | Yes (mock harness) | `impl/src/labtrust_portfolio/llm_planning.py` (`MockToolExecutor`) | `tests/test_llm_planning_validators.py` | `datasets/runs/llm_eval_camera_ready_20260424/mock_execution_harness.json` | Demonstrated in mock execution harness; production external executor is out of scope. |
 | Denied steps produce trace/audit records | Yes | adapter | N/A | `trace.json` (`denied_steps`, `denial_reason`, `denials_count`) | Deterministic denial capture present. |
 | Trace records sufficient to replay denial | Yes | `scripts/replay_denials.py` | N/A | `replay_denials.json` | Replay recomputes decisions. |
 | Weak baseline = allow-list only (no safe_args) | Yes | adapter (`validation_mode="weak"`) | baseline artifacts | `baseline_comparison.json`, `baseline_comparison_args.json` | Verified by tool-level/arg-level split. |
@@ -86,24 +86,25 @@ Source: `impl/src/labtrust_portfolio/llm_planning.py` (`safe_args_check`)
 
 Rules currently implemented:
 
-1. Path traversal heuristic on serialized args:
-   - deny if `".."` and (`"/"` or `"\\"`) are both present
+1. Path traversal checks:
+   - normalize path-like fields (`path`, `file`, `dir`, `directory`, `target`, `input`, `output`, `location`) and deny if parent traversal segment `..` appears
+   - fallback serialized heuristic still denies if `".."` and (`"/"` or `"\\"`) are both present
 2. Dangerous substring patterns:
    - `eval(`, `exec(`, `subprocess.`, `__import__`
 3. Jailbreak-style substrings (case-insensitive over serialized args):
    - `ignore previous instruction`, `disregard instruction`, `override instruction`,
      `developer mode bypass`, `jailbreak assistant`
-4. Top-level denylist keys (case-sensitive):
+4. Recursive denylist keys (case-insensitive):
    - `cmd`, `shell`, `code`, `script`
 
 Behavior clarifications:
 
-- recursive inspection: partial (full-content substring checks through JSON serialization; key checks are top-level only)
+- recursive inspection: yes for denylist-key checks (dict/list walk)
 - arrays: covered by serialization for substring checks
 - nested objects: covered by serialization for substring checks
-- key checks: not recursive
+- key checks: recursive
 - regex: no (substring checks)
-- path normalization: no
+- path normalization: yes (path-like fields)
 - shell metacharacter dedicated check: no
 - per-tool policy distinction: only through validator annotations, not deep tool-specific schema enforcement
 
@@ -170,8 +171,8 @@ python scripts/replay_denials.py --run-dir datasets/runs/llm_eval_camera_ready_2
 ```json
 {
   "run_id": "llm_eval_camera_ready_20260424",
-  "denials_checked": 180,
-  "replay_matches": 180,
+  "denials_checked": 60,
+  "replay_matches": 60,
   "mismatches": 0
 }
 ```
@@ -212,22 +213,22 @@ Secondary run generated:
 - `datasets/runs/llm_eval_camera_ready_20260424/tables/jailbreak_suite_cases.csv`
 - `datasets/runs/llm_eval_camera_ready_20260424/tables/confusable_deputy_cases.csv`
 - `datasets/runs/llm_eval_camera_ready_20260424/tables/baseline_tool_level_rows.csv`
+- `datasets/runs/llm_eval_camera_ready_20260424/tables/baseline_argument_level_rows.csv`
+- `datasets/runs/llm_eval_camera_ready_20260424/tables/benign_probe_rows.csv`
 - `datasets/runs/llm_eval_camera_ready_20260424/tables/latency_per_run.csv`
 - `datasets/runs/llm_eval_camera_ready_20260424/tables/llm_aggregate.json`
 - `datasets/runs/llm_eval_camera_ready_20260424/tables/denial_trace_stats.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/mock_execution_harness.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/task_critical_injection.json`
 
-Note: this secondary run intentionally does not contain `baseline_comparison_args.json`
-or `baseline_benign.json`; exporter now handles missing optional artifacts without failure.
+Note: this secondary run contains tool-level baseline, argument-level baseline, and benign probe artifacts.
 
 ## 8) Explicit limitations and blockers
 
 1. Current trace format does not embed policy/evaluator/model/prompt-hash directly in each trace.
 2. `safe_args` remains heuristic and is not a full schema-typed per-tool argument policy.
-3. Task-critical replacement/competition experiment is not yet added in this package.
-4. Secondary run (`llm_eval_camera_ready_20260424`) includes tool-level baseline
-   but not argument-level (`baseline_comparison_args.json`) and not benign probe
-   (`baseline_benign.json`), so those tables should still cite the primary run
-   unless regenerated for the secondary run.
+3. Task-critical experiment is currently a thin-slice harness study (`task_critical_injection.json`),
+   not an external effectful tool execution benchmark.
 
 ## 9) Files changed in this hardening pass
 
@@ -238,3 +239,5 @@ or `baseline_benign.json`; exporter now handles missing optional artifacts witho
 - `scripts/export_p6_camera_ready_bundle.py`
 - `scripts/llm_redteam_eval.py` (OpenAI GPT-5.x: Responses API path, temperature retry, request timeouts)
 - `scripts/export_p6_failure_analysis.py` (`p6_failure_analysis.json`: JSON-safe `by_case_mode` nesting)
+- `scripts/export_p6_mock_execution_harness.py`
+- `scripts/run_p6_task_critical_injection.py`

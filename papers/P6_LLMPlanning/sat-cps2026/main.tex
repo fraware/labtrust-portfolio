@@ -45,7 +45,7 @@ In CPS, the control plane often invokes tools (query status, submit results, or 
 Generic LLM safety benchmarks focus on prompt injection, jailbreaks, or output filtering in isolation. For CPS we need: (a) a clear trust boundary (planner output is untrusted until validated); (b) integration with trace and audit (deterministic capture, denial logs); (c) evaluation that includes both synthetic validator correctness and real-LLM stress tests; (d) explicit baselines that show the value of each validation layer (allow-list vs.\ safe\_args).
 
 \paragraph{The typed-plan firewall.}
-The typed-plan firewall sits at the actuation boundary: planner output is untrusted until the firewall admits it. Plans are typed (tool, args, validators); the firewall runs allow-list and argument checks (e.g., path traversal, dangerous patterns). Denied steps are not executed; they are captured for replay and audit. This is a runtime enforcement architecture for CPS tool invocation, not merely an LLM benchmark.
+The typed-plan firewall sits at the actuation boundary: planner output is untrusted until the firewall admits it. Plans are typed (tool, args, validators); the firewall runs allow-list and argument checks (e.g., normalized path traversal, dangerous patterns, recursive denylist-key checks). In the published mock execution harness, denied steps are not executed and are captured for replay and audit. This is a runtime enforcement architecture for CPS tool invocation, not merely an LLM benchmark.
 
 \paragraph{Evidence and scope.}
 We report four evaluation blocks: (A) synthetic validator evidence; (B) real-LLM stress test with explicit failure-case analysis; (C) adapter latency and denial traces; (D) baseline comparison (tool-level and argument-level). We do not claim elimination of prompt injection, full jailbreak coverage, or universal robustness.
@@ -119,7 +119,7 @@ Three scenarios, 20 seeds each; mean p95 latency, stdev, 95\% CI; total denied u
 
 \section{Discussion and Limitations}
 
-Containment, not elimination: the firewall blocks the released unsafe cases; we do not claim elimination of prompt injection or full coverage. Validator v0.2 covers allow\_list and safe\_args; PONR and broader checks are future work. Real-LLM pass rate is model- and prompt-dependent; synthetic table remains primary validator evidence. Residual risk from novel attack vectors remains.
+Containment, not elimination: the firewall blocks the released unsafe cases; we do not claim elimination of prompt injection or full coverage. \texttt{safe\_args} is deterministic deny-pattern logic (recursive denylist-key checks, normalized path-traversal checks, and substring checks), not a full per-tool semantic sanitizer. The mock execution harness validates deny-vs-execute behavior for this artifact; production external-tool execution semantics remain future work. Real-LLM pass rate is model- and prompt-dependent; synthetic table remains primary validator evidence. Residual risk from novel attack vectors remains.
 
 \section{Conclusion}
 

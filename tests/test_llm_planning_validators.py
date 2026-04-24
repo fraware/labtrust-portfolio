@@ -6,7 +6,10 @@ import unittest
 from labtrust_portfolio.llm_planning import (
     CONFUSABLE_DEPUTY_CASES,
     JAILBREAK_STYLE_CASES,
+    MockToolExecutor,
     RED_TEAM_CASES,
+    StepDecision,
+    safe_args_check,
     validate_plan,
     ponr_gate_check,
     validate_plan_step_with_attribution,
@@ -100,6 +103,68 @@ class TestTypedPlanValidation(unittest.TestCase):
         ok, errs = validate_plan(plan)
         self.assertFalse(ok)
         self.assertTrue(any("monotone increasing" in e for e in errs))
+
+
+class TestSafeArgsHardening(unittest.TestCase):
+    def test_recursive_deny_key_is_blocked(self) -> None:
+        step = {
+            "seq": 0,
+            "tool": "query_status",
+            "args": {"payload": {"nested": {"script": "evil"}}},
+            "validators": ["allow_list", "safe_args"],
+        }
+        ok, violations = safe_args_check(step)
+        self.assertFalse(ok)
+        self.assertTrue(any("deny-list key 'script'" in v for v in violations))
+
+    def test_normalized_path_traversal_is_blocked(self) -> None:
+        step = {
+            "seq": 0,
+            "tool": "query_status",
+            "args": {"output_path": "reports\\..\\..\\secrets.txt"},
+            "validators": ["allow_list", "safe_args"],
+        }
+        ok, violations = safe_args_check(step)
+        self.assertFalse(ok)
+        self.assertTrue(any("path traversal" in v for v in violations))
+
+
+class TestMockToolExecutor(unittest.TestCase):
+    def test_denied_disallowed_tool_not_executed(self) -> None:
+        step = {"seq": 0, "tool": "execute_system", "args": {"cmd": "rm -rf"}, "validators": ["allow_list"]}
+        allowed, reasons, _ = validate_plan_step_with_attribution(step, ALLOWED)
+        ex = MockToolExecutor()
+        ex.execute_if_allowed(step, StepDecision(allowed=allowed, reasons=reasons))
+        self.assertEqual(len(ex.executed), 0)
+        self.assertEqual(len(ex.denied), 1)
+
+    def test_denied_unsafe_args_not_executed(self) -> None:
+        step = {
+            "seq": 1,
+            "tool": "query_status",
+            "args": {"path": "../../../etc/passwd"},
+            "validators": ["allow_list", "safe_args"],
+        }
+        allowed, reasons, _ = validate_plan_step_with_attribution(step, ALLOWED)
+        ex = MockToolExecutor()
+        ex.execute_if_allowed(step, StepDecision(allowed=allowed, reasons=reasons))
+        self.assertEqual(len(ex.executed), 0)
+        self.assertEqual(len(ex.denied), 1)
+
+    def test_allowed_safe_step_is_executed(self) -> None:
+        step = {"seq": 0, "tool": "query_status", "args": {}, "validators": ["allow_list"]}
+        allowed, reasons, _ = validate_plan_step_with_attribution(step, ALLOWED)
+        ex = MockToolExecutor()
+        ex.execute_if_allowed(step, StepDecision(allowed=allowed, reasons=reasons))
+        self.assertEqual(len(ex.executed), 1)
+        self.assertEqual(len(ex.denied), 0)
+
+    def test_ungated_mode_executes_unsafe_step(self) -> None:
+        step = {"seq": 0, "tool": "execute_system", "args": {"cmd": "rm -rf"}, "validators": ["allow_list"]}
+        ex = MockToolExecutor()
+        ex.execute_if_allowed(step, StepDecision(allowed=True, reasons=["mock ungated"]))
+        self.assertEqual(len(ex.executed), 1)
+        self.assertEqual(len(ex.denied), 0)
 
 
 if __name__ == "__main__":

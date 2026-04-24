@@ -6,6 +6,8 @@ Containment: block unsafe; no elimination claim.
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass, field
+from pathlib import PurePosixPath
 from typing import Any, Dict, List, Tuple
 
 
@@ -386,7 +388,7 @@ def safe_args_check(step: Dict[str, Any]) -> Tuple[bool, List[str]]:
     args = step.get("args", {})
     s = json.dumps(args)
     s_lower = s.lower()
-    if ".." in s and ("/" in s or "\\" in s):
+    if _contains_path_traversal(args):
         violations.append("path traversal (../) in args")
     for dangerous in ("eval(", "exec(", "subprocess.", "__import__"):
         if dangerous in s:
@@ -401,11 +403,88 @@ def safe_args_check(step: Dict[str, Any]) -> Tuple[bool, List[str]]:
         if jailbreak_phrase in s_lower:
             violations.append(f"jailbreak-style phrase in args")
             break
-    deny_keys = ("cmd", "shell", "code", "script")
-    for k in deny_keys:
-        if k in args:
-            violations.append(f"deny-list key {k!r} in args")
+    deny_keys = {"cmd", "shell", "code", "script"}
+    deny_key_hits = _find_deny_keys_recursive(args, deny_keys)
+    for k in sorted(deny_key_hits):
+        violations.append(f"deny-list key {k!r} in args")
     return (len(violations) == 0, violations)
+
+
+def _iter_strings_in_path_like_fields(args: Any, parent_key: str = "") -> List[str]:
+    values: List[str] = []
+    path_like_tokens = (
+        "path",
+        "file",
+        "dir",
+        "directory",
+        "target",
+        "input",
+        "output",
+        "location",
+    )
+    if isinstance(args, dict):
+        for key, value in args.items():
+            key_str = str(key).lower()
+            if isinstance(value, str) and any(tok in key_str for tok in path_like_tokens):
+                values.append(value)
+            values.extend(_iter_strings_in_path_like_fields(value, parent_key=key_str))
+    elif isinstance(args, list):
+        for value in args:
+            values.extend(_iter_strings_in_path_like_fields(value, parent_key=parent_key))
+    return values
+
+
+def _path_has_parent_ref(value: str) -> bool:
+    if "://" in value:
+        return False
+    normalized = value.replace("\\", "/")
+    if ".." not in normalized:
+        return False
+    parts = [p for p in PurePosixPath(normalized).parts if p not in ("", ".")]
+    return any(p == ".." for p in parts)
+
+
+def _contains_path_traversal(args: Dict[str, Any]) -> bool:
+    path_candidates = _iter_strings_in_path_like_fields(args)
+    if any(_path_has_parent_ref(v) for v in path_candidates):
+        return True
+    serialized = json.dumps(args)
+    return ".." in serialized and ("/" in serialized or "\\" in serialized)
+
+
+def _find_deny_keys_recursive(node: Any, deny_keys: set[str]) -> set[str]:
+    hits: set[str] = set()
+    if isinstance(node, dict):
+        for key, value in node.items():
+            key_l = str(key).lower()
+            if key_l in deny_keys:
+                hits.add(key_l)
+            hits.update(_find_deny_keys_recursive(value, deny_keys))
+    elif isinstance(node, list):
+        for item in node:
+            hits.update(_find_deny_keys_recursive(item, deny_keys))
+    return hits
+
+
+@dataclass
+class StepDecision:
+    allowed: bool
+    reasons: List[str] = field(default_factory=list)
+
+
+class MockToolExecutor:
+    """Mock executor used to show deny-vs-execute behavior in tests/artifacts."""
+
+    def __init__(self) -> None:
+        self.executed: List[Dict[str, Any]] = []
+        self.denied: List[Dict[str, Any]] = []
+
+    def execute_if_allowed(self, step: Dict[str, Any], decision: StepDecision) -> bool:
+        if decision.allowed:
+            self.executed.append(step)
+            return True
+        self.denied.append(step)
+        return False
 
 
 def validate_plan_step(

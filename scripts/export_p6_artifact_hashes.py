@@ -22,7 +22,12 @@ ARTIFACTS = [
     "e2e_denial_trace.json",
     "baseline_comparison.json",
     "baseline_comparison_args.json",
+    "baseline_benign.json",
     "denial_trace_stats.json",
+    "replay_denials.json",
+    "MANIFEST.json",
+    "mock_execution_harness.json",
+    "task_critical_injection.json",
 ]
 
 # Map artifact filename to paper table id for reproducibility table
@@ -33,7 +38,12 @@ ARTIFACT_TO_TABLE = {
     "e2e_denial_trace.json": "Case study",
     "baseline_comparison.json": "Table (tool-level)",
     "baseline_comparison_args.json": "Table (argument-level)",
+    "baseline_benign.json": "Benign baseline",
     "denial_trace_stats.json": "Table 2",
+    "replay_denials.json": "Replay verification",
+    "MANIFEST.json": "Manifest",
+    "mock_execution_harness.json": "Mock execution evidence",
+    "task_critical_injection.json": "Task-critical injection",
 }
 
 

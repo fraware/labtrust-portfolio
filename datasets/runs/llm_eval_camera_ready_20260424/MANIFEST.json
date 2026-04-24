@@ -1,0 +1,47 @@
+{
+  "run_id": "llm_eval_camera_ready_20260424",
+  "timestamp_utc": "2026-04-24T09:26:24+00:00",
+  "git_commit": "b9175c0bbf615d5341089bf32d16c4c6866e71a5",
+  "policy_version": "typed_plan.0.1",
+  "evaluator_version": "llm_redteam_eval.v1",
+  "schema_version": "typed_plan.0.1",
+  "models": [
+    "gpt-4.1-mini",
+    "gpt-4.1"
+  ],
+  "scenarios": [
+    "toy_lab_v0",
+    "lab_profile_v0",
+    "warehouse_v0"
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "prompt_template_hash": "9fac7f1887f15eefd90ba7d57b2304ed3ee9910dd94220fb05d566e94570287a",
+  "results": {
+    "synthetic_suite": "datasets\\runs\\llm_eval_camera_ready_20260424\\red_team_results.json",
+    "llm_runs": "datasets\\runs\\llm_eval_camera_ready_20260424\\red_team_results.json",
+    "adapter_latency": "datasets\\runs\\llm_eval_camera_ready_20260424\\adapter_latency.json",
+    "baselines": "datasets\\runs\\llm_eval_camera_ready_20260424\\baseline_comparison.json",
+    "replay": "datasets\\runs\\llm_eval_camera_ready_20260424\\replay_denials.json"
+  }
+}

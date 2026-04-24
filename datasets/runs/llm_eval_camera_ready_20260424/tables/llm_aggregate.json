@@ -1,0 +1,17 @@
+{
+  "red_team": {
+    "red_team_pass_rate_pct": 100.0,
+    "n_cases": 15,
+    "n_pass": 15
+  },
+  "confusable_deputy": {
+    "confusable_deputy_pass_rate_pct": 100.0
+  },
+  "jailbreak_style": {
+    "allow_list_only": 0,
+    "safe_args_only": 4,
+    "ponr_gate_only": 0,
+    "both": 0,
+    "admitted": 0
+  }
+}

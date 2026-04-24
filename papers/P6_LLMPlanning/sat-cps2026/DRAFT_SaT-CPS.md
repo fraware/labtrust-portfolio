@@ -178,7 +178,7 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 
-Containment, not elimination: the firewall blocks the released unsafe cases; we do not claim elimination of prompt injection or full coverage. Validator v0.2 covers allow_list and safe_args; PONR and broader checks are future work. Real-LLM pass rate is model- and prompt-dependent; synthetic table remains primary validator evidence. Residual risk from novel attack vectors remains.
+Containment, not elimination: the firewall blocks the released unsafe cases; we do not claim elimination of prompt injection or full coverage. The current `safe_args` is deterministic deny-pattern logic (recursive denylist-key checks + normalized path-traversal checks + substring checks), not a full per-tool semantic sanitizer. A mock execution harness demonstrates denied steps are not executed in the published harness path; production external-tool execution semantics remain future work. Real-LLM pass rate is model- and prompt-dependent; synthetic table remains primary validator evidence. Residual risk from novel attack vectors remains.
 
 
 
