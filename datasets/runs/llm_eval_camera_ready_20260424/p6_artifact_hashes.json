@@ -10,8 +10,9 @@
     "denial_trace_stats.json": "c74506c2349d9e4dd421fc840b5b36842d7ae87c32349a49ffe3ce72a04940f4",
     "replay_denials.json": "74f00ada6a6e4ca0d1ad2c690ca82c05c9e0ba0e600ed634a5401098ad59f8ac",
     "MANIFEST.json": "e3fc1a86f448e01679eb7a3211130a5abd384686943006d20881276ddfe05163",
+    "P6_CAMERA_READY_SUMMARY.json": "70eede8e0dc14efcb52784c9970f9b80ea2d1e8ab76e821a843a216f87bfe112",
     "mock_execution_harness.json": "2e2bd42abf89e9fb446cc90c7d555d6fa685d807ad98f6d8ac8994af1b1325d0",
-    "task_critical_injection.json": "91be45b5b4a00fd517ef604060b48bca09dcc4c2687e33d482cb4fc964762cdc"
+    "task_critical_injection.json": "a920465577dbab4e6530969bd6c0c233f5554353db6cf00c57d0df374e139507"
   },
   "reproducibility_table": [
     {
@@ -241,6 +242,17 @@
       "artifact_hash": "e3fc1a86f448e01679eb7a3211130a5abd384686943006d20881276ddfe05163"
     },
     {
+      "table_id": "Camera-ready summary",
+      "artifact": "P6_CAMERA_READY_SUMMARY.json",
+      "model_id": null,
+      "timestamp_iso": null,
+      "seed": null,
+      "prompt_template_hash": null,
+      "evaluator_version": null,
+      "policy_version": null,
+      "artifact_hash": "70eede8e0dc14efcb52784c9970f9b80ea2d1e8ab76e821a843a216f87bfe112"
+    },
+    {
       "table_id": "Mock execution evidence",
       "artifact": "mock_execution_harness.json",
       "model_id": null,
@@ -260,7 +272,7 @@
       "prompt_template_hash": null,
       "evaluator_version": null,
       "policy_version": null,
-      "artifact_hash": "91be45b5b4a00fd517ef604060b48bca09dcc4c2687e33d482cb4fc964762cdc"
+      "artifact_hash": "a920465577dbab4e6530969bd6c0c233f5554353db6cf00c57d0df374e139507"
     }
   ],
   "run_dir": "datasets\\runs\\llm_eval_camera_ready_20260424",

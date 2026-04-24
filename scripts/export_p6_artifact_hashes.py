@@ -27,6 +27,7 @@ ARTIFACTS = [
     "denial_trace_stats.json",
     "replay_denials.json",
     "MANIFEST.json",
+    "P6_CAMERA_READY_SUMMARY.json",
     "mock_execution_harness.json",
     "task_critical_injection.json",
 ]
@@ -43,6 +44,7 @@ ARTIFACT_TO_TABLE = {
     "denial_trace_stats.json": "Table 2",
     "replay_denials.json": "Replay verification",
     "MANIFEST.json": "Manifest",
+    "P6_CAMERA_READY_SUMMARY.json": "Camera-ready summary",
     "mock_execution_harness.json": "Mock execution evidence",
     "task_critical_injection.json": "Task-critical injection",
 }
