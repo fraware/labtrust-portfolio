@@ -7,14 +7,11 @@ No aspirational behavior is reported as implemented.
 ## Scope and run context
 
 - Repository root: `C:\Users\mateo\labtrust-portfolio`
-- Primary artifact run directory: `datasets/runs/llm_eval`
-- Replay artifact: `datasets/runs/llm_eval/replay_denials.json`
-- Camera-ready manifest: `datasets/runs/llm_eval/MANIFEST.json`
-- Table-ready exports: `datasets/runs/llm_eval/tables/*`
-- Secondary camera-ready run (real-LLM): `datasets/runs/llm_eval_camera_ready_20260424`
-- Secondary replay artifact: `datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json`
-- Secondary manifest: `datasets/runs/llm_eval_camera_ready_20260424/MANIFEST.json`
-- Secondary table-ready exports: `datasets/runs/llm_eval_camera_ready_20260424/tables/*`
+- Canonical camera-ready run directory: `datasets/runs/llm_eval_camera_ready_20260424`
+- Canonical replay artifact: `datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json`
+- Canonical manifest: `datasets/runs/llm_eval_camera_ready_20260424/MANIFEST.json`
+- Canonical table-ready exports: `datasets/runs/llm_eval_camera_ready_20260424/tables/*`
+- Historical reference run directory: `datasets/runs/llm_eval` (retained for provenance)
 
 **Supplementary isolated real-LLM runs (OpenAI GPT-5.x, post client patch, 2026-04-24):** same harness as Table 1b (`--real-llm-suite full`, `n_runs_per_case=3`). These are **not** merged with the camera-ready canonical run; cite them only when comparing newer models.
 

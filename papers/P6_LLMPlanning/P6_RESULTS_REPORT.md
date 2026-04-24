@@ -39,9 +39,9 @@ From `adapter_latency.json` and `denial_trace_stats.json`:
 - scenarios: `toy_lab_v0`, `lab_profile_v0`, `warehouse_v0`
 - seeds per scenario: 20
 - total runs: 60
-- `tail_latency_p95_mean_ms`: **32.07**
-- `tail_latency_p95_stdev_ms`: **18.45**
-- 95% CI(mean): **[27.41, 36.74]**
+- `tail_latency_p95_mean_ms`: **36.70**
+- `tail_latency_p95_stdev_ms`: **22.07**
+- 95% CI(mean): **[31.12, 42.29]**
 - runs_with_denial: **60/60** (denial-injection plan)
 
 ## 4) Baselines

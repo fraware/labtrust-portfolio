@@ -17,7 +17,7 @@ artifact paths against the current repository state.
 | `claims.yaml` | C1 | `datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json` | yes | Canonical camera-ready Table 1b companion path. |
 | `claims.yaml` | C1 | `kernel/llm_runtime/TYPED_PLAN.v0.1.schema.json` | yes | Schema artifact present. |
 | `claims.yaml` | C1/C2 | `impl/src/labtrust_portfolio/llm_planning.py` | yes | Validator implementation present. |
-| `claims.yaml` | C2 | `datasets/runs/llm_eval/adapter_latency.json` | yes | Adapter latency artifact present. |
+| `claims.yaml` | C2 | `datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json` | yes | Adapter latency artifact present. |
 | `claims.yaml` | C2/C4 | `datasets/runs/llm_eval/denial_trace_stats.json` | yes | Denial stats artifact present. |
 | `claims.yaml` | C3 | `datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json` | yes | Canonical camera-ready suite artifact present. |
 | `claims.yaml` | C3 | `datasets/runs/llm_eval/p6_adaptive_results.json` | yes | Adaptive suite artifact present. |
@@ -25,8 +25,8 @@ artifact paths against the current repository state.
 | `claims.yaml` | C3 | `datasets/p6_benign_suite.json` | yes | Benign corpus present. |
 | `claims.yaml` | C3 | `datasets/p6_adaptive_suite.json` | yes | Adaptive corpus present. |
 | `claims.yaml` | C4 | `datasets/runs/llm_eval/e2e_denial_trace.json` | yes | E2E denial artifact present. |
-| `claims.yaml` | C4 | `datasets/runs/llm_eval/baseline_comparison.json` | yes | Tool-level baseline artifact present. |
-| `claims.yaml` | C4 | `datasets/runs/llm_eval/baseline_comparison_args.json` | yes | Arg-level baseline artifact present. |
+| `claims.yaml` | C4 | `datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json` | yes | Tool-level baseline artifact present. |
+| `claims.yaml` | C4 | `datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json` | yes | Arg-level baseline artifact present. |
 | `claims.yaml` | C4 | `datasets/runs/llm_eval/baseline_benign.json` | yes | Benign baseline artifact present. |
 | `claims_satcps.yaml` | C1 | `datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json` | yes | Canonical venue claim source path exists. |
 | `claims_satcps.yaml` | C1 | `datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json` | yes | Canonical venue claim source path exists. |
@@ -54,8 +54,8 @@ No blocking path mismatches remain after harmonization:
 ## Freeze recommendation
 
 - Keep `llm_eval_camera_ready_20260424` as canonical for Table 1b in paper text.
-- Keep `llm_eval` references only where baseline/adapter/support artifacts are
-  intentionally sourced from that run family.
+- Keep all canonical citation rows mapped to `llm_eval_camera_ready_20260424`
+  unless explicitly labeled as supplementary or historical.
 - Keep GPT-5.x post-patch runs (`llm_eval_openai_gpt54_postpatch_20260424`,
   `llm_eval_openai_gpt54pro_postpatch2_n3_20260424`) clearly labeled as
   supplementary and denominator-separated.

@@ -22,12 +22,12 @@ claims:
   - id: "C2"
     statement: "Deterministic toolcalling capture and bounded retries make behavior replayable and auditable."
     evidence:
-      release_id: "llm_eval"
+      release_id: "llm_eval_camera_ready_20260424"
       confidence: "high"
       artifact_paths:
         - "impl/src/labtrust_portfolio/llm_planning.py"
-        - "datasets/runs/llm_eval/adapter_latency.json"
-        - "datasets/runs/llm_eval/denial_trace_stats.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json"
       table_ids: ["Table 2"]
       figure_ids: []
 
@@ -39,7 +39,6 @@ claims:
       artifact_paths:
         - "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json"
         - "datasets/runs/llm_eval_camera_ready_20260424/confusable_deputy_results.json"
-        - "datasets/runs/llm_eval/p6_adaptive_results.json"
         - "docs/P6_OWASP_MAPPING.md"
         - "datasets/p6_benign_suite.json"
         - "datasets/p6_adaptive_suite.json"
@@ -49,16 +48,16 @@ claims:
   - id: "C4"
     statement: "Under MAESTRO faults, the pattern reduces safety violations without unacceptable tail latency."
     evidence:
-      release_id: "llm_eval"
+      release_id: "llm_eval_camera_ready_20260424"
       confidence: "medium"  # e2e_denial_trace, adapter latency, baselines, latency_decomposition; conditional on trigger_met
       artifact_paths:
-        - "datasets/runs/llm_eval/adapter_latency.json"
-        - "datasets/runs/llm_eval/e2e_denial_trace.json"
-        - "datasets/runs/llm_eval/baseline_comparison.json"
-        - "datasets/runs/llm_eval/baseline_comparison_args.json"
-        - "datasets/runs/llm_eval/baseline_benign.json"
-        - "datasets/runs/llm_eval/denial_trace_stats.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/e2e_denial_trace.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/baseline_benign.json"
+        - "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json"
       table_ids: ["Table 2", "Baseline table"]
       figure_ids: ["Figure 1"]
 
-# Table 1: red_team (synthetic). Table 1b: real-LLM (camera-ready canonical: full suite, 3 runs/case, Wilson CI, run dir llm_eval_camera_ready_20260424). Table 2: adapter latency + optional latency_decomposition (llm_eval run dir). Baselines: gated/weak/ungated (tool, args_unsafe, benign; llm_eval run dir). Figure 1: plot_llm_adapter_latency.py. Bundle: scripts/p6_publish_bundle.py.
+# Table 1: red_team (synthetic). Table 1b: real-LLM (camera-ready canonical: full suite, 3 runs/case, Wilson CI, run dir llm_eval_camera_ready_20260424). Table 2: adapter latency + optional latency_decomposition (camera-ready run dir). Baselines: gated/weak/ungated (tool, args_unsafe, benign; camera-ready run dir). Figure 1: plot_llm_adapter_latency.py. Bundle: scripts/p6_publish_bundle.py.

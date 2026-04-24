@@ -116,7 +116,7 @@ python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval
 python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval --baseline-file baseline_comparison_args.json
 python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval --baseline-file baseline_benign.json
 python scripts/export_p6_firewall_flow.py
-python scripts/plot_llm_adapter_latency.py --latency datasets/runs/llm_eval/adapter_latency.json
+python scripts/plot_llm_adapter_latency.py --latency datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json
 python scripts/export_p6_denial_trace_case_study.py --trace datasets/runs/llm_eval/baseline_runs/gated/toy_lab_v0/seed_1/trace.json
 python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval --markdown
 python scripts/export_p6_reproducibility_table.py

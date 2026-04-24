@@ -18,27 +18,47 @@
     },
     {
       "check": "baseline_adapter",
-      "path": "datasets/runs/llm_eval/adapter_latency.json",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json",
       "exists": true
     },
     {
       "check": "baseline_denial",
-      "path": "datasets/runs/llm_eval/denial_trace_stats.json",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json",
       "exists": true
     },
     {
       "check": "baseline_tool",
-      "path": "datasets/runs/llm_eval/baseline_comparison.json",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json",
       "exists": true
     },
     {
       "check": "baseline_args",
-      "path": "datasets/runs/llm_eval/baseline_comparison_args.json",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json",
       "exists": true
     },
     {
       "check": "baseline_benign",
-      "path": "datasets/runs/llm_eval/baseline_benign.json",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/baseline_benign.json",
+      "exists": true
+    },
+    {
+      "check": "replay_denials",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json",
+      "exists": true
+    },
+    {
+      "check": "mock_execution_harness",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/mock_execution_harness.json",
+      "exists": true
+    },
+    {
+      "check": "task_critical_injection",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/task_critical_injection.json",
+      "exists": true
+    },
+    {
+      "check": "artifact_hashes",
+      "path": "datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json",
       "exists": true
     },
     {
@@ -82,6 +102,16 @@
     "claims_uses_camera_ready_red": true,
     "claims_sat_uses_camera_ready_red": true,
     "claims_sat_uses_camera_ready_confusable": true,
-    "checklist_mentions_canonical_dir": true
+    "checklist_mentions_canonical_dir": true,
+    "claims_uses_camera_ready_baselines": true,
+    "claims_sat_uses_camera_ready_baselines": true
+  },
+  "canonical_adapter_metrics": {
+    "tail_latency_p95_mean_ms": 36.7046,
+    "tail_latency_p95_stdev_ms": 22.0685,
+    "tail_latency_p95_ci95_lower": 31.1205,
+    "tail_latency_p95_ci95_upper": 42.2887,
+    "runs_with_denial": "60/60",
+    "replay_matches": "60/60"
   }
 }

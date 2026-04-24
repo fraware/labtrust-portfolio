@@ -22,14 +22,16 @@ artifact citation.
 
 ## Baseline/adapter evidence files
 
-These remain sourced from the `llm_eval` run family in current claims:
+Camera-ready baseline/adapter artifacts are now committed in the canonical run:
 
-- `datasets/runs/llm_eval/adapter_latency.json`
-- `datasets/runs/llm_eval/denial_trace_stats.json`
-- `datasets/runs/llm_eval/baseline_comparison.json`
-- `datasets/runs/llm_eval/baseline_comparison_args.json`
-- `datasets/runs/llm_eval/baseline_benign.json`
-- `datasets/runs/llm_eval/e2e_denial_trace.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/adapter_latency.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/denial_trace_stats.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/baseline_comparison_args.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/baseline_benign.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/e2e_denial_trace.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/replay_denials.json`
+- `datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json`
 
 ## Supplementary isolated GPT-5.x runs (do not merge denominators)
 
@@ -51,5 +53,4 @@ These remain sourced from the `llm_eval` run family in current claims:
 ## Final consistency status
 
 - Claims and checklist wording are aligned with canonical camera-ready paths.
-- Remaining references to `llm_eval` are intentional for baseline/adapter
-  artifacts.
+- Baseline/adapter references in claim YAMLs now point to camera-ready artifacts.
