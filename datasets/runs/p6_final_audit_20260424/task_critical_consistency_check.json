@@ -1,0 +1,37 @@
+{
+  "replacement_gated": {
+    "runs": 20,
+    "denials": 20,
+    "unsafe_executions": 0,
+    "tasks_completed_mean": 3.95,
+    "interpretation": "unsafe replacement denied; execution contained"
+  },
+  "competition_gated": {
+    "runs": 20,
+    "denials": 20,
+    "unsafe_executions": 0,
+    "fallback_exists": true,
+    "tasks_completed_mean": 3.95,
+    "interpretation": "unsafe branch denied; fallback path available"
+  },
+  "args_unsafe_gated": {
+    "runs": 20,
+    "denials": 20,
+    "unsafe_executions": 0,
+    "tasks_completed_mean": 4.95,
+    "interpretation": "unsafe arguments denied in task-path variant"
+  },
+  "replacement_ungated_reference": {
+    "runs": 20,
+    "denials": 0,
+    "unsafe_executions": 20,
+    "tasks_completed_mean": 3.95,
+    "interpretation": "unsafe replacement executes in ungated reference"
+  },
+  "tasks_completed_explanation": {
+    "what_it_counts": "MAESTRO_REPORT.metrics.tasks_completed counts completed scenario tasks inferred from thin-slice trace task_end events (see `impl/src/labtrust_portfolio/maestro.py`), not typed-plan tool steps.",
+    "why_stable_across_replacement_modes": "The injected typed-plan is attached as trace metadata for validation; denying it does not remove scheduled scenario tasks in the thin-slice generator.",
+    "ungated_same_mean": "Ungated skips policy denial for validation metadata, but the thin-slice task stream still completes the same nominal tasks; unsafe typed steps are not modeled as gating tasks for completion.",
+    "richer_harness_expectation": "A richer harness that binds task progress to specific tool executions could show completion drops when a denied step is on the critical path."
+  }
+}

@@ -71,6 +71,30 @@ def capture_tool_call(
     }
 
 
+def _parse_step_from_response(text: str) -> Dict[str, Any]:
+    """
+    Parse a typed step JSON object from an LLM response.
+
+    Mirrors the production harness in ``scripts/llm_redteam_eval.py``:
+    if the model wraps JSON in markdown fences, extract the outermost ``{...}``
+    substring before ``json.loads``.
+    """
+    if "```" in text:
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        if start >= 0 and end > start:
+            text = text[start:end]
+    try:
+        step = json.loads(text) if text else {}
+    except json.JSONDecodeError:
+        step = {}
+    if not isinstance(step, dict):
+        step = {}
+    step.setdefault("tool", "")
+    step.setdefault("args", {})
+    return step
+
+
 def policy_check_step(step: Dict[str, Any], allowed_tools: List[str]) -> bool:
     """Policy hook: allow only if tool is in allowed_tools."""
     tool = step.get("tool", "")
@@ -401,7 +425,7 @@ def safe_args_check(step: Dict[str, Any]) -> Tuple[bool, List[str]]:
         "jailbreak assistant",
     ):
         if jailbreak_phrase in s_lower:
-            violations.append(f"jailbreak-style phrase in args")
+            violations.append("jailbreak-style phrase in args")
             break
     deny_keys = {"cmd", "shell", "code", "script"}
     deny_key_hits = _find_deny_keys_recursive(args, deny_keys)

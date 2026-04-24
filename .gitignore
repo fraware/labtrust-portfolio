@@ -12,6 +12,12 @@ datasets/runs/llm_eval_camera_ready_20260424/**
 !datasets/runs/llm_eval_camera_ready_20260424/*.json
 !datasets/runs/llm_eval_camera_ready_20260424/tables/
 !datasets/runs/llm_eval_camera_ready_20260424/tables/**
+!datasets/runs/p6_final_audit_20260424/
+datasets/runs/p6_final_audit_20260424/**
+!datasets/runs/p6_final_audit_20260424/*.json
+!datasets/runs/p6_final_audit_20260424/*.md
+!datasets/runs/p6_final_audit_20260424/*.csv
+!datasets/runs/p6_final_audit_20260424/*.jsonl
 # P0 manuscript evidence (publishable corpus, E2 demo, summaries, E3 release bundle)
 !datasets/runs/p0_conformance_corpus/
 !datasets/runs/p0_conformance_corpus/**

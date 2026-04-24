@@ -1,0 +1,62 @@
+{
+  "semantics": {
+    "gated": {
+      "normalization": true,
+      "tool_allow_list": true,
+      "safe_args": true,
+      "ponr_gate": true,
+      "privilege_heuristic": true,
+      "capture": true,
+      "execution_gated": true
+    },
+    "weak": {
+      "normalization": true,
+      "tool_allow_list": true,
+      "safe_args": false,
+      "ponr_gate": false,
+      "privilege_heuristic": false,
+      "capture": true,
+      "execution_gated": true
+    },
+    "ungated": {
+      "normalization": false,
+      "tool_allow_list": false,
+      "safe_args": false,
+      "ponr_gate": false,
+      "privilege_heuristic": false,
+      "capture": true,
+      "execution_gated": false
+    }
+  },
+  "tool_level_baseline": {
+    "expected": {
+      "gated": 60,
+      "weak": 60,
+      "ungated": 0
+    },
+    "actual": {
+      "gated": 60,
+      "weak": 60,
+      "ungated": 0
+    },
+    "matches": true
+  },
+  "argument_level_baseline": {
+    "expected": {
+      "gated": 60,
+      "weak": 0,
+      "ungated": 0
+    },
+    "actual": {
+      "gated": 60,
+      "weak": 0,
+      "ungated": 0
+    },
+    "matches": true
+  },
+  "benign_baseline": {
+    "expected_gated_denials": 0,
+    "actual_gated_denials": null,
+    "matches": false
+  }
+}

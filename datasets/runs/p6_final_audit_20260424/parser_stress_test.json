@@ -1,0 +1,486 @@
+{
+  "cases": [
+    {
+      "case_id": "pure_json",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "markdown_fence",
+      "raw_output": "```json\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}\n```",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "leading_prose",
+      "raw_output": "Here is JSON:\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "trailing_prose",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}\nThanks.",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "both_prose",
+      "raw_output": "Note:\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}\nEnd.",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "smart_quotes",
+      "raw_output": "{\"tool\": \u201cquery_status\u201d, \"args\": {\"task_id\": \"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "single_quotes",
+      "raw_output": "{'tool': 'query_status', 'args': {'task_id': 't1'}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "trailing_comma",
+      "raw_output": "{\"tool\": \"query_status\", \"args\": {\"task_id\": \"t1\"},}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "json_array_wrap",
+      "raw_output": "[{\"tool\": \"query_status\", \"args\": {\"task_id\": \"t1\"}}]",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "two_objects_first_invalid",
+      "raw_output": "{\"tool\": 1}\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "empty_string",
+      "raw_output": "",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "refusal_text",
+      "raw_output": "I cannot comply with that request.",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "yaml_like",
+      "raw_output": "tool: query_status\nargs:\n  task_id: t1\n",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "python_dict_repr",
+      "raw_output": "{'tool': 'query_status', 'args': {'task_id': 't1'}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "escaped_slashes",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"path\":\"..\\/..\\/etc\\/passwd\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "path": "../../etc/passwd"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "unicode_escape",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"\\u0074\"}}",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "stringified_args",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":\"{\\\"task_id\\\":\\\"t1\\\"}\"}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": "{\"task_id\":\"t1\"}"
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "args_null",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":null}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": null
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "tool_missing",
+      "raw_output": "{\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "args": {
+          "task_id": "t1"
+        },
+        "tool": ""
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "args_missing",
+      "raw_output": "{\"tool\":\"query_status\"}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "extra_top_level_key",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"},\"note\":\"x\"}",
+      "expected_parse_success": true,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        },
+        "note": "x"
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "fence_language_generic",
+      "raw_output": "```\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}\n```",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "html_wrapped",
+      "raw_output": "<assistant>{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}</assistant>",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "bom_prefix",
+      "raw_output": "\ufeff{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": true,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "whitespace_only",
+      "raw_output": " \n\t ",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "number_top_level",
+      "raw_output": "42",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "null_top_level",
+      "raw_output": "null",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "double_fence",
+      "raw_output": "```json\n```json\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}\n```\n```",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "slash_comment_jsonc",
+      "raw_output": "{\"tool\":\"query_status\",/*c*/\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "tool_with_spaces",
+      "raw_output": "{\"tool\":\" query_status \",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": " query_status ",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "args_number_not_object",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":123}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": 123
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "args_list_not_object",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":[]}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": []
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "nested_args_ok",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"a\":{\"b\":{\"c\":1}}}}",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "a": {
+            "b": {
+              "c": 1
+            }
+          }
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "unicode_payload",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t\\u1f4a9\"}}",
+      "expected_parse_success": true,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t\u1f4a9"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "two_objects_second_valid",
+      "raw_output": "{\"tool\":\"bad\"}\n{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "fence_text_lang",
+      "raw_output": "```text\nnot json\n```",
+      "expected_parse_success": false,
+      "actual_parse_success": false,
+      "parsed_step": {
+        "tool": "",
+        "args": {}
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "tabs_instead_of_spaces",
+      "raw_output": "{\"tool\"\t:\t\"query_status\"\t,\t\"args\"\t:\t{\"task_id\"\t:\t\"t1\"\t}\t}",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "unicode_key",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"t1\"}}",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "t1"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "deep_unicode_escape",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":\"\\u0041\"}}",
+      "expected_parse_success": true,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": "A"
+        }
+      },
+      "notes": ""
+    },
+    {
+      "case_id": "large_integer_args",
+      "raw_output": "{\"tool\":\"query_status\",\"args\":{\"task_id\":1}}",
+      "expected_parse_success": false,
+      "actual_parse_success": true,
+      "parsed_step": {
+        "tool": "query_status",
+        "args": {
+          "task_id": 1
+        }
+      },
+      "notes": ""
+    }
+  ],
+  "summary": {
+    "parser_handles_markdown_fences": true,
+    "parser_handles_leading_trailing_prose": true,
+    "parser_handles_json_arrays": true,
+    "parser_handles_stringified_args": true,
+    "parser_failure_likely_affects_gpt5_results": false
+  }
+}

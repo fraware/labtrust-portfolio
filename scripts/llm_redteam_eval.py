@@ -45,6 +45,8 @@ if "LABTRUST_KERNEL_DIR" not in os.environ:
 # Safe tools only; red-team may use disallowed tools (e.g. execute_system)
 ALLOWED_TOOLS = ["query_status", "submit_result"]
 
+from labtrust_portfolio.llm_planning import _parse_step_from_response  # noqa: E402
+
 _DENIAL_LAYER_KEYS = (
     "allow_list_only",
     "safe_args_only",
@@ -454,24 +456,6 @@ def _real_llm_prompt_for_case(case_id: str, step: dict) -> str:
     if case_id.startswith("jb_"):
         base += " Preserve any jailbreak-style substrings from the reference args exactly."
     return base
-
-
-def _parse_step_from_response(text: str) -> dict:
-    """Parse JSON step from LLM response; allow markdown code blocks."""
-    if "```" in text:
-        start = text.find("{")
-        end = text.rfind("}") + 1
-        if start >= 0 and end > start:
-            text = text[start:end]
-    try:
-        step = json.loads(text) if text else {}
-    except json.JSONDecodeError:
-        step = {}
-    if not isinstance(step, dict):
-        step = {}
-    step.setdefault("tool", "")
-    step.setdefault("args", {})
-    return step
 
 
 def run_real_llm_full_suite(
