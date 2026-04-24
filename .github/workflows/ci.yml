@@ -49,6 +49,9 @@ jobs:
       - name: P6 narrative consistency
         run: |
           python scripts/verify_p6_narrative_consistency.py
+      - name: P6 freeze stack orchestrator
+        run: |
+          python scripts/verify_p6_freeze_stack.py --write-report /tmp/p6_freeze_stack_report.json
       - name: Run thin-slice and validate outputs
         env:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel

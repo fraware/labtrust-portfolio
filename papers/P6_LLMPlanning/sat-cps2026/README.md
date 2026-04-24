@@ -22,6 +22,8 @@ This folder is the **submission-facing bundle** for the workshop paper (ACM proc
 | **FREEZE_SUBMISSION_NOTES_2026-04-24.md** | One-page freeze snapshot (canonical run, denominators, non-merge rules) |
 | **FREEZE_VERIFICATION_REPORT_2026-04-24.json** | Machine-readable existence + consistency checks |
 | **CLAIMS_CONSISTENCY_REPORT_2026-04-24.json** | Machine-readable claim-YAML path consistency checks |
+| **NARRATIVE_CONSISTENCY_REPORT_2026-04-24.json** | Machine-readable freeze-metric wording consistency checks |
+| **FREEZE_STACK_REPORT_2026-04-24.json** | Consolidated pass/fail report across bundle, claim, and narrative gates |
 
 ## Evidence tiers (how to cite without overclaiming)
 
@@ -38,6 +40,9 @@ All summary JSONs in a P6 run directory include `run_manifest` with at least `ti
 python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 python scripts/export_p6_reproducibility_table.py
 python scripts/verify_p6_camera_ready_bundle.py
+python scripts/verify_p6_claims_consistency.py
+python scripts/verify_p6_narrative_consistency.py
+python scripts/verify_p6_freeze_stack.py
 ```
 
 Further exports: `export_p6_layer_attribution.py`, `export_p6_failure_analysis.py`, `export_p6_cross_model_heatmap.py`, `export_p6_latency_decomposition.py` (see EXPERIMENTS_RUNBOOK.md).

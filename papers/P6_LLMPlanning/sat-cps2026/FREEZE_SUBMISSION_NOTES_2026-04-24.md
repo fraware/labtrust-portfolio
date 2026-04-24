@@ -56,3 +56,5 @@ Camera-ready baseline/adapter artifacts are now committed in the canonical run:
 - Baseline/adapter references in claim YAMLs now point to camera-ready artifacts.
 - Machine gate: `python scripts/verify_p6_camera_ready_bundle.py` (also runs in CI on every push/PR).
 - Claim gate: `python scripts/verify_p6_claims_consistency.py` (also runs in CI on every push/PR).
+- Narrative gate: `python scripts/verify_p6_narrative_consistency.py` (also runs in CI on every push/PR).
+- Aggregated gate: `python scripts/verify_p6_freeze_stack.py` (also runs in CI on every push/PR).

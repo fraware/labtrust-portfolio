@@ -32,6 +32,8 @@ Paper is ready for submission only when all items are true.
 - [ ] Appendix or supplementary: `export_p6_artifact_hashes.py` + `export_p6_reproducibility_table.py` run on the **same** directory cited in the paper.
 - [ ] Machine integrity gate passes: `python scripts/verify_p6_camera_ready_bundle.py` (CI + local pre-submit).
 - [ ] Claim path integrity gate passes: `python scripts/verify_p6_claims_consistency.py` (CI + local pre-submit).
+- [ ] Narrative integrity gate passes: `python scripts/verify_p6_narrative_consistency.py` (CI + local pre-submit).
+- [ ] Aggregate freeze stack gate passes: `python scripts/verify_p6_freeze_stack.py` (CI + local pre-submit).
 - [ ] Optional deep-dive exports (if referenced): `export_p6_layer_attribution.py`, `export_p6_failure_analysis.py`, `export_p6_cross_model_heatmap.py`, `export_p6_latency_decomposition.py`.
 
 ## Optional extended experiments (6--12)
