@@ -51,6 +51,13 @@ Camera-ready baseline/adapter artifacts are now committed in the canonical run:
   unless the table explicitly relabels run directory, models, suite mode, and
   denominator.
 
+## Final engineering audit bundle (evidence freeze)
+
+- **Directory:** `datasets/runs/p6_final_audit_20260424/`
+- **Generator:** `python scripts/export_p6_final_audit_bundle.py --out-dir datasets/runs/p6_final_audit_20260424`
+- **Purpose:** Recompute paper-facing aggregates from raw JSON (no hand-edited summary drift), SHA256 the cited artifacts, attach GPT-5.x failure forensics with explicit caveats (empty API responses, sparse `run_details` on some models), run parser stress + extended validator replay notes, and record baseline/task-critical consistency plus a paper-claims checklist (`paper_claims_checklist.md`).
+- **Replay wording:** When citing **60/60** replay matches, scope that claim to the committed `replay_denials.json` summary. Larger denied-step counts can appear when **all** `trace.json` files under the canonical run are scanned; see `reproducibility_check.json` in the audit bundle for frozen vs trace-scan fields.
+
 ## Final consistency status
 
 - Claims and checklist wording are aligned with canonical camera-ready paths.

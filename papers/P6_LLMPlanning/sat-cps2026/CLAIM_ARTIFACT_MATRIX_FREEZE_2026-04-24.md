@@ -9,6 +9,7 @@ artifact paths against the current repository state.
 - `papers/P6_LLMPlanning/sat-cps2026/claims_satcps.yaml`
 - `papers/P6_LLMPlanning/sat-cps2026/FINAL_CHECKLIST.md`
 - `papers/P6_LLMPlanning/sat-cps2026/ENGINEERING_TRUTH_PACKAGE_2026-04-24.md`
+- `datasets/runs/p6_final_audit_20260424/README.md` (audit bundle scope; cross-check paths against repo)
 
 ## Consolidated claim-to-artifact matrix
 
@@ -33,6 +34,9 @@ artifact paths against the current repository state.
 | `claims_satcps.yaml` | C3 | `docs/P6_OWASP_MAPPING.md` | yes | Mapping source exists. |
 | `claims_satcps.yaml` | C4 | `scripts/export_p6_denial_trace_case_study.py` | yes | Export script exists. |
 | `claims_satcps.yaml` | C4 | `datasets/runs/llm_eval_camera_ready_20260424/p6_artifact_hashes.json` | yes | Hash mapping artifact exists. |
+| `FINAL_CHECKLIST.md` | audit | `scripts/export_p6_final_audit_bundle.py` | yes | Final audit exporter script present. |
+| `FINAL_CHECKLIST.md` | audit | `datasets/runs/p6_final_audit_20260424/README.md` | yes | Audit bundle scope and interpretation notes. |
+| `FINAL_CHECKLIST.md` | audit | `datasets/runs/p6_final_audit_20260424/FINAL_AUDIT_SUMMARY.md` | yes | Human sign-off for the evidence freeze. |
 
 ## Camera-ready run checks
 
@@ -51,6 +55,9 @@ artifact paths against the current repository state.
 | `scripts/verify_p6_claims_consistency.py` | yes | CI / pre-submit machine gate for claim-path integrity. |
 | `scripts/verify_p6_narrative_consistency.py` | yes | CI / pre-submit machine gate for freeze-metric wording integrity. |
 | `scripts/verify_p6_freeze_stack.py` | yes | CI / pre-submit orchestration gate (bundle + claims + narrative). |
+| `datasets/runs/p6_final_audit_20260424/reproducibility_check.json` | yes | Frozen replay summary vs full `trace.json` scan (no silent count drift). |
+| `datasets/runs/p6_final_audit_20260424/FINAL_AUDIT_SUMMARY.json` | yes | Machine-readable audit rollup. |
+| `datasets/runs/p6_final_audit_20260424/paper_claims_checklist.md` | yes | Claim-to-artifact checklist for submission prose. |
 
 ## Mismatches flagged before freeze
 
@@ -66,6 +73,8 @@ No blocking path mismatches remain after harmonization:
 - Keep `llm_eval_camera_ready_20260424` as canonical for Table 1b in paper text.
 - Keep all canonical citation rows mapped to `llm_eval_camera_ready_20260424`
   unless explicitly labeled as supplementary or historical.
+- Keep `p6_final_audit_20260424` as the committed **engineering evidence freeze**
+  (regenerate with `export_p6_final_audit_bundle.py` when canonical JSONs change).
 - Keep GPT-5.x post-patch runs (`llm_eval_openai_gpt54_postpatch_20260424`,
   `llm_eval_openai_gpt54pro_postpatch2_n3_20260424`) clearly labeled as
   supplementary and denominator-separated.

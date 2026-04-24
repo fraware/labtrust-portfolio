@@ -159,7 +159,21 @@ Optional: `--out papers/P6_LLMPlanning/exported_tables.md` on `export_llm_redtea
 
 **Baseline trace metadata:** Gated/weak traces may include `metadata.denied_steps` and `metadata.denial_reason` for case-study export.
 
-## 9. Research questions and statistics
+## 9. Final engineering audit bundle (submission freeze)
+
+When the canonical camera-ready directory is stable and any supplementary GPT-5.x run directories exist under `datasets/runs/`, materialize the paper-facing **evidence freeze** (recompute summary numbers from raw JSON, SHA256 the cited artifacts, GPT-5.x per-case/per-run forensics, parser stress suite, extended validator replay notes, baseline and task-critical consistency, trace-field inventory, and a paper-claims checklist):
+
+```bash
+python scripts/export_p6_final_audit_bundle.py --out-dir datasets/runs/p6_final_audit_20260424
+```
+
+The committed bundle is tracked at `datasets/runs/p6_final_audit_20260424/` (same `.gitignore` “explicit allow-list” pattern as `llm_eval_camera_ready_20260424/`). Start from `datasets/runs/p6_final_audit_20260424/README.md` and `FINAL_AUDIT_SUMMARY.md`.
+
+**Replay semantics (important for prose):** `replay_denials.json` under `llm_eval_camera_ready_20260424/` is a **frozen summary artifact** (the camera-ready paper cites **60/60** matches for that snapshot). A full recursive scan of all `trace.json` files under the same run directory can enumerate **additional** `metadata.denied_steps` records when more traces are present than were summarized into `replay_denials.json`. The audit bundle’s `reproducibility_check.json` records both the frozen snapshot and a fresh trace scan (`replay_fresh_trace_scan`) plus `replay_frozen_vs_trace_scan` so reviewers can see the distinction without silently “moving the goalposts.”
+
+**Typed-step JSON parsing (harness correctness):** `_parse_step_from_response` is implemented once in `impl/src/labtrust_portfolio/llm_planning.py` and imported by `scripts/llm_redteam_eval.py` so the eval harness and audit tooling cannot drift on “what counts as a parsed step.”
+
+## 10. Research questions and statistics
 
 - **Q1:** Synthetic separation of safe vs unsafe (Block A).
 - **Q2:** Persistence under real LLM outputs (Block B).
@@ -169,7 +183,7 @@ Optional: `--out papers/P6_LLMPlanning/exported_tables.md` on `export_llm_redtea
 
 Pass rates: **95% Wilson score interval**. Latency: mean, stdev, CI for mean where applicable.
 
-## 10. Related documents
+## 11. Related documents
 
 - **README.md** (this folder) -- Evidence tiers and quick reference.
 - **SUBMISSION_STANDARD.md** -- Five axes, banned words, page budget.

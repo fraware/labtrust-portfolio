@@ -206,7 +206,7 @@ We presented a runtime enforcement architecture for CPS tool invocation: typed-p
 
 - **Figure 2 (adapter latency):** plot_llm_adapter_latency.py from adapter_latency.json; include only if compact and clearly answers overhead.
 
-- **Reproduction:** See EXPERIMENTS_RUNBOOK.md in this folder for the experiment roadmap (0--12), one-shot commands, artifact locations, OpenAI real-LLM (canonical Table 1b), optional Prime multi-model run, benign baseline, latency decomposition, and export scripts (export_llm_redteam_table.py, export_p6_reproducibility_table.py, export_p6_layer_attribution.py, export_p6_failure_analysis.py, export_p6_cross_model_heatmap.py, export_p6_latency_decomposition.py). Appendix A in papers/P6_LLMPlanning/DRAFT.md lists the core reproduction chain and artifact hashes.
+- **Reproduction:** See EXPERIMENTS_RUNBOOK.md in this folder for the experiment roadmap (0--12), one-shot commands, artifact locations, OpenAI real-LLM (canonical Table 1b), optional Prime multi-model run, benign baseline, latency decomposition, final engineering audit bundle (`export_p6_final_audit_bundle.py` → `datasets/runs/p6_final_audit_20260424/`), and export scripts (export_llm_redteam_table.py, export_p6_reproducibility_table.py, export_p6_layer_attribution.py, export_p6_failure_analysis.py, export_p6_cross_model_heatmap.py, export_p6_latency_decomposition.py). Appendix A in papers/P6_LLMPlanning/DRAFT.md lists the core reproduction chain and artifact hashes.
 
 
 

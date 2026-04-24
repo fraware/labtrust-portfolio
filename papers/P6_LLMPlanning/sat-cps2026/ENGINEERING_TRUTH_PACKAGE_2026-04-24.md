@@ -12,6 +12,7 @@ No aspirational behavior is reported as implemented.
 - Canonical manifest: `datasets/runs/llm_eval_camera_ready_20260424/MANIFEST.json`
 - Canonical table-ready exports: `datasets/runs/llm_eval_camera_ready_20260424/tables/*`
 - Historical reference run directory: `datasets/runs/llm_eval` (retained for provenance)
+- Final engineering audit bundle (evidence freeze, not a substitute for canonical eval JSONs): `datasets/runs/p6_final_audit_20260424/` (generator: `scripts/export_p6_final_audit_bundle.py`)
 
 **Supplementary isolated real-LLM runs (OpenAI GPT-5.x, post client patch, 2026-04-24):** same harness as Table 1b (`--real-llm-suite full`, `n_runs_per_case=3`). These are **not** merged with the camera-ready canonical run; cite them only when comparing newer models.
 
@@ -37,7 +38,9 @@ No aspirational behavior is reported as implemented.
 | Unsafe args to allowed tools denied | Yes (gated mode) | `impl/src/labtrust_portfolio/llm_planning.py` | same | `trace_samples/unsafe_args_path_traversal/trace.json`, `trace_samples/denylist_key/trace.json` | Works for current heuristic rules. |
 | Denied steps never executed | Yes (mock harness) | `impl/src/labtrust_portfolio/llm_planning.py` (`MockToolExecutor`) | `tests/test_llm_planning_validators.py` | `datasets/runs/llm_eval_camera_ready_20260424/mock_execution_harness.json` | Demonstrated in mock execution harness; production external executor is out of scope. |
 | Denied steps produce trace/audit records | Yes | adapter | N/A | `trace.json` (`denied_steps`, `denial_reason`, `denials_count`) | Deterministic denial capture present. |
-| Trace records sufficient to replay denial | Yes | `scripts/replay_denials.py` | N/A | `replay_denials.json` | Replay recomputes decisions. |
+| Trace records sufficient to replay denial | Yes | `scripts/replay_denials.py` | N/A | `replay_denials.json` | Replay recomputes decisions for the **frozen summary** rows in `replay_denials.json` (camera-ready paper cites **60/60** matches for the committed snapshot). |
+| Full-tree denied-step inventory vs frozen replay summary | Yes | `scripts/export_p6_final_audit_bundle.py` | N/A | `datasets/runs/p6_final_audit_20260424/reproducibility_check.json` | A recursive scan of all `trace.json` under `llm_eval_camera_ready_20260424/` can count **more** `metadata.denied_steps` records than summarized in `replay_denials.json`; `replay_fresh_trace_scan` and `replay_frozen_vs_trace_scan` document both without implying validator disagreement. |
+| Harness typed-step JSON parse matches production | Yes | `impl/src/labtrust_portfolio/llm_planning.py` (`_parse_step_from_response`) | `tests/test_llm_planning_validators.py` (indirect) | real-LLM `trace.json` / `run_details` | `scripts/llm_redteam_eval.py` imports the same function to avoid parser drift between eval and firewall. |
 | Weak baseline = allow-list only (no safe_args) | Yes | adapter (`validation_mode="weak"`) | baseline artifacts | `baseline_comparison.json`, `baseline_comparison_args.json` | Verified by tool-level/arg-level split. |
 | Ungated baseline bypasses firewall | Yes | adapter (`validation_mode="ungated"`) | baseline artifacts | baseline JSONs | `validation_skipped: true` in traces. |
 | Evaluation artifacts include seeds/scenarios/modes/policy/evaluator/model where applicable | Partial | `scripts/llm_redteam_eval.py` + bundle script | N/A | run manifests + `MANIFEST.json` | Model/prompt hash present only if real-LLM run exists in artifact. |

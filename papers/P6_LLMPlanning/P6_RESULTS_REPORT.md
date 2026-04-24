@@ -91,4 +91,15 @@ python scripts/export_p6_baseline_table.py --out-dir datasets/runs/llm_eval_came
 python scripts/run_p6_task_critical_injection.py --out-dir datasets/runs/llm_eval_camera_ready_20260424
 python scripts/export_p6_artifact_hashes.py --out-dir datasets/runs/llm_eval_camera_ready_20260424 --markdown
 python scripts/export_p6_reproducibility_table.py
+python scripts/export_p6_final_audit_bundle.py --out-dir datasets/runs/p6_final_audit_20260424
 ```
+
+## 8) Final engineering audit bundle
+
+After the canonical run directory and any supplementary GPT-5.x directories exist under `datasets/runs/`, materialize the committed freeze at `datasets/runs/p6_final_audit_20260424/`:
+
+```bash
+python scripts/export_p6_final_audit_bundle.py --out-dir datasets/runs/p6_final_audit_20260424
+```
+
+That bundle includes `FINAL_AUDIT_SUMMARY.md`, `reproducibility_check.json` (frozen `replay_denials.json` counts vs a fresh recursive `trace.json` denied-step scan), `gpt5_failure_audit.*`, `paper_claims_checklist.md`, and related machine-readable rollups. **Paper prose:** cite **60/60** replay verification only as the frozen `replay_denials.json` summary; do not imply no additional denied-step records exist elsewhere in committed traces without reading the audit diff object.
