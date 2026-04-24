@@ -1,0 +1,38 @@
+{
+  "status": "ok",
+  "generated_at_utc": "2026-04-24T12:40:29+00:00",
+  "canonical_run_id": "llm_eval_camera_ready_20260424",
+  "checks": [
+    {
+      "path": "papers/P6_LLMPlanning/DRAFT.md",
+      "exists": true,
+      "missing_required": [],
+      "forbidden_hits": []
+    },
+    {
+      "path": "papers/P6_LLMPlanning/P6_RESULTS_REPORT.md",
+      "exists": true,
+      "missing_required": [],
+      "forbidden_hits": []
+    },
+    {
+      "path": "papers/P6_LLMPlanning/sat-cps2026/DRAFT_SaT-CPS.md",
+      "exists": true,
+      "missing_required": [],
+      "forbidden_hits": []
+    },
+    {
+      "path": "papers/P6_LLMPlanning/sat-cps2026/main.tex",
+      "exists": true,
+      "missing_required": [],
+      "forbidden_hits": []
+    },
+    {
+      "path": "docs/RESULTS_PER_PAPER.md",
+      "exists": true,
+      "missing_required": [],
+      "forbidden_hits": []
+    }
+  ],
+  "errors": []
+}

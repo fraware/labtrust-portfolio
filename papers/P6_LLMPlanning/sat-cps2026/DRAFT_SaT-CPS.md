@@ -150,7 +150,7 @@ The validator correctly blocks the canonical unsafe step; the real-LLM experimen
 
 
 
-**Case study: denial trace.** In a representative run, the planner proposed step { tool: execute_system, args: { cmd: "rm -rf" } }. Allow-list check: tool not in allow_list -> Deny. The step was captured for audit; no execution occurred. Regenerate snippet from a baseline trace: `python scripts/export_p6_denial_trace_case_study.py --trace datasets/runs/llm_eval/baseline_runs/gated/toy_lab_v0/seed_1/trace.json`.
+**Case study: denial trace.** In a representative run, the planner proposed step { tool: execute_system, args: { cmd: "rm -rf" } }. Allow-list check: tool not in allow_list -> Deny. The step was captured for audit; no execution occurred. Regenerate snippet from a local baseline trace with: `python scripts/export_p6_denial_trace_case_study.py --trace <local_trace_path_from_adapter_or_baseline_run>`.
 
 **Latency decomposition and layer attribution.** With --latency-decomposition, adapter_latency.json includes per-component timings (validation_ms, capture_total_ms) with p50/p95/p99. Layer attribution (denial by allow_list_only, safe_args_only, both, admitted) is in red_team_results.json and confusable_deputy_results.json per case; export_p6_layer_attribution.py produces the stacked-bar table. Argument-level failure analysis (exact unsafe vs omitted vs safe substitution, etc.) is produced by export_p6_failure_analysis.py from real-LLM run_details.
 

@@ -34,7 +34,9 @@ def _is_dataset_run_path(path: str) -> bool:
     return path.startswith("datasets/runs/")
 
 
-def verify_file(path: Path, canonical_run_id: str) -> tuple[list[dict[str, Any]], list[str]]:
+def verify_file(
+    path: Path, canonical_run_id: str
+) -> tuple[list[dict[str, Any]], list[str]]:
     data = _load_yaml(path)
     checks: list[dict[str, Any]] = []
     errors: list[str] = []
@@ -63,7 +65,8 @@ def verify_file(path: Path, canonical_run_id: str) -> tuple[list[dict[str, Any]]
                 and f"datasets/runs/{canonical_run_id}/" not in rel
             ):
                 errors.append(
-                    f"{path.name}:{claim_id} non-canonical run path for canonical release_id: {rel}"
+                    f"{path.name}:{claim_id} non-canonical run path "
+                    f"for canonical release_id: {rel}"
                 )
     return checks, errors
 
@@ -72,17 +75,27 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--claims", type=Path, default=DEFAULT_CLAIMS)
     ap.add_argument("--claims-sat", type=Path, default=DEFAULT_CLAIMS_SAT)
-    ap.add_argument("--canonical-run-id", type=str, default=DEFAULT_CANONICAL_RUN_ID)
+    ap.add_argument(
+        "--canonical-run-id",
+        type=str,
+        default=DEFAULT_CANONICAL_RUN_ID,
+    )
     ap.add_argument("--write-report", type=Path, default=None)
     args = ap.parse_args()
 
-    checks1, errors1 = verify_file(args.claims.resolve(), args.canonical_run_id)
-    checks2, errors2 = verify_file(args.claims_sat.resolve(), args.canonical_run_id)
+    checks1, errors1 = verify_file(
+        args.claims.resolve(), args.canonical_run_id
+    )
+    checks2, errors2 = verify_file(
+        args.claims_sat.resolve(), args.canonical_run_id
+    )
     checks = checks1 + checks2
     errors = errors1 + errors2
     report = {
         "status": "ok" if not errors else "failed",
-        "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "generated_at_utc": datetime.now(timezone.utc).isoformat(
+            timespec="seconds"
+        ),
         "canonical_run_id": args.canonical_run_id,
         "checks": checks,
         "errors": errors,
