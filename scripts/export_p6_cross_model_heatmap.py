@@ -63,7 +63,9 @@ def main() -> int:
         row = per_case[cid]
         vals = [str(row.get(m, "-")) for m in model_ids]
         var_str = str(per_case_var.get(cid, "-"))
-        lines.append("| " + cid + " | " + " | ".join(vals) + " | " + var_str + " |")
+        # Avoid raw `|` in case id (composite keys use case_id|prompt_variant).
+        cid_disp = str(cid).replace("|", " · ")
+        lines.append("| " + cid_disp + " | " + " | ".join(vals) + " | " + var_str + " |")
     lines.extend(["", "# Cross-model: pairwise disagreement matrix", ""])
     lines.append("Count of cases where one model passed (>=50% runs) and the other failed.")
     lines.append("")

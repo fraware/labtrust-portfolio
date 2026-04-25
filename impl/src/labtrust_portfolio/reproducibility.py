@@ -19,6 +19,12 @@ def sha256_utf8(s: str) -> str:
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
 
+def get_real_llm_variant_fingerprint(prompt_variants: list[str]) -> str:
+    """Hash of active real-LLM prompt variants (sorted for stability)."""
+    norm = sorted(set(prompt_variants))
+    return sha256_utf8("p6_prompt_variants:" + json.dumps(norm))
+
+
 def get_prompt_template_hash(cases: list[dict[str, Any]]) -> str:
     """
     Canonical hash of the prompt template context: sorted case ids and step shapes.

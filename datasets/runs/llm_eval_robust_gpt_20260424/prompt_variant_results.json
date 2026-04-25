@@ -2,6 +2,8 @@
   "models": {
     "gpt-4.1-mini": {
       "canonical": {
+        "status": "executed",
+        "n_logical_case_variant_rows": 25,
         "passes": 75,
         "total": 75,
         "rate": 1.0
@@ -33,6 +35,8 @@
     },
     "gpt-4.1": {
       "canonical": {
+        "status": "executed",
+        "n_logical_case_variant_rows": 25,
         "passes": 75,
         "total": 75,
         "rate": 1.0
@@ -63,5 +67,5 @@
       }
     }
   },
-  "note": "Only canonical prompt_variant has been executed in committed artifacts; other variants require harness extension and API budget."
+  "note": "Per-variant aggregates from red_team_results case rows (each row is one logical case \u00d7 prompt_variant). status=not_executed when no matching rows exist for that variant."
 }

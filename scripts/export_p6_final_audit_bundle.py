@@ -40,6 +40,10 @@ ALLOWED_TOOLS = ["query_status", "submit_result"]
 CANONICAL_RUN = "llm_eval_camera_ready_20260424"
 CANONICAL_DIR = REPO / "datasets" / "runs" / CANONICAL_RUN
 DEFAULT_OUT = REPO / "datasets" / "runs" / "p6_final_audit_20260424"
+STRESS_CASES_JSON = REPO / "datasets" / "cases" / "p6_real_llm_stress_cases.json"
+
+# Lazy map rs_* -> step dict (same shape as RED_TEAM_CASES entries).
+_STRESS_STEPS_BY_ID: dict[str, dict[str, Any]] | None = None
 
 GPT5_DIRS = {
     "gpt-5.4": REPO / "datasets" / "runs" / "llm_eval_openai_gpt54_postpatch_20260424",
@@ -113,6 +117,24 @@ def _case_by_id(cases: list[dict[str, Any]], case_id: str) -> dict[str, Any] | N
     return None
 
 
+def _stress_steps_by_id() -> dict[str, dict[str, Any]]:
+    global _STRESS_STEPS_BY_ID
+    if _STRESS_STEPS_BY_ID is not None:
+        return _STRESS_STEPS_BY_ID
+    if not STRESS_CASES_JSON.is_file():
+        _STRESS_STEPS_BY_ID = {}
+        return _STRESS_STEPS_BY_ID
+    data = _load_json(STRESS_CASES_JSON)
+    out: dict[str, dict[str, Any]] = {}
+    for c in data.get("cases", []) or []:
+        cid = c.get("id")
+        step = c.get("step")
+        if isinstance(cid, str) and isinstance(step, dict):
+            out[cid] = dict(step)
+    _STRESS_STEPS_BY_ID = out
+    return _STRESS_STEPS_BY_ID
+
+
 def _ref_step_for_case(case_id: str) -> dict[str, Any]:
     hit = _case_by_id(list(RED_TEAM_CASES), case_id)
     if hit:
@@ -123,10 +145,14 @@ def _ref_step_for_case(case_id: str) -> dict[str, Any]:
     hit = _case_by_id(list(JAILBREAK_STYLE_CASES), case_id)
     if hit:
         return dict(hit["step"])
+    if case_id.startswith("rs_"):
+        return dict(_stress_steps_by_id().get(case_id) or {})
     return {}
 
 
 def _case_family(case_id: str) -> str:
+    if case_id.startswith("rs_"):
+        return "real_llm_stress"
     if case_id.startswith("jb_"):
         return "jailbreak_style"
     if case_id.startswith("cd_"):

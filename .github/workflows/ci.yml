@@ -43,6 +43,13 @@ jobs:
       - name: P6 camera-ready bundle integrity
         run: |
           python scripts/verify_p6_camera_ready_bundle.py
+      - name: P6 robust GPT bundle verify
+        run: |
+          python scripts/verify_p6_robust_gpt_bundle.py
+      - name: P6 stress corpus validator-only audit
+        run: |
+          python scripts/run_robust_gpt_eval.py --synthetic-stress-audit /tmp/p6_stress_validator_audit.json
+          python -c "import json,sys; d=json.load(open('/tmp/p6_stress_validator_audit.json')); sys.exit(0 if d.get('all_match') else 1)"
       - name: P6 claims consistency
         run: |
           python scripts/verify_p6_claims_consistency.py

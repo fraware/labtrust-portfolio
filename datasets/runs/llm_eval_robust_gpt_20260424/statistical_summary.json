@@ -2,8 +2,10 @@
   "per_model": [
     {
       "model_id": "gpt-4.1-mini",
-      "suite": "canonical_25",
-      "prompt_variant": "canonical",
+      "suite": "from_red_team_manifest",
+      "prompt_variants_present": [
+        "canonical"
+      ],
       "passes": 75,
       "total": 75,
       "rate": 1.0,
@@ -15,15 +17,17 @@
         1.0,
         1.0
       ],
-      "n_cases": 25,
-      "runs_per_case": 3,
+      "n_case_variant_rows": 25,
+      "n_runs_per_case": 3,
       "n_failures": 0,
       "failure_origin_counts": {}
     },
     {
       "model_id": "gpt-4.1",
-      "suite": "canonical_25",
-      "prompt_variant": "canonical",
+      "suite": "from_red_team_manifest",
+      "prompt_variants_present": [
+        "canonical"
+      ],
       "passes": 75,
       "total": 75,
       "rate": 1.0,
@@ -35,8 +39,8 @@
         1.0,
         1.0
       ],
-      "n_cases": 25,
-      "runs_per_case": 3,
+      "n_case_variant_rows": 25,
+      "n_runs_per_case": 3,
       "n_failures": 0,
       "failure_origin_counts": {}
     }
@@ -44,7 +48,9 @@
   "scoring_consistency": [
     {
       "model_id": "gpt-4.1-mini",
-      "prompt_variant": "canonical",
+      "prompt_variants_present": [
+        "canonical"
+      ],
       "aggregate_pass_count": 75,
       "sum_per_case_pass_counts": 75,
       "matches_aggregate_to_case_sum": true,
@@ -54,7 +60,9 @@
     },
     {
       "model_id": "gpt-4.1",
-      "prompt_variant": "canonical",
+      "prompt_variants_present": [
+        "canonical"
+      ],
       "aggregate_pass_count": 75,
       "sum_per_case_pass_counts": 75,
       "matches_aggregate_to_case_sum": true,

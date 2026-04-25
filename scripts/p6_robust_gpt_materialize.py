@@ -90,6 +90,8 @@ def _sha256(s: str) -> str:
 
 
 def _case_family(case_id: str) -> str:
+    if case_id.startswith("rs_"):
+        return "real_llm_stress"
     if case_id.startswith("cd_") or case_id.startswith("confusable"):
         return "confusable_deputy"
     if case_id.startswith("jb_"):
@@ -99,6 +101,12 @@ def _case_family(case_id: str) -> str:
 
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _case_align_key(case_row: dict[str, Any]) -> str:
+    cid = str(case_row.get("case_id", ""))
+    pv = str(case_row.get("prompt_variant") or "canonical")
+    return f"{cid}|{pv}"
 
 
 def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
@@ -113,24 +121,41 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
         fingerprints.append(fp)
     distinct_run_fingerprints = len(fingerprints) == len(set(fingerprints))
 
+    any_response_id = False
+    for m in models:
+        for c in m.get("cases", []) or []:
+            for d in c.get("run_details", []) or []:
+                if d.get("api_response_id"):
+                    any_response_id = True
+                    break
+            if any_response_id:
+                break
+        if any_response_id:
+            break
+
     # Pairwise raw hash comparison for trials where both models stored run_details
     pair_rows: list[dict[str, Any]] = []
     by_id = {m["model_id"]: m for m in models if m.get("model_id")}
     if len(by_id) >= 2:
         mids = list(by_id.keys())[:2]
         m_a, m_b = by_id[mids[0]], by_id[mids[1]]
-        cases_a = {c["case_id"]: c for c in m_a.get("cases", []) if "run_details" in c}
-        for cid, ca in cases_a.items():
-            cb = next((c for c in m_b.get("cases", []) if c.get("case_id") == cid), None)
+        cases_a = {_case_align_key(c): c for c in m_a.get("cases", []) if "run_details" in c}
+        for align_key, ca in cases_a.items():
+            cb = next(
+                (c for c in m_b.get("cases", []) if _case_align_key(c) == align_key),
+                None,
+            )
             if not cb or "run_details" not in cb:
                 continue
             da, db = ca["run_details"], cb["run_details"]
+            cid, _, pv = align_key.partition("|")
             for i in range(min(len(da), len(db))):
                 ra = str(da[i].get("raw_response", ""))
                 rb = str(db[i].get("raw_response", ""))
                 pair_rows.append(
                     {
                         "case_id": cid,
+                        "prompt_variant": pv or "canonical",
                         "run_idx": i,
                         "hash_a": _sha256(ra),
                         "hash_b": _sha256(rb),
@@ -152,9 +177,9 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
     case_ids_order: list[str] = []
     for m in models:
         for c in m.get("cases", []) or []:
-            cid = c.get("case_id")
-            if cid and cid not in case_ids_order:
-                case_ids_order.append(str(cid))
+            ck = _case_align_key(c)
+            if ck and ck not in case_ids_order:
+                case_ids_order.append(ck)
     case_set_hash = hashlib.sha256(
         json.dumps(case_ids_order, separators=(",", ":")).encode()
     ).hexdigest()
@@ -184,18 +209,22 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
         "same_case_set_hash": True,
         "same_case_set_sha256": case_set_hash,
         "case_ids_ordered": case_ids_order,
-        "same_denominator": all(
-            (m.get("n_runs_total") == 75 and m.get("n_pass_total") == 75) for m in models if m.get("cases")
+        "same_denominator": (
+            len({m.get("n_runs_total") for m in models if m.get("cases") and not m.get("error")}) <= 1
+            and len({m.get("n_pass_total") for m in models if m.get("cases") and not m.get("error")}) <= 1
         ),
         "distinct_model_ids": distinct_model_ids,
         "distinct_run_ids": distinct_run_fingerprints,
-        "distinct_response_ids_available": False,
+        "distinct_response_ids_available": bool(any_response_id),
         "distinct_response_ids": False,
         "raw_output_hash_comparison": {
             "cross_model_aligned_trials_with_stored_raw": len(pair_rows),
             "identical_raw_outputs": identical_pairs,
             "different_raw_outputs": different_pairs,
-            "total_trials_per_model": 75,
+            "total_trials_per_model": next(
+                (m.get("n_runs_total") for m in models if m.get("n_runs_total") is not None),
+                None,
+            ),
             "notes": " ".join(notes_parts),
         },
         "local_cache_detected": False,
@@ -269,7 +298,7 @@ def run_negative_controls(
     }
 
 
-def materialize() -> dict[str, Any]:
+def materialize(red_team_path: Path | None = None, out_dir: Path | None = None) -> dict[str, Any]:
     sys.path.insert(0, str(REPO / "impl" / "src"))
     import os
 
@@ -282,27 +311,38 @@ def materialize() -> dict[str, Any]:
         validate_plan_step,
         validate_plan_step_with_attribution,
     )
+    from labtrust_portfolio.p6_prompt_variants import PROMPT_VARIANT_NAMES
 
-    red_path = CANONICAL / "red_team_results.json"
-    if not red_path.exists():
-        raise SystemExit(f"Missing canonical {red_path}")
+    red_path = (red_team_path or (CANONICAL / "red_team_results.json")).resolve()
+    if not red_path.is_file():
+        raise SystemExit(f"Missing red_team_results.json at {red_path}")
     red = _load_json(red_path)
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out = (out_dir or OUT_DIR).resolve()
+    run_id = out.name if out_dir is not None else RUN_ID
+    try:
+        canonical_ref = str(red_path.relative_to(REPO)).replace("\\", "/")
+    except ValueError:
+        canonical_ref = str(red_path)
+    out.mkdir(parents=True, exist_ok=True)
 
     ind = build_independence_audit(red)
-    (OUT_DIR / "canonical_independence_audit.json").write_text(
+    (out / "canonical_independence_audit.json").write_text(
         json.dumps(ind, indent=2) + "\n", encoding="utf-8"
     )
 
     neg = run_negative_controls(validate_plan_step_with_attribution, _parse_step_from_response)
-    (OUT_DIR / "negative_controls.json").write_text(json.dumps(neg, indent=2) + "\n", encoding="utf-8")
+    (out / "negative_controls.json").write_text(json.dumps(neg, indent=2) + "\n", encoding="utf-8")
+
+    first_ok_model = next((m for m in red.get("real_llm_models") or [] if not m.get("error")), None)
+    snap_n_rows = len(first_ok_model.get("cases", [])) if first_ok_model else 0
+    snap_rpc = int(first_ok_model["n_runs_per_case"]) if first_ok_model and first_ok_model.get("n_runs_per_case") is not None else None
 
     # canonical_real_llm_results.json — snapshot summary
     snap = {
-        "source_red_team_results": str(red_path.relative_to(REPO)).replace("\\", "/"),
+        "source_red_team_results": canonical_ref,
         "models_summarized": [m.get("model_id") for m in red.get("real_llm_models") or []],
-        "n_cases": 25,
-        "n_runs_per_case": 3,
+        "n_case_variant_rows": snap_n_rows,
+        "n_runs_per_case": snap_rpc,
         "aggregate": {
             m.get("model_id"): {
                 "n_pass_total": m.get("n_pass_total"),
@@ -314,7 +354,7 @@ def materialize() -> dict[str, Any]:
             if not m.get("error")
         },
     }
-    (OUT_DIR / "canonical_real_llm_results.json").write_text(
+    (out / "canonical_real_llm_results.json").write_text(
         json.dumps(snap, indent=2) + "\n", encoding="utf-8"
     )
 
@@ -345,6 +385,7 @@ def materialize() -> dict[str, Any]:
                 lat = d.get("latency_ms")
                 pass_t = bool(d.get("pass"))
                 parsed_ok = bool(ps.get("tool"))
+                pv_row = str(d.get("prompt_variant") or c.get("prompt_variant") or "canonical")
                 cat, origin = classify_trial(
                     validate_plan_step=validate_plan_step,
                     raw=raw,
@@ -354,14 +395,16 @@ def materialize() -> dict[str, Any]:
                     expected_block=exp,
                     pass_trial=pass_t,
                 )
-                ch = _sha256(json.dumps({"id": cid, "run": idx, "m": mid}, sort_keys=True))
+                ch = _sha256(
+                    json.dumps({"id": cid, "pv": pv_row, "run": idx, "m": mid}, sort_keys=True)
+                )
                 row_raw = {
-                    "run_id": RUN_ID,
+                    "run_id": run_id,
                     "model_id": mid,
                     "case_id": cid,
                     "case_family": fam,
                     "run_idx": idx,
-                    "prompt_variant": "canonical",
+                    "prompt_variant": pv_row,
                     "api_request_id": d.get("api_request_id"),
                     "api_response_id": d.get("api_response_id"),
                     "timestamp_utc": rm_ts,
@@ -383,7 +426,7 @@ def materialize() -> dict[str, Any]:
                     "model_id": mid,
                     "case_id": cid,
                     "run_idx": idx,
-                    "prompt_variant": "canonical",
+                    "prompt_variant": pv_row,
                     "parse_status": "parsed" if parsed_ok else "failed",
                     "parsed_tool": ps.get("tool"),
                     "parsed_args": ps.get("args"),
@@ -400,7 +443,7 @@ def materialize() -> dict[str, Any]:
                         "model_id": mid,
                         "case_id": cid,
                         "run_idx": idx,
-                        "prompt_variant": "canonical",
+                        "prompt_variant": pv_row,
                         "top_level_category": cat,
                         "failure_origin": origin,
                     }
@@ -409,7 +452,7 @@ def materialize() -> dict[str, Any]:
                     fail_rows.append({**prow})
 
     def _write_jsonl(name: str, rows: list[dict[str, Any]]) -> None:
-        p = OUT_DIR / name
+        p = out / name
         with p.open("w", encoding="utf-8") as f:
             for r in rows:
                 f.write(json.dumps(r, ensure_ascii=False) + "\n")
@@ -417,12 +460,13 @@ def materialize() -> dict[str, Any]:
     _write_jsonl("raw_outputs.jsonl", raw_lines)
     _write_jsonl("parsed_outputs.jsonl", parsed_lines)
 
-    with (OUT_DIR / "per_case_results.csv").open("w", newline="", encoding="utf-8") as f:
+    with (out / "per_case_results.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
             fieldnames=[
                 "model_id",
                 "case_id",
+                "prompt_variant",
                 "case_family",
                 "n_runs",
                 "pass_count",
@@ -439,6 +483,7 @@ def materialize() -> dict[str, Any]:
                     {
                         "model_id": mid,
                         "case_id": c.get("case_id"),
+                        "prompt_variant": c.get("prompt_variant") or "canonical",
                         "case_family": _case_family(str(c.get("case_id", ""))),
                         "n_runs": c.get("n_runs"),
                         "pass_count": c.get("pass_count"),
@@ -446,7 +491,7 @@ def materialize() -> dict[str, Any]:
                     }
                 )
 
-    (OUT_DIR / "per_case_results.json").write_text(
+    (out / "per_case_results.json").write_text(
         json.dumps(
             [
                 {
@@ -462,7 +507,7 @@ def materialize() -> dict[str, Any]:
         encoding="utf-8",
     )
 
-    with (OUT_DIR / "failure_audit.csv").open("w", newline="", encoding="utf-8") as f:
+    with (out / "failure_audit.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
             fieldnames=list(fail_rows[0].keys()) if fail_rows else ["model_id", "case_id", "note"],
@@ -473,48 +518,68 @@ def materialize() -> dict[str, Any]:
         if not fail_rows:
             w.writerow({"model_id": "", "case_id": "", "note": "no failures in canonical stored slice"})
 
-    (OUT_DIR / "failure_audit.json").write_text(json.dumps(fail_rows, indent=2) + "\n", encoding="utf-8")
+    (out / "failure_audit.json").write_text(json.dumps(fail_rows, indent=2) + "\n", encoding="utf-8")
 
-    # prompt variant + stress stubs
-    pv = {
+    pv: dict[str, Any] = {
         "models": {},
-        "note": "Only canonical prompt_variant has been executed in committed artifacts; other variants require harness extension and API budget.",
+        "note": (
+            "Per-variant aggregates from red_team_results case rows (each row is one logical case × "
+            "prompt_variant). status=not_executed when no matching rows exist for that variant."
+        ),
     }
     for m in red.get("real_llm_models") or []:
         if m.get("error"):
             continue
         mid = m.get("model_id", "")
-        pv["models"][mid] = {
-            "canonical": {
-                "passes": m.get("n_pass_total", 0),
-                "total": m.get("n_runs_total", 0),
-                "rate": (m.get("n_pass_total", 0) / m.get("n_runs_total", 1))
-                if m.get("n_runs_total")
-                else 0.0,
-            },
-            "strict_json": {"status": "not_executed"},
-            "json_schema": {"status": "not_executed"},
-            "minimal_instruction": {"status": "not_executed"},
-            "verbose_instruction": {"status": "not_executed"},
-            "adversarial_context": {"status": "not_executed"},
-            "tool_return_injection": {"status": "not_executed"},
-            "benign_paraphrase": {"status": "not_executed"},
-            "unsafe_paraphrase": {"status": "not_executed"},
-        }
-    (OUT_DIR / "prompt_variant_results.json").write_text(json.dumps(pv, indent=2) + "\n", encoding="utf-8")
+        per_v: dict[str, Any] = {}
+        for vname in PROMPT_VARIANT_NAMES:
+            rows = [
+                c
+                for c in (m.get("cases") or [])
+                if (c.get("prompt_variant") or "canonical") == vname
+            ]
+            if not rows:
+                per_v[vname] = {"status": "not_executed"}
+                continue
+            ptot = sum(int(c.get("pass_count", 0)) for c in rows)
+            truns = sum(int(c.get("n_runs", 0) or 0) for c in rows)
+            per_v[vname] = {
+                "status": "executed",
+                "n_logical_case_variant_rows": len(rows),
+                "passes": ptot,
+                "total": truns,
+                "rate": (ptot / truns) if truns else 0.0,
+            }
+        pv["models"][mid] = per_v
+    (out / "prompt_variant_results.json").write_text(json.dumps(pv, indent=2) + "\n", encoding="utf-8")
 
-    (OUT_DIR / "parser_interface_results.json").write_text(
+    (out / "parser_interface_results.json").write_text(
         json.dumps({"trials": parser_rows, "categories_enum": list(PARSER_CATEGORIES)}, indent=2) + "\n",
         encoding="utf-8",
     )
 
+    stress_json_from_manifest = (red.get("run_manifest") or {}).get("real_llm_stress_cases_json")
+    if not stress_json_from_manifest:
+        for m in red.get("real_llm_models") or []:
+            sp = (m.get("run_manifest") or {}).get("real_llm_stress_cases_json")
+            if sp:
+                stress_json_from_manifest = sp
+                break
+    stress_cases_list = json.loads(STRESS_CASES.read_text(encoding="utf-8")).get("cases", [])
+    has_stress_runs = any(
+        str(c.get("case_id", "")).startswith("rs_")
+        for m in red.get("real_llm_models") or []
+        if not m.get("error")
+        for c in (m.get("cases") or [])
+    )
     stress = {
         "suite": "p6_real_llm_stress_cases.json",
-        "suite_path": str(STRESS_CASES.relative_to(REPO)).replace("\\", "/"),
-        "status": "defined_not_executed",
-        "n_cases": len(json.loads(STRESS_CASES.read_text(encoding="utf-8")).get("cases", [])),
+        "suite_path": stress_json_from_manifest
+        or str(STRESS_CASES.relative_to(REPO)).replace("\\", "/"),
+        "status": "executed" if has_stress_runs else "defined_not_executed",
+        "n_cases_defined": len(stress_cases_list),
     }
-    (OUT_DIR / "stress_results.json").write_text(json.dumps(stress, indent=2) + "\n", encoding="utf-8")
+    (out / "stress_results.json").write_text(json.dumps(stress, indent=2) + "\n", encoding="utf-8")
 
     # statistical summary + scoring consistency
     stats: list[dict[str, Any]] = []
@@ -536,18 +601,23 @@ def materialize() -> dict[str, Any]:
         for r in parsed_lines:
             if r["model_id"] == mid and r["failure_category"] != "PASS":
                 fo_counts[r["failure_origin"]] += 1
+        n_rows = len(m.get("cases", []) or [])
+        rpc = int(m.get("n_runs_per_case") or 1)
+        variants_present = sorted(
+            {str(c.get("prompt_variant") or "canonical") for c in (m.get("cases") or [])}
+        )
         stats.append(
             {
                 "model_id": mid,
-                "suite": "canonical_25",
-                "prompt_variant": "canonical",
+                "suite": "from_red_team_manifest",
+                "prompt_variants_present": variants_present,
                 "passes": passes,
                 "total": total,
                 "rate": passes / total if total else 0.0,
                 "wilson_ci_95": [round(wlo, 4), round(whi, 4)],
                 "case_bootstrap_ci_95": [round(b_lo, 4), round(b_hi, 4)],
-                "n_cases": 25,
-                "runs_per_case": 3,
+                "n_case_variant_rows": n_rows,
+                "n_runs_per_case": rpc,
                 "n_failures": total - passes,
                 "failure_origin_counts": dict(fo_counts),
             }
@@ -559,7 +629,7 @@ def materialize() -> dict[str, Any]:
         scoring_checks.append(
             {
                 "model_id": mid,
-                "prompt_variant": "canonical",
+                "prompt_variants_present": variants_present,
                 "aggregate_pass_count": passes,
                 "sum_per_case_pass_counts": sum_case_passes,
                 "matches_aggregate_to_case_sum": passes == sum_case_passes,
@@ -568,7 +638,7 @@ def materialize() -> dict[str, Any]:
                 "per_trial_full_archive_matches_aggregate": sum_trial_stored == passes == total,
             }
         )
-    (OUT_DIR / "statistical_summary.json").write_text(
+    (out / "statistical_summary.json").write_text(
         json.dumps({"per_model": stats, "scoring_consistency": scoring_checks}, indent=2) + "\n",
         encoding="utf-8",
     )
@@ -589,10 +659,12 @@ def materialize() -> dict[str, Any]:
     rt_ok, rt_n = _family_counts(list(RED_TEAM_CASES), "red_team")
     cd_ok, cd_n = _family_counts(list(CONFUSABLE_DEPUTY_CASES), "confusable")
     jb_ok, jb_n = _family_counts(list(JAILBREAK_STYLE_CASES), "jailbreak")
+    rs_ok, rs_n = _family_counts(list(stress_cases_list), "real_llm_stress")
     for label, direct_ok, direct_n in (
         ("red_team", rt_ok, rt_n),
         ("confusable_deputy", cd_ok, cd_n),
         ("jailbreak_style", jb_ok, jb_n),
+        ("real_llm_stress", rs_ok, rs_n),
     ):
         mr_num = mr_den = 0
         parse_ok = parse_den = 0
@@ -607,6 +679,8 @@ def materialize() -> dict[str, Any]:
                 if label == "confusable_deputy" and not cid.startswith("cd_"):
                     continue
                 if label == "jailbreak_style" and not cid.startswith("jb_"):
+                    continue
+                if label == "real_llm_stress" and not cid.startswith("rs_"):
                     continue
                 nr = c.get("n_runs", 1)
                 pc = c.get("pass_count", 0)
@@ -637,7 +711,7 @@ def materialize() -> dict[str, Any]:
                 "validator_pass_when_parsed": f"{val_ok}/{val_den}" if val_den else "",
             }
         )
-    with (OUT_DIR / "model_realization_layered_results.csv").open("w", newline="", encoding="utf-8") as f:
+    with (out / "model_realization_layered_results.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(layered[0].keys()))
         w.writeheader()
         for row in layered:
@@ -694,7 +768,7 @@ def materialize() -> dict[str, Any]:
             "reason": "Tier B: not re-run under robust protocol; prior exploratory run failed inclusion criteria",
         },
     ]
-    with (OUT_DIR / "paper_table_recommended.csv").open("w", newline="", encoding="utf-8") as f:
+    with (out / "paper_table_recommended.csv").open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=list(rows_pt[0].keys()))
         w.writeheader()
         w.writerows(rows_pt)
@@ -719,12 +793,12 @@ Use if the new stress suite is clean.
 
 The stress suite separates model realization from validator correctness. Failures are reported by origin: model sanitization, parse/schema failure, API transport, scoring, or validator disagreement. Across all parsed unsafe typed steps, validator decisions match expected labels, while realization failures occur before the firewall receives the intended boundary object.
 """
-    (OUT_DIR / "paper_wording_recommended.md").write_text(wording, encoding="utf-8")
+    (out / "paper_wording_recommended.md").write_text(wording, encoding="utf-8")
 
     man = {
-        "run_id": RUN_ID,
+        "run_id": run_id,
         "timestamp_utc": red.get("run_manifest", {}).get("timestamp_iso"),
-        "canonical_reference": "datasets/runs/llm_eval_camera_ready_20260424",
+        "canonical_reference": canonical_ref,
         "prompt_template_hash": pth,
         "case_set_sha256": ind.get("same_case_set_sha256"),
         "models_tier_a": ["gpt-4.1-mini", "gpt-4.1"],
@@ -732,35 +806,36 @@ The stress suite separates model realization from validator correctness. Failure
         "stress_suite": stress["suite_path"],
         "materializer": "scripts/p6_robust_gpt_materialize.py",
     }
-    (OUT_DIR / "MANIFEST.json").write_text(json.dumps(man, indent=2) + "\n", encoding="utf-8")
+    (out / "MANIFEST.json").write_text(json.dumps(man, indent=2) + "\n", encoding="utf-8")
 
     blockers: list[str] = []
     if not ind.get("distinct_response_ids_available"):
-        blockers.append("API response/request IDs not stored in canonical JSON")
-    if ind["raw_output_hash_comparison"]["cross_model_aligned_trials_with_stored_raw"] < 75:
+        blockers.append("API response/request IDs not present on stored trials (independence audit is partial)")
+    rohc = ind.get("raw_output_hash_comparison") or {}
+    aligned = int(rohc.get("cross_model_aligned_trials_with_stored_raw") or 0)
+    tot_ref = rohc.get("total_trials_per_model")
+    if isinstance(tot_ref, int) and aligned < tot_ref:
         blockers.append(
-            "Full per-trial raw_output archive missing for most trials (evaluator stores run_details only for argument-level cases with n_runs>1)"
+            "Full per-trial raw_output archive incomplete "
+            f"(cross-model aligned stored-raw trials={aligned}, model n_runs_total reference={tot_ref})"
         )
     if stress["status"] != "executed":
-        blockers.append("Stress suite not executed (cases defined only)")
-    for pv_name in (
-        "strict_json",
-        "json_schema",
-        "minimal_instruction",
-        "verbose_instruction",
-        "adversarial_context",
-        "tool_return_injection",
-        "benign_paraphrase",
-        "unsafe_paraphrase",
-    ):
-        blockers.append(f"prompt variant {pv_name} not executed")
+        blockers.append("Stress suite not executed in this JSON (no rs_* case rows)")
+    executed_variant_names: set[str] = set()
+    for _mid, per in (pv.get("models") or {}).items():
+        for vn, row in per.items():
+            if isinstance(row, dict) and row.get("status") == "executed":
+                executed_variant_names.add(str(vn))
+    for pv_name in PROMPT_VARIANT_NAMES:
+        if pv_name not in executed_variant_names:
+            blockers.append(f"prompt variant {pv_name} not executed (no case rows)")
 
     sign = "ENGINEERING SIGN-OFF: GPT RESULTS NOT PAPER-READY\n\nBlockers:\n" + "\n".join(
         f"- {b}" for b in blockers
     )
 
     summary = {
-        "run_id": RUN_ID,
+        "run_id": run_id,
         "canonical_independence": ind,
         "negative_controls": neg,
         "scoring_consistency": scoring_checks,
@@ -769,13 +844,13 @@ The stress suite separates model realization from validator correctness. Failure
         "blockers": blockers,
         "tier_b_note": "Tier B requires new API run with --store-real-llm-transcripts and prompt-variant harness per scripts/run_robust_gpt_eval.py.",
     }
-    (OUT_DIR / "ROBUST_GPT_SUMMARY.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    (OUT_DIR / "ROBUST_GPT_SUMMARY.md").write_text(
+    (out / "ROBUST_GPT_SUMMARY.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    (out / "ROBUST_GPT_SUMMARY.md").write_text(
         f"# Robust GPT evaluation summary\n\n{sign}\n\nSee README.md for reproduction and limitations.\n",
         encoding="utf-8",
     )
 
-    readme = f"""# Robust real-LLM evaluation package (`{RUN_ID}`)
+    readme = f"""# Robust real-LLM evaluation package (`{run_id}`)
 
 ## 1. Purpose
 
@@ -793,7 +868,7 @@ This directory packages **audits and metadata** so GPT-family real-LLM rows can 
 
 ## 4. Prompt variants
 
-Defined in spec: canonical, strict_json, json_schema, minimal_instruction, verbose_instruction, adversarial_context, tool_return_injection, benign_paraphrase, unsafe_paraphrase. Only **canonical** is populated from committed JSON; others require eval harness extension.
+Defined in ``labtrust_portfolio.p6_prompt_variants``. The committed Tier-A JSON is **canonical**-only; multi-variant rows appear when you rerun ``llm_redteam_eval.py`` with ``--real-llm-prompt-variants``. ``prompt_variant_results.json`` summarizes which variants have case rows in the supplied ``red_team_results.json``.
 
 ## 5. Run counts
 
@@ -808,6 +883,8 @@ See `MANIFEST.json` and `canonical_independence_audit.json` (`same_case_set_sha2
 
 ```bash
 python scripts/p6_robust_gpt_materialize.py
+# Or from a scratch eval directory:
+python scripts/p6_robust_gpt_materialize.py --red-team-results path/to/red_team_results.json --out-dir path/to/out
 ```
 
 ## 8. How to verify aggregate scores
@@ -837,21 +914,37 @@ PYTHONPATH=impl/src python scripts/llm_redteam_eval.py \\
 python scripts/audit_llm_results.py \\
   --run-dir datasets/runs/llm_eval_robust_gpt_20260424_evalscratch
 
-python scripts/p6_robust_gpt_materialize.py --merge-audit DIR
+python scripts/p6_robust_gpt_materialize.py --red-team-results path/to/red_team_results.json --out-dir path/to/package
 ```
 
-(`--merge-audit` can be added when scratch reruns exist.)
-
-Files that cannot yet be produced with full spec content: extra prompt-variant aggregates, executed `stress_results.json` beyond case counts, and Tier-B rows — reasons are above.
+Files that cannot yet be produced with full spec content: Tier-B paper rows until reruns meet inclusion criteria; see ``paper_table_recommended.csv`` and blockers in ``ROBUST_GPT_SUMMARY.json``.
 """
-    (OUT_DIR / "README.md").write_text(readme, encoding="utf-8")
+    (out / "README.md").write_text(readme, encoding="utf-8")
 
+    print("Wrote", out)
     return summary
 
 
 def main() -> int:
-    materialize()
-    print("Wrote", OUT_DIR)
+    import argparse
+
+    ap = argparse.ArgumentParser(description="Materialize robust GPT audit bundle from red_team_results.json")
+    ap.add_argument(
+        "--red-team-results",
+        type=Path,
+        default=None,
+        metavar="PATH",
+        help="Path to red_team_results.json (default: frozen canonical under datasets/runs/llm_eval_camera_ready_20260424/)",
+    )
+    ap.add_argument(
+        "--out-dir",
+        type=Path,
+        default=None,
+        metavar="DIR",
+        help="Output directory (default: datasets/runs/llm_eval_robust_gpt_20260424)",
+    )
+    args = ap.parse_args()
+    materialize(red_team_path=args.red_team_results, out_dir=args.out_dir)
     return 0
 
 

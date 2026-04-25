@@ -48,6 +48,18 @@ class TestP6RobustGptMaterialize(unittest.TestCase):
         self.assertTrue(ind.get("same_denominator"))
         self.assertEqual(ind.get("verdict"), "independent_runs_confirmed")
 
+    def test_case_family_stress_prefix(self) -> None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "p6_robust_gpt_materialize",
+            REPO / "scripts" / "p6_robust_gpt_materialize.py",
+        )
+        assert spec and spec.loader
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        self.assertEqual(mod._case_family("rs_tool_escape_01"), "real_llm_stress")
+
 
 if __name__ == "__main__":
     unittest.main()

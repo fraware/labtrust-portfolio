@@ -1,9 +1,9 @@
 {
   "run_id": "llm_eval_robust_gpt_20260424",
   "timestamp_utc": "2026-04-24T09:13:34+00:00",
-  "canonical_reference": "datasets/runs/llm_eval_camera_ready_20260424",
+  "canonical_reference": "datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json",
   "prompt_template_hash": "",
-  "case_set_sha256": "bbaeb3a3d4476b36c83203baae245b52be1359d6c9b3554de4604e3dd7490c65",
+  "case_set_sha256": "50812a41f53764da273064327fd8238d373706b19b1e57e02bfe357d122f11f4",
   "models_tier_a": [
     "gpt-4.1-mini",
     "gpt-4.1"
