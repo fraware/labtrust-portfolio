@@ -16,7 +16,7 @@ This directory packages **audits and metadata** so GPT-family real-LLM rows can 
 
 ## 4. Prompt variants
 
-Defined in spec: canonical, strict_json, json_schema, minimal_instruction, verbose_instruction, adversarial_context, tool_return_injection, benign_paraphrase, unsafe_paraphrase. Only **canonical** is populated from committed JSON; others require eval harness extension.
+Defined in ``labtrust_portfolio.p6_prompt_variants``. The committed Tier-A JSON is **canonical**-only; multi-variant rows appear when you rerun ``llm_redteam_eval.py`` with ``--real-llm-prompt-variants``. ``prompt_variant_results.json`` summarizes which variants have case rows in the supplied ``red_team_results.json``.
 
 ## 5. Run counts
 
@@ -31,11 +31,21 @@ See `MANIFEST.json` and `canonical_independence_audit.json` (`same_case_set_sha2
 
 ```bash
 python scripts/p6_robust_gpt_materialize.py
+# Or from a scratch eval directory:
+python scripts/p6_robust_gpt_materialize.py --red-team-results path/to/red_team_results.json --out-dir path/to/out
 ```
 
 ## 8. How to verify aggregate scores
 
 Re-sum `expected_matched` from `parsed_outputs.jsonl` and compare to `n_pass_total` in canonical `red_team_results.json` per model. `statistical_summary.json` includes `scoring_consistency` rows.
+
+Recommended machine gate (file integrity + scoring recomputation):
+
+```bash
+python scripts/verify_p6_robust_gpt_bundle.py \
+  --run-dir datasets/runs/llm_eval_robust_gpt_20260424 \
+  --red-team-results datasets/runs/llm_eval_camera_ready_20260424/red_team_results.json
+```
 
 ## 9. Known limitations
 
@@ -60,9 +70,10 @@ PYTHONPATH=impl/src python scripts/llm_redteam_eval.py \
 python scripts/audit_llm_results.py \
   --run-dir datasets/runs/llm_eval_robust_gpt_20260424_evalscratch
 
-python scripts/p6_robust_gpt_materialize.py --merge-audit DIR
+python scripts/p6_robust_gpt_materialize.py --red-team-results path/to/red_team_results.json --out-dir path/to/package
+
+# Optional validator-only stress check (no API):
+python scripts/run_robust_gpt_eval.py --synthetic-stress-audit /tmp/p6_stress_validator_audit.json
 ```
 
-(`--merge-audit` can be added when scratch reruns exist.)
-
-Files that cannot yet be produced with full spec content: extra prompt-variant aggregates, executed `stress_results.json` beyond case counts, and Tier-B rows — reasons are above.
+Files that cannot yet be produced with full spec content: Tier-B paper rows until reruns meet inclusion criteria; see ``paper_table_recommended.csv`` and blockers in ``ROBUST_GPT_SUMMARY.json``.
