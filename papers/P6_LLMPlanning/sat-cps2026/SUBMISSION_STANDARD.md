@@ -14,6 +14,8 @@ The paper will be judged on five axes. **No sentence survives unless it helps on
 
    **GPT-5.x and newer models:** Post-patch OpenAI runs under `datasets/runs/llm_eval_openai_gpt54_postpatch_20260424` and `datasets/runs/llm_eval_openai_gpt54pro_postpatch2_n3_20260424` are **supplementary** only—separate denominators, never merged into the canonical Table 1b row. The verified multi-variant/stress supplementary freeze is `datasets/runs/llm_eval_paper_bundle_final/` (check with `verify_p6_robust_gpt_bundle.py --schema full --require-paper-ready`). When discussing failures, acknowledge harness/API effects where relevant and do not over-read sparse telemetry as validator disagreement with gold labels without per-case evidence.
 
+   **Reviewer-objection guardrail:** If you write GPT-5.x, stress-suite real-LLM, prompt-variant robustness, or prompt-template-consistency claims without citing a verified supplementary robust directory, reviewers are correct to reject those claims as unsupported in canonical Table 1b. For those claims, cite `llm_eval_paper_bundle_final` explicitly and keep denominators separate from camera-ready.
+
 4. **Failure honesty:** Report failure modes or boundary conditions explicitly for the run you cite (for example, argument-level cases, parse failures, or model-specific drift). Keep historical snapshots clearly labeled when discussing prior runs with different denominators. For GPT-5.x rows, align qualitative claims with `p6_final_audit_20260424/gpt5_failure_audit.*` and the interpretation notes in that directory’s `README.md` / `FINAL_AUDIT_SUMMARY.md`.
 
 5. **Format discipline:** ACM proceedings style, named authors, 10-page cap respected.

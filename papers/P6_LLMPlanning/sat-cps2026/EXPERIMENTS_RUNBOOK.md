@@ -148,6 +148,21 @@ python scripts/verify_p6_robust_gpt_bundle.py `
 
 The checked-in freeze `datasets/runs/llm_eval_paper_bundle_final/` must end with **ENGINEERING SIGN-OFF: GPT RESULTS PAPER-READY** in `ROBUST_GPT_SUMMARY.md` when verify passes. Source lineage for that directory is documented in its `README.md`.
 
+### 5.2 Why reviewers may still reject supplementary claims
+
+Reviewers often audit canonical Table 1b lineage first. If your text does not explicitly cite `llm_eval_paper_bundle_final`, they may correctly conclude:
+
+- no GPT-5.x claim support,
+- no stress-suite real-LLM support,
+- no prompt-variant robustness support,
+- no same-prompt-template support.
+
+To avoid this, always pair supplementary claims with:
+
+- exact run directory path,
+- verifier command and pass status,
+- denominator/model-set statement distinct from canonical Table 1b.
+
 ## 6. Real-LLM -- optional Prime Inference (four-model matrix)
 
 If the eval script supports `--real-llm-provider prime` and Prime API keys, you can write a **separate** output directory so you do not overwrite the OpenAI canonical run:

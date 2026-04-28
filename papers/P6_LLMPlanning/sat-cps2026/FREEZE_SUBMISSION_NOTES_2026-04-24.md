@@ -51,6 +51,25 @@ Camera-ready baseline/adapter artifacts are now committed in the canonical run:
   unless the table explicitly relabels run directory, models, suite mode, and
   denominator.
 
+## Common reviewer rejection line (and why it appears)
+
+If reviewers say:
+
+- "No GPT-5.x."
+- "No stress-suite real-LLM claims."
+- "No prompt-variant robustness claims."
+- "No same prompt template claim."
+
+they are usually auditing only the canonical Table 1b lineage
+(`llm_eval_camera_ready_20260424`), where those claims are intentionally out of scope.
+
+To make those claims admissible, cite and verify the supplementary robust package:
+
+- `datasets/runs/llm_eval_paper_bundle_final/`
+- `python scripts/verify_p6_robust_gpt_bundle.py --run-dir datasets/runs/llm_eval_paper_bundle_final --schema full --require-paper-ready --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json`
+
+Do not present those supplementary claims as if they came from canonical Table 1b.
+
 ## Final engineering audit bundle (evidence freeze)
 
 - **Directory:** `datasets/runs/p6_final_audit_20260424/`

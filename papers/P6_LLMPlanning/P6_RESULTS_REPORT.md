@@ -99,6 +99,17 @@ python scripts/verify_p6_robust_gpt_bundle.py \
 
 This bundle is sourced from `datasets/runs/llm_eval_robust_gpt_20260425_two_models_scratch/red_team_results.json` (see `MANIFEST.json` in the bundle). Keep it labeled as supplementary because model set and denominator differ from canonical Table 1b.
 
+## 6c) Reviewer caveat (must appear in writing workflow)
+
+If a reviewer says:
+
+- "No GPT-5.x."
+- "No stress-suite real-LLM claims."
+- "No prompt-variant robustness claims."
+- "No same prompt template claim."
+
+that is correct **unless** your cited artifact path is the verified supplementary robust package. Canonical Table 1b (`llm_eval_camera_ready_20260424`) does not by itself carry those supplementary claims.
+
 ## 7) Regeneration checklist
 
 ```bash
