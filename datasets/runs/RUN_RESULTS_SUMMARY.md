@@ -93,6 +93,13 @@ PYTHONPATH=impl/src python scripts/llm_redteam_eval.py --out datasets/runs/llm_e
 
 Treat as **compatibility / behavior characterization**; failure interpretation should follow `p6_final_audit_20260424/gpt5_failure_audit.*` (harness/API empty responses, sparse `run_details` on some models).
 
+### Supplementary robust package (verified)
+
+- **Path:** `datasets/runs/llm_eval_paper_bundle_final/`
+- **Gate:** `python scripts/verify_p6_robust_gpt_bundle.py --run-dir datasets/runs/llm_eval_paper_bundle_final --schema full --require-paper-ready --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json`
+- **Source lineage:** see `MANIFEST.json` (`canonical_reference`) and `README.md` in that directory.
+- **Scope rule:** cite this package only for supplementary cross-model/multi-variant/stress statements, not for canonical Table 1b denominator claims.
+
 ### Final engineering audit bundle
 
 **Path:** `datasets/runs/p6_final_audit_20260424/`  

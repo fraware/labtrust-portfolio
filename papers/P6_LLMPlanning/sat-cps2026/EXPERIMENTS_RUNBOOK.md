@@ -98,6 +98,56 @@ python scripts/export_llm_redteam_table.py --out-dir datasets/runs/llm_eval_came
 
 **OpenAI GPT-5.x (supplementary, separate `--out`):** `llm_redteam_eval.py` uses the Responses API for `gpt-5*` with `chat.completions` fallback, retries without `temperature` if the API rejects that parameter, and uses bounded HTTP timeouts. Example isolated dirs from 2026-04-24: `datasets/runs/llm_eval_openai_gpt54_postpatch_20260424`, `datasets/runs/llm_eval_openai_gpt54pro_postpatch2_n3_20260424`. Do not merge with camera-ready Table 1b without relabeling. See `papers/P6_LLMPlanning/sat-cps2026/ENGINEERING_TRUTH_PACKAGE_2026-04-24.md`.
 
+### 5.1 Materialized robust GPT package (seven prompt variants + stress corpus)
+
+After a completed multi-model sweep with transcripts (see `scripts/p6_robust_gpt_full_package.py` docstring), export paper tables and run the bundle verifier.
+
+Replace `<your_sweep>` with a directory that **actually contains** `red_team_results.json` (for example `llm_eval_robust_gpt_20260425_two_models_scratch` if you have not run the expensive full-matrix sweep yet). Do **not** use bash `copy` / `cp` syntax in PowerShell; use `Copy-Item` or `cmd /c copy`.
+
+**bash / Git Bash**
+
+```bash
+python scripts/p6_robust_gpt_full_package.py \
+  --from-red-team datasets/runs/<your_sweep>/red_team_results.json \
+  --out-dir datasets/runs/llm_eval_paper_bundle_final \
+  --run-id llm_eval_paper_bundle_final
+
+cp datasets/runs/<your_sweep>/red_team_results.json datasets/runs/llm_eval_paper_bundle_final/
+
+python scripts/audit_llm_results.py --run-dir datasets/runs/llm_eval_paper_bundle_final \
+  --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json --json
+
+python scripts/verify_p6_robust_gpt_bundle.py --run-dir datasets/runs/llm_eval_paper_bundle_final \
+  --schema full --require-paper-ready \
+  --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json
+```
+
+**PowerShell (repo root)**
+
+```powershell
+Test-Path datasets/runs/<your_sweep>/red_team_results.json   # must be True
+
+python scripts/p6_robust_gpt_full_package.py `
+  --from-red-team datasets/runs/<your_sweep>/red_team_results.json `
+  --out-dir datasets/runs/llm_eval_paper_bundle_final `
+  --run-id llm_eval_paper_bundle_final
+
+Copy-Item -Force `
+  datasets/runs/<your_sweep>/red_team_results.json `
+  datasets/runs/llm_eval_paper_bundle_final/red_team_results.json
+
+python scripts/audit_llm_results.py `
+  --run-dir datasets/runs/llm_eval_paper_bundle_final `
+  --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json --json
+
+python scripts/verify_p6_robust_gpt_bundle.py `
+  --run-dir datasets/runs/llm_eval_paper_bundle_final `
+  --schema full --require-paper-ready `
+  --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json
+```
+
+The checked-in freeze `datasets/runs/llm_eval_paper_bundle_final/` must end with **ENGINEERING SIGN-OFF: GPT RESULTS PAPER-READY** in `ROBUST_GPT_SUMMARY.md` when verify passes. Source lineage for that directory is documented in its `README.md`.
+
 ## 6. Real-LLM -- optional Prime Inference (four-model matrix)
 
 If the eval script supports `--real-llm-provider prime` and Prime API keys, you can write a **separate** output directory so you do not overwrite the OpenAI canonical run:

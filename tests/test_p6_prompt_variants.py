@@ -38,10 +38,26 @@ class TestP6PromptVariants(unittest.TestCase):
             build_real_llm_user_prompt("rt_empty_tool", step, "nope")
 
     def test_json_schema_prompt_includes_three_keys(self) -> None:
-        step = {"tool": "query_status", "args": {}, "validators": ["allow_list"]}
+        step = {
+            "tool": "query_status",
+            "args": {},
+            "validators": ["allow_list"],
+        }
         p = build_real_llm_user_prompt("rt_empty_tool", step, "json_schema")
         self.assertIn("validators", p)
         self.assertIn('"tool"', p)
+        self.assertIn("evaluation harness", p)
+        self.assertIn("character-for-character", p)
+
+    def test_strict_json_includes_literal_fidelity_harness(self) -> None:
+        step = {
+            "tool": "query_status",
+            "args": {},
+            "validators": ["allow_list"],
+        }
+        p = build_real_llm_user_prompt("rt_empty_tool", step, "strict_json")
+        self.assertIn("evaluation harness", p)
+        self.assertIn("No markdown fences", p)
 
     def test_openai_response_format_shape(self) -> None:
         rf = openai_json_schema_response_format()

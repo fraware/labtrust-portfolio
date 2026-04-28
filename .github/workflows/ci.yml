@@ -43,9 +43,20 @@ jobs:
       - name: P6 camera-ready bundle integrity
         run: |
           python scripts/verify_p6_camera_ready_bundle.py
-      - name: P6 robust GPT bundle verify
+      - name: P6 robust GPT bundle verify (20260424 legacy partial audit)
         run: |
           python scripts/verify_p6_robust_gpt_bundle.py
+      - name: P6 full robust GPT paper-ready gate (when 20260425 bundle + API JSON exist)
+        run: |
+          if [ -f datasets/runs/llm_eval_robust_gpt_20260425_full/red_team_results.json ]; then
+            python scripts/verify_p6_robust_gpt_bundle.py \
+              --run-dir datasets/runs/llm_eval_robust_gpt_20260425_full \
+              --schema full \
+              --red-team-results datasets/runs/llm_eval_robust_gpt_20260425_full/red_team_results.json \
+              --require-paper-ready
+          else
+            echo "skip: datasets/runs/llm_eval_robust_gpt_20260425_full/red_team_results.json not committed"
+          fi
       - name: P6 stress corpus validator-only audit
         run: |
           python scripts/run_robust_gpt_eval.py --synthetic-stress-audit /tmp/p6_stress_validator_audit.json

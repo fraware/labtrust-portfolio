@@ -32,6 +32,7 @@ PARSER_CATEGORIES = (
     "MODEL_CHANGED_TOOL",
     "MODEL_CHANGED_ARGUMENT_KEY",
     "MODEL_OMITTED_REQUIRED_FIELD",
+    "MODEL_CHANGED_SEMANTICS",
     "NON_JSON_OUTPUT",
     "JSON_WITH_EXTRA_PROSE",
     "PARSER_FAILURE",
@@ -165,14 +166,26 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
 
     identical_pairs = sum(1 for p in pair_rows if p["identical"])
     different_pairs = len(pair_rows) - identical_pairs
+    pair_count = len(pair_rows)
+    # Flag a join bug only if *every* aligned trial matches bit-for-bit across models.
+    # At temperature 0, distinct models often agree on the same minimal JSON; partial
+    # overlap is not evidence of response reuse.
+    copy_or_join_bug_suspected = pair_count > 0 and identical_pairs == pair_count
     top_manifest = red.get("run_manifest") or {}
-    pth = top_manifest.get("prompt_template_hash")
-    same_pth = True
-    if len(models) >= 2:
-        h0 = (models[0].get("run_manifest") or {}).get("prompt_template_hash")
-        same_pth = all(
-            (m.get("run_manifest") or {}).get("prompt_template_hash") == h0 for m in models
-        )
+    top_pth = top_manifest.get("prompt_template_hash")
+    model_pths = [
+        (m.get("run_manifest") or {}).get("prompt_template_hash")
+        for m in models
+        if not m.get("error")
+    ]
+    non_null_pths = [h for h in model_pths if h]
+    # Paper-facing: compare per-model hashes (top-level manifest often omits pth).
+    same_pth_across_models = len(set(non_null_pths)) <= 1 if non_null_pths else True
+    top_matches_models = (
+        top_pth is None
+        or not non_null_pths
+        or all(h == top_pth for h in non_null_pths)
+    )
 
     case_ids_order: list[str] = []
     for m in models:
@@ -192,6 +205,11 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
         notes_parts.append(
             "Cross-model aligned trials with stored raw: all pairs have distinct SHA256 (no evidence of output copying between models)."
         )
+    elif pair_rows and 0 < identical_pairs < pair_count:
+        notes_parts.append(
+            f"Cross-model aligned trials: {identical_pairs}/{pair_count} pairs have identical raw text "
+            "(possible at temperature 0); remainder differ."
+        )
 
     verdict = "independent_runs_confirmed"
     if not distinct_model_ids or not distinct_run_fingerprints:
@@ -205,7 +223,14 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
     return {
         "canonical_run_dir": "datasets/runs/llm_eval_camera_ready_20260424",
         "models": m_ids,
-        "same_prompt_template_hash": bool(same_pth and pth),
+        "same_prompt_template_hash": bool(same_pth_across_models),
+        "prompt_template_hashes_by_model": {
+            str(m.get("model_id") or "?"): (m.get("run_manifest") or {}).get("prompt_template_hash")
+            for m in models
+            if m.get("model_id")
+        },
+        "top_level_prompt_template_hash": top_pth,
+        "top_level_prompt_template_hash_matches_models": bool(top_matches_models),
         "same_case_set_hash": True,
         "same_case_set_sha256": case_set_hash,
         "case_ids_ordered": case_ids_order,
@@ -228,7 +253,7 @@ def build_independence_audit(red: dict[str, Any]) -> dict[str, Any]:
             "notes": " ".join(notes_parts),
         },
         "local_cache_detected": False,
-        "copy_or_join_bug_detected": identical_pairs > 0,
+        "copy_or_join_bug_detected": copy_or_join_bug_suspected,
         "scoring_reads_model_specific_files": True,
         "verdict": verdict,
         "caveats": caveats,

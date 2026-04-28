@@ -93,3 +93,7 @@ datasets/runs/llm_eval_robust_gpt_20260424/**
 !datasets/runs/sensitivity_sweep/scaling_sensitivity.json
 !datasets/runs/scaling_recommend/
 !datasets/runs/scaling_recommend/recommendation_eval.json
+# Real-LLM eval scratch: partial / checkpoints (recoverable intermediates; not publishable bundles)
+datasets/runs/**/red_team_results.partial.json
+datasets/runs/**/real_llm_*checkpoint*.json
+datasets/runs/**/real_llm_postvalidation_failure.json

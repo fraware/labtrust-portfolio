@@ -9,6 +9,9 @@ OpenAI ``api_response_id`` when returned (for robustness audits). Optional
 variants are ``canonical`` only (25 logical cases × ``n_runs`` in the standard suite).
 Writes to ``--out DIR`` (default scratch dir is ``datasets/runs/llm_eval/``; canonical
 frozen bundle for SaT-CPS is ``datasets/runs/llm_eval_camera_ready_20260424/``).
+With ``--real-llm``, always writes ``red_team_results.partial.json`` immediately before
+post-validation gates (removed after success). Multi-model runs also write
+``real_llm_models_checkpoint.json`` after each model unless ``--no-real-llm-checkpoint``.
 Usage: ... llm_redteam_eval.py [--out DIR] [--run-adapter] [--real-llm]
 """
 from __future__ import annotations
@@ -354,11 +357,15 @@ def _call_openai_chat_completions(
 ) -> tuple[str, str | None]:
     """OpenAI Chat Completions path with robust content extraction."""
     try:
+        token_key = "max_tokens"
+        # Newer GPT-5 family expects max_completion_tokens in chat.completions.
+        if str(model_id).startswith("gpt-5"):
+            token_key = "max_completion_tokens"
         req: dict = {
             "model": model_id,
             "messages": [{"role": "user", "content": prompt}],
             "temperature": temperature,
-            "max_tokens": 200,
+            token_key: 200,
         }
         if extra_create_kwargs:
             overlap = set(req) & set(extra_create_kwargs)
@@ -368,9 +375,19 @@ def _call_openai_chat_completions(
         try:
             resp = client.chat.completions.create(timeout=30, **req)
         except Exception as e:
+            estr = str(e)
             # Some newer models reject temperature; retry without it.
-            if "Unsupported parameter: 'temperature'" in str(e):
+            if "Unsupported parameter: 'temperature'" in estr:
                 req.pop("temperature", None)
+                resp = client.chat.completions.create(timeout=30, **req)
+            # Some models only accept max_completion_tokens / max_tokens (endpoint dependent).
+            elif "Unsupported parameter: 'max_tokens'" in estr:
+                if "max_tokens" in req:
+                    req["max_completion_tokens"] = req.pop("max_tokens")
+                resp = client.chat.completions.create(timeout=30, **req)
+            elif "Unsupported parameter: 'max_completion_tokens'" in estr:
+                if "max_completion_tokens" in req:
+                    req["max_tokens"] = req.pop("max_completion_tokens")
                 resp = client.chat.completions.create(timeout=30, **req)
             else:
                 raise
@@ -520,6 +537,95 @@ def _load_stress_cases_json(path: Path) -> list[dict]:
     return rows
 
 
+def _json_write_utf8(path: Path, obj: object) -> None:
+    path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
+
+
+def _apply_real_llm_results_to_red_team(
+    red_team: dict,
+    real_llm_models: list[dict],
+    pv_list: list[str],
+    stress_json: Path | None,
+    *,
+    real_llm_model_fallback: str,
+    use_prime_manifest: bool,
+) -> None:
+    """Attach real_llm_models and related run_manifest keys (same as post-validation success path)."""
+    for m in real_llm_models:
+        if m.get("error"):
+            continue
+        pth = (m.get("run_manifest") or {}).get("prompt_template_hash")
+        if pth:
+            red_team.setdefault("run_manifest", {})["prompt_template_hash"] = pth
+            break
+    red_team["real_llm_models"] = real_llm_models
+    rm = red_team.setdefault("run_manifest", {})
+    rm["real_llm_used"] = True
+    rm["real_llm_prompt_variants"] = list(pv_list)
+    if stress_json is not None:
+        rm["real_llm_stress_cases_json"] = str(stress_json)
+    if use_prime_manifest:
+        rm["real_llm_provider"] = "prime"
+        rm["inference_base_url"] = PRIME_INFERENCE_BASE_URL
+    if len(real_llm_models) == 1:
+        red_team["real_llm"] = real_llm_models[0]
+        rm["real_llm_model_id"] = real_llm_models[0].get("model_id", real_llm_model_fallback)
+    else:
+        rm["real_llm_model_ids"] = [m.get("model_id", "?") for m in real_llm_models]
+    cross = _compute_cross_model_summary(real_llm_models)
+    if cross:
+        red_team["cross_model_summary"] = cross
+
+
+def _validate_real_llm_postconditions(
+    real_llm_models: list[dict],
+    *,
+    fail_on_scoring_mismatch: bool,
+    fail_on_missing_raw_output: bool,
+    store_all_transcripts: bool,
+) -> None:
+    """Hard gates for auditable full-trial archives (optional CLI flags)."""
+    for m in real_llm_models:
+        if m.get("error"):
+            continue
+        mid = m.get("model_id", "?")
+        cases = m.get("cases") or []
+        if fail_on_scoring_mismatch:
+            sum_pc = sum(int(c.get("pass_count", 0)) for c in cases)
+            sum_nr = sum(int(c.get("n_runs", 0) or 0) for c in cases)
+            npt = m.get("n_pass_total")
+            nrt = m.get("n_runs_total")
+            if npt is not None and sum_pc != npt:
+                raise ValueError(
+                    f"real-LLM scoring mismatch for {mid}: sum(pass_count)={sum_pc} != n_pass_total={npt}"
+                )
+            if nrt is not None and sum_nr != nrt:
+                raise ValueError(
+                    f"real-LLM scoring mismatch for {mid}: sum(n_runs)={sum_nr} != n_runs_total={nrt}"
+                )
+        if fail_on_missing_raw_output and store_all_transcripts:
+            for c in cases:
+                cid = c.get("case_id", "")
+                nr = int(c.get("n_runs", 0) or 0)
+                rds = c.get("run_details")
+                if not isinstance(rds, list) or len(rds) != nr:
+                    raise ValueError(
+                        f"real-LLM missing run_details for {mid} case {cid}: "
+                        f"expected {nr} rows, got {len(rds) if isinstance(rds, list) else 'none'}"
+                    )
+                for rd in rds:
+                    raw = str((rd or {}).get("raw_response") or "")
+                    if not raw.strip():
+                        api_err = (rd or {}).get("error")
+                        msg = (
+                            f"real-LLM empty raw_response for {mid} case {cid} "
+                            f"run_idx={rd.get('run_idx')} prompt_variant={c.get('prompt_variant')}"
+                        )
+                        if api_err:
+                            msg += f" api_error={api_err!r}"
+                        raise ValueError(msg)
+
+
 def run_real_llm_full_suite(
     model_id: str = "gpt-4o-mini",
     temperature: float = 0.0,
@@ -530,6 +636,9 @@ def run_real_llm_full_suite(
     store_all_transcripts: bool = False,
     prompt_variants: list[str] | None = None,
     stress_cases_json: Path | str | None = None,
+    case_id_allowlist: set[str] | None = None,
+    *,
+    progress: bool = False,
 ) -> dict:
     """
     Run red-team (+ optional jailbreak-style) and confusable-deputy cases through a real LLM.
@@ -567,6 +676,18 @@ def run_real_llm_full_suite(
     if stress_cases_json:
         stress_path = Path(stress_cases_json)
         all_cases += _load_stress_cases_json(stress_path)
+    if case_id_allowlist:
+        all_cases = [c for c in all_cases if str(c.get("id", "")) in case_id_allowlist]
+        if not all_cases:
+            raise ValueError("real-LLM case filter matched zero cases")
+    if progress:
+        est_calls = len(all_cases) * len(variants) * n_runs
+        print(
+            f"[real-llm] starting model={model_id} provider={provider} suite={suite_mode} "
+            f"~api_calls={est_calls} cases={len(all_cases)} variants={variants} n_runs={n_runs}",
+            file=sys.stderr,
+            flush=True,
+        )
     ARGUMENT_LEVEL_CASES = ("rt_allowed_tool_disallowed_args", "rt_allowed_tool_denylist_key")
     cases_result = []
     raw_cap = 4000 if store_all_transcripts else 2000
@@ -578,7 +699,26 @@ def run_real_llm_full_suite(
             prompt = build_real_llm_user_prompt(case_id, ref_step, variant)
             chat_extra = None
             if provider == "openai" and variant == "json_schema":
-                chat_extra = {"response_format": openai_json_schema_response_format()}
+                # Keep this schema permissive enough for cross-model compatibility:
+                # enforce a JSON object with tool+args keys, while allowing arbitrary args shape.
+                chat_extra = {
+                    "response_format": {
+                        "type": "json_schema",
+                        "json_schema": {
+                            "name": "typed_plan_step",
+                            "strict": False,
+                            "schema": {
+                                "type": "object",
+                                "required": ["tool", "args"],
+                                "properties": {
+                                    "tool": {"type": "string"},
+                                    "args": {"type": "object", "additionalProperties": True},
+                                },
+                                "additionalProperties": False,
+                            },
+                        },
+                    }
+                }
             runs_pass = []
             runs_latency_ms = []
             run_details = []
@@ -666,6 +806,13 @@ def run_real_llm_full_suite(
             if run_details:
                 entry["run_details"] = run_details
             cases_result.append(entry)
+            if progress:
+                print(
+                    f"[real-llm] {model_id} {case_id}@{variant} "
+                    f"{pass_count}/{n_runs_done} pass latency_mean_ms={latency_mean}",
+                    file=sys.stderr,
+                    flush=True,
+                )
     total_runs = sum(c.get("n_runs", 1) for c in cases_result)
     total_pass = sum(
         c.get("pass_count", 1 if c.get("pass") else 0) for c in cases_result
@@ -1216,6 +1363,57 @@ def main() -> int:
         ),
     )
     ap.add_argument(
+        "--real-llm-case-ids",
+        type=str,
+        default=None,
+        metavar="ID1,ID2,...",
+        help=(
+            "Optional comma-separated case-id subset for --real-llm (e.g. rt_unsafe_tool,rs_mb_01). "
+            "Useful for targeted reruns without paying full-suite cost."
+        ),
+    )
+    ap.add_argument(
+        "--store-api-metadata",
+        action="store_true",
+        help=(
+            "With --real-llm: persist API request/response identifiers and finish reasons on each trial "
+            "(implies --store-real-llm-transcripts so every trial is materialized)."
+        ),
+    )
+    ap.add_argument(
+        "--fail-on-missing-raw-output",
+        action="store_true",
+        help="With --real-llm: exit non-zero if any trial lacks non-empty raw_response when transcripts are stored.",
+    )
+    ap.add_argument(
+        "--fail-on-scoring-mismatch",
+        action="store_true",
+        help="With --real-llm: exit non-zero if aggregate n_pass_total / n_runs_total disagrees with per-case sums.",
+    )
+    ap.add_argument(
+        "--disable-cache",
+        action="store_true",
+        help="Reserved for future client-side caching controls; currently a no-op.",
+    )
+    ap.add_argument(
+        "--real-llm-progress",
+        action="store_true",
+        help="During --real-llm, print progress lines to stderr (each case×variant slice; use with Tee-Object).",
+    )
+    ap.add_argument(
+        "--real-llm-checkpoint",
+        action="store_true",
+        help=(
+            "With --real-llm: after each model, overwrite real_llm_models_checkpoint.json (cumulative). "
+            "Default is on when multiple models are listed; this flag forces checkpoints for a single model too."
+        ),
+    )
+    ap.add_argument(
+        "--no-real-llm-checkpoint",
+        action="store_true",
+        help="With --real-llm: disable per-model real_llm_models_checkpoint.json even for multi-model runs.",
+    )
+    ap.add_argument(
         "--run-baseline",
         action="store_true",
         help="Run gated vs ungated adapter with denial-injection; write baseline_comparison.json",
@@ -1264,6 +1462,13 @@ def main() -> int:
         "policy_version": get_policy_version(),
     }
     if args.real_llm:
+        if args.store_api_metadata and not args.store_real_llm_transcripts:
+            print(
+                "Note: --store-api-metadata enables full per-trial persistence; turning on "
+                "--store-real-llm-transcripts.",
+                file=sys.stderr,
+            )
+            args.store_real_llm_transcripts = True
         if args.real_llm_models:
             model_list = [m.strip() for m in args.real_llm_models.split(",") if m.strip()]
         else:
@@ -1287,7 +1492,18 @@ def main() -> int:
         if stress_json is not None and not stress_json.is_file():
             print(f"--real-llm-stress-json not a file: {stress_json}", file=sys.stderr)
             return 2
-        real_llm_models = []
+        case_filter = None
+        if args.real_llm_case_ids:
+            case_filter = {c.strip() for c in str(args.real_llm_case_ids).split(",") if c.strip()}
+            if not case_filter:
+                print("--real-llm-case-ids was provided but no non-empty ids were parsed", file=sys.stderr)
+                return 2
+        do_checkpoint = (len(model_list) > 1 or bool(args.real_llm_checkpoint)) and not bool(
+            args.no_real_llm_checkpoint
+        )
+        real_llm_models: list[dict] = []
+        partial_path = args.out / "red_team_results.partial.json"
+        ckpt_path = args.out / "real_llm_models_checkpoint.json"
         for model_id in model_list:
             prov_label = "?"
             try:
@@ -1303,6 +1519,8 @@ def main() -> int:
                     store_all_transcripts=bool(args.store_real_llm_transcripts),
                     prompt_variants=pv_list,
                     stress_cases_json=stress_json,
+                    case_id_allowlist=case_filter,
+                    progress=bool(args.real_llm_progress),
                 )
                 real_llm_models.append(real_out)
             except SystemExit:
@@ -1318,22 +1536,74 @@ def main() -> int:
                     "model_id": model_id,
                     "error": str(e),
                 })
-        red_team["real_llm_models"] = real_llm_models
-        red_team["run_manifest"]["real_llm_used"] = True
-        red_team["run_manifest"]["real_llm_prompt_variants"] = list(pv_list)
-        if stress_json is not None:
-            red_team["run_manifest"]["real_llm_stress_cases_json"] = str(stress_json)
-        if args.real_llm_provider == "prime":
-            red_team["run_manifest"]["real_llm_provider"] = "prime"
-            red_team["run_manifest"]["inference_base_url"] = PRIME_INFERENCE_BASE_URL
-        if len(real_llm_models) == 1:
-            red_team["real_llm"] = real_llm_models[0]
-            red_team["run_manifest"]["real_llm_model_id"] = real_llm_models[0].get("model_id", args.real_llm_model)
-        else:
-            red_team["run_manifest"]["real_llm_model_ids"] = [m.get("model_id", "?") for m in real_llm_models]
-        cross = _compute_cross_model_summary(real_llm_models)
-        if cross:
-            red_team["cross_model_summary"] = cross
+            if do_checkpoint:
+                _json_write_utf8(
+                    ckpt_path,
+                    {
+                        "checkpoint_version": 1,
+                        "kind": "after_model",
+                        "timestamp_iso": get_timestamp_iso(),
+                        "last_completed_model_id": model_id,
+                        "n_models_planned": len(model_list),
+                        "n_models_completed": len(real_llm_models),
+                        "real_llm_models": real_llm_models,
+                    },
+                )
+                print(f"[real-llm] checkpoint written: {ckpt_path.name}", file=sys.stderr, flush=True)
+        partial_snapshot: dict | None = None
+        try:
+            partial_snapshot = json.loads(json.dumps(red_team, default=str))
+        except (TypeError, ValueError):
+            partial_snapshot = None
+        if partial_snapshot is not None:
+            _apply_real_llm_results_to_red_team(
+                partial_snapshot,
+                real_llm_models,
+                pv_list,
+                stress_json,
+                real_llm_model_fallback=str(args.real_llm_model),
+                use_prime_manifest=bool(args.real_llm_provider == "prime"),
+            )
+            partial_snapshot.setdefault("run_manifest", {})["real_llm_checkpoint"] = {
+                "post_validation_ok": False,
+                "written_at": get_timestamp_iso(),
+                "note": "Snapshot immediately before _validate_real_llm_postconditions; not a final bundle.",
+            }
+            _json_write_utf8(partial_path, partial_snapshot)
+            print(f"[real-llm] pre-validation snapshot: {partial_path.name}", file=sys.stderr, flush=True)
+        try:
+            _validate_real_llm_postconditions(
+                real_llm_models,
+                fail_on_scoring_mismatch=bool(args.fail_on_scoring_mismatch),
+                fail_on_missing_raw_output=bool(args.fail_on_missing_raw_output),
+                store_all_transcripts=bool(args.store_real_llm_transcripts),
+            )
+        except ValueError as ve:
+            print(str(ve), file=sys.stderr)
+            if partial_snapshot is not None:
+                partial_snapshot.setdefault("run_manifest", {}).setdefault("real_llm_checkpoint", {})
+                partial_snapshot["run_manifest"]["real_llm_checkpoint"]["validation_error"] = str(ve)
+                partial_snapshot["run_manifest"]["real_llm_checkpoint"]["failed_at"] = get_timestamp_iso()
+                _json_write_utf8(partial_path, partial_snapshot)
+            fail_path = args.out / "real_llm_postvalidation_failure.json"
+            _json_write_utf8(
+                fail_path,
+                {
+                    "validation_error": str(ve),
+                    "timestamp_iso": get_timestamp_iso(),
+                    "real_llm_models": real_llm_models,
+                },
+            )
+            print(f"[real-llm] post-validation failure record: {fail_path.name}", file=sys.stderr, flush=True)
+            return 1
+        _apply_real_llm_results_to_red_team(
+            red_team,
+            real_llm_models,
+            pv_list,
+            stress_json,
+            real_llm_model_fallback=str(args.real_llm_model),
+            use_prime_manifest=bool(args.real_llm_provider == "prime"),
+        )
     red_team["success_criteria_met"] = {
         "red_team_all_pass": red_team.get("all_block_unsafe_pass", False),
         "trigger_met": red_team.get("all_block_unsafe_pass", False),
@@ -1350,6 +1620,10 @@ def main() -> int:
     red_path = args.out / "red_team_results.json"
     red_path.write_text(json.dumps(red_team, indent=2) + "\n", encoding="utf-8")
     print("Red-team results:", json.dumps(red_team, indent=2))
+    if args.real_llm:
+        partial_done = args.out / "red_team_results.partial.json"
+        if partial_done.is_file():
+            partial_done.unlink()
 
     confusable = run_confusable_deputy()
     confusable["success_criteria_met"] = {"confusable_deputy_all_pass": confusable.get("all_pass", False)}

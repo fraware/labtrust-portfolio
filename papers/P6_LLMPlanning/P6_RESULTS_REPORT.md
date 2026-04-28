@@ -1,7 +1,14 @@
 # P6 Evaluation Results Report
 
-This report summarizes the camera-ready P6 artifacts under
-`datasets/runs/llm_eval_camera_ready_20260424/`.
+This report summarizes P6 artifacts by evidence tier and keeps denominators separated.
+
+## Authoritative artifact sets
+
+- **Primary (camera-ready/Table 1b):** `datasets/runs/llm_eval_camera_ready_20260424/`
+- **Extended robust package (supplementary):** `datasets/runs/llm_eval_paper_bundle_final/`
+- **Freeze hygiene audit:** `datasets/runs/p6_final_audit_20260424/`
+
+Use camera-ready artifacts for the main Table 1b row unless manuscript text explicitly introduces the robust supplementary run with its own denominator.
 
 ## 1) Synthetic suites
 
@@ -78,6 +85,19 @@ for compatibility/behavior characterization only.
 |---|---|---:|---:|---|---|
 | `datasets/runs/llm_eval_openai_gpt54_postpatch_20260424` | `gpt-5.4` | 73 / 75 | 97.3 | [90.8, 99.3] | Full suite, n=3/case, post parser/client patch |
 | `datasets/runs/llm_eval_openai_gpt54pro_postpatch2_n3_20260424` | `gpt-5.4-pro` | 54 / 75 | 72.0 | [61.0, 80.9] | Full suite, n=3/case, temperature-retry + timeout patch |
+
+## 6b) Supplementary robust package (verified)
+
+`datasets/runs/llm_eval_paper_bundle_final/` is machine-verified with:
+
+```bash
+python scripts/verify_p6_robust_gpt_bundle.py \
+  --run-dir datasets/runs/llm_eval_paper_bundle_final \
+  --schema full --require-paper-ready \
+  --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json
+```
+
+This bundle is sourced from `datasets/runs/llm_eval_robust_gpt_20260425_two_models_scratch/red_team_results.json` (see `MANIFEST.json` in the bundle). Keep it labeled as supplementary because model set and denominator differ from canonical Table 1b.
 
 ## 7) Regeneration checklist
 
