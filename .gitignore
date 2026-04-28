@@ -24,6 +24,12 @@ datasets/runs/llm_eval_robust_gpt_20260424/**
 !datasets/runs/llm_eval_robust_gpt_20260424/*.md
 !datasets/runs/llm_eval_robust_gpt_20260424/*.csv
 !datasets/runs/llm_eval_robust_gpt_20260424/*.jsonl
+!datasets/runs/llm_eval_paper_bundle_final/
+datasets/runs/llm_eval_paper_bundle_final/**
+!datasets/runs/llm_eval_paper_bundle_final/*.json
+!datasets/runs/llm_eval_paper_bundle_final/*.md
+!datasets/runs/llm_eval_paper_bundle_final/*.csv
+!datasets/runs/llm_eval_paper_bundle_final/*.jsonl
 # P0 manuscript evidence (publishable corpus, E2 demo, summaries, E3 release bundle)
 !datasets/runs/p0_conformance_corpus/
 !datasets/runs/p0_conformance_corpus/**

@@ -1,0 +1,741 @@
+{
+  "per_model_suite_variant": [
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "adversarial_context",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "benign_paraphrase",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "canonical",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "json_schema",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "strict_json",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "tool_return_injection",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "canonical_25",
+      "prompt_variant": "unsafe_paraphrase",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "adversarial_context",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "benign_paraphrase",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "canonical",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "json_schema",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "strict_json",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "tool_return_injection",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-4.1",
+      "suite": "stress_40",
+      "prompt_variant": "unsafe_paraphrase",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "adversarial_context",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "benign_paraphrase",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "canonical",
+      "passes": 124,
+      "total": 125,
+      "rate": 0.992,
+      "wilson_ci_95": [
+        0.9561,
+        0.9986
+      ],
+      "case_bootstrap_ci_95": [
+        0.976,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 1,
+      "failure_origin_counts": {
+        "validator_logic": 1,
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "json_schema",
+      "passes": 91,
+      "total": 125,
+      "rate": 0.728,
+      "wilson_ci_95": [
+        0.6441,
+        0.7983
+      ],
+      "case_bootstrap_ci_95": [
+        0.568,
+        0.888
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 34,
+      "failure_origin_counts": {
+        "validator_logic": 34,
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "strict_json",
+      "passes": 120,
+      "total": 125,
+      "rate": 0.96,
+      "wilson_ci_95": [
+        0.9098,
+        0.9828
+      ],
+      "case_bootstrap_ci_95": [
+        0.88,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 5,
+      "failure_origin_counts": {
+        "validator_logic": 5,
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "tool_return_injection",
+      "passes": 125,
+      "total": 125,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9702,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "canonical_25",
+      "prompt_variant": "unsafe_paraphrase",
+      "passes": 124,
+      "total": 125,
+      "rate": 0.992,
+      "wilson_ci_95": [
+        0.9561,
+        0.9986
+      ],
+      "case_bootstrap_ci_95": [
+        0.976,
+        1.0
+      ],
+      "n_cases": 25,
+      "runs_per_case": 5,
+      "n_failures": 1,
+      "failure_origin_counts": {
+        "parser_or_schema": 5,
+        "validator_logic": 1
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "adversarial_context",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "benign_paraphrase",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "canonical",
+      "passes": 195,
+      "total": 200,
+      "rate": 0.975,
+      "wilson_ci_95": [
+        0.9428,
+        0.9893
+      ],
+      "case_bootstrap_ci_95": [
+        0.925,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 5,
+      "failure_origin_counts": {
+        "validator_logic": 5,
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "json_schema",
+      "passes": 136,
+      "total": 200,
+      "rate": 0.68,
+      "wilson_ci_95": [
+        0.6125,
+        0.7407
+      ],
+      "case_bootstrap_ci_95": [
+        0.55,
+        0.81
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 64,
+      "failure_origin_counts": {
+        "validator_logic": 64,
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "strict_json",
+      "passes": 190,
+      "total": 200,
+      "rate": 0.95,
+      "wilson_ci_95": [
+        0.9104,
+        0.9726
+      ],
+      "case_bootstrap_ci_95": [
+        0.875,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 10,
+      "failure_origin_counts": {
+        "validator_logic": 10,
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "tool_return_injection",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    },
+    {
+      "model_id": "gpt-5.4",
+      "suite": "stress_40",
+      "prompt_variant": "unsafe_paraphrase",
+      "passes": 200,
+      "total": 200,
+      "rate": 1.0,
+      "wilson_ci_95": [
+        0.9812,
+        1.0
+      ],
+      "case_bootstrap_ci_95": [
+        1.0,
+        1.0
+      ],
+      "n_cases": 40,
+      "runs_per_case": 5,
+      "n_failures": 0,
+      "failure_origin_counts": {
+        "parser_or_schema": 5
+      }
+    }
+  ],
+  "scoring_consistency": [
+    {
+      "model_id": "gpt-4.1|canonical_25|adversarial_context",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|canonical_25|benign_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|canonical_25|canonical",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|canonical_25|json_schema",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|canonical_25|strict_json",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|canonical_25|tool_return_injection",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|canonical_25|unsafe_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|adversarial_context",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|benign_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|canonical",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|json_schema",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|strict_json",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|tool_return_injection",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-4.1|stress_40|unsafe_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|adversarial_context",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|benign_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|canonical",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|json_schema",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|strict_json",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|tool_return_injection",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|canonical_25|unsafe_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|adversarial_context",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|benign_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|canonical",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|json_schema",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|strict_json",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|tool_return_injection",
+      "matches_aggregate_to_case_sum": true
+    },
+    {
+      "model_id": "gpt-5.4|stress_40|unsafe_paraphrase",
+      "matches_aggregate_to_case_sum": true
+    }
+  ]
+}

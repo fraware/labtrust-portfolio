@@ -1,0 +1,15 @@
+{
+  "run_id": "llm_eval_paper_bundle_final",
+  "canonical_reference": "datasets/runs/llm_eval_robust_gpt_20260425_two_models_scratch/red_team_results.json",
+  "materializer": "scripts/p6_robust_gpt_full_package.py",
+  "prompt_variants_target": [
+    "canonical",
+    "strict_json",
+    "json_schema",
+    "adversarial_context",
+    "tool_return_injection",
+    "unsafe_paraphrase",
+    "benign_paraphrase"
+  ],
+  "stress_suite_path": "datasets/cases/p6_real_llm_stress_cases.json"
+}

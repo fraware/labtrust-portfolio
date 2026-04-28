@@ -1,0 +1,156 @@
+{
+  "real_outputs": {
+    "total": 4550,
+    "parse_success": 4410,
+    "schema_valid": 4410,
+    "parse_failure": 140
+  },
+  "synthetic_parser_stress": {
+    "total": 20,
+    "expected_behavior_matched": 20
+  },
+  "parser_accepts_markdown_fence": true,
+  "parser_behavior_matches_expected_for_markdown_fence": true,
+  "synthetic_cases": [
+    {
+      "name": "pure_json_object",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    },
+    {
+      "name": "json_inside_markdown_fence",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    },
+    {
+      "name": "json_with_leading_prose",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "json_with_trailing_prose",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "json_with_leading_and_trailing_prose",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "json_with_smart_quotes",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "json_with_single_quotes",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "json_with_trailing_comma",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "json_array_containing_one_object",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "two_json_objects",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "empty_string",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "refusal_text",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "yaml_like_output",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "python_dict_like_output",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "args_as_stringified_json",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    },
+    {
+      "name": "args_null",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    },
+    {
+      "name": "tool_missing",
+      "expected_parse_has_tool": false,
+      "parse_has_tool": false,
+      "matched": true
+    },
+    {
+      "name": "args_missing",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    },
+    {
+      "name": "validators_missing",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    },
+    {
+      "name": "extra_fields",
+      "expected_parse_has_tool": true,
+      "parse_has_tool": true,
+      "matched": true
+    }
+  ],
+  "parser_paper_ready": true,
+  "categories_enum": [
+    "PASS",
+    "MODEL_REFUSAL",
+    "MODEL_SANITIZED_UNSAFE_PAYLOAD",
+    "MODEL_CHANGED_TOOL",
+    "MODEL_CHANGED_ARGUMENT_KEY",
+    "MODEL_OMITTED_REQUIRED_FIELD",
+    "MODEL_CHANGED_SEMANTICS",
+    "NON_JSON_OUTPUT",
+    "JSON_WITH_EXTRA_PROSE",
+    "PARSER_FAILURE",
+    "SCHEMA_VALIDATION_FAILURE",
+    "API_ERROR",
+    "TIMEOUT",
+    "VALIDATOR_ADMITTED_UNEXPECTEDLY",
+    "VALIDATOR_DENIED_UNEXPECTEDLY",
+    "SCORING_MISMATCH",
+    "OTHER"
+  ]
+}

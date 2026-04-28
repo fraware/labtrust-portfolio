@@ -1,0 +1,14 @@
+{
+  "models": [
+    "gpt-4.1",
+    "gpt-5.4"
+  ],
+  "actual_prompt_template_identical": true,
+  "prompt_template_hash_identical": true,
+  "prompt_template_hashes": {
+    "gpt-4.1": "bb8d8eda3c772e5ab2da272f6b380c5bee5f81fb90e8cfb08fc19a4cbb5262c3",
+    "gpt-5.4": "bb8d8eda3c772e5ab2da272f6b380c5bee5f81fb90e8cfb08fc19a4cbb5262c3"
+  },
+  "root_cause_if_false": null,
+  "paper_safe_statement": "Both rows use the same canonical case set, denominator, run count, and prompt template."
+}

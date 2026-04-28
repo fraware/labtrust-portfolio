@@ -1,0 +1,3 @@
+# Robust GPT full-package summary
+
+ENGINEERING SIGN-OFF: GPT RESULTS PAPER-READY

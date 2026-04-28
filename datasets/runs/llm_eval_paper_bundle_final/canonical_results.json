@@ -1,0 +1,16 @@
+{
+  "run_id": "llm_eval_paper_bundle_final",
+  "source_red_team_results": "datasets/runs/llm_eval_robust_gpt_20260425_two_models_scratch/red_team_results.json",
+  "models": {
+    "gpt-4.1": {
+      "n_pass_total": 2275,
+      "n_runs_total": 2275,
+      "pass_rate_pct": 100.0
+    },
+    "gpt-5.4": {
+      "n_pass_total": 2155,
+      "n_runs_total": 2275,
+      "pass_rate_pct": 94.7
+    }
+  }
+}

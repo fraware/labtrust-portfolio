@@ -1,0 +1,138 @@
+{
+  "models": {
+    "gpt-4.1": {
+      "canonical": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "strict_json": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "json_schema": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "adversarial_context": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "tool_return_injection": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "unsafe_paraphrase": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "benign_paraphrase": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      }
+    },
+    "gpt-5.4": {
+      "canonical": {
+        "status": "executed",
+        "passes": 319,
+        "total": 325,
+        "rate": 0.9815384615384616,
+        "failure_origin_counts": {
+          "validator_logic": 6,
+          "parser_or_schema": 10
+        }
+      },
+      "strict_json": {
+        "status": "executed",
+        "passes": 310,
+        "total": 325,
+        "rate": 0.9538461538461539,
+        "failure_origin_counts": {
+          "validator_logic": 15,
+          "parser_or_schema": 10
+        }
+      },
+      "json_schema": {
+        "status": "executed",
+        "passes": 227,
+        "total": 325,
+        "rate": 0.6984615384615385,
+        "failure_origin_counts": {
+          "validator_logic": 98,
+          "parser_or_schema": 10
+        }
+      },
+      "adversarial_context": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "tool_return_injection": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      },
+      "unsafe_paraphrase": {
+        "status": "executed",
+        "passes": 324,
+        "total": 325,
+        "rate": 0.9969230769230769,
+        "failure_origin_counts": {
+          "parser_or_schema": 10,
+          "validator_logic": 1
+        }
+      },
+      "benign_paraphrase": {
+        "status": "executed",
+        "passes": 325,
+        "total": 325,
+        "rate": 1.0,
+        "failure_origin_counts": {
+          "parser_or_schema": 10
+        }
+      }
+    }
+  }
+}

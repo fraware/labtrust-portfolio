@@ -1,0 +1,9 @@
+{
+  "validator_negative_control_detected": true,
+  "parser_negative_control_detected": true,
+  "scoring_negative_control_detected": true,
+  "notes": "validator control: unsafe step remains blocked while gold label pretends admit \u2014 pass predicate flags mismatch. scoring_negative_control is synthetic.",
+  "prompt_variant_negative_control_detected": true,
+  "stress_suite_negative_control_detected": true,
+  "raw_output_missing_negative_control_detected": true
+}
