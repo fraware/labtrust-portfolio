@@ -84,7 +84,7 @@ PYTHONPATH=impl/src python scripts/llm_redteam_eval.py --out datasets/runs/llm_e
 - **`replay_denials.json`** is a **frozen summary** used for deterministic replay checks; the camera-ready narrative may cite **60/60** **matches** for that artifact’s row set.
 - A **full recursive scan** of all `trace.json` files under `llm_eval_camera_ready_20260424/` can list **more** `metadata.denied_steps` entries than summarized in `replay_denials.json`. That is **not** a validator inconsistency by itself; see `datasets/runs/p6_final_audit_20260424/reproducibility_check.json` (`replay_fresh_trace_scan`, `replay_frozen_vs_trace_scan`).
 
-### Supplementary GPT-5.x runs (never merge denominators with Table 1b)
+### Supplementary GPT-5.x runs (historical snapshots; do not use as latest robust line)
 
 | Directory | Model | n_pass / n_runs | pass_rate % | Wilson CI95 |
 |-----------|-------|-----------------|---------------|-------------|
@@ -99,6 +99,7 @@ Treat as **compatibility / behavior characterization**; failure interpretation s
 - **Gate:** `python scripts/verify_p6_robust_gpt_bundle.py --run-dir datasets/runs/llm_eval_paper_bundle_final --schema full --require-paper-ready --red-team-results datasets/runs/llm_eval_paper_bundle_final/red_team_results.json`
 - **Source lineage:** see `MANIFEST.json` (`canonical_reference`) and `README.md` in that directory.
 - **Scope rule:** cite this package only for supplementary cross-model/multi-variant/stress statements, not for canonical Table 1b denominator claims.
+- **Latest supplementary headline:** `gpt-4.1` 2275/2275 (100.0%), `gpt-5.4` 2155/2275 (94.73%).
 
 ### Final engineering audit bundle
 

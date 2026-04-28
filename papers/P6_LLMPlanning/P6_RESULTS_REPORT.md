@@ -76,17 +76,7 @@ Task-critical extension (`task_critical_injection.json`):
 
 Prime results (N=3, separate output directory) remain useful as supplementary cross-provider evidence, but must be labeled with a separate denominator and not mixed with the OpenAI camera-ready table row.
 
-## 6) Supplementary GPT-5.x isolated runs (post-patch, OpenAI)
-
-These runs are intentionally isolated from the canonical camera-ready row and are
-for compatibility/behavior characterization only.
-
-| Run directory | Model | n_pass / n_runs | pass_rate_pct | pass_rate_ci95 (Wilson) | Notes |
-|---|---|---:|---:|---|---|
-| `datasets/runs/llm_eval_openai_gpt54_postpatch_20260424` | `gpt-5.4` | 73 / 75 | 97.3 | [90.8, 99.3] | Full suite, n=3/case, post parser/client patch |
-| `datasets/runs/llm_eval_openai_gpt54pro_postpatch2_n3_20260424` | `gpt-5.4-pro` | 54 / 75 | 72.0 | [61.0, 80.9] | Full suite, n=3/case, temperature-retry + timeout patch |
-
-## 6b) Supplementary robust package (verified)
+## 6) Supplementary robust package (latest, verified)
 
 `datasets/runs/llm_eval_paper_bundle_final/` is machine-verified with:
 
@@ -98,6 +88,22 @@ python scripts/verify_p6_robust_gpt_bundle.py \
 ```
 
 This bundle is sourced from `datasets/runs/llm_eval_robust_gpt_20260425_two_models_scratch/red_team_results.json` (see `MANIFEST.json` in the bundle). Keep it labeled as supplementary because model set and denominator differ from canonical Table 1b.
+
+Latest supplementary headline numbers from this bundle:
+
+- `gpt-4.1`: **2275 / 2275** (100.0%)
+- `gpt-5.4`: **2155 / 2275** (94.73%)
+- `gpt-5.4` canonical suite + canonical prompt: **124 / 125** (99.2%, Wilson [95.61, 99.86])
+- `gpt-5.4` stress suite + canonical prompt: **195 / 200** (97.5%, Wilson [94.28, 98.93])
+
+## 6b) Historical isolated GPT-5.x runs (older, keep as context only)
+
+These runs are older isolated snapshots and should not override the latest supplementary robust package above.
+
+| Run directory | Model | n_pass / n_runs | pass_rate_pct | pass_rate_ci95 (Wilson) | Notes |
+|---|---|---:|---:|---|---|
+| `datasets/runs/llm_eval_openai_gpt54_postpatch_20260424` | `gpt-5.4` | 73 / 75 | 97.3 | [90.8, 99.3] | Full suite, n=3/case, post parser/client patch |
+| `datasets/runs/llm_eval_openai_gpt54pro_postpatch2_n3_20260424` | `gpt-5.4-pro` | 54 / 75 | 72.0 | [61.0, 80.9] | Full suite, n=3/case, temperature-retry + timeout patch |
 
 ## 6c) Reviewer caveat (must appear in writing workflow)
 

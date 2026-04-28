@@ -45,6 +45,9 @@ Camera-ready baseline/adapter artifacts are now committed in the canonical run:
   - full suite, n=3/case
   - 54/75, 72.0%, Wilson [61.0, 80.9]
 
+These are historical isolated snapshots. For latest supplementary robustness claims, cite
+`datasets/runs/llm_eval_paper_bundle_final/` and include its verifier pass status.
+
 ## Non-merge rule (required wording discipline)
 
 - Do not mix canonical Table 1b rows with Prime or GPT-5.x supplementary rows
