@@ -21,6 +21,7 @@
       "actuals_mean": 4.854166666666667,
       "test_collapse_rate": 0.0,
       "train_collapse_rate": 0.0035,
+      "test_collapse_brier_train_prevalence": 1.2250000000000001e-05,
       "regression_pi_coverage_95": 0.013333333333333334
     },
     {
@@ -42,6 +43,7 @@
       "actuals_mean": 3.8833333333333333,
       "test_collapse_rate": 0.0008333333333333334,
       "train_collapse_rate": 0.0033333333333333335,
+      "test_collapse_brier_train_prevalence": 0.0008388888888888888,
       "regression_pi_coverage_95": 0.8975
     },
     {
@@ -63,6 +65,7 @@
       "actuals_mean": 3.8833333333333333,
       "test_collapse_rate": 0.0008333333333333334,
       "train_collapse_rate": 0.0033333333333333335,
+      "test_collapse_brier_train_prevalence": 0.0008388888888888888,
       "regression_pi_coverage_95": 0.8975
     },
     {
@@ -84,6 +87,7 @@
       "actuals_mean": 3.8833333333333333,
       "test_collapse_rate": 0.0008333333333333334,
       "train_collapse_rate": 0.0033333333333333335,
+      "test_collapse_brier_train_prevalence": 0.0008388888888888888,
       "regression_pi_coverage_95": 0.9808333333333333
     },
     {
@@ -105,6 +109,7 @@
       "actuals_mean": 2.91,
       "test_collapse_rate": 0.0075,
       "train_collapse_rate": 0.002,
+      "test_collapse_brier_train_prevalence": 0.007474,
       "regression_pi_coverage_95": 0.9175
     },
     {
@@ -126,6 +131,7 @@
       "actuals_mean": 2.91,
       "test_collapse_rate": 0.0075,
       "train_collapse_rate": 0.002,
+      "test_collapse_brier_train_prevalence": 0.007474,
       "regression_pi_coverage_95": 0.9175
     }
   ],
@@ -152,6 +158,7 @@
   },
   "regression_skipped_reason": null,
   "overall_collapse_rate": 0.0029166666666666664,
+  "overall_collapse_brier_train_prevalence": 0.002912819444444444,
   "overall_baseline_mae_ci95_lower": 0.41967688732881187,
   "overall_baseline_mae_ci95_upper": 1.0537228348934102,
   "overall_feat_baseline_mae_ci95_lower": 0.03494471487622841,
@@ -232,7 +239,7 @@
     "train_n_total": 36000,
     "test_n_total": 7200,
     "script": "scaling_heldout_eval.py",
-    "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
+    "runs_dir": "datasets\\runs\\multiscenario_runs",
     "holdout_mode": "scenario",
     "seeds": [
       1,
@@ -283,9 +290,9 @@
       "drop_005",
       "no_drop"
     ],
-    "commit": "d3700fc8816522cc47720fd166a7bf8256297efe"
+    "commit": "ede2b361620270bbaf5e4e343ce6a6c3c2834217"
   },
-  "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
+  "runs_dir": "datasets\\runs\\multiscenario_runs",
   "total_rows": 7200,
   "scenario_ids": [
     "lab_profile_v0",

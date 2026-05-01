@@ -21,6 +21,7 @@
       "actuals_mean": 3.7016666666666667,
       "test_collapse_rate": 0.0022222222222222222,
       "train_collapse_rate": 0.003148148148148148,
+      "test_collapse_brier_train_prevalence": 0.0022181412894375857,
       "regression_pi_coverage_95": 0.8838888888888888
     },
     {
@@ -42,6 +43,7 @@
       "actuals_mean": 3.747777777777778,
       "test_collapse_rate": 0.0011111111111111111,
       "train_collapse_rate": 0.0035185185185185185,
+      "test_collapse_brier_train_prevalence": 0.0011156721536351166,
       "regression_pi_coverage_95": 0.9233333333333333
     },
     {
@@ -63,6 +65,7 @@
       "actuals_mean": 3.732222222222222,
       "test_collapse_rate": 0.005,
       "train_collapse_rate": 0.0022222222222222222,
+      "test_collapse_brier_train_prevalence": 0.0049827160493827165,
       "regression_pi_coverage_95": 0.9133333333333333
     },
     {
@@ -84,6 +87,7 @@
       "actuals_mean": 3.701111111111111,
       "test_collapse_rate": 0.0033333333333333335,
       "train_collapse_rate": 0.002777777777777778,
+      "test_collapse_brier_train_prevalence": 0.003322530864197531,
       "regression_pi_coverage_95": 0.9005555555555556
     }
   ],
@@ -110,6 +114,7 @@
   },
   "regression_skipped_reason": null,
   "overall_collapse_rate": 0.002916666666666667,
+  "overall_collapse_brier_train_prevalence": 0.0029097650891632375,
   "overall_baseline_mae_ci95_lower": 0.6242985466787296,
   "overall_baseline_mae_ci95_upper": 0.6422428113459617,
   "overall_feat_baseline_mae_ci95_lower": 0.19213713787141196,
@@ -186,7 +191,7 @@
     "train_n_total": 21600,
     "test_n_total": 7200,
     "script": "scaling_heldout_eval.py",
-    "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
+    "runs_dir": "datasets\\runs\\multiscenario_runs",
     "holdout_mode": "agent_count",
     "seeds": [
       1,
@@ -237,9 +242,9 @@
       "drop_005",
       "no_drop"
     ],
-    "commit": "d3700fc8816522cc47720fd166a7bf8256297efe"
+    "commit": "ede2b361620270bbaf5e4e343ce6a6c3c2834217"
   },
-  "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
+  "runs_dir": "datasets\\runs\\multiscenario_runs",
   "total_rows": 7200,
   "scenario_ids": [
     "lab_profile_v0",

@@ -9,5 +9,9 @@
   "n_decisions": 7200,
   "mean_regret_tasks_completed": 0.10486111111111111,
   "regret_p95": 1.0,
-  "brier_collapse_on_test_rows": 0.002991071780486495
+  "brier_collapse_on_test_rows": 0.002991071780486495,
+  "claim_status": "exploratory",
+  "deployment_claim_allowed": false,
+  "reason": "low regime-selection accuracy under frozen evaluation",
+  "deployment_claim_reason": "low regime-selection accuracy under frozen evaluation (regime_selection_accuracy=0.02847222222222222)"
 }

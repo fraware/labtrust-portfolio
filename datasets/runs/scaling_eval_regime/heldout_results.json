@@ -21,6 +21,7 @@
       "actuals_mean": 3.7118055555555554,
       "test_collapse_rate": 0.002777777777777778,
       "train_collapse_rate": 0.002951388888888889,
+      "test_collapse_brier_train_prevalence": 0.002770091869212963,
       "regression_pi_coverage_95": 0.8930555555555556
     },
     {
@@ -42,6 +43,7 @@
       "actuals_mean": 3.734027777777778,
       "test_collapse_rate": 0.002777777777777778,
       "train_collapse_rate": 0.002951388888888889,
+      "test_collapse_brier_train_prevalence": 0.002770091869212963,
       "regression_pi_coverage_95": 0.9125
     },
     {
@@ -63,6 +65,7 @@
       "actuals_mean": 3.714583333333333,
       "test_collapse_rate": 0.001388888888888889,
       "train_collapse_rate": 0.003298611111111111,
+      "test_collapse_brier_train_prevalence": 0.0013906069155092593,
       "regression_pi_coverage_95": 0.7381944444444445
     },
     {
@@ -84,6 +87,7 @@
       "actuals_mean": 3.736111111111111,
       "test_collapse_rate": 0.001388888888888889,
       "train_collapse_rate": 0.003298611111111111,
+      "test_collapse_brier_train_prevalence": 0.0013906069155092593,
       "regression_pi_coverage_95": 0.9083333333333333
     },
     {
@@ -105,6 +109,7 @@
       "actuals_mean": 3.7069444444444444,
       "test_collapse_rate": 0.00625,
       "train_collapse_rate": 0.0020833333333333333,
+      "test_collapse_brier_train_prevalence": 0.0062282986111111115,
       "regression_pi_coverage_95": 0.8923611111111112
     }
   ],
@@ -131,6 +136,7 @@
   },
   "regression_skipped_reason": null,
   "overall_collapse_rate": 0.002916666666666667,
+  "overall_collapse_brier_train_prevalence": 0.002909939236111111,
   "overall_baseline_mae_ci95_lower": 0.6301871724877299,
   "overall_baseline_mae_ci95_upper": 0.6361287997344922,
   "overall_feat_baseline_mae_ci95_lower": 0.19554843940396632,
@@ -209,7 +215,7 @@
     "train_n_total": 28800,
     "test_n_total": 7200,
     "script": "scaling_heldout_eval.py",
-    "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
+    "runs_dir": "datasets\\runs\\multiscenario_runs",
     "holdout_mode": "regime",
     "seeds": [
       1,
@@ -260,9 +266,9 @@
       "drop_005",
       "no_drop"
     ],
-    "commit": "d3700fc8816522cc47720fd166a7bf8256297efe"
+    "commit": "ede2b361620270bbaf5e4e343ce6a6c3c2834217"
   },
-  "runs_dir": "C:\\Users\\mateo\\labtrust-portfolio\\datasets\\runs\\multiscenario_runs",
+  "runs_dir": "datasets\\runs\\multiscenario_runs",
   "total_rows": 7200,
   "scenario_ids": [
     "lab_profile_v0",
