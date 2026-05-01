@@ -18,7 +18,9 @@ When agent count and coordination regime vary across realistic CPS scenarios, wh
 
 Six `real_world` scenarios × five regimes × agent counts `{1,2,4,8}` × fault labels `{no_drop, drop_005}` × 30 seeds → **7200** rows in `datasets/runs/multiscenario_runs/`.
 
-## 4) Frozen evidence (sync to JSON; `run_manifest.commit` **3c4fd57f189670e73e9336845454ed3bc830d4ff** on `scaling_eval/heldout_results.json`)
+## 4) Frozen evidence (sync to JSON)
+
+**Artifact bundle commit:** **`3a7d4f0b17c86cde219852f59dbd36a68b45efb0`** (full tree: JSON + exported tables + hashes). **`run_manifest.commit`** embedded in `scaling_eval/heldout_results.json`: **`ede2b361620270bbaf5e4e343ce6a6c3c2834217`** (HEAD at eval write time). See `FINAL_REPRO_LOG.md` §4.
 
 | Artifact | `tasks_completed` headline |
 |----------|-----------------------------|

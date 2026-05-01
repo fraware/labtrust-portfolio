@@ -67,11 +67,25 @@ PYTHONPATH=impl/src python scripts/export_scaling_tables.py \
 
 ## 4. Record here after success
 
+**Interpretation (two SHAs).** Cite **`git rev-parse HEAD` below** as the **artifact freeze bundle** (committed JSON + `generated_tables.md` + `p5_artifact_hashes.txt` + LaTeX tables). Each `heldout_results.json` also embeds **`run_manifest.commit`**, which records **`git rev-parse HEAD` at the instant `scaling_heldout_eval.py` wrote that file** (here the parent commit of the bundle — portfolio code without the artifact commit). For NeurIPS reproducibility, reviewers should **check out the artifact bundle commit**; the embedded field documents which code revision produced the numeric sweep.
+
 | Field | Value |
 |-------|--------|
-| `git rev-parse HEAD` | _(paste)_ |
-| `python --version` | _(paste)_ |
-| `uname -a` or OS build | _(paste)_ |
+| Artifact bundle commit (`git rev-parse HEAD` at freeze) | `3a7d4f0b17c86cde219852f59dbd36a68b45efb0` |
+| Embedded `run_manifest.commit` (eval-time HEAD; parent of bundle) | `ede2b361620270bbaf5e4e343ce6a6c3c2834217` |
+| `python --version` | Python 3.13.11 |
+| OS | Microsoft Windows 11 Home; Version 10.0.26200 |
+
+**Commands executed for this log entry (repo root, PowerShell):**
+
+1. `python scripts/validate_kernel.py`
+2. `$env:PYTHONPATH='impl/src'; $env:LABTRUST_KERNEL_DIR='kernel'; python -m unittest discover -s tests -q`
+3. Held-out regeneration (five modes): `python scripts/scaling_heldout_eval.py --runs-dir datasets/runs/multiscenario_runs --out datasets/runs/<dir> --holdout-mode <scenario|family|regime|agent_count|fault_setting> --quiet`
+4. `$env:PYTHONPATH='impl/src'; python scripts/export_scaling_tables.py --out papers/P5_ScalingLaws/generated_tables.md --out-tex-dir papers/P5_ScalingLaws/neurips2026/tables_tex`
+5. `python scripts/hash_p5_artifacts.py`
+6. `python scripts/check_p5_claim_sources.py`
+
+**Git tag:** `neurips2026-p5-freeze-v1` points at the commit that contains this filled log (docs-only follow-up commit after the artifact bundle).
 
 ## 5. Artifact hashes (cross-platform)
 

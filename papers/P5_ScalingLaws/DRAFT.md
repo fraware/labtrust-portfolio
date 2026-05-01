@@ -47,7 +47,7 @@ Thin-slice synthetic environment; proxy metrics; **sparse collapse** (appendix B
 
 ## Frozen snapshot
 
-Headline numbers match `datasets/runs/scaling_eval/heldout_results.json` `run_manifest.commit` **3c4fd57f189670e73e9336845454ed3bc830d4ff** (refresh via `run_paper_experiments.py --paper P5` or `scaling_heldout_eval.py`).
+**Artifact freeze (full tree):** git **`3a7d4f0b17c86cde219852f59dbd36a68b45efb0`** — see `papers/P5_ScalingLaws/FINAL_REPRO_LOG.md` §4. Embedded `run_manifest.commit` in each `heldout_results.json` is **`ede2b361620270bbaf5e4e343ce6a6c3c2834217`** (repository HEAD when `scaling_heldout_eval.py` wrote the JSON; parent of the artifact commit). Refresh via `run_paper_experiments.py --paper P5` or `scaling_heldout_eval.py`, then `export_scaling_tables.py` and `hash_p5_artifacts.py`.
 
 - **Leave-one-scenario-out (`tasks_completed`):** `overall_regression_mae` **0.5105**, `overall_feat_baseline_mae` **0.3899**, `overall_baseline_mae` **0.7367**, `mean_regression_pi_coverage_95` **0.7707**, `overall_collapse_rate` **0.00292**, **`trigger_met` false**. Hardest fold: **`lab_profile_v0`** (Main Table 2).
 - **Leave-one-family-out:** `overall_regression_mae` **0.5185**, **`trigger_met` true**.
