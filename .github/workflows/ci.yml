@@ -40,6 +40,9 @@ jobs:
           LABTRUST_KERNEL_DIR: ${{ github.workspace }}/kernel
         run: |
           PYTHONPATH=impl/src python -m unittest discover -s tests -q
+      - name: P5 claim-source checker
+        run: |
+          python scripts/check_p5_claim_sources.py
       - name: P6 camera-ready bundle integrity
         run: |
           python scripts/verify_p6_camera_ready_bundle.py

@@ -86,6 +86,23 @@ def _mae(actuals: List[float], preds: List[float]) -> float:
     return sum(abs(a - p) for a, p in zip(actuals, preds)) / len(actuals)
 
 
+def _collapse_brier_train_prevalence(
+    train_rows: List[Dict[str, Any]],
+    test_rows: List[Dict[str, Any]],
+) -> Optional[float]:
+    """
+    Exploratory collapse calibration: constant predictor p = train collapse prevalence,
+    evaluated on test rows. Low values under rare collapse are not strong evidence of
+    calibrated collapse *prediction* (see appendix note).
+    """
+    train_y = [bool(r.get("collapse", False)) for r in train_rows if "collapse" in r]
+    test_y = [bool(r.get("collapse", False)) for r in test_rows if "collapse" in r]
+    if not test_y:
+        return None
+    p = float(sum(1 for y in train_y if y)) / float(len(train_y)) if train_y else 0.0
+    return sum((p - (1.0 if y else 0.0)) ** 2 for y in test_y) / float(len(test_y))
+
+
 def eval_fold(
     train_rows: List[Dict[str, Any]],
     test_rows: List[Dict[str, Any]],
@@ -172,6 +189,7 @@ def eval_fold(
     train_collapse_rate = (
         sum(train_collapse) / len(train_collapse) if train_collapse else None
     )
+    collapse_brier_tr_prev = _collapse_brier_train_prevalence(train_rows, test_rows)
     pi_cov = regression_pi_coverage(
         train_rows, test_rows, target, feature_cols, fit_linear_predictor,
     )
@@ -216,6 +234,7 @@ def eval_fold(
         "actuals_mean": sum(actuals) / len(actuals) if actuals else 0.0,
         "test_collapse_rate": test_collapse_rate,
         "train_collapse_rate": train_collapse_rate,
+        "test_collapse_brier_train_prevalence": collapse_brier_tr_prev,
         "regression_pi_coverage_95": pi_cov,
     }
 
@@ -302,6 +321,14 @@ def run_eval_for_target(
     ]
     overall_collapse_rate = (
         sum(collapse_rates) / len(collapse_rates) if collapse_rates else None
+    )
+    fold_briers = [
+        r["test_collapse_brier_train_prevalence"]
+        for r in results
+        if r.get("test_collapse_brier_train_prevalence") is not None
+    ]
+    overall_collapse_brier_train_prevalence = (
+        sum(fold_briers) / len(fold_briers) if fold_briers else None
     )
     n_hold = len(results)
     stdev_baseline = (
@@ -396,6 +423,7 @@ def run_eval_for_target(
             )
         ),
         "overall_collapse_rate": overall_collapse_rate,
+        "overall_collapse_brier_train_prevalence": overall_collapse_brier_train_prevalence,
         "overall_baseline_mae_ci95_lower": overall_mae - ci_half,
         "overall_baseline_mae_ci95_upper": overall_mae + ci_half,
         "overall_feat_baseline_mae_ci95_lower": overall_feat_mae - ci_half_feat,
@@ -496,6 +524,11 @@ def main() -> int:
         default=None,
         metavar="N",
         help="Keep only rows with seed <= N (sensitivity / subsample designs)",
+    )
+    ap.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Write JSON only to --out (no full summary on stdout)",
     )
     args = ap.parse_args()
 
@@ -686,7 +719,10 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     out_file = args.out / "heldout_results.json"
     out_file.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps(summary, indent=2))
+    if not args.quiet:
+        print(json.dumps(summary, indent=2))
+    else:
+        print(f"Wrote {out_file}")
     return 0
 
 
