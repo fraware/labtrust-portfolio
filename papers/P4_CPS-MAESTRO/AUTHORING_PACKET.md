@@ -54,6 +54,6 @@ How do we make CPS coordination **measurable and comparable** under tail latency
 - arXiv first (cs.RO, cs.SE)
 
 ## 9) Integration contract
-- MAESTRO is the **release train** producing datasets used by scaling laws and validating LLM/REP/meta modules.
+- MAESTRO is the **release train** producing datasets used by coordination-scaling / multi-scenario evaluation work (e.g. P5) and validating LLM/REP/meta modules.
 - Must emit traces compatible with Replay and evidence bundles compatible with MADS.
 

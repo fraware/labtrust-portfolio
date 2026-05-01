@@ -139,11 +139,11 @@ This document explains what each paper (P0–P8) measures, where its results are
 
 ---
 
-## P5 — Scaling laws (held-out scenario prediction)
+## P5 — Empirical coordination-scaling patterns & held-out evaluation (evaluation protocol)
 
-**Contribution / headline:** Publishable **7200-row** grid (six `real_world` scenarios × five coordination regimes × agent counts 1/2/4/8 × fault labels `no_drop` / `drop_005` × 30 seeds) with ridge-stabilized linear regression on the default P5 feature vector, multiple LOO protocols, sensitivity over seed caps, recommendation/regret metrics, and a frozen **regime × agent** summary for title-level scaling deltas. **`success_criteria_met.trigger_met` is protocol-specific:** on the freeze recorded in `papers/P5_ScalingLaws/DRAFT.md` (`run_manifest.commit` in `scaling_eval/heldout_results.json`), leave-one-family-out can be **true** while leave-one-scenario-out is **false** (regression fails vs the num-tasks bucket baseline). See `papers/P5_ScalingLaws/generated_tables.md` and `datasets/runs/scaling_summary/regime_agent_summary.json`.
+**Contribution / headline:** Publishable **7200-row** grid (six `real_world` scenarios × five coordination regimes × agent counts 1/2/4/8 × fault labels `no_drop` / `drop_005` × 30 seeds) with ridge-stabilized linear regression on the default P5 feature vector, multiple LOO protocols, sensitivity over seed caps, **exploratory** recommendation/regret metrics, and a frozen **regime × agent** summary for title-level **empirical coordination-scaling** deltas. **`success_criteria_met.trigger_met` is protocol-specific:** on the freeze recorded in `papers/P5_ScalingLaws/DRAFT.md` (`run_manifest.commit` in `scaling_eval/heldout_results.json`), leave-one-family-out can be **true** while leave-one-scenario-out is **false** (regression fails vs the num-tasks bucket baseline). See `papers/P5_ScalingLaws/generated_tables.md`, `papers/P5_ScalingLaws/CLAIM_LOCK_NEURIPS2026.md`, and `datasets/runs/scaling_summary/regime_agent_summary.json`.
 
-**What it measures:** Out-of-sample MAE for `tasks_completed` (and optional `secondary_targets`) under scenario, family, regime, agent-count, and fault-setting holdouts; admissible vs oracle baselines; strict nulling when any fold cannot fit regression; exploratory `scaling_fit`.
+**What it measures:** Out-of-sample MAE for `tasks_completed` (and optional `secondary_targets`) under scenario, family, regime, agent-count, and fault-setting holdouts; admissible vs oracle baselines; strict nulling when any fold cannot fit regression; **exploratory** log-log `scaling_fit` (scaling-law-style diagnostic only — **we do not establish a general scaling law**).
 
 **Result location:** `datasets/runs/scaling_eval/heldout_results.json` and sibling dirs `scaling_eval_family`, `scaling_eval_regime`, `scaling_eval_agent_count`, `scaling_eval_fault`; `sensitivity_sweep/scaling_sensitivity.json`; `scaling_recommend/recommendation_eval.json`; `scaling_summary/regime_agent_summary.json`. Produced by `run_paper_experiments.py --paper P5` or the individual scripts in `papers/P5_ScalingLaws/README.md`.
 
@@ -152,10 +152,11 @@ This document explains what each paper (P0–P8) measures, where its results are
 - `held_out_results[]`: per fold, `baseline_mae`, `feat_baseline_mae`, `regression_mae`, `regression_pi_coverage_95`, `stump_mae`, `actuals_mean`, `train_n`, `test_n`.
 - `secondary_targets`: compact summaries for extra response keys (e.g. coordination_tax_proxy, error_amplification_proxy).
 - `overall_baseline_mae`, `overall_feat_baseline_mae`, `overall_regression_mae`, `overall_stump_mae`: aggregate; when regression is skipped (e.g. train_n < k or singular), summary includes `regression_skipped_reason`; export_scaling_tables prints N/A with footnote. Feature/regression/stump beating global mean = “beat baseline out-of-sample.”
+- `overall_collapse_rate`, `overall_collapse_brier_train_prevalence`: exploratory collapse prevalence + train-prevalence Brier macro-averaged across folds (do not treat low Brier under rare collapse as strong calibrated prediction); `held_out_results[].test_collapse_brier_train_prevalence` per fold.
 - `overall_*_mae_ci95_lower/upper`: 95% CI for MAE; regression row uses CI across held-out folds when all folds fit.
 - `mean_regression_pi_coverage_95`: exploratory calibration (train-residual intervals).
 - `scaling_fit`: `scaling_exponent`, `scaling_r2`, `n_used` (exploratory log-log fit).
-- **Title/claims:** If scaling-law stability is not demonstrated, use "empirical predictors" and state scaling laws are exploratory.
+- **Title/claims:** Prefer **empirical coordination-scaling patterns**, **admissible baselines**, and **exploratory scaling-fit** language; see `docs/P5_BASELINE_DISCIPLINE.md`. **We do not establish a general scaling law.**
 - `overall_collapse_rate`, per-result `test_collapse_rate`: collapse (e.g. tasks_completed below threshold) if defined.
 
 **Tables:** `scripts/export_scaling_tables.py`.

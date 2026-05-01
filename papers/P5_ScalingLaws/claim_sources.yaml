@@ -1,0 +1,66 @@
+# Canonical mapping from frozen artifacts to paper surfaces (NeurIPS E&D freeze).
+# Loaded by scripts/check_p5_claim_sources.py — keep in sync with CLAIM_SOURCE_MAP.md.
+
+claims:
+  grid_size:
+    value: 7200
+    source: datasets/runs/scaling_eval/heldout_results.json
+    field: total_rows
+    note: "Also run_manifest.train_n_total + run_manifest.test_n_total across folds matches grid expansion."
+
+  scenario_holdout_mae:
+    source: datasets/runs/scaling_eval/heldout_results.json
+    fields:
+      overall_regression_mae: overall_regression_mae
+      num_tasks_bucket_mae: overall_feat_baseline_mae
+      global_mean_mae: overall_baseline_mae
+      trigger_met: success_criteria_met.trigger_met
+    paper_location: "Main Table 2"
+
+  family_holdout_mae:
+    source: datasets/runs/scaling_eval_family/heldout_results.json
+    fields:
+      overall_regression_mae: overall_regression_mae
+      num_tasks_bucket_mae: overall_feat_baseline_mae
+      trigger_met: success_criteria_met.trigger_met
+    paper_location: "Main Table 3 (protocol row)"
+
+  protocol_summary:
+    sources:
+      - datasets/runs/scaling_eval/heldout_results.json
+      - datasets/runs/scaling_eval_family/heldout_results.json
+      - datasets/runs/scaling_eval_regime/heldout_results.json
+      - datasets/runs/scaling_eval_agent_count/heldout_results.json
+      - datasets/runs/scaling_eval_fault/heldout_results.json
+    paper_location: "Main Table 3"
+
+  regime_agent_deltas:
+    source: datasets/runs/scaling_summary/regime_agent_summary.json
+    field: group_summary + computed 1→8 absolute deltas in generated_tables.md
+    paper_location: "Main Table 1"
+
+  secondary_targets:
+    source: datasets/runs/scaling_eval/heldout_results.json
+    field: secondary_targets
+    paper_location: "Main Table 4"
+
+  seed_sensitivity:
+    source: datasets/runs/sensitivity_sweep/scaling_sensitivity.json
+    paper_location: "Appendix"
+
+  recommendation_metrics:
+    source: datasets/runs/scaling_recommend/recommendation_eval.json
+    paper_location: "Appendix only"
+    claim_status: exploratory
+
+  collapse_train_prevalence_brier:
+    source: datasets/runs/scaling_eval/heldout_results.json
+    fields:
+      prevalence: overall_collapse_rate
+      brier: overall_collapse_brier_train_prevalence
+    paper_location: "Appendix (collapse table)"
+
+scaling_fit:
+  label: exploratory
+  source: datasets/runs/scaling_eval/heldout_results.json
+  field: scaling_fit

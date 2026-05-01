@@ -10,10 +10,10 @@ Papers P2, P5, P6, and P8 are **conditional**: proceed only when their trigger c
 - **Proceed when:** You can show that REP-like protocols are in scope for the lab (or other) profile and that naive forms break under CPS constraints; or submit as profile paper with honest scope (profile + harness, reduced observed bias under compromise).
 - **Dependency order:** After Contracts (P1) typed state and Replay/MAESTRO harnesses exist; REP-CPS is a profile inside the MADS envelope.
 
-## P5 Scaling laws
+## P5 Coordination scaling & held-out evaluation
 
-- **Trigger:** MAESTRO provides **multi-scenario** datasets sufficient for out-of-sample validation. Otherwise the paper reads as overclaim.
-- **Trigger proof required (admissible, no leakage):** `heldout_results.json` must report `success_criteria_met.trigger_met` from **admissible** baselines only: `beat_global_mean_out_of_sample`, `beat_feature_baseline_out_of_sample`, and `beat_regime_baseline_out_of_sample` (train-only regime means). Oracle baselines (`oracle_baselines.per_scenario_mean_including_test_mae`, etc.) are for analysis only and **must not** drive the go/no-go trigger. If `trigger_met` is false, treat as negative / exploratory and say so in the draft.
+- **Trigger:** MAESTRO provides **multi-scenario** datasets sufficient for **evaluation-protocol** out-of-sample tests. The paper is **not** conditioned on discovering a universal CPS scaling law.
+- **Trigger proof required (admissible, no leakage):** `heldout_results.json` must report `success_criteria_met.trigger_met` from **admissible** baselines only: `beat_global_mean_out_of_sample`, `beat_feature_baseline_out_of_sample`, and `beat_regime_baseline_out_of_sample` (train-only regime means). Oracle baselines (`oracle_baselines.per_scenario_mean_including_test_mae`, etc.) are for analysis only and **must not** drive the go/no-go trigger. If `trigger_met` is false on a protocol, report the **negative / mixed** result explicitly (scenario-heldout vs family-heldout can disagree).
 - **Proceed when:** Runs span multiple scenario families, coordination regimes, agent counts, and fault mixtures, with frozen artifacts under `datasets/runs/scaling_eval/`, `scaling_eval_family/`, `scaling_eval_regime/`, `scaling_eval_agent_count/`, `scaling_eval_fault/`, `sensitivity_sweep/scaling_sensitivity.json`, and `scaling_recommend/recommendation_eval.json` produced by the paper runner.
 - **Dependency order:** After P4 (MAESTRO) has multi-scenario coverage; consumes MAESTRO datasets and Replay traces.
 

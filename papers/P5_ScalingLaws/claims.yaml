@@ -1,16 +1,16 @@
-﻿# P5 Scaling Laws claim table (synchronized to frozen artifacts, rich grid)
+﻿# P5 claim table (NeurIPS evaluation-protocol posture; synchronized to frozen artifacts)
 
 paper_id: "P5_ScalingLaws"
-title: "When More Agents Hurt: Coordination scaling in MAESTRO CPS scenarios"
+title: "When More Agents Hurt: Held-Out Evaluation of Coordination Scaling in Cyber-Physical Agent Systems"
 release_id: "scaling_eval_rich_grid_7200"
 
 claims:
   - id: "C1"
     statement: >
-      Coordination load and throughput vary systematically with scenario family,
-      coordination regime, and agent count in MAESTRO thin-slice runs; frozen
-      regime×agent summaries quantify coordination-tax growth and throughput
-      deltas (including 1→8 agent scaling).
+      Empirical coordination-scaling patterns: coordination load and throughput vary
+      with scenario family, coordination regime, and agent count in MAESTRO thin-slice
+      runs; frozen regime×agent summaries quantify coordination-tax growth and
+      throughput deltas (including 1→8 agent comparisons). This is not a universal CPS law.
     evidence:
       release_id: "scaling_eval_rich_grid_7200"
       confidence: "high"
@@ -19,17 +19,20 @@ claims:
         - "datasets/runs/multiscenario_runs/"
         - "impl/src/labtrust_portfolio/thinslice.py"
         - "impl/src/labtrust_portfolio/coordination_profile.py"
-      table_ids: ["Table 8"]
+      table_ids: ["Main Table 1"]
       figure_ids: ["Figure 2", "Figure 3", "Figure 4"]
 
   - id: "C2"
     statement: >
       Held-out evaluation enforces admissible train-only baselines versus oracle
-      analysis baselines, strict null handling when any fold cannot fit
-      regression, and ridge-stabilized linear OLS for the default P5 feature
-      vector. On the current 7200-row publishable grid, leave-one-family-out
-      meets trigger_met for tasks_completed; leave-one-scenario-out and other
-      protocols do not (primarily failing vs the num-tasks bucket baseline).
+      diagnostics, strict null handling when any fold cannot fit regression, and
+      ridge-stabilized linear regression for the default P5 feature vector. On the
+      current 7200-row publishable grid, leave-one-family-out meets trigger_met for
+      tasks_completed; leave-one-scenario-out does not (fails vs the num-tasks bucket
+      baseline). Under scenario-heldout, coordination tax is much more predictable than
+      throughput (tasks_completed) or latency-derived error amplification by admissible
+      regression MAE and trigger_met (Main Table 4; per-target MAE scale caveat). Other
+      protocols vary — see Main Table 3.
     evidence:
       release_id: "scaling_eval_rich_grid_7200"
       confidence: "medium"
@@ -41,14 +44,14 @@ claims:
         - "datasets/runs/scaling_eval_fault/heldout_results.json"
         - "impl/src/labtrust_portfolio/scaling.py"
         - "scripts/scaling_heldout_eval.py"
-      table_ids: ["Table 1", "Table 2", "Table 4", "Table 5", "Table 7"]
+      table_ids: ["Main Table 2", "Main Table 3", "Main Table 4", "Appendix baselines"]
       figure_ids: ["Figure 1", "Figure 5"]
 
   - id: "C3"
     statement: >
-      Regime recommendation and collapse-scoring artifacts exist, but regime
-      match rate is low and collapse Brier is small-scale; treat architecture
-      selection as exploratory, not as proven superiority over hindsight.
+      Exploratory recommendation artifacts exist; regime-selection accuracy is low.
+      Architecture selection is not deployment-ready — see claim_status in
+      recommendation_eval.json.
     evidence:
       release_id: "scaling_eval_rich_grid_7200"
       confidence: "low"
@@ -56,5 +59,5 @@ claims:
         - "datasets/runs/scaling_recommend/recommendation_eval.json"
         - "scripts/scaling_recommend_eval.py"
         - "datasets/runs/scaling_eval/heldout_results.json"
-      table_ids: ["Table 3", "Table 6"]
+      table_ids: ["Appendix recommendation"]
       figure_ids: ["Figure 4"]

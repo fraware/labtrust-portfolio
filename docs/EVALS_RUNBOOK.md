@@ -101,7 +101,7 @@ python scripts/plot_replay_overhead.py
 python scripts/verify_p3_replay_summary.py --strict-curve
 ```
 
-## P5 — Scaling
+## P5 — Coordination scaling & held-out evaluation
 
 - **Prerequisite:** Multi-scenario runs. Generate with `scripts/generate_multiscenario_runs.py`, then run held-out eval.
 - **Scenarios:** Default `--profile all` uses every `bench/maestro/scenarios/*.yaml` (currently seven ids including `regime_stress_v1`, `rep_cps_scheduling_v0`). Use `--profile real_world` to omit `toy_lab_v0`, or `--profile core` for the legacy five-scenario list. Override with `--scenarios id1,id2,...`. Shard with `--seed-min` / `--seed-max` for parallel workers.
@@ -114,7 +114,7 @@ PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/run_paper_experime
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/generate_multiscenario_runs.py --out datasets/runs/multiscenario_runs --seeds 30 --coordination-grid --clean --profile real_world --agent-counts 1,2,4,8 --fault-settings no_drop,drop_005
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/scaling_heldout_eval.py --runs-dir datasets/runs/multiscenario_runs --out datasets/runs/scaling_eval --holdout-mode scenario
 PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/scaling_sensitivity_sweep.py --runs-dir datasets/runs/multiscenario_runs --out-dir datasets/runs/sensitivity_sweep
-PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/export_scaling_tables.py --results datasets/runs/scaling_eval/heldout_results.json --family-results datasets/runs/scaling_eval_family/heldout_results.json --agent-results datasets/runs/scaling_eval_agent_count/heldout_results.json --recommend-results datasets/runs/scaling_recommend/recommendation_eval.json --sensitivity-results datasets/runs/sensitivity_sweep/scaling_sensitivity.json --regime-agent-summary datasets/runs/scaling_summary/regime_agent_summary.json --out papers/P5_ScalingLaws/generated_tables.md
+PYTHONPATH=impl/src LABTRUST_KERNEL_DIR=kernel python scripts/export_scaling_tables.py --results datasets/runs/scaling_eval/heldout_results.json --family-results datasets/runs/scaling_eval_family/heldout_results.json --regime-results datasets/runs/scaling_eval_regime/heldout_results.json --agent-results datasets/runs/scaling_eval_agent_count/heldout_results.json --fault-results datasets/runs/scaling_eval_fault/heldout_results.json --recommend-results datasets/runs/scaling_recommend/recommendation_eval.json --sensitivity-results datasets/runs/sensitivity_sweep/scaling_sensitivity.json --regime-agent-summary datasets/runs/scaling_summary/regime_agent_summary.json --out papers/P5_ScalingLaws/generated_tables.md
 ```
 
 **Prime Intellect (disks + pods) for heavy P5/P8:** [PRIME_COMPUTE_P5_P8.md](PRIME_COMPUTE_P5_P8.md).
